@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: linkedin-skills-studio
+    runtime: node
+    plan: free
+    buildCommand: npm install --legacy-peer-deps && pip3 install -r linkedin-skills-main/requirements.txt && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: PUBLORA_API_KEY
+        sync: false
+      - key: LINKEDIN_PLATFORM_ID
+        sync: false
+      - key: APIFY_API_TOKEN
+        sync: false
+      - key: PIXFARO_API_KEY
+        sync: false
+      - key: STORAGE_BACKEND
+        value: local
+      - key: DRY_RUN
+        value: "false"

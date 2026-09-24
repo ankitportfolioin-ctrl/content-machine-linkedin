@@ -82,7 +82,7 @@ dotenv.config();
 
 async function startServer() {
   const app = express();
-  const PORT = 3000;
+  const PORT = Number(process.env.PORT) || 3000;
 
   app.use(express.json({ limit: '10mb' }));
 
@@ -398,10 +398,11 @@ async function startServer() {
       const profile = getVoiceProfile(wsId);
       const opp = addSharedContentOpportunity(
         {
+          sourceType: 'SALES_OBJECTION',
           suggestedTopic: `Navigating: ${objectionText.slice(0, 60)}`,
           targetAudience: profile.audience || 'Target Buyers',
           recommendedFormat: 'CAROUSEL_DOCUMENT',
-          businessObjective: 'CONVERSION',
+          businessObjective: 'LEAD_GENERATION',
           originContext: `Sales objection from ${prospectName || 'prospect'} (${company || 'target company'}): "${objectionText}"`,
           suggestedAngle: `Technical breakdown addressing "${objectionText}" directly with architectural trade-offs.`,
         },

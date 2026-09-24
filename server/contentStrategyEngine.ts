@@ -242,9 +242,11 @@ export interface ContentStrategy {
   contentType: ContentType;
   recommendedFormat: ContentFormat;
   formatReason: string;
+  formatReasoning?: string;
   narrativeStructure: string[];
   hookStrategy: string;
   hookConcepts: StrategyHookOption[];
+  recommendedHooks?: string[];
   visualStrategy: VisualStrategy;
   CTAType: string;
   evidenceRequirements: string[];
@@ -2588,12 +2590,21 @@ export function validateHookRelevance(
 
 export interface GenerateStructuredPostInput {
   strategy: ContentStrategy;
-  hook: string;
+  hook?: string;
   profile?: VoiceProfile;
   customNotes?: string;
   sourceContext?: string;
   includeSources?: boolean;
-  sources?: { title: string; url: string; sourceName: string }[];
+  sources?: Array<{
+    title: string;
+    url: string;
+    sourceName?: string;
+    body?: string;
+    text?: string;
+    author?: string;
+    publisher?: string;
+  }>;
+  simulateAiFailure?: boolean;
 }
 
 export interface StructuredPostResult {
@@ -3604,7 +3615,7 @@ export interface EndToEndContentPipelineResult {
   contentType: ContentType;
   format: ContentFormat;
   formatReasoning: string;
-  hookStrategy: HookStrategy;
+  hookStrategy: string;
   visualStrategy?: VisualStrategy;
   finalContent: string;
   carousel?: CarouselExecution;
@@ -3678,7 +3689,7 @@ export async function pipelineArticleToContent(
   const consistency = understanding.consistencyResult || validateSourceConsistency(
     docTitle,
     docBody,
-    understanding.canonicalFacts.map((f) => ({ name: f }))
+    understanding.items || []
   );
 
   const isContradiction =

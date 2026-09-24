@@ -86,11 +86,12 @@ export interface SharedContentOpportunity {
   sourceType: 'SALES_OBJECTION' | 'CUSTOMER_QUESTION' | 'PROSPECT_PAIN' | 'CONTENT_ENGAGEMENT' | 'TREND_SIGNAL';
   originContext: string;
   suggestedTopic: string;
+  suggestedAngle?: string;
   targetAudience: string;
   businessObjective: 'AWARENESS' | 'AUTHORITY' | 'EDUCATION' | 'TRUST' | 'LEAD_GENERATION' | 'CONVERSATION';
   recommendedFormat: ContentFormat;
-  recommendedContentType: ContentType;
-  urgency: 'HIGH' | 'MEDIUM' | 'LOW';
+  recommendedContentType?: ContentType;
+  urgency?: 'HIGH' | 'MEDIUM' | 'LOW';
   createdAt: string;
 }
 
