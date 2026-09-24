@@ -3,7 +3,7 @@ services:
     name: linkedin-skills-studio
     runtime: node
     plan: free
-    buildCommand: npm install --legacy-peer-deps && pip3 install -r linkedin-skills-main/requirements.txt && npm run build
+    buildCommand: npm install --include=dev --legacy-peer-deps && pip3 install -r linkedin-skills-main/requirements.txt && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
