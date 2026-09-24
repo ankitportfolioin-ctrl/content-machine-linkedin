@@ -1,0 +1,8 @@
+{
+  "name": "LinkedIn Skills Studio",
+  "description": "Unified LinkedIn AI Sales & Growth Copilot with AI content generation, Publora scheduling, humanizer v3, sales prospecting, multi-action approval queue, AI inbox, and CRM pipeline.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

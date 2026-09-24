@@ -1,0 +1,31 @@
+{
+  "prospect_id": "pr_bec57472c22b",
+  "name": "Rahul Sharma",
+  "company": "GlowRoots D2C",
+  "stage": "CONTACTED",
+  "owner": "Founder",
+  "source": "demo",
+  "opportunity_value": 0.0,
+  "notes": [],
+  "tags": [],
+  "stage_history": [
+    {
+      "from_stage": "",
+      "to_stage": "READY_FOR_REVIEW",
+      "timestamp": "2026-09-24T12:21:36.024956+00:00",
+      "reason": "Initial intake into pipeline",
+      "actor": "system"
+    },
+    {
+      "from_stage": "READY_FOR_REVIEW",
+      "to_stage": "CONTACTED",
+      "timestamp": "2026-09-24T12:22:25.436925+00:00",
+      "reason": "Outreach sent via publora",
+      "actor": "user"
+    }
+  ],
+  "last_interaction": null,
+  "next_action": "Qualify against ICP",
+  "created_at": "2026-09-24T12:21:36.024968+00:00",
+  "updated_at": "2026-09-24T12:22:25.436925+00:00"
+}

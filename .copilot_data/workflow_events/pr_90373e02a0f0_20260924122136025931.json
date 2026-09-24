@@ -1,0 +1,9 @@
+{
+  "prospect_id": "pr_90373e02a0f0",
+  "from_state": "RESEARCHING",
+  "to_state": "READY_FOR_REVIEW",
+  "actor": "ai",
+  "reason": "Qualified (91/100) and draft generated.",
+  "timestamp": "2026-09-24T12:21:36.025925+00:00",
+  "metadata": {}
+}

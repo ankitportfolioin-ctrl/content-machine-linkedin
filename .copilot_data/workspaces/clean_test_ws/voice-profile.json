@@ -1,0 +1,72 @@
+{
+  "filled": true,
+  "role": "Tech Creator & Educator",
+  "audience": "Developers, AI builders, technical founders",
+  "contentPillars": [
+    "AI",
+    "Software Development",
+    "Emerging Technology",
+    "Startups",
+    "Tech Careers"
+  ],
+  "sentenceRhythm": "Clear, direct, and conversational. Short paragraphs with real substance and no fluff.",
+  "signatureOpeners": [
+    "Most production implementations fail at the seams.",
+    "A pragmatic look at how engineering teams actually deploy this:"
+  ],
+  "bannedWords": [
+    "delve",
+    "tapestry",
+    "crucial",
+    "leverage",
+    "robust",
+    "foster",
+    "streamline",
+    "landscape",
+    "multifaceted",
+    "navigate",
+    "uncharted",
+    "realm",
+    "testament",
+    "empower",
+    "supercharge",
+    "game-changer",
+    "in today's fast-paced world"
+  ],
+  "alwaysRules": [
+    "Open with a strong, specific hook or factual observation",
+    "Keep lines concise and formatted for mobile readability",
+    "End with an open, thoughtful discussion prompt"
+  ],
+  "neverRules": [
+    "Never open with a generic rhetorical question",
+    "Never use AI clichés or reveal bridges",
+    "Never use excessive emojis",
+    "Never put external links directly in the post body"
+  ],
+  "primaryLink": "",
+  "ctaStyle": "Direct question inviting peers to share their experiences in the comments",
+  "signatureExamples": [],
+  "keyReceipts": [
+    "Built developer community to 45,000 engineers",
+    "Published 120+ technical breakdowns on AI architectures"
+  ],
+  "industry": "Developer Tools & AI",
+  "companySize": "1-10",
+  "workspaceId": "clean_test_ws",
+  "profile": {
+    "filled": false,
+    "role": "",
+    "audience": "",
+    "contentPillars": [],
+    "sentenceRhythm": "Direct",
+    "signatureOpeners": [],
+    "bannedWords": [],
+    "alwaysRules": [],
+    "neverRules": [],
+    "primaryLink": "",
+    "ctaStyle": "",
+    "signatureExamples": [],
+    "keyReceipts": []
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "prospect_id": "pr_bec57472c22b",
+  "from_state": "READY_FOR_REVIEW",
+  "to_state": "CONTACTED",
+  "actor": "ai",
+  "reason": "Dispatched via backend 'publora'",
+  "timestamp": "2026-09-24T12:22:25.435998+00:00",
+  "metadata": {}
+}

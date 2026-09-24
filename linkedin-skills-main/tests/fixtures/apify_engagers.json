@@ -1,0 +1,34 @@
+[
+  {
+    "name": "Sarah Chen",
+    "subtitle": "Staff ML Systems Engineer @ HyperScale",
+    "type": "commenters",
+    "url_profile": "https://www.linkedin.com/in/sarahchen-ml",
+    "content": "What do you think is the primary cause of model inference latency in production?",
+    "datetime": "2026-09-20T14:32:00Z"
+  },
+  {
+    "name": "Marcus Vance",
+    "subtitle": "Founder & CEO @ DataFlow Systems",
+    "type": "commenters",
+    "url_profile": "https://www.linkedin.com/in/marcus-vance-b2b",
+    "content": "In our experience it is cold-start GPU virtualization and oversized KV cache.",
+    "datetime": "2026-09-20T15:05:00Z"
+  },
+  {
+    "name": "Elena Rostova",
+    "subtitle": "VP of Growth @ FinCore Analytics",
+    "type": "likers",
+    "url_profile": "https://www.linkedin.com/in/elena-rostova-growth",
+    "content": null,
+    "datetime": "2026-09-20T16:10:00Z"
+  },
+  {
+    "name": "Danielle Cook",
+    "subtitle": "Co-Founder @ CloudStream B2B",
+    "type": "likers",
+    "url_profile": "https://www.linkedin.com/in/danielle-cook-saas",
+    "content": null,
+    "datetime": "2026-09-20T16:45:00Z"
+  }
+]

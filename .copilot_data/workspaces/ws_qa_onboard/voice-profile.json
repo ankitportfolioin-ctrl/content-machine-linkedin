@@ -1,0 +1,40 @@
+{
+  "filled": true,
+  "role": "Technical Founder / AI Creator",
+  "audience": "Software engineers, AI builders, technical founders",
+  "contentPillars": [
+    "AI Engineering",
+    "Developer Tools",
+    "Startups",
+    "Emerging Technology"
+  ],
+  "sentenceRhythm": "Terse, direct, technical and pragmatic.",
+  "signatureOpeners": [
+    "Architectural patterns reveal system bottlenecks before code runs."
+  ],
+  "bannedWords": [
+    "synergize",
+    "game-changer",
+    "revolutionary"
+  ],
+  "alwaysRules": [
+    "Open with a strong, specific hook or factual observation",
+    "Keep lines concise and formatted for mobile readability",
+    "End with an open, thoughtful discussion prompt"
+  ],
+  "neverRules": [
+    "Never open with a generic rhetorical question",
+    "Never use AI clichés or reveal bridges",
+    "Never use excessive emojis",
+    "Never put external links directly in the post body"
+  ],
+  "primaryLink": "",
+  "ctaStyle": "Direct question inviting peers to share their experiences in the comments",
+  "signatureExamples": [],
+  "keyReceipts": [
+    "Scaled real-time telemetry pipeline to 50M daily events"
+  ],
+  "industry": "Developer Infrastructure",
+  "companySize": "1-10",
+  "workspaceId": "ws_qa_onboard"
+}

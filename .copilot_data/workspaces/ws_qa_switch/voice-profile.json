@@ -1,0 +1,55 @@
+{
+  "filled": true,
+  "role": "D2C Founder & Brand Operator",
+  "audience": "E-commerce operators, retail brand founders, direct-to-consumer heads of growth",
+  "contentPillars": [
+    "Customer Retention",
+    "Paid Acquisition & CAC",
+    "Supply Chain & Fulfillment",
+    "D2C Unit Economics",
+    "Omnichannel Retail"
+  ],
+  "sentenceRhythm": "Concise, data-conscious, practical direct-to-consumer operator notes.",
+  "signatureOpeners": [
+    "Unit economics will always expose vanity metrics.",
+    "A tactical breakdown of what actually improved retention this quarter:"
+  ],
+  "bannedWords": [
+    "delve",
+    "tapestry",
+    "crucial",
+    "leverage",
+    "robust",
+    "foster",
+    "streamline",
+    "landscape",
+    "multifaceted",
+    "navigate",
+    "uncharted",
+    "realm",
+    "testament",
+    "empower",
+    "supercharge",
+    "game-changer",
+    "in today's fast-paced world"
+  ],
+  "alwaysRules": [
+    "Focus on real contribution margin, LTV, and customer retention",
+    "Keep lines punchy and clear for busy brand operators",
+    "End with an open operator question"
+  ],
+  "neverRules": [
+    "Never confuse gross revenue with contribution margin",
+    "Never invent customer support metrics without verified receipts",
+    "Never use generic hype"
+  ],
+  "primaryLink": "",
+  "ctaStyle": "Direct question inviting e-commerce operators to share retention strategies",
+  "signatureExamples": [],
+  "keyReceipts": [
+    "Scaled consumer brand to 8-figure omnichannel distribution",
+    "Improved repeat purchase rate by 18% through subscription cohort optimization"
+  ],
+  "industry": "D2C & Retail",
+  "companySize": "11-50"
+}

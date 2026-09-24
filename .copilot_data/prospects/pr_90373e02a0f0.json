@@ -1,0 +1,72 @@
+{
+  "name": "Priya Nair",
+  "id": "pr_90373e02a0f0",
+  "linkedin_url": "https://www.linkedin.com/in/priya-nair-urban",
+  "headline": "Head of Growth & Performance Marketing @ UrbanNaturals | Ex-Nykaa",
+  "job_title": "Head of Growth",
+  "company": "UrbanNaturals",
+  "company_url": "https://urbannaturals.co",
+  "industry": "E-commerce",
+  "location": "Mumbai, India",
+  "company_size": "80 employees",
+  "source": "demo",
+  "source_url": "https://www.linkedin.com/in/priya-nair-urban",
+  "created_at": "2026-09-24T12:21:36.020519+00:00",
+  "updated_at": "2026-09-24T12:21:36.020497+00:00",
+  "fit": {
+    "industry_match": 100,
+    "role_match": 100,
+    "company_match": 70,
+    "geography_match": 80
+  },
+  "intent": {
+    "signals": [
+      "Operational trigger: Commented: 'Looking for creator agencies that understand LinkedIn & Instagram cross-pollin"
+    ],
+    "strength": 55
+  },
+  "relationship": {
+    "connected": false,
+    "previous_interaction": false,
+    "mutual_context": []
+  },
+  "qualification": {
+    "score": 91,
+    "reason": "Target role match: 'Head of Growth' fits ['CEO', 'Founder', 'VP Sales', 'Head of Growth']; Target industry match: 'E-commerce'; Target geography match: 'Mumbai, India'",
+    "status": "high_relevance"
+  },
+  "research": {
+    "summary": "Priya Nair is currently serving as Head of Growth at UrbanNaturals based in Mumbai, India. The company operates within the E-commerce sector with an estimated team size of 80 employees. Their recent public commentary focuses on Commented: 'Looking for creator agencies that understand LinkedIn & Instagram cross-pollination.'.",
+    "recent_activity": [
+      "Commented: 'Looking for creator agencies that understand LinkedIn & Instagram cross-pollination.'",
+      "Published thought leadership on retention loops for omnichannel retail."
+    ],
+    "possible_pain_points": [
+      "Share a tactical breakdown or benchmark related to E-commerce challenges without pitching.",
+      "Comment or message referencing their perspective on Commented: 'Looking for creator agencies that understand Lin.",
+      "Inquire how their team at UrbanNaturals is currently handling resource allocation or distribution."
+    ],
+    "relevant_topics": [
+      "Head of Growth",
+      "E-commerce"
+    ],
+    "personalization_points": [
+      "Leadership role at UrbanNaturals",
+      "Local market context: Mumbai, India",
+      "Referenced topic: 'Commented: 'Looking for creator agencies that understand LinkedIn & Instagram cr...'",
+      "Referenced topic: 'Published thought leadership on retention loops for omnichannel retail....'"
+    ]
+  },
+  "outreach": {
+    "connection_draft": "Hi Priya, saw your post on Commented: 'Looking for creator agencies that understand LinkedIn & Instagram cr... Really resonated with how we look at operations at UrbanNaturals. Would love to connect here.",
+    "first_message": "Hi Priya,\n\nAppreciated your point regarding: \"Commented: 'Looking for creator agencies that understand LinkedIn & Instagram cross-pollination.'\".\n\nWe've been seeing similar shifts across teams in E-commerce. How are you and the UrbanNaturals team approaching that balance this quarter?\n\nBest",
+    "followup_drafts": [
+      "Hi Priya, looping back briefly. We put together a short note on how teams are tackling that exact friction without inflating overhead. Happy to share if relevant."
+    ]
+  },
+  "pipeline": {
+    "stage": "READY_FOR_REVIEW",
+    "last_action_at": null,
+    "next_action_at": null
+  }
+}

@@ -1,0 +1,68 @@
+{
+  "name": "Sarah Jenkins",
+  "id": "pr_1ab1a9ae4d50",
+  "linkedin_url": "https://www.linkedin.com/in/sarahjenkins-health",
+  "headline": "Founder & Managing Director @ VitaHealth Direct | Omnichannel Wellness",
+  "job_title": "Founder & Managing Director",
+  "company": "VitaHealth Direct",
+  "company_url": "https://vitahealth.co.uk",
+  "industry": "D2C / Health & Wellness",
+  "location": "London, UK",
+  "company_size": "65 employees",
+  "source": "discovery_demo",
+  "source_url": "https://www.linkedin.com/in/sarahjenkins-health",
+  "created_at": "2026-09-22T15:32:14.638598+00:00",
+  "updated_at": "2026-09-22T15:32:14.638562+00:00",
+  "fit": {
+    "industry_match": 70,
+    "role_match": 70,
+    "company_match": 70,
+    "geography_match": 80
+  },
+  "intent": {
+    "signals": [],
+    "strength": 15
+  },
+  "relationship": {
+    "connected": false,
+    "previous_interaction": false,
+    "mutual_context": []
+  },
+  "qualification": {
+    "score": 71,
+    "reason": "Target role match: 'Founder & Managing Director' fits target titles; Target industry match: 'D2C / Health & Wellness'; Target geography match: 'London, UK'",
+    "status": "qualified"
+  },
+  "research": {
+    "summary": "Sarah Jenkins is currently serving as Founder & Managing Director at VitaHealth Direct based in London, UK. The company operates within the D2C / Health & Wellness sector with an estimated team size of 65 employees. Their recent public commentary focuses on Announced new retail listing in 200 boots locations across the UK..",
+    "recent_activity": [
+      "Announced new retail listing in 200 boots locations across the UK."
+    ],
+    "possible_pain_points": [
+      "Share a tactical breakdown or benchmark related to D2C / Health & Wellness challenges without pitching.",
+      "Comment or message referencing their perspective on Announced new retail listing in 200 boots locations across t.",
+      "Inquire how their team at VitaHealth Direct is currently handling resource allocation or distribution."
+    ],
+    "relevant_topics": [
+      "Founder & Managing Director",
+      "D2C / Health & Wellness"
+    ],
+    "personalization_points": [
+      "Leadership role at VitaHealth Direct",
+      "Local market context: London, UK",
+      "Referenced topic: 'Announced new retail listing in 200 boots locations across the UK....'"
+    ]
+  },
+  "outreach": {
+    "connection_draft": "Hi Sarah, saw your post on Announced new retail listing in 200 boots locations across the UK.... Really resonated with how we look at distribution at VitaHealth Direct. Would love to connect here.",
+    "first_message": "Hi Sarah,\n\nAppreciated your point regarding: \"Announced new retail listing in 200 boots locations across the UK.\".\n\nWe've been seeing similar shifts across teams in D2C / Health & Wellness. How are you and the VitaHealth Direct team approaching that balance this quarter?\n\nBest,\nFounder",
+    "followup_drafts": [
+      "Hi Sarah, looping back briefly. We put together a short note on how founders are tackling that exact distribution friction without inflating ad spend. Happy to share if relevant."
+    ]
+  },
+  "pipeline": {
+    "stage": "READY_FOR_REVIEW",
+    "last_action_at": null,
+    "next_action_at": null
+  }
+}

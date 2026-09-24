@@ -1,0 +1,24 @@
+{
+  "prospect_id": "pr_90373e02a0f0",
+  "name": "Priya Nair",
+  "company": "UrbanNaturals",
+  "stage": "READY_FOR_REVIEW",
+  "owner": "Founder",
+  "source": "discovery_demo",
+  "opportunity_value": 0.0,
+  "notes": [],
+  "tags": [],
+  "stage_history": [
+    {
+      "from_stage": "",
+      "to_stage": "READY_FOR_REVIEW",
+      "timestamp": "2026-09-22T13:48:02.601469+00:00",
+      "reason": "Initial intake into pipeline",
+      "actor": "system"
+    }
+  ],
+  "last_interaction": null,
+  "next_action": "Qualify against ICP",
+  "created_at": "2026-09-22T13:48:02.601481+00:00",
+  "updated_at": "2026-09-22T13:48:02.601484+00:00"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "appr_pr_1ab1a9ae4d50",
+  "kind": "connection_request",
+  "target": "Sarah Jenkins (VitaHealth Direct)",
+  "why": "Qualified lead (67/100). Target role match: 'Founder & Managing Director' fits ['Founder', 'CEO', 'Head of Sales']",
+  "draft": "Hi Sarah, saw your post on Announced new retail listing in 200 boots locations across the UK.... Really resonated with how we look at distribution at VitaHealth Direct. Would love to connect here.",
+  "source_context": "Derived directly from prospect's public post: 'Announced new retail listing in 200 boots locations across the UK.'",
+  "risk_notes": "Ensure message fits your authentic voice before confirming.",
+  "status": "pending",
+  "created_at": "2026-09-22T15:32:14.643876+00:00",
+  "resolved_at": null,
+  "edited_draft": null
+}

@@ -1,0 +1,9 @@
+{
+  "prospect_id": "pr_bec57472c22b",
+  "from_state": "NEW",
+  "to_state": "RESEARCHING",
+  "actor": "ai",
+  "reason": "Prospect discovered; beginning qualification and research.",
+  "timestamp": "2026-09-22T13:47:50.691890+00:00",
+  "metadata": {}
+}

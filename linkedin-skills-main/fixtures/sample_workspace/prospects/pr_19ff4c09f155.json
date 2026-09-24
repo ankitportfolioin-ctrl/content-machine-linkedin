@@ -1,0 +1,66 @@
+{
+  "name": "Vikram Mehta",
+  "id": "pr_19ff4c09f155",
+  "linkedin_url": "https://www.linkedin.com/in/vikrammehta-ops",
+  "headline": "VP of Operations @ ChaiPoint Direct | Scaling omnichannel fulfillment & customer care",
+  "job_title": "VP of Operations",
+  "company": "ChaiPoint Direct",
+  "company_url": "https://chaipointdirect.in",
+  "industry": "D2C / E-commerce",
+  "location": "Gurugram, India",
+  "company_size": "150 employees",
+  "source": "discovery_demo",
+  "source_url": "https://www.linkedin.com/in/vikrammehta-ops",
+  "created_at": "2026-09-22T15:32:14.638551+00:00",
+  "updated_at": "2026-09-22T15:32:14.638527+00:00",
+  "fit": {
+    "industry_match": 100,
+    "role_match": 85,
+    "company_match": 80,
+    "geography_match": 90
+  },
+  "intent": {
+    "signals": [],
+    "strength": 20
+  },
+  "relationship": {
+    "connected": false,
+    "previous_interaction": false,
+    "mutual_context": []
+  },
+  "qualification": {
+    "score": 88,
+    "reason": "Target role match: 'VP of Operations'; Target industry match: 'D2C / E-commerce'; Target geography match: 'Gurugram, India'",
+    "status": "qualified"
+  },
+  "research": {
+    "summary": "Vikram Mehta is VP of Operations at ChaiPoint Direct based in Gurugram, India. Leading logistics SLAs and multi-channel customer turnaround.",
+    "recent_activity": [
+      "Reduced order support resolution time from 4 hours to 20 minutes across 12 fulfillment centers."
+    ],
+    "possible_pain_points": [
+      "Peak season support volume spikes",
+      "Maintaining sub-30 minute resolution SLAs across digital channels"
+    ],
+    "relevant_topics": [
+      "Customer support automation",
+      "D2C logistics turnaround"
+    ],
+    "personalization_points": [
+      "Operations leadership at ChaiPoint Direct",
+      "Resolution time reduction benchmark from 4 hours to 20 minutes"
+    ]
+  },
+  "outreach": {
+    "connection_draft": "Hi Vikram, saw your note on reducing support turnaround to 20 minutes across fulfillment hubs. Really resonated with how we structure D2C customer operations. Would love to connect.",
+    "first_message": "Hi Vikram,\n\nAppreciated your benchmark on reducing support resolution to 20 minutes across hubs.\n\nWe have seen similar turnaround patterns across high-growth D2C brands in India. How are you and the ChaiPoint Direct team tackling peak seasonal volume this quarter?\n\nBest,\nFounder",
+    "followup_drafts": [
+      "Hi Vikram, looping back briefly. We put together a short playbook on how D2C operators maintain sub-20 minute SLAs without expanding support headcount. Happy to share if helpful."
+    ]
+  },
+  "pipeline": {
+    "stage": "READY_FOR_REVIEW",
+    "last_action_at": null,
+    "next_action_at": null
+  }
+}
