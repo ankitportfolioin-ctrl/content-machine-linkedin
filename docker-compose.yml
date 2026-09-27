@@ -1,0 +1,21 @@
+﻿services:
+  postgres:
+    image: postgres:17
+    container_name: growth_operator_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: growth_operator
+      POSTGRES_PASSWORD: growth_operator_dev
+      POSTGRES_DB: growth_operator
+    ports:
+      - "5432:5432"
+    volumes:
+      - growth_operator_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U growth_operator -d growth_operator"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  growth_operator_postgres_data:

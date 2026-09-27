@@ -1,0 +1,27 @@
+{
+  "name": "growth-operator",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Growth Operator - Human-guided AI operating system for LinkedIn growth",
+  "scripts": {
+    "dev": "pnpm --filter=@growth-operator/api dev --parallel",
+    "build": "pnpm --filter=@growth-operator/api build && pnpm --filter=@growth-operator/web build",
+    "typecheck": "pnpm --filter=@growth-operator/api typecheck && pnpm --filter=@growth-operator/web typecheck && pnpm --filter=@growth-operator/db typecheck && pnpm --filter=@growth-operator/ai typecheck && pnpm --filter=@growth-operator/schemas typecheck && pnpm --filter=@growth-operator/shared typecheck",
+    "test": "pnpm --filter=@growth-operator/api test && pnpm --filter=@growth-operator/web test",
+    "test:watch": "pnpm --filter=@growth-operator/api test:watch",
+    "db:generate": "pnpm --filter=@growth-operator/db db:generate",
+    "db:migrate": "pnpm --filter=@growth-operator/db db:migrate",
+    "db:studio": "pnpm --filter=@growth-operator/db db:studio",
+    "lint": "pnpm --filter=@growth-operator/api lint && pnpm --filter=@growth-operator/web lint",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md,yaml,yml}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3",
+    "typescript": "^5.5.4"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0"
+}

@@ -1,0 +1,369 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum ContentStatus {
+  DRAFT
+  REVIEW
+  APPROVED
+  PUBLISHED
+  ARCHIVED
+}
+
+enum ContentFormat {
+  POST
+  ARTICLE
+  CAROUSEL
+  VIDEO
+  POLL
+}
+
+enum LeadStatus {
+  NEW
+  CONTACTED
+  CONNECTED
+  RESPONDING
+  QUALIFIED
+  DISQUALIFIED
+  CLOSED
+}
+
+enum MessageDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum PipelineStage {
+  PROSPECTING
+  QUALIFICATION
+  PROPOSAL
+  NEGOTIATION
+  CLOSED_WON
+  CLOSED_LOST
+}
+
+enum LearningSignalSourceType {
+  CONTENT_PERFORMANCE
+  ENGAGEMENT
+  CONVERSION
+  FEEDBACK
+}
+
+model User {
+  id            String    @id @default(uuid())
+  email         String    @unique @db.VarChar(255)
+  passwordHash  String    @db.VarChar(255)
+  name          String    @db.VarChar(100)
+  avatarUrl     String?   @db.VarChar(2048)
+  isActive      Boolean   @default(true)
+  emailVerified Boolean   @default(false)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  lastLoginAt   DateTime?
+
+  memberships     WorkspaceMembership[]
+  profiles        Profile[]
+  contentIdeas    ContentIdea[]         @relation("ContentIdeaAuthor")
+  contentDrafts   ContentDraft[]        @relation("ContentDraftAuthor")
+  contentVersions ContentVersion[]      @relation("ContentVersionAuthor")
+  leads           Lead[]                @relation("LeadAssignee")
+  conversations   Conversation[]        @relation("ConversationUser")
+  messages        Message[]             @relation("MessageSender")
+  opportunities   PipelineOpportunity[] @relation("OpportunityOwner")
+  analyticsEvents AnalyticsEvent[]
+  learningSignals LearningSignal[]
+
+  @@index([email])
+  @@index([isActive])
+}
+
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String   @db.VarChar(100)
+  slug        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  memberships     WorkspaceMembership[]
+  profiles        Profile[]
+  icps            ICP[]
+  contentIdeas    ContentIdea[]
+  contentDrafts   ContentDraft[]
+  contentVersions ContentVersion[]
+  leads           Lead[]
+  conversations   Conversation[]
+  messages        Message[]
+  opportunities   PipelineOpportunity[]
+  analyticsEvents AnalyticsEvent[]
+  learningSignals LearningSignal[]
+
+  @@index([slug])
+  @@index([isActive])
+}
+
+model WorkspaceMembership {
+  id          String   @id @default(uuid())
+  userId      String
+  workspaceId String
+  role        UserRole @default(MEMBER)
+  joinedAt    DateTime @default(now())
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([userId])
+  @@index([workspaceId])
+  @@index([role])
+}
+
+model Profile {
+  id          String   @id @default(uuid())
+  userId      String
+  workspaceId String
+  linkedinUrl String?  @unique @db.VarChar(2048)
+  headline    String?  @db.VarChar(220)
+  summary     String?  @db.Text
+  industry    String?  @db.VarChar(100)
+  location    String?  @db.VarChar(100)
+  avatarUrl   String?  @db.VarChar(2048)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, workspaceId])
+  @@index([workspaceId])
+  @@index([linkedinUrl])
+}
+
+model ICP {
+  id          String   @id @default(uuid())
+  workspaceId String
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  criteria    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model ContentIdea {
+  id          String         @id @default(uuid())
+  workspaceId String
+  authorId    String
+  title       String         @db.VarChar(200)
+  description String?        @db.Text
+  angle       String?        @db.VarChar(500)
+  format      ContentFormat?
+  status      ContentStatus  @default(DRAFT)
+  tags        String[]       @default([])
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  publishedAt DateTime?
+
+  workspace Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  author    User           @relation("ContentIdeaAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  drafts    ContentDraft[]
+
+  @@index([workspaceId])
+  @@index([authorId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model ContentDraft {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  contentIdeaId String
+  authorId      String
+  body          String   @db.Text
+  version       Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentIdea ContentIdea      @relation(fields: [contentIdeaId], references: [id], onDelete: Cascade)
+  author      User             @relation("ContentDraftAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  versions    ContentVersion[]
+
+  @@unique([contentIdeaId, version])
+  @@index([workspaceId])
+  @@index([contentIdeaId])
+  @@index([authorId])
+}
+
+model ContentVersion {
+  id             String   @id @default(uuid())
+  workspaceId    String
+  contentDraftId String
+  authorId       String
+  body           String   @db.Text
+  version        Int
+  changeSummary  String?  @db.VarChar(500)
+  createdAt      DateTime @default(now())
+
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentDraft ContentDraft @relation(fields: [contentDraftId], references: [id], onDelete: Cascade)
+  author       User         @relation("ContentVersionAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+
+  @@unique([contentDraftId, version])
+  @@index([workspaceId])
+  @@index([contentDraftId])
+  @@index([authorId])
+}
+
+model Lead {
+  id            String     @id @default(uuid())
+  workspaceId   String
+  assigneeId    String?
+  linkedinUrl   String     @unique @db.VarChar(2048)
+  name          String     @db.VarChar(100)
+  headline      String?    @db.VarChar(220)
+  company       String?    @db.VarChar(200)
+  location      String?    @db.VarChar(100)
+  status        LeadStatus @default(NEW)
+  tags          String[]   @default([])
+  notes         String?    @db.Text
+  lastContactAt DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  workspace     Workspace             @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  assignee      User?                 @relation("LeadAssignee", fields: [assigneeId], references: [id], onDelete: SetNull)
+  conversations Conversation[]
+  opportunities PipelineOpportunity[]
+
+  @@index([workspaceId])
+  @@index([assigneeId])
+  @@index([status])
+  @@index([linkedinUrl])
+  @@index([createdAt])
+}
+
+model Conversation {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  leadId        String
+  userId        String
+  subject       String?  @db.VarChar(200)
+  lastMessageAt DateTime @default(now())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead      Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  user      User      @relation("ConversationUser", fields: [userId], references: [id], onDelete: Restrict)
+  messages  Message[]
+
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([userId])
+  @@index([lastMessageAt])
+}
+
+model Message {
+  id                String           @id @default(uuid())
+  workspaceId       String
+  conversationId    String
+  senderId          String
+  body              String           @db.Text
+  direction         MessageDirection
+  linkedinMessageId String?          @unique @db.VarChar(100)
+  sentAt            DateTime         @default(now())
+  createdAt         DateTime         @default(now())
+
+  workspace    Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId])
+  @@index([conversationId])
+  @@index([senderId])
+  @@index([sentAt])
+}
+
+model PipelineOpportunity {
+  id                String        @id @default(uuid())
+  workspaceId       String
+  leadId            String
+  ownerId           String
+  name              String        @db.VarChar(100)
+  stage             PipelineStage @default(PROSPECTING)
+  value             Decimal?      @db.Decimal(12, 2)
+  expectedCloseDate DateTime?
+  probability       Int           @default(0)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  closedAt          DateTime?
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  lead      Lead      @relation(fields: [leadId], references: [id], onDelete: Cascade)
+  owner     User      @relation("OpportunityOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+
+  @@index([workspaceId])
+  @@index([leadId])
+  @@index([ownerId])
+  @@index([stage])
+  @@index([createdAt])
+}
+
+model AnalyticsEvent {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String?
+  eventType   String   @db.VarChar(100)
+  eventName   String   @db.VarChar(100)
+  properties  Json?
+  timestamp   DateTime @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([eventType])
+  @@index([eventName])
+  @@index([timestamp])
+}
+
+model LearningSignal {
+  id          String                   @id @default(uuid())
+  workspaceId String
+  userId      String?
+  sourceType  LearningSignalSourceType
+  sourceId    String
+  signalType  String                   @db.VarChar(100)
+  signalValue Float
+  metadata    Json?
+  createdAt   DateTime                 @default(now())
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([sourceType])
+  @@index([sourceId])
+  @@index([signalType])
+  @@index([createdAt])
+}
