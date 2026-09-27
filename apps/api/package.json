@@ -14,6 +14,7 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
+    "@growth-operator/content": "workspace:*",
     "@growth-operator/db": "workspace:*",
     "@growth-operator/schemas": "workspace:*",
     "@growth-operator/shared": "workspace:*",

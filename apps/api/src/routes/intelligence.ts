@@ -475,6 +475,10 @@ router.post('/opportunities/:opportunityId/convert', async (req, res, next) => {
       data: { status: 'CONVERTED' },
     });
 
+    const sourceIds = (opportunity.sourceIds as string[] | null) ?? [];
+    const claimIds = (opportunity.claimIds as string[] | null) ?? [];
+    const trendSignalIds = (opportunity.trendSignalIds as string[] | null) ?? [];
+
     const contentIdea = await prisma.contentIdea.create({
       data: {
         workspaceId: authReq.workspaceId,
@@ -485,10 +489,34 @@ router.post('/opportunities/:opportunityId/convert', async (req, res, next) => {
         format: opportunity.contentFormat as any,
         status: 'DRAFT',
         tags: [],
+        opportunityId: opportunity.id,
+        topicId: opportunity.topicId,
+        sourceIds,
+        claimIds,
+        trendSignalIds,
+        thesis: opportunity.thesis,
+        audience: opportunity.audience,
+        objective: opportunity.objective,
+        reasoning: opportunity.reasoning,
+        evidenceSnapshot: {
+          evidenceSummary: opportunity.evidenceSummary,
+          sourceIds,
+          claimIds,
+          trendSignalIds,
+        },
       },
     });
 
-    res.status(201).json({ contentIdea, provenance: { opportunityId: opportunity.id } });
+    res.status(201).json({
+      contentIdea,
+      provenance: {
+        opportunityId: opportunity.id,
+        topicId: opportunity.topicId,
+        sourceIds,
+        claimIds,
+        trendSignalIds,
+      },
+    });
   } catch (error) {
     next(error);
   }

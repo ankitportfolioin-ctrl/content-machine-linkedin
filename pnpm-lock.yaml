@@ -20,6 +20,9 @@ importers:
       '@growth-operator/ai':
         specifier: workspace:*
         version: link:../../packages/ai
+      '@growth-operator/content':
+        specifier: workspace:*
+        version: link:../../packages/content
       '@growth-operator/db':
         specifier: workspace:*
         version: link:../../packages/db
@@ -155,6 +158,37 @@ importers:
         specifier: ^3.23.8
         version: 3.25.76
     devDependencies:
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@22.20.4)(jsdom@25.0.1)
+
+  packages/content:
+    dependencies:
+      '@growth-operator/ai':
+        specifier: workspace:*
+        version: link:../ai
+      '@growth-operator/db':
+        specifier: workspace:*
+        version: link:../db
+      '@growth-operator/schemas':
+        specifier: workspace:*
+        version: link:../schemas
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
+      zod:
+        specifier: ^3.23.8
+        version: 3.25.76
+    devDependencies:
+      '@types/node':
+        specifier: ^22.5.0
+        version: 22.20.4
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.6.1
       typescript:
         specifier: ^5.5.4
         version: 5.9.3

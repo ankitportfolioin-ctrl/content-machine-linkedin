@@ -55,7 +55,9 @@ export const workspaceMembershipUpdateSchema = z.object({
 export const profileCreateSchema = z.object({
   linkedinUrl: urlSchema.optional(),
   headline: z.string().max(220).optional(),
+  role: z.string().max(120).optional(),
   summary: z.string().max(2000).optional(),
+  professionalContext: z.string().max(5000).optional(),
   industry: z.string().max(100).optional(),
   location: z.string().max(100).optional(),
   avatarUrl: urlSchema.optional(),
@@ -67,15 +69,32 @@ export const icpCreateSchema = z.object({
   name: nameSchema,
   description: descriptionSchema,
   criteria: z.record(z.unknown()).optional(),
+  targetRoles: z.array(z.string().max(100)).max(20).default([]),
+  industries: z.array(z.string().max(100)).max(20).default([]),
+  companySize: z.string().max(100).optional(),
+  problems: z.string().max(5000).optional(),
+  exclusions: z.string().max(5000).optional(),
 });
 
 export const icpUpdateSchema = icpCreateSchema.partial();
+
+export const contentFormatSchema = z.enum([
+  'post',
+  'text_post',
+  'article',
+  'carousel',
+  'video',
+  'poll',
+  'checklist',
+  'framework',
+  'contrarian',
+]);
 
 export const contentIdeaCreateSchema = z.object({
   title: z.string().min(1).max(200),
   description: descriptionSchema,
   angle: z.string().max(500).optional(),
-  format: z.enum(['post', 'article', 'carousel', 'video', 'poll']).optional(),
+  format: contentFormatSchema.optional(),
   status: z.enum(['draft', 'review', 'approved', 'published', 'archived']).default('draft'),
   tags: z.array(z.string().max(50)).max(20).default([]),
 });
@@ -174,6 +193,129 @@ export const opportunityConvertSchema = z.object({
   contentIdeaTitle: z.string().min(1).max(200).optional(),
 });
 
+export const contentObjectiveSchema = z.enum([
+  'educate',
+  'explain',
+  'challenge',
+  'build_authority',
+  'share_framework',
+  'start_discussion',
+  'teach_practical',
+  'analyze',
+  'reframe',
+]);
+
+export const contentAngleSchema = z.enum([
+  'educational',
+  'contrarian',
+  'practical',
+  'framework',
+  'analysis',
+  'observation',
+  'breakdown',
+]);
+
+export const contentNarrativeSchema = z.enum([
+  'problem_why_solution',
+  'observation_analysis_implication',
+  'hook_context_framework_application_takeaway',
+  'mistake_consequence_better_approach',
+  'thesis_evidence_tradeoff_conclusion',
+]);
+
+export const contentPlanCreateSchema = z.object({
+  contentIdeaId: idSchema.optional(),
+  opportunityId: idSchema.optional(),
+  topicId: idSchema.optional(),
+  thesis: z.string().min(1).max(5000),
+  coreQuestion: z.string().max(2000).optional(),
+  audience: z.string().min(1).max(5000),
+  audienceReason: z.string().max(5000).optional(),
+  objective: contentObjectiveSchema,
+  angle: contentAngleSchema,
+  format: contentFormatSchema,
+  narrativeStructure: contentNarrativeSchema,
+  keyPoints: z.array(z.string().min(1).max(1000)).min(1).max(20),
+  hookDirection: z.string().max(2000).optional(),
+  ctaStrategy: z.string().max(2000).optional(),
+  evidenceMap: z.array(z.object({
+    claimRef: z.string().max(2000),
+    sourceClaimId: idSchema.optional(),
+    note: z.string().max(2000).optional(),
+  })).max(50).default([]),
+  contradictionNotes: z.string().max(5000).optional(),
+  voiceInstructions: z.string().max(5000).optional(),
+  mustNotClaim: z.array(z.string().min(1).max(1000)).max(30).default([]),
+  sourceIds: z.array(idSchema).max(50).optional(),
+  claimIds: z.array(idSchema).max(100).optional(),
+  trendSignalIds: z.array(idSchema).max(20).optional(),
+  reasoning: z.string().max(5000).optional(),
+  evidenceSnapshot: z.record(z.unknown()).optional(),
+});
+
+export const contentPlanGenerateSchema = z.object({
+  contentIdeaId: idSchema.optional(),
+  opportunityId: idSchema.optional(),
+  topicId: idSchema.optional(),
+  objective: contentObjectiveSchema.optional(),
+  angle: contentAngleSchema.optional(),
+  format: contentFormatSchema.optional(),
+  audienceOverride: z.string().max(5000).optional(),
+  thesisOverride: z.string().max(5000).optional(),
+});
+
+export const draftComposeSchema = z.object({
+  planId: idSchema,
+});
+
+export const draftReviseSchema = z.object({
+  body: z.string().min(1).max(50000).optional(),
+  structure: z.record(z.unknown()).optional(),
+});
+
+export const claimBindingCreateSchema = z.object({
+  span: z.string().min(1).max(5000),
+  sourceClaimId: idSchema.optional(),
+  confidence: z.number().min(0).max(1).optional(),
+});
+
+export const reviewActionSchema = z.object({
+  action: z.enum(['submit', 'approve', 'reject', 'request_changes']),
+  note: z.string().max(5000).optional(),
+});
+
+export const versionFinalizeSchema = z.object({
+  changeSummary: z.string().max(500).optional(),
+});
+
+export const hookGenerateSchema = z.object({
+  planId: idSchema,
+  strategy: z.enum(['observation', 'tension', 'implication', 'question', 'claim', 'contrast']).optional(),
+});
+
+export const voiceProfileCreateSchema = z.object({
+  role: z.string().max(120).optional(),
+  headline: z.string().max(220).optional(),
+  professionalContext: z.string().max(5000).optional(),
+  tone: z.string().max(5000).optional(),
+  writingStyle: z.string().max(5000).optional(),
+  bannedWords: z.array(z.string().min(1).max(100)).max(100).default([]),
+  preferredVocabulary: z.array(z.string().min(1).max(100)).max(100).default([]),
+  contentPillars: z.array(z.string().min(1).max(200)).max(20).default([]),
+});
+
+export const voiceProfileUpdateSchema = voiceProfileCreateSchema.partial();
+
+export const voiceReceiptCreateSchema = z.object({
+  fact: z.string().min(1).max(2000),
+  context: z.string().max(2000).optional(),
+});
+
+export const writingSampleCreateSchema = z.object({
+  title: z.string().max(200).optional(),
+  content: z.string().min(1).max(20000),
+});
+
 export type UserCreate = z.infer<typeof userCreateSchema>;
 export type UserLogin = z.infer<typeof userLoginSchema>;
 export type WorkspaceCreate = z.infer<typeof workspaceCreateSchema>;
@@ -202,3 +344,16 @@ export type IntelligenceSourceUpdate = z.infer<typeof intelligenceSourceUpdateSc
 export type TopicResearch = z.infer<typeof topicResearchSchema>;
 export type OpportunityFeedback = z.infer<typeof opportunityFeedbackSchema>;
 export type OpportunityConvert = z.infer<typeof opportunityConvertSchema>;
+export type ContentObjective = z.infer<typeof contentObjectiveSchema>;
+export type ContentAngle = z.infer<typeof contentAngleSchema>;
+export type ContentNarrative = z.infer<typeof contentNarrativeSchema>;
+export type ContentPlanCreate = z.infer<typeof contentPlanCreateSchema>;
+export type ContentPlanGenerate = z.infer<typeof contentPlanGenerateSchema>;
+export type DraftCompose = z.infer<typeof draftComposeSchema>;
+export type ClaimBindingCreate = z.infer<typeof claimBindingCreateSchema>;
+export type ReviewAction = z.infer<typeof reviewActionSchema>;
+export type HookGenerate = z.infer<typeof hookGenerateSchema>;
+export type VoiceProfileCreate = z.infer<typeof voiceProfileCreateSchema>;
+export type VoiceProfileUpdate = z.infer<typeof voiceProfileUpdateSchema>;
+export type VoiceReceiptCreate = z.infer<typeof voiceReceiptCreateSchema>;
+export type WritingSampleCreate = z.infer<typeof writingSampleCreateSchema>;

@@ -25,10 +25,14 @@ enum ContentStatus {
 
 enum ContentFormat {
   POST
+  TEXT_POST
   ARTICLE
   CAROUSEL
   VIDEO
   POLL
+  CHECKLIST
+  FRAMEWORK
+  CONTRARIAN
 }
 
 enum LeadStatus {
@@ -155,6 +159,64 @@ enum FeedbackType {
   NOT_TIMELY
 }
 
+enum ContentPlanStatus {
+  DRAFT
+  APPROVED
+  ARCHIVED
+}
+
+enum ContentObjective {
+  EDUCATE
+  EXPLAIN
+  CHALLENGE
+  BUILD_AUTHORITY
+  SHARE_FRAMEWORK
+  START_DISCUSSION
+  TEACH_PRACTICAL
+  ANALYZE
+  REFRAME
+}
+
+enum ContentAngle {
+  EDUCATIONAL
+  CONTRARIAN
+  PRACTICAL
+  FRAMEWORK
+  ANALYSIS
+  OBSERVATION
+  BREAKDOWN
+}
+
+enum ContentNarrative {
+  PROBLEM_WHY_SOLUTION
+  OBSERVATION_ANALYSIS_IMPLICATION
+  HOOK_CONTEXT_FRAMEWORK_APPLICATION_TAKEAWAY
+  MISTAKE_CONSEQUENCE_BETTER_APPROACH
+  THESIS_EVIDENCE_TRADEOFF_CONCLUSION
+}
+
+enum ReviewStatus {
+  SUBMITTED
+  APPROVED
+  REJECTED
+  CHANGES_REQUESTED
+  BLOCKED
+}
+
+enum GateStatus {
+  PASS
+  WARN
+  REVIEW_REQUIRED
+  BLOCKED
+}
+
+enum EvidenceStatus {
+  SUPPORTED
+  REVIEW_REQUIRED
+  BLOCKED
+  CONTRADICTED
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique @db.VarChar(255)
@@ -214,6 +276,13 @@ model Workspace {
   contentOpportunities ContentOpportunity[]
   contentGaps         ContentGap[]
   opportunityFeedbacks OpportunityFeedback[]
+  contentPlans        ContentPlan[]
+  draftClaimBindings  DraftClaimBinding[]
+  contentGateResults  ContentQualityGateResult[]
+  contentReviews      ContentReview[]
+  voiceProfiles       VoiceProfile[]
+  voiceReceipts       VoiceReceipt[]
+  writingSamples      WritingSample[]
 
   @@index([slug])
   @@index([isActive])
@@ -241,7 +310,9 @@ model Profile {
   workspaceId String
   linkedinUrl String?  @unique @db.VarChar(2048)
   headline    String?  @db.VarChar(220)
+  role        String?  @db.VarChar(120)
   summary     String?  @db.Text
+  professionalContext String? @db.Text
   industry    String?  @db.VarChar(100)
   location    String?  @db.VarChar(100)
   avatarUrl   String?  @db.VarChar(2048)
@@ -262,6 +333,11 @@ model ICP {
   name        String   @db.VarChar(100)
   description String?  @db.Text
   criteria    Json?
+  targetRoles String[] @default([])
+  industries  String[] @default([])
+  companySize String?  @db.VarChar(100)
+  problems    String?  @db.Text
+  exclusions  String?  @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -280,6 +356,16 @@ model ContentIdea {
   format      ContentFormat?
   status      ContentStatus @default(DRAFT)
   tags        String[]     @default([])
+  opportunityId String?
+  topicId     String?
+  sourceIds   Json?
+  claimIds    Json?
+  trendSignalIds Json?
+  thesis      String?      @db.Text
+  audience    String?      @db.Text
+  objective   String?      @db.VarChar(50)
+  reasoning   String?      @db.Text
+  evidenceSnapshot Json?
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   publishedAt DateTime?
@@ -287,6 +373,7 @@ model ContentIdea {
   workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   author      User          @relation("ContentIdeaAuthor", fields: [authorId], references: [id], onDelete: Restrict)
   drafts      ContentDraft[]
+  plans       ContentPlan[]
 
   @@index([workspaceId])
   @@index([authorId])
@@ -298,16 +385,22 @@ model ContentDraft {
   id              String   @id @default(uuid())
   workspaceId     String
   contentIdeaId   String
+  planId          String?
   authorId        String
   body            String   @db.Text
+  structure       Json?
   version         Int      @default(1)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contentIdea     ContentIdea   @relation(fields: [contentIdeaId], references: [id], onDelete: Cascade)
+  plan            ContentPlan?  @relation(fields: [planId], references: [id], onDelete: SetNull)
   author          User          @relation("ContentDraftAuthor", fields: [authorId], references: [id], onDelete: Restrict)
   versions        ContentVersion[]
+  claimBindings   DraftClaimBinding[]
+  gateResults     ContentQualityGateResult[]
+  reviews         ContentReview[]
 
   @@unique([contentIdeaId, version])
   @@index([workspaceId])
@@ -323,6 +416,7 @@ model ContentVersion {
   body            String   @db.Text
   version         Int
   changeSummary   String?  @db.VarChar(500)
+  isFinal         Boolean  @default(false)
   createdAt       DateTime @default(now())
 
   workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
@@ -546,6 +640,7 @@ model SourceClaim {
   workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   source              IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   document            SourceDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  draftBindings       DraftClaimBinding[]
 
   @@index([workspaceId])
   @@index([sourceId])
@@ -589,6 +684,7 @@ model TopicMention {
   topic           Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
   source          IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
 
+  @@unique([workspaceId, topicId, sourceId])
   @@index([workspaceId])
   @@index([topicId])
   @@index([sourceId])
@@ -613,6 +709,7 @@ model TrendSignal {
   workspace               Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   topic                   Topic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
+  @@unique([workspaceId, topicId])
   @@index([workspaceId])
   @@index([topicId])
   @@index([workspaceId, status])
@@ -683,4 +780,153 @@ model OpportunityFeedback {
   @@index([workspaceId])
   @@index([opportunityId])
   @@index([userId])
+}
+
+model ContentPlan {
+  id                  String            @id @default(uuid())
+  workspaceId         String
+  contentIdeaId       String?
+  opportunityId       String?
+  topicId             String?
+  thesis              String            @db.Text
+  coreQuestion        String?           @db.Text
+  audience            String            @db.Text
+  audienceReason      String?           @db.Text
+  objective           ContentObjective
+  angle               ContentAngle
+  format              ContentFormat
+  narrativeStructure  ContentNarrative
+  keyPoints           Json
+  hookDirection       String?           @db.Text
+  ctaStrategy         String?           @db.Text
+  evidenceMap         Json
+  contradictionNotes  String?           @db.Text
+  voiceInstructions   String?           @db.Text
+  mustNotClaim        String[]          @default([])
+  sourceIds           Json?
+  claimIds            Json?
+  trendSignalIds      Json?
+  reasoning           String?           @db.Text
+  evidenceSnapshot    Json?
+  status              ContentPlanStatus @default(DRAFT)
+  createdBy           String?
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentIdea         ContentIdea?      @relation(fields: [contentIdeaId], references: [id], onDelete: Cascade)
+  drafts              ContentDraft[]
+  gateResults         ContentQualityGateResult[]
+
+  @@index([workspaceId])
+  @@index([contentIdeaId])
+  @@index([workspaceId, status])
+}
+
+model DraftClaimBinding {
+  id                String         @id @default(uuid())
+  workspaceId       String
+  draftId           String
+  span              String         @db.Text
+  sourceClaimId     String?
+  evidenceStatus    EvidenceStatus @default(REVIEW_REQUIRED)
+  confidence        Float?
+  contradictionState String        @default("NONE") @db.VarChar(30)
+  createdAt         DateTime       @default(now())
+
+  workspace         Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  draft             ContentDraft   @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  sourceClaim       SourceClaim?   @relation(fields: [sourceClaimId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([draftId])
+  @@index([sourceClaimId])
+}
+
+model ContentQualityGateResult {
+  id          String     @id @default(uuid())
+  workspaceId String
+  draftId     String?
+  planId      String?
+  gate        String     @db.VarChar(100)
+  status      GateStatus
+  severity    String     @db.VarChar(20)
+  message     String     @db.Text
+  evidence    String?    @db.Text
+  createdAt   DateTime   @default(now())
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  draft       ContentDraft? @relation(fields: [draftId], references: [id], onDelete: Cascade)
+  plan        ContentPlan?  @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([draftId])
+  @@index([planId])
+  @@index([workspaceId, status])
+}
+
+model ContentReview {
+  id          String       @id @default(uuid())
+  workspaceId String
+  draftId     String
+  status      ReviewStatus
+  requestedBy String
+  reviewerId  String?
+  note        String?      @db.Text
+  gateSummary Json?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  workspace   Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  draft       ContentDraft @relation(fields: [draftId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([draftId])
+  @@index([workspaceId, status])
+}
+
+model VoiceProfile {
+  id                  String   @id @default(uuid())
+  workspaceId         String
+  userId              String?
+  role                String?  @db.VarChar(120)
+  headline            String?  @db.VarChar(220)
+  professionalContext String?  @db.Text
+  tone                String?  @db.Text
+  writingStyle        String?  @db.Text
+  bannedWords         String[] @default([])
+  preferredVocabulary String[] @default([])
+  contentPillars      String[] @default([])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+model VoiceReceipt {
+  id          String   @id @default(uuid())
+  workspaceId String
+  fact        String   @db.Text
+  context     String?  @db.Text
+  verifiedAt  DateTime @default(now())
+  createdAt   DateTime @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model WritingSample {
+  id          String   @id @default(uuid())
+  workspaceId String
+  title       String?  @db.VarChar(200)
+  content     String   @db.Text
+  createdAt   DateTime @default(now())
+
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
 }

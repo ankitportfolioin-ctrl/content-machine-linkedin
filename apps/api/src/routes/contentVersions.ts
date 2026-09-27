@@ -1,8 +1,17 @@
+import { z } from 'zod';
 import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, AuthenticatedRequest } from '../middleware/auth';
-import { contentVersionCreateSchema } from '@growth-operator/schemas';
+import { contentVersionCreateSchema, versionFinalizeSchema, idSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { ValidationError, NotFoundError } from '../utils/errors';
+import { ReviewService } from '@growth-operator/content';
+import { forwardContentError } from '../utils/contentErrors';
+
+const reviewService = new ReviewService(prisma);
+
+function toContentError(error: unknown, next: (err: unknown) => void): void {
+  forwardContentError(error, next);
+}
 
 const router: ExpressRouter = Router();
 
@@ -116,11 +125,37 @@ router.delete('/:contentVersionId', async (req, res, next) => {
       throw new NotFoundError('Content Version');
     }
 
+    if (contentVersion.isFinal) {
+      return res.status(403).json({ error: { code: 'VERSION_IMMUTABLE', message: 'Final versions are immutable and cannot be deleted.' } });
+    }
+
     await prisma.contentVersion.delete({ where: { id: contentVersionId } });
 
     res.status(204).send();
   } catch (error) {
     next(error);
+  }
+});
+
+router.post('/finalize', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const data = versionFinalizeSchema.extend({ draftId: idSchema }).parse(req.body);
+
+    const draft = await prisma.contentDraft.findFirst({
+      where: { id: data.draftId, workspaceId: authReq.workspaceId },
+    });
+    if (!draft) throw new NotFoundError('Content Draft');
+
+    const version = await reviewService.finalizeVersion(
+      authReq.workspaceId,
+      draft.id,
+      { userId: authReq.user.id, role: authReq.workspaceRole },
+      data.changeSummary
+    );
+    res.status(201).json({ contentVersion: version });
+  } catch (error) {
+    toContentError(error, next);
   }
 });
 

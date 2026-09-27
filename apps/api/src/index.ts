@@ -1,4 +1,10 @@
-import 'dotenv/config';
+import path from 'path';
+import dotenv from 'dotenv';
+// Load the repository-root .env regardless of the process working directory
+// (e.g. `pnpm --filter @growth-operator/api dev` runs with CWD=apps/api),
+// then fall back to default dotenv behavior for a package-local .env.
+dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config();
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -14,6 +20,9 @@ import icpRoutes from './routes/icps';
 import contentIdeaRoutes from './routes/contentIdeas';
 import contentDraftRoutes from './routes/contentDrafts';
 import contentVersionRoutes from './routes/contentVersions';
+import contentPlanRoutes from './routes/contentPlans';
+import contentReviewRoutes from './routes/contentReviews';
+import voiceRoutes from './routes/voice';
 import leadRoutes from './routes/leads';
 import conversationRoutes from './routes/conversations';
 import messageRoutes from './routes/messages';
@@ -82,6 +91,9 @@ app.use('/api/v1/icps', icpRoutes);
 app.use('/api/v1/content-ideas', contentIdeaRoutes);
 app.use('/api/v1/content-drafts', contentDraftRoutes);
 app.use('/api/v1/content-versions', contentVersionRoutes);
+app.use('/api/v1/content-plans', contentPlanRoutes);
+app.use('/api/v1/content-reviews', contentReviewRoutes);
+app.use('/api/v1/voice', voiceRoutes);
 app.use('/api/v1/leads', leadRoutes);
 app.use('/api/v1/conversations', conversationRoutes);
 app.use('/api/v1/messages', messageRoutes);
@@ -93,7 +105,9 @@ app.use('/api/v1/intelligence', intelligenceRoutes);
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-const server = app.listen(env.PORT, () => {
+// Supertest exercises the app instance directly, so skip binding a port in
+// test runs (multiple test files import this module in one process).
+const server = env.NODE_ENV === 'test' ? null : app.listen(env.PORT, () => {
   console.log(`🚀 API server running on http://localhost:${env.PORT}`);
   console.log(`📖 Health: http://localhost:${env.PORT}/api/v1/health`);
   console.log(`🔍 Ready: http://localhost:${env.PORT}/api/v1/ready`);
@@ -101,6 +115,11 @@ const server = app.listen(env.PORT, () => {
 
 const shutdown = async (signal: string) => {
   console.log(`\n${signal} received, shutting down gracefully...`);
+  if (!server) {
+    const { prisma } = await import('@growth-operator/db');
+    await prisma.$disconnect();
+    process.exit(0);
+  }
   server.close(async () => {
     const { prisma } = await import('@growth-operator/db');
     await prisma.$disconnect();
