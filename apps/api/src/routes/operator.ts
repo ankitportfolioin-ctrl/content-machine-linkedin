@@ -4,7 +4,7 @@ import { operatorActionsQuerySchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
 import { createDefaultRegistry } from '@growth-operator/ai';
-import { OperatorActionService, explainWithAi } from '@growth-operator/decision';
+import { OperatorActionService, explainWithAi, extractResultKeys } from '@growth-operator/decision';
 import { forwardDecisionError } from '../utils/decisionErrors';
 import { getEnv } from '../config/env';
 
@@ -28,9 +28,10 @@ router.get('/next-actions', async (req, res, next) => {
     const filtered = query.kind ? ranked.filter((a) => a.kind === query.kind) : ranked;
     const persisted = await prisma.operatorAction.findMany({
       where: { workspaceId: authReq.workspaceId, status: 'PENDING' },
-      select: { id: true, identityKey: true },
+      select: { id: true, identityKey: true, subjectMeta: true },
     });
     const idByKey = new Map(persisted.map((r) => [r.identityKey, r.id]));
+    const metaByKey = new Map(persisted.map((r) => [r.identityKey, r.subjectMeta]));
     res.json({
       actions: filtered.map((a) => ({
         id: idByKey.get(a.identityKey) ?? null,
@@ -41,7 +42,7 @@ router.get('/next-actions', async (req, res, next) => {
         score: a.score,
         reasons: a.reasons,
         evidenceLinks: a.evidenceLinks,
-        subjectMeta: a.facts.subjectMeta ?? {},
+        subjectMeta: { ...((a.facts.subjectMeta ?? {}) as object), ...extractResultKeys(metaByKey.get(a.identityKey)) },
         status: 'PENDING' as const,
       })),
       total: filtered.length,
@@ -87,6 +88,18 @@ router.post('/actions/:actionId/complete', async (req, res, next) => {
     if (!actionId) throw new NotFoundError('Operator Action');
     const action = await actionService.transition(authReq.workspaceId, actionId, 'COMPLETED');
     res.json({ action });
+  } catch (error) {
+    forwardDecisionError(error, next);
+  }
+});
+
+router.post('/actions/:actionId/ideas', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { actionId } = req.params;
+    if (!actionId) throw new NotFoundError('Operator Action');
+    const result = await actionService.initiateIdea(authReq.workspaceId, actionId, authReq.user.id);
+    res.status(201).json(result);
   } catch (error) {
     forwardDecisionError(error, next);
   }

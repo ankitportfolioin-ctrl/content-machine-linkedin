@@ -6,6 +6,7 @@ import { collectCandidates } from './collectors';
 import { checkEligibility } from './eligibility';
 import { rankScored, scoreCandidate } from './scoring';
 import { explainAction } from './explain';
+import { buildObjectionIdea, extractResultKeys } from './initiation';
 
 export class OperatorActionService {
   private prisma: PrismaClient;
@@ -49,7 +50,18 @@ export class OperatorActionService {
 
     const ranked = rankScored(scored);
 
+    const persistedMeta = new Map(
+      existing
+        .filter((r: { status: string }) => r.status === 'PENDING')
+        .map((r: { identityKey: string; subjectMeta: unknown }) => [r.identityKey, r.subjectMeta] as [string, unknown])
+    );
+
     for (const action of ranked) {
+      // Initiation linkage (resultIdeaId/Title/initiatedAt) is operator history:
+      // freshly collected candidates never carry it, so re-merge it on update
+      // rather than letting refresh erase it.
+      const preserved = extractResultKeys(persistedMeta.get(action.identityKey));
+      const subjectMeta = { ...((action.facts.subjectMeta ?? {}) as object), ...preserved };
       await this.prisma.operatorAction.upsert({
         where: { workspaceId_identityKey: { workspaceId, identityKey: action.identityKey } },
         create: {
@@ -69,7 +81,7 @@ export class OperatorActionService {
           score: action.score,
           reasons: action.reasons,
           evidenceLinks: action.evidenceLinks as object,
-          subjectMeta: (action.facts.subjectMeta ?? {}) as object,
+          subjectMeta: subjectMeta as object,
         },
       });
     }
@@ -107,6 +119,93 @@ export class OperatorActionService {
         ...(to === 'DISMISSED' ? { dismissedAt: new Date() } : { completedAt: new Date() }),
       },
     });
+  }
+
+  /**
+   * Human-initiated workflow scaffolding: creates exactly one DRAFT ContentIdea
+   * prefilled from a PENDING objection_pattern action's recorded evidence.
+   * The idea is a draft only — no plan, draft, review, approval, or publication
+   * is created, and the action stays PENDING for the operator to complete
+   * manually. The create + linkage update run atomically.
+   */
+  async initiateIdea(workspaceId: string, actionId: string, authorId: string) {
+    const row = await this.prisma.operatorAction.findFirst({ where: { id: actionId, workspaceId } });
+    if (!row) {
+      throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
+    }
+    if (row.kind !== 'objection_pattern') {
+      throw new DecisionError('CONFLICT', `Only objection_pattern actions can start ideas (kind: ${row.kind}).`);
+    }
+    if (row.status !== 'PENDING') {
+      throw new DecisionError('CONFLICT', `Only PENDING actions can start ideas (current: ${row.status}).`);
+    }
+    const meta = (row.subjectMeta ?? {}) as Record<string, unknown>;
+    if (typeof meta['resultIdeaId'] === 'string') {
+      const prior = await this.prisma.contentIdea.findFirst({
+        where: { id: meta['resultIdeaId'] as string, workspaceId },
+      });
+      if (prior) {
+        throw new DecisionError('CONFLICT', 'An idea was already started from this action.', {
+          ideaId: prior.id,
+          ideaTitle: (prior as { title?: unknown }).title ?? meta['resultIdeaTitle'] ?? null,
+        });
+      }
+    }
+
+    const candidates = await collectCandidates(this.prisma, workspaceId, Date.now());
+    const candidate = candidates.find((c) => c.identityKey === row.identityKey);
+    if (!candidate) {
+      throw new DecisionError('CONFLICT', 'The objection pattern no longer qualifies; nothing was created.');
+    }
+    const verdict = await checkEligibility(this.prisma, workspaceId, candidate);
+    if (!verdict.eligible) {
+      throw new DecisionError('CONFLICT', verdict.reason ?? 'The objection pattern is no longer eligible; nothing was created.');
+    }
+
+    const candidateMeta = (candidate.facts.subjectMeta ?? {}) as Record<string, unknown>;
+    const prefill = buildObjectionIdea({
+      normalizedObjection: typeof candidateMeta['normalizedObjection'] === 'string' ? (candidateMeta['normalizedObjection'] as string) : '',
+      count: typeof candidateMeta['count'] === 'number' ? (candidateMeta['count'] as number) : 0,
+      conversationIds: Array.isArray(candidateMeta['conversationIds'])
+        ? (candidateMeta['conversationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
+        : [],
+      classificationIds: Array.isArray(candidateMeta['classificationIds'])
+        ? (candidateMeta['classificationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
+        : [],
+      sampleEvidence: Array.isArray(candidateMeta['sampleEvidence'])
+        ? (candidateMeta['sampleEvidence'] as unknown[]).filter((v): v is string => typeof v === 'string')
+        : [],
+      identityKey: candidate.identityKey,
+    });
+
+    const initiatedAt = new Date().toISOString();
+    const idea = await this.prisma.contentIdea.create({
+      data: {
+        workspaceId,
+        authorId,
+        title: prefill.title,
+        description: prefill.description,
+        tags: prefill.tags,
+      },
+    });
+    try {
+      const ideaTitle = (idea as { title?: unknown }).title;
+      const action = await this.prisma.operatorAction.update({
+        where: { id: row.id },
+        data: {
+          subjectMeta: {
+            ...(meta as object),
+            resultIdeaId: idea.id,
+            resultIdeaTitle: typeof ideaTitle === 'string' ? ideaTitle : prefill.title,
+            initiatedAt,
+          } as object,
+        },
+      });
+      return { idea, action };
+    } catch (error) {
+      await this.prisma.contentIdea.delete({ where: { id: idea.id } }).catch(() => undefined);
+      throw error;
+    }
   }
 
   async explain(workspaceId: string, actionId: string) {

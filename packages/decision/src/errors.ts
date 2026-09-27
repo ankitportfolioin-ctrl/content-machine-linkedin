@@ -4,7 +4,8 @@ export type DecisionErrorCode =
   | 'EVIDENCE_MISSING'
   | 'INVALID_TRANSITION'
   | 'APPROVAL_NOT_ALLOWED'
-  | 'NOT_FOUND';
+  | 'NOT_FOUND'
+  | 'CONFLICT';
 
 export class DecisionError extends Error {
   readonly code: DecisionErrorCode;

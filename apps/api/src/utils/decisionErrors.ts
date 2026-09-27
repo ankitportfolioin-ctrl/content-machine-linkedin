@@ -8,6 +8,7 @@ const STATUS_BY_CODE: Record<string, number> = {
   INVALID_TRANSITION: 422,
   APPROVAL_NOT_ALLOWED: 403,
   NOT_FOUND: 404,
+  CONFLICT: 409,
 };
 
 export function toDecisionHttpError(error: DecisionError): AppError {

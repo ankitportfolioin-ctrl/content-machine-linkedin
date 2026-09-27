@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useHealth } from '../hooks/useHealth';
 import { HealthResponse, OperatorAction } from '../types';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
+  ApiRequestError,
   completeAction,
   dismissAction,
   friendlyErrorMessage,
   isAiUnavailable,
   listNextActions,
+  startIdeaFromAction,
 } from '../services/api';
 
 interface StatusBadgeProps {
@@ -200,6 +202,31 @@ function RecommendedSteps() {
     );
   }
 
+  const navigate = useNavigate();
+
+  async function handleStartIdea(id: string) {
+    setWorkingId(id);
+    setRowError((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    try {
+      await startIdeaFromAction(id);
+      await fetchData();
+      navigate('/content');
+    } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 409 && err.code === 'CONFLICT') {
+        await fetchData();
+        navigate('/content');
+        return;
+      }
+      setRowError((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
   async function handleDecision(id: string, decision: 'dismiss' | 'complete') {
     setWorkingId(id);
     setRowError((prev) => {
@@ -286,6 +313,15 @@ function RecommendedSteps() {
                     <NavLink to={kindTarget(String(action.kind))} className="btn btn-secondary">
                       Open
                     </NavLink>
+                    {String(action.kind) === 'objection_pattern' ? (
+                      <button
+                        className="btn btn-secondary"
+                        disabled={workingId === String(action.id)}
+                        onClick={() => void handleStartIdea(String(action.id))}
+                      >
+                        {workingId === String(action.id) ? 'Saving...' : 'Start idea'}
+                      </button>
+                    ) : null}
                     <button
                       className="btn btn-secondary"
                       disabled={workingId === String(action.id)}
