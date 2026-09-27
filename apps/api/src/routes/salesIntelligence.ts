@@ -8,7 +8,7 @@ import {
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
 import { createDefaultRegistry } from '@growth-operator/ai';
-import { ClassificationService, SalesBridgeService } from '@growth-operator/sales';
+import { ClassificationService, SalesBridgeService, aggregateObjectionPatterns, computeTopicRelevance } from '@growth-operator/sales';
 import { forwardSalesError } from '../utils/salesErrors';
 import { getEnv } from '../config/env';
 
@@ -118,6 +118,54 @@ router.get('/content-signals/:signalId/content-input', async (req, res, next) =>
     if (!signalId) throw new NotFoundError('Sales Content Signal');
     const input = await bridgeService.toContentInput(authReq.workspaceId, signalId);
     res.json({ contentInput: input });
+  } catch (error) {
+    forwardSalesError(error, next);
+  }
+});
+
+router.get('/objections', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const rawMin = typeof req.query.minSampleSize === 'string' ? parseInt(req.query.minSampleSize, 10) : 2;
+    const minSampleSize = Number.isFinite(rawMin) ? Math.min(50, Math.max(1, rawMin)) : 2;
+    const aggregation = await aggregateObjectionPatterns(prisma, authReq.workspaceId, minSampleSize);
+    res.json({ objections: aggregation });
+  } catch (error) {
+    forwardSalesError(error, next);
+  }
+});
+
+router.get('/topics/:topicId/relevance', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { topicId } = req.params;
+    if (!topicId) throw new NotFoundError('Topic');
+    const { leadId } = req.query;
+    const topic = await prisma.topic.findFirst({ where: { id: topicId, workspaceId: authReq.workspaceId } });
+    if (!topic) throw new NotFoundError('Topic');
+    if (typeof leadId === 'string') {
+      const lead = await prisma.lead.findFirst({ where: { id: leadId, workspaceId: authReq.workspaceId } });
+      if (!lead) throw new NotFoundError('Lead');
+    }
+    const icp = await prisma.iCP.findFirst({
+      where: { workspaceId: authReq.workspaceId },
+      orderBy: { updatedAt: 'desc' },
+    });
+    const relevance = await computeTopicRelevance(prisma, authReq.workspaceId, {
+      topicId,
+      leadId: typeof leadId === 'string' ? leadId : undefined,
+      icp: icp ? {
+        id: icp.id,
+        name: icp.name,
+        description: icp.description,
+        targetRoles: icp.targetRoles,
+        industries: icp.industries,
+        companySize: icp.companySize,
+        problems: icp.problems,
+        exclusions: icp.exclusions,
+      } : null,
+    });
+    res.json({ relevance, icpUsed: icp ? { id: icp.id, name: icp.name } : null });
   } catch (error) {
     forwardSalesError(error, next);
   }

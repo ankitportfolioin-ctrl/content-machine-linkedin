@@ -1,9 +1,9 @@
 import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, requireRole, AuthenticatedRequest } from '../middleware/auth';
-import { learningSignalCreateSchema, learningDeriveSchema, learningConfirmSchema } from '@growth-operator/schemas';
+import { learningSignalCreateSchema, learningDeriveSchema, learningConfirmSchema, contentOutcomeDeriveSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
-import { LearningDerivationService, deriveProposal } from '@growth-operator/learning';
+import { LearningDerivationService, deriveProposal, ContentOutcomeService } from '@growth-operator/learning';
 import { forwardLearningError } from '../utils/learningErrors';
 const router: ExpressRouter = Router();
 
@@ -102,6 +102,41 @@ router.post('/', async (req, res, next) => {
 });
 
 const derivationService = new LearningDerivationService(prisma);
+const contentOutcomeService = new ContentOutcomeService(prisma);
+
+router.post('/derived/content-outcome', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const data = contentOutcomeDeriveSchema.parse(req.body);
+    const summary = await contentOutcomeService.summarize(authReq.workspaceId, {
+      metricName: data.metricName,
+      attribute: data.attribute,
+    });
+    if (summary.totalMetrics === 0) {
+      return res.status(422).json({ error: { code: 'INSUFFICIENT_DATA', message: `No recorded "${data.metricName}" measurements linked to content versions. Content-outcome derivation requires measured data.` } });
+    }
+    const outcome = contentOutcomeService.deriveFromSummary(summary, data.minSampleSize);
+    if (!outcome.derived) {
+      return res.status(422).json({ error: { code: 'INSUFFICIENT_DATA', message: (outcome as { reason: string }).reason } });
+    }
+    const { derived, dimension } = outcome as { derived: NonNullable<ReturnType<typeof deriveProposal>>; dimension: string };
+    const proposal = await derivationService.propose({
+      workspaceId: authReq.workspaceId,
+      dimension,
+      observedPattern: derived.observedPattern,
+      supportingMeasurements: summary.groups,
+      sourceMetricIds: derived.sourceMetricIds,
+      sampleSize: derived.sampleSize,
+      denominator: derived.denominator,
+      proposedAdjustment: derived.proposedAdjustment,
+      reason: derived.reason,
+      confidence: derived.confidence,
+    });
+    res.status(201).json({ proposal, summary });
+  } catch (error) {
+    forwardLearningError(error, next);
+  }
+});
 
 router.get('/derived', async (req, res, next) => {
   try {

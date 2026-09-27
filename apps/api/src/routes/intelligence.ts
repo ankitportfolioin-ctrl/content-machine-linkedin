@@ -6,6 +6,7 @@ import {
   topicResearchSchema,
   opportunityFeedbackSchema,
   opportunityConvertSchema,
+  opportunityScoreSchema,
 } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError, ValidationError } from '../utils/errors';
@@ -14,8 +15,9 @@ import { SourceUnderstandingService } from '@growth-operator/intelligence';
 import { ClaimLedgerService } from '@growth-operator/intelligence';
 import { TopicClusteringService } from '@growth-operator/intelligence';
 import { TrendSignalService } from '@growth-operator/intelligence';
-import { ContentOpportunityService } from '@growth-operator/intelligence';
+import { ContentOpportunityService, toOpportunityLearningView, ContentOpportunityInput } from '@growth-operator/intelligence';
 import { ContentGapService } from '@growth-operator/intelligence';
+import { LearningDerivationService, applyLearningInfluence } from '@growth-operator/learning';
 import { AIProviderRegistry, createDefaultRegistry } from '@growth-operator/ai';
 import { getEnv } from '../config/env';
 
@@ -35,6 +37,32 @@ const topicService = new TopicClusteringService(prisma, aiRegistry);
 const trendService = new TrendSignalService(prisma);
 const opportunityService = new ContentOpportunityService(prisma, aiRegistry, topicService, trendService);
 const gapService = new ContentGapService(prisma, aiRegistry);
+const learningDerivation = new LearningDerivationService(prisma);
+
+async function scoreOpportunityWithLearning(workspaceId: string, input: ContentOpportunityInput) {
+  const scoreResult = await opportunityService.scoreOpportunity(input);
+  if (scoreResult.criticalFailure) {
+    return toOpportunityLearningView(scoreResult, {
+      dimensions: scoreResult.dimensions.map((d) => ({
+        name: d.name,
+        score: d.score,
+        reason: d.explanation,
+        evidence: d.evidence,
+        baseScore: d.score,
+        appliedAdjustment: 0,
+      })),
+      applied: [],
+      ignored: [{ dimension: '*', reason: 'Critical evidence failure; confirmed learning is not applied over a failed base score.' }],
+      overallScore: scoreResult.overallScore,
+    });
+  }
+  const confirmed = await learningDerivation.confirmedInfluences(workspaceId);
+  const withLearning = applyLearningInfluence(
+    scoreResult.dimensions.map((d) => ({ name: d.name, score: d.score, reason: d.explanation, evidence: d.evidence })),
+    confirmed
+  );
+  return toOpportunityLearningView(scoreResult, withLearning);
+}
 
 router.post('/sources', async (req, res, next) => {
   try {
@@ -420,6 +448,62 @@ router.get('/opportunities/:opportunityId', async (req, res, next) => {
     }
 
     res.json({ opportunity });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/opportunities/score', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const data = opportunityScoreSchema.parse(req.body);
+    const topic = await prisma.topic.findFirst({ where: { id: data.topicId, workspaceId: authReq.workspaceId } });
+    if (!topic) {
+      throw new NotFoundError('Topic');
+    }
+    const scoring = await scoreOpportunityWithLearning(authReq.workspaceId, {
+      workspaceId: authReq.workspaceId,
+      topicId: data.topicId,
+      sourceIds: data.sourceIds,
+      claimIds: data.claimIds,
+      trendSignalIds: data.trendSignalIds,
+      workspaceProfile: data.workspaceProfile,
+      icp: data.icp,
+      contentGaps: data.contentGaps,
+    });
+    res.json({ scoring, scoringInputs: { ...data, workspaceId: authReq.workspaceId } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/opportunities/:opportunityId/score', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { opportunityId } = req.params;
+
+    const opportunity = await prisma.contentOpportunity.findFirst({
+      where: { id: opportunityId, workspaceId: authReq.workspaceId },
+    });
+
+    if (!opportunity) {
+      throw new NotFoundError('Content Opportunity');
+    }
+
+    const asIds = (value: unknown): string[] =>
+      Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string') : [];
+    const scoringInputs = {
+      workspaceId: authReq.workspaceId,
+      topicId: opportunity.topicId,
+      sourceIds: asIds(opportunity.sourceIds),
+      claimIds: asIds(opportunity.claimIds),
+      trendSignalIds: asIds(opportunity.trendSignalIds),
+      workspaceProfile: '',
+      icp: '',
+      contentGaps: [] as Array<{ type: string; description: string; evidence: string }>,
+    };
+    const scoring = await scoreOpportunityWithLearning(authReq.workspaceId, scoringInputs);
+    res.json({ scoring, scoringInputs, storedScore: opportunity.opportunityScore });
   } catch (error) {
     next(error);
   }

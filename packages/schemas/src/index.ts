@@ -455,6 +455,26 @@ export const learningConfirmSchema = z.object({
   note: z.string().max(2000).optional(),
 });
 
+export const contentOutcomeDeriveSchema = z.object({
+  metricName: z.string().min(1).max(100).default('responses'),
+  attribute: z.enum(['format', 'angle', 'objective']),
+  minSampleSize: z.number().int().min(2).max(100).default(3),
+});
+
+export const opportunityScoreSchema = z.object({
+  topicId: idSchema,
+  sourceIds: z.array(idSchema).max(100).default([]),
+  claimIds: z.array(idSchema).max(200).default([]),
+  trendSignalIds: z.array(idSchema).max(100).default([]),
+  workspaceProfile: z.string().max(5000).default(''),
+  icp: z.string().max(5000).default(''),
+  contentGaps: z.array(z.object({
+    type: z.string().min(1).max(100),
+    description: z.string().min(1).max(2000),
+    evidence: z.string().min(1).max(2000),
+  })).max(50).default([]),
+});
+
 export const operatorActionKindSchema = z.enum([
   'content_opportunity',
   'content_gap',
@@ -525,4 +545,6 @@ export type SalesContentSignalCreate = z.infer<typeof salesContentSignalCreateSc
 export type PublishRecordCreate = z.infer<typeof publishRecordCreateSchema>;
 export type OutcomeMetricCreate = z.infer<typeof outcomeMetricCreateSchema>;
 export type LearningDerive = z.infer<typeof learningDeriveSchema>;
+export type ContentOutcomeDerive = z.infer<typeof contentOutcomeDeriveSchema>;
+export type OpportunityScore = z.infer<typeof opportunityScoreSchema>;
 export type OperatorActionKind = z.infer<typeof operatorActionKindSchema>;

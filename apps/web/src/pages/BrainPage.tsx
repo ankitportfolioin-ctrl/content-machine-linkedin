@@ -11,6 +11,7 @@ import {
   getExplanation,
   getIntelligenceOverview,
   getOpportunity,
+  getOpportunityScoring,
   isAiUnavailable,
   listGaps,
   listLearningProposals,
@@ -30,6 +31,7 @@ import {
   OperatorAction,
   Opportunity,
   OpportunityFeedbackKind,
+  OpportunityScoring,
   Source,
   TrendSignal,
 } from '../types';
@@ -426,6 +428,8 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
           topicId: typeof opportunity.topicId === 'string' ? opportunity.topicId : '',
         }}
       />
+
+      <OpportunityScoringBreakdown opportunityId={String(opportunity.id ?? '')} />
 
       <div className="card">
         <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Was this helpful?</h3>
@@ -904,6 +908,82 @@ function subjectMatches(meta: Record<string, unknown> | undefined, keys: Record<
     const candidate = meta[key];
     return typeof candidate === 'string' && candidate === value;
   });
+}
+
+function OpportunityScoringBreakdown({ opportunityId }: { opportunityId: string }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [scoring, setScoring] = useState<OpportunityScoring | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getOpportunityScoring(opportunityId);
+      setScoring(data.scoring ?? null);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [opportunityId]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  if (loading) {
+    return (
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Score breakdown</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Recomputing score...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Score breakdown</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{error}</p>
+        <button className="btn btn-secondary" onClick={() => void fetchData()} style={{ marginTop: '0.5rem' }}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!scoring) return null;
+
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Score breakdown</h3>
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+        <span className="badge badge-neutral">Score: {scoring.overallScore.toFixed(2)}</span>
+        <span className="badge badge-neutral">Base: {scoring.baseOverallScore.toFixed(2)}</span>
+        {scoring.learning.applied.length > 0 ? (
+          <span className="badge badge-neutral">{scoring.learning.applied.length} confirmed learning adjustment(s)</span>
+        ) : (
+          <span className="badge badge-neutral">No confirmed learning applied</span>
+        )}
+      </div>
+      {scoring.criticalFailure ? (
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+          Evidence failure: {scoring.failureReason ?? 'base score failed evidence checks; learning was not applied.'}
+        </p>
+      ) : null}
+      <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {scoring.dimensions.map((dim) => (
+          <li key={dim.name} style={{ fontSize: '0.875rem' }}>
+            <strong>{dim.name}</strong>: {dim.score.toFixed(2)}
+            {dim.appliedAdjustment !== 0 ? ` (base ${dim.baseScore.toFixed(2)}, ${dim.appliedAdjustment > 0 ? '+' : ''}${dim.appliedAdjustment.toFixed(2)} from confirmed learning)` : null}
+            <br />
+            <span style={{ color: 'var(--color-text-secondary)' }}>{dim.explanation}</span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
 }
 
 function WhyRecommended({ matchKeys }: { matchKeys: Record<string, string> }) {

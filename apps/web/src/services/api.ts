@@ -30,6 +30,7 @@ import {
   LoginResponse,
   OpportunitiesResponse,
   OpportunityDetailResponse,
+  OpportunityScoringResponse,
   OpportunityFeedback,
   OpportunityFeedbackKind,
   OutreachDraft,
@@ -240,6 +241,10 @@ export async function listOpportunities(): Promise<OpportunitiesResponse> {
 
 export async function getOpportunity(id: string): Promise<OpportunityDetailResponse> {
   return authedRequest<OpportunityDetailResponse>(`/intelligence/opportunities/${encodeURIComponent(id)}`);
+}
+
+export async function getOpportunityScoring(id: string): Promise<OpportunityScoringResponse> {
+  return authedRequest<OpportunityScoringResponse>(`/intelligence/opportunities/${encodeURIComponent(id)}/score`);
 }
 
 export async function submitOpportunityFeedback(

@@ -4,3 +4,4 @@ export * from './outcome';
 export * from './aggregation';
 export * from './derivation';
 export * from './influence';
+export * from './contentOutcome';

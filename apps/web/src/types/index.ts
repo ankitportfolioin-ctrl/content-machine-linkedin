@@ -72,6 +72,33 @@ export interface OpportunityDetailResponse {
   opportunity: Opportunity;
 }
 
+export interface OpportunityScoringDimension {
+  name: string;
+  score: number;
+  explanation: string;
+  evidence: string[];
+  baseScore: number;
+  appliedAdjustment: number;
+}
+
+export interface OpportunityScoring {
+  overallScore: number;
+  baseOverallScore: number;
+  dimensions: OpportunityScoringDimension[];
+  criticalFailure: boolean;
+  failureReason?: string;
+  learning: {
+    applied: Array<{ dimension: string; adjustment: number; reason: string; proposalId: string; confirmedAt: string }>;
+    ignored: Array<{ dimension: string; reason: string }>;
+  };
+}
+
+export interface OpportunityScoringResponse {
+  scoring: OpportunityScoring;
+  scoringInputs: Record<string, unknown>;
+  storedScore?: number;
+}
+
 export type OpportunityFeedbackKind =
   | 'useful'
   | 'not_useful'
