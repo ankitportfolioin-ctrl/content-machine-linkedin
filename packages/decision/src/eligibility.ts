@@ -1,5 +1,7 @@
 import { PrismaClient } from '@prisma/client';
+import { computeTopicRelevance, IcpInput } from '@growth-operator/sales';
 import { Candidate } from './types';
+import { MIN_OBJECTION_SAMPLE, MIN_PROSPECT_RELEVANCE } from './signals';
 
 export interface EligibilityVerdict {
   eligible: boolean;
@@ -101,6 +103,56 @@ export async function checkEligibility(
       if (versions.length > 0) return { eligible: false, reason: 'Draft has a final version.' };
       if (reviews.some((r) => r.status === 'APPROVED' || r.status === 'SUBMITTED')) {
         return { eligible: false, reason: 'Draft entered review or approval since collection.' };
+      }
+      return { eligible: true, reason: null };
+    }
+    case 'objection_pattern': {
+      const meta = candidate.facts.subjectMeta as
+        | { classificationIds?: unknown; minSampleSize?: unknown }
+        | undefined;
+      const ids = Array.isArray(meta?.classificationIds)
+        ? meta.classificationIds.filter((v): v is string => typeof v === 'string')
+        : [];
+      const minSample =
+        typeof meta?.minSampleSize === 'number' && Number.isFinite(meta.minSampleSize)
+          ? Math.max(1, Math.floor(meta.minSampleSize))
+          : MIN_OBJECTION_SAMPLE;
+      if (ids.length === 0) return missing('Objection pattern');
+      const rows = await prisma.conversationClassificationResult.findMany({
+        where: { id: { in: ids }, workspaceId, classification: 'OBJECTION' },
+        select: { conversationId: true },
+      });
+      const distinct = new Set(rows.map((r: { conversationId: string }) => r.conversationId));
+      if (distinct.size < minSample) {
+        return { eligible: false, reason: `Objection pattern no longer meets the minimum sample (${distinct.size} < ${minSample} conversations).` };
+      }
+      return { eligible: true, reason: null };
+    }
+    case 'prospect_relevance': {
+      const meta = candidate.facts.subjectMeta as { topicId?: unknown } | undefined;
+      const topicId = typeof meta?.topicId === 'string' ? meta.topicId : null;
+      const leadId = typeof candidate.subjectId === 'string' ? candidate.subjectId : null;
+      if (!topicId || !leadId) return missing('Topic relevance');
+      const topic = await prisma.topic.findFirst({ where: { id: topicId, workspaceId } });
+      if (!topic) return missing('Topic');
+      const lead = await prisma.lead.findFirst({ where: { id: leadId, workspaceId } });
+      if (!lead) return missing('Prospect');
+      const icpRow = await prisma.iCP.findFirst({ where: { workspaceId }, orderBy: { updatedAt: 'desc' } });
+      const icp: IcpInput | null = icpRow
+        ? {
+            id: icpRow.id,
+            name: icpRow.name,
+            description: icpRow.description,
+            targetRoles: icpRow.targetRoles,
+            industries: icpRow.industries,
+            companySize: icpRow.companySize,
+            problems: icpRow.problems,
+            exclusions: icpRow.exclusions,
+          }
+        : null;
+      const relevance = await computeTopicRelevance(prisma, workspaceId, { topicId, leadId, icp });
+      if (relevance.relevance < MIN_PROSPECT_RELEVANCE) {
+        return { eligible: false, reason: `Relevance ${relevance.relevance} is below the ${MIN_PROSPECT_RELEVANCE} floor.` };
       }
       return { eligible: true, reason: null };
     }

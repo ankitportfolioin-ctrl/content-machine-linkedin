@@ -20,6 +20,10 @@ function lifecycleLine(action: ScoredAction): string {
       return 'Recommended next step only; sending remains a human decision.';
     case 'stale_draft':
       return 'Idle draft; resume or dismiss at your discretion.';
+    case 'objection_pattern':
+      return 'Recurring recorded objection; creating content from it remains a human decision.';
+    case 'prospect_relevance':
+      return 'Recorded-fit signal only; any outreach remains a human decision.';
     default:
       return 'Informational candidate; opening its workflow is the action.';
   }

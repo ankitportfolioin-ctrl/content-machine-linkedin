@@ -13,6 +13,13 @@ function basePrisma() {
     preparedAction: { findMany: vi.fn().mockResolvedValue([]) },
     learningProposal: { findMany: vi.fn().mockResolvedValue([]) },
     contentDraft: { findMany: vi.fn().mockResolvedValue([]) },
+    conversationClassificationResult: {
+      findMany: vi.fn().mockResolvedValue([]),
+      aggregate: vi.fn().mockResolvedValue({ _max: { createdAt: null } }),
+    },
+    iCP: { findFirst: vi.fn().mockResolvedValue(null) },
+    topic: { findMany: vi.fn().mockResolvedValue([]) },
+    lead: { findMany: vi.fn().mockResolvedValue([]) },
     operatorAction: {
       findMany: vi.fn().mockResolvedValue([]),
       findFirst: vi.fn(),

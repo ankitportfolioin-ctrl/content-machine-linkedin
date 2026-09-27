@@ -40,6 +40,8 @@ function kindLabel(kind: string): string {
   if (normalized === 'prepared_action') return 'Prepared next step';
   if (normalized === 'follow_up' || normalized === 'followup') return 'Follow-up';
   if (normalized === 'learning_proposal') return 'Suggested improvement';
+  if (normalized === 'objection_pattern') return 'Recurring objection';
+  if (normalized === 'prospect_relevance') return 'Prospect fit';
   if (normalized.includes('review')) return 'Review';
   if (normalized.includes('pipeline') || normalized.includes('deal')) return 'Pipeline';
   if (normalized.includes('lead') || normalized.includes('prospect') || normalized.includes('outreach'))
@@ -59,6 +61,7 @@ function kindLabel(kind: string): string {
 
 function kindTarget(kind: string): string {
   const normalized = (kind ?? '').toLowerCase();
+  if (normalized === 'objection_pattern') return '/content';
   if (
     normalized.includes('content') ||
     normalized.includes('review') ||

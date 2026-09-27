@@ -238,6 +238,9 @@ importers:
       '@growth-operator/learning':
         specifier: workspace:*
         version: link:../learning
+      '@growth-operator/sales':
+        specifier: workspace:*
+        version: link:../sales
       '@growth-operator/schemas':
         specifier: workspace:*
         version: link:../schemas
