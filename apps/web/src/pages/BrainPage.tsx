@@ -8,11 +8,13 @@ import {
   createSource,
   deriveLearningProposalAuto,
   friendlyErrorMessage,
+  getExplanation,
   getIntelligenceOverview,
   getOpportunity,
   isAiUnavailable,
   listGaps,
   listLearningProposals,
+  listNextActions,
   listOpportunities,
   listSources,
   listTrends,
@@ -21,9 +23,11 @@ import {
   submitOpportunityFeedback,
 } from '../services/api';
 import {
+  ActionExplanation,
   ContentGap,
   IntelligenceOverview,
   LearningProposal,
+  OperatorAction,
   Opportunity,
   OpportunityFeedbackKind,
   Source,
@@ -416,6 +420,13 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
         </div>
       </div>
 
+      <WhyRecommended
+        matchKeys={{
+          opportunityId: String(opportunity.id ?? ''),
+          topicId: typeof opportunity.topicId === 'string' ? opportunity.topicId : '',
+        }}
+      />
+
       <div className="card">
         <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Was this helpful?</h3>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.75rem' }}>
@@ -507,6 +518,12 @@ function TrendsSection() {
             {trend.description ? (
               <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{String(trend.description)}</p>
             ) : null}
+            <details style={{ marginTop: '0.5rem' }}>
+              <summary style={{ fontSize: '0.875rem', cursor: 'pointer' }}>Why recommended</summary>
+              <div style={{ marginTop: '0.5rem' }}>
+                <WhyRecommended matchKeys={{ trendId: String(trend.id ?? '') }} />
+              </div>
+            </details>
           </li>
         ))}
       </ul>
@@ -552,6 +569,12 @@ function GapsSection() {
             {gap.description ? (
               <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{String(gap.description)}</p>
             ) : null}
+            <details style={{ marginTop: '0.5rem' }}>
+              <summary style={{ fontSize: '0.875rem', cursor: 'pointer' }}>Why recommended</summary>
+              <div style={{ marginTop: '0.5rem' }}>
+                <WhyRecommended matchKeys={{ gapId: String(gap.id ?? '') }} />
+              </div>
+            </details>
           </li>
         ))}
       </ul>
@@ -870,6 +893,137 @@ function LearningSection() {
           </ul>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function subjectMatches(meta: Record<string, unknown> | undefined, keys: Record<string, string>): boolean {
+  if (!meta || typeof meta !== 'object') return false;
+  return Object.entries(keys).some(([key, value]) => {
+    if (!value) return false;
+    const candidate = meta[key];
+    return typeof candidate === 'string' && candidate === value;
+  });
+}
+
+function WhyRecommended({ matchKeys }: { matchKeys: Record<string, string> }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [matched, setMatched] = useState<OperatorAction | null>(null);
+  const [explanation, setExplanation] = useState<ActionExplanation | null>(null);
+  const [found, setFound] = useState(false);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listNextActions({ status: 'pending' });
+      const list = data.actions ?? [];
+      const hit = list.find((action) =>
+        subjectMatches((action.subjectMeta ?? {}) as Record<string, unknown>, matchKeys),
+      );
+      if (!hit) {
+        setFound(false);
+        setMatched(null);
+        setExplanation(null);
+        return;
+      }
+      setFound(true);
+      setMatched(hit);
+      try {
+        const detail = await getExplanation(String(hit.id));
+        setExplanation(detail.explanation ?? null);
+      } catch {
+        // Fall back to the ranked item when the full breakdown is unavailable.
+        setExplanation(null);
+      }
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [matchKeys.opportunityId, matchKeys.topicId, matchKeys.trendId, matchKeys.gapId]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  if (loading) {
+    return (
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Why recommended</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Checking current ranking...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Why recommended</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{error}</p>
+        <button className="btn btn-secondary" onClick={() => void fetchData()} style={{ marginTop: '0.5rem' }}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
+  if (!found || !matched) {
+    return (
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Why recommended</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+          Not currently ranked. This item is saved but is not among the current suggestions.
+        </p>
+      </div>
+    );
+  }
+
+  const reasons = explanation?.reasons ?? matched.reasons ?? [];
+  const score = explanation?.score ?? matched.score;
+  const dimensions = explanation?.dimensions ?? [];
+  const lifecycle = explanation?.lifecycle ?? null;
+  const learning = explanation?.learningApplied ?? [];
+
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Why recommended</h3>
+      <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>Score: {String(score)}</p>
+      {reasons.length > 0 ? (
+        <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+          {reasons.map((reason, i) => (
+            <li key={i}>{String(reason)}</li>
+          ))}
+        </ul>
+      ) : null}
+      {dimensions.length > 0 ? (
+        <div style={{ marginBottom: '0.5rem' }}>
+          <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>Score breakdown</p>
+          <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {dimensions.map((d, i) => (
+              <li key={i}>
+                {String(d.name)}: {String(d.points)} of {String(d.maxPoints)} — {String(d.reason)}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+      {lifecycle ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+          Status: {String(lifecycle)}
+        </p>
+      ) : null}
+      {learning.length > 0 ? (
+        <div>
+          <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>What we have learned</p>
+          <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {learning.map((line, i) => (
+              <li key={i}>{String(line)}</li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
     </div>
   );
 }

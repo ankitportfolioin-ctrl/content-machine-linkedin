@@ -455,6 +455,24 @@ export const learningConfirmSchema = z.object({
   note: z.string().max(2000).optional(),
 });
 
+export const operatorActionKindSchema = z.enum([
+  'content_opportunity',
+  'content_gap',
+  'trend_signal',
+  'content_review',
+  'outreach_review',
+  'follow_up',
+  'prepared_action',
+  'learning_proposal',
+  'stale_draft',
+]);
+
+export const operatorActionsQuerySchema = z.object({
+  status: z.enum(['pending', 'dismissed', 'completed']).default('pending'),
+  kind: z.string().max(100).optional(),
+  limit: z.coerce.number().int().positive().max(100).default(20),
+});
+
 export type UserCreate = z.infer<typeof userCreateSchema>;
 export type UserLogin = z.infer<typeof userLoginSchema>;
 export type WorkspaceCreate = z.infer<typeof workspaceCreateSchema>;
@@ -507,3 +525,4 @@ export type SalesContentSignalCreate = z.infer<typeof salesContentSignalCreateSc
 export type PublishRecordCreate = z.infer<typeof publishRecordCreateSchema>;
 export type OutcomeMetricCreate = z.infer<typeof outcomeMetricCreateSchema>;
 export type LearningDerive = z.infer<typeof learningDeriveSchema>;
+export type OperatorActionKind = z.infer<typeof operatorActionKindSchema>;

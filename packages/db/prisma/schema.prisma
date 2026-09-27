@@ -377,6 +377,7 @@ model Workspace {
   publishRecords      PublishRecord[]
   outcomeMetrics      OutcomeMetric[]
   learningProposals   LearningProposal[]
+  operatorActions     OperatorAction[]
   contentPlans        ContentPlan[]
   draftClaimBindings  DraftClaimBinding[]
   contentGateResults  ContentQualityGateResult[]
@@ -1347,6 +1348,31 @@ model OutcomeMetric {
   @@index([workspaceId])
   @@index([publishRecordId])
   @@index([workspaceId, metricName])
+}
+
+model OperatorAction {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  identityKey   String   @db.VarChar(300)
+  kind          String   @db.VarChar(100)
+  subjectId     String?
+  title         String   @db.VarChar(300)
+  score         Float
+  reasons       String[]
+  evidenceLinks Json?
+  subjectMeta   Json?
+  status        String   @default("PENDING") @db.VarChar(20)
+  dismissedAt   DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, identityKey])
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, score])
 }
 
 model LearningProposal {

@@ -641,6 +641,77 @@ export interface PipelineOpportunity {
 }
 
 // ---------------------------------------------------------------------------
+// Phase 6: Operator next actions + explanations (ranked, honest states only)
+// ---------------------------------------------------------------------------
+
+export interface OperatorEvidenceLink {
+  label: string;
+  ref: string;
+}
+
+export type OperatorActionStatus = 'PENDING' | 'DISMISSED' | 'COMPLETED' | string;
+
+export interface OperatorAction {
+  id: string;
+  identityKey: string;
+  kind: string;
+  subjectId: string;
+  title: string;
+  score: number;
+  reasons: string[];
+  evidenceLinks: OperatorEvidenceLink[];
+  subjectMeta: Record<string, unknown>;
+  status: OperatorActionStatus;
+  dismissedAt?: string | null;
+  completedAt?: string | null;
+}
+
+export interface NextActionsResponse {
+  actions: OperatorAction[];
+  total: number;
+}
+
+export interface ActionsResponse {
+  actions: OperatorAction[];
+}
+
+export interface ActionDetailResponse {
+  action: OperatorAction;
+}
+
+export interface ScoreDimension {
+  name: string;
+  points: number;
+  maxPoints: number;
+  reason: string;
+}
+
+export interface ActionExplanation {
+  identityKey: string;
+  kind: string;
+  title: string;
+  score: number;
+  status: string;
+  reasons: string[];
+  dimensions: ScoreDimension[];
+  evidenceLinks: OperatorEvidenceLink[];
+  lifecycle?: string | null;
+  learningApplied?: string[];
+  subjectMeta: Record<string, unknown>;
+}
+
+export interface ExplanationResponse {
+  explanation: ActionExplanation;
+}
+
+export interface AiExplanationResponse {
+  explanation: ActionExplanation;
+  aiSummary?: string | null;
+  aiAvailable: boolean;
+  aiError?: string | null;
+}
+
+// ---------------------------------------------------------------------------
 // Phase 5: Recorded outcomes + derived learning (recorded data only)
 // ---------------------------------------------------------------------------
 

@@ -1,5 +1,10 @@
 import {
+  ActionDetailResponse,
+  ActionsResponse,
+  AiExplanationResponse,
   ApiError,
+  ExplanationResponse,
+  NextActionsResponse,
   BindingsResponse,
   BriefSynthesis,
   ComposeDraftResponse,
@@ -1284,5 +1289,63 @@ export async function revokeLearningProposal(
   return authedRequest<{ proposal: LearningProposal }>(
     `/learning/derived/${encodeURIComponent(id)}/revoke`,
     { method: 'POST', body: JSON.stringify({}) },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: Operator next actions + explanations
+// ---------------------------------------------------------------------------
+
+export interface ListNextActionsParams {
+  status?: string;
+  kind?: string;
+  limit?: number;
+}
+
+export async function listNextActions(params?: ListNextActionsParams): Promise<NextActionsResponse> {
+  const query = new URLSearchParams();
+  query.set('status', params?.status ?? 'pending');
+  if (typeof params?.kind !== 'undefined' && params.kind !== '') {
+    query.set('kind', params.kind);
+  }
+  if (typeof params?.limit !== 'undefined') {
+    query.set('limit', String(params.limit));
+  }
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const data = await authedRequest<NextActionsResponse>(`/operator/next-actions${suffix}`);
+  return {
+    actions: Array.isArray(data.actions) ? data.actions : [],
+    total: typeof data.total === 'number' ? data.total : 0,
+  };
+}
+
+export async function listActions(params?: { status?: string; limit?: number }): Promise<ActionsResponse> {
+  const query = new URLSearchParams();
+  if (params?.status) query.set('status', params.status);
+  if (typeof params?.limit !== 'undefined') query.set('limit', String(params.limit));
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const data = await authedRequest<ActionsResponse>(`/operator/actions${suffix}`);
+  return { actions: Array.isArray(data.actions) ? data.actions : [] };
+}
+
+export async function dismissAction(id: string): Promise<ActionDetailResponse> {
+  return authedRequest<ActionDetailResponse>(`/operator/actions/${encodeURIComponent(id)}/dismiss`, {
+    method: 'POST',
+  });
+}
+
+export async function completeAction(id: string): Promise<ActionDetailResponse> {
+  return authedRequest<ActionDetailResponse>(`/operator/actions/${encodeURIComponent(id)}/complete`, {
+    method: 'POST',
+  });
+}
+
+export async function getExplanation(id: string): Promise<ExplanationResponse> {
+  return authedRequest<ExplanationResponse>(`/operator/explanations/${encodeURIComponent(id)}`);
+}
+
+export async function getAiExplanation(id: string): Promise<AiExplanationResponse> {
+  return authedRequest<AiExplanationResponse>(
+    `/operator/explanations/${encodeURIComponent(id)}?format=ai`,
   );
 }

@@ -35,6 +35,7 @@ import outreachRoutes from './routes/outreach';
 import salesIntelligenceRoutes from './routes/salesIntelligence';
 import publishRecordRoutes from './routes/publishRecords';
 import outcomeRoutes from './routes/outcomes';
+import operatorRoutes from './routes/operator';
 
 const env = getEnv();
 
@@ -111,6 +112,7 @@ app.use('/api/v1/outreach', outreachRoutes);
 app.use('/api/v1/sales-intelligence', salesIntelligenceRoutes);
 app.use('/api/v1/publish-records', publishRecordRoutes);
 app.use('/api/v1/outcomes', outcomeRoutes);
+app.use('/api/v1/operator', operatorRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

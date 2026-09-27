@@ -1,6 +1,15 @@
+import { useCallback, useEffect, useState } from 'react';
 import { useHealth } from '../hooks/useHealth';
-import { HealthResponse } from '../types';
+import { HealthResponse, OperatorAction } from '../types';
 import { NavLink } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import {
+  completeAction,
+  dismissAction,
+  friendlyErrorMessage,
+  isAiUnavailable,
+  listNextActions,
+} from '../services/api';
 
 interface StatusBadgeProps {
   status: HealthResponse['status'];
@@ -19,6 +28,288 @@ function StatusBadge({ status, label }: StatusBadgeProps) {
       <span className="status-dot" aria-hidden="true"></span>
       {label}: {status}
     </span>
+  );
+}
+
+function kindLabel(kind: string): string {
+  const normalized = (kind ?? '').toLowerCase();
+  if (normalized === 'content_opportunity') return 'Content opportunity';
+  if (normalized === 'content_gap') return 'Content gap';
+  if (normalized === 'trend_signal') return 'Trend';
+  if (normalized === 'stale_draft') return 'Draft needing attention';
+  if (normalized === 'prepared_action') return 'Prepared next step';
+  if (normalized === 'follow_up' || normalized === 'followup') return 'Follow-up';
+  if (normalized === 'learning_proposal') return 'Suggested improvement';
+  if (normalized.includes('review')) return 'Review';
+  if (normalized.includes('pipeline') || normalized.includes('deal')) return 'Pipeline';
+  if (normalized.includes('lead') || normalized.includes('prospect') || normalized.includes('outreach'))
+    return 'Lead';
+  if (normalized.includes('inbox') || normalized.includes('conversation') || normalized.includes('message'))
+    return 'Message';
+  if (normalized.includes('content') || normalized.includes('draft') || normalized.includes('opportunity'))
+    return 'Content';
+  if (normalized.includes('gap') || normalized.includes('trend') || normalized.includes('learning'))
+    return 'Research';
+  if (!normalized) return 'Suggestion';
+  return normalized
+    .split('_')
+    .map((part) => (part ? part.charAt(0).toUpperCase() + part.slice(1) : part))
+    .join(' ');
+}
+
+function kindTarget(kind: string): string {
+  const normalized = (kind ?? '').toLowerCase();
+  if (
+    normalized.includes('content') ||
+    normalized.includes('review') ||
+    normalized.includes('draft') ||
+    normalized.includes('opportunity')
+  ) {
+    return '/content';
+  }
+  if (
+    normalized.includes('gap') ||
+    normalized.includes('trend') ||
+    normalized.includes('learning') ||
+    normalized.includes('brain') ||
+    normalized.includes('intelligence')
+  ) {
+    return '/brain';
+  }
+  if (
+    normalized.includes('lead') ||
+    normalized.includes('prospect') ||
+    normalized.includes('outreach') ||
+    normalized.includes('prepared')
+  ) {
+    return '/leads';
+  }
+  if (
+    normalized.includes('follow') ||
+    normalized.includes('inbox') ||
+    normalized.includes('conversation') ||
+    normalized.includes('message')
+  ) {
+    return '/inbox';
+  }
+  if (normalized.includes('pipeline') || normalized.includes('deal')) {
+    return '/pipeline';
+  }
+  if (normalized.includes('setting')) {
+    return '/settings';
+  }
+  return '/brain';
+}
+
+function RecommendedSteps() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const [actions, setActions] = useState<OperatorAction[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aiUnavailable, setAiUnavailable] = useState(false);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+  const [rowError, setRowError] = useState<Record<string, string>>({});
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setAiUnavailable(false);
+    try {
+      const data = await listNextActions({ status: 'pending' });
+      setActions(data.actions ?? []);
+      setTotal(typeof data.total === 'number' ? data.total : (data.actions ?? []).length);
+    } catch (err) {
+      if (isAiUnavailable(err)) {
+        setAiUnavailable(true);
+      } else {
+        setError(friendlyErrorMessage(err));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+    void fetchData();
+  }, [authLoading, isAuthenticated, fetchData]);
+
+  if (authLoading || loading) {
+    return <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Loading suggestions...</p>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+        Sign in to see your recommended next steps.
+      </p>
+    );
+  }
+
+  if (aiUnavailable) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+          AI assistance is temporarily unavailable. Please try again later.
+        </p>
+        <div>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>
+          {error}
+        </p>
+        <div>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (actions.length === 0 || total === 0) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+          No pending actions. You are all caught up — new suggestions will appear here when available.
+        </p>
+        <div>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  async function handleDecision(id: string, decision: 'dismiss' | 'complete') {
+    setWorkingId(id);
+    setRowError((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    try {
+      if (decision === 'dismiss') {
+        await dismissAction(id);
+      } else {
+        await completeAction(id);
+      }
+      await fetchData();
+    } catch (err) {
+      setRowError((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+        <button className="btn btn-secondary" onClick={() => void fetchData()}>
+          Refresh
+        </button>
+      </div>
+      <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
+        {actions.map((action, index) => {
+          const expanded = expandedId === String(action.id);
+          const topReason = Array.isArray(action.reasons) && action.reasons.length > 0
+            ? String(action.reasons[0])
+            : null;
+          return (
+            <li
+              key={String(action.id)}
+              style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '1rem' }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                <p style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
+                  {index + 1}. {action.title}
+                </p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  {kindLabel(String(action.kind))} · Score: {String(action.score)}
+                </p>
+                {topReason ? (
+                  <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{topReason}</p>
+                ) : null}
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                  <button
+                    className="btn btn-secondary"
+                    onClick={() => setExpandedId(expanded ? null : String(action.id))}
+                  >
+                    {expanded ? 'Hide details' : 'Show details'}
+                  </button>
+                </div>
+              </div>
+              {expanded ? (
+                <div style={{ marginTop: '0.75rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {Array.isArray(action.reasons) && action.reasons.length > 0 ? (
+                    <div>
+                      <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>Why this matters</p>
+                      <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                        {action.reasons.map((reason, i) => (
+                          <li key={i}>{String(reason)}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  {Array.isArray(action.evidenceLinks) && action.evidenceLinks.length > 0 ? (
+                    <div>
+                      <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>Supporting references</p>
+                      <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                        {action.evidenceLinks.map((link, i) => (
+                          <li key={i}>
+                            {String(link.label ?? 'Reference')}: {String(link.ref ?? '')}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : null}
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
+                    <NavLink to={kindTarget(String(action.kind))} className="btn btn-secondary">
+                      Open
+                    </NavLink>
+                    <button
+                      className="btn btn-secondary"
+                      disabled={workingId === String(action.id)}
+                      onClick={() => void handleDecision(String(action.id), 'dismiss')}
+                    >
+                      {workingId === String(action.id) ? 'Saving...' : 'Dismiss'}
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      disabled={workingId === String(action.id)}
+                      onClick={() => void handleDecision(String(action.id), 'complete')}
+                    >
+                      {workingId === String(action.id) ? 'Saving...' : 'Mark done'}
+                    </button>
+                  </div>
+                  {rowError[String(action.id)] ? (
+                    <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>
+                      {rowError[String(action.id)]}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
   );
 }
 
@@ -106,11 +397,12 @@ export function HomePage() {
       </div>
 
       <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 className="health-card-title" style={{ marginBottom: '1rem' }}>Navigation</h2>
-        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem' }}>
-          Use the sidebar to navigate between sections. All pages are currently empty shells
-          that will be implemented in future phases.
+        <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Recommended next steps</h2>
+        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
         </p>
+        <RecommendedSteps />
+        <h2 className="health-card-title" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>Sections</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
           <NavLink to="/content" className="btn btn-secondary">Content</NavLink>
           <NavLink to="/brain" className="btn btn-secondary">Brain / Intelligence</NavLink>
