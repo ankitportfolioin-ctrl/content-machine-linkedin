@@ -10,6 +10,17 @@ import { prisma } from '@growth-operator/db';
 import authRoutes from './routes/auth';
 import workspaceRoutes from './routes/workspaces';
 import profileRoutes from './routes/profiles';
+import icpRoutes from './routes/icps';
+import contentIdeaRoutes from './routes/contentIdeas';
+import contentDraftRoutes from './routes/contentDrafts';
+import contentVersionRoutes from './routes/contentVersions';
+import leadRoutes from './routes/leads';
+import conversationRoutes from './routes/conversations';
+import messageRoutes from './routes/messages';
+import pipelineRoutes from './routes/pipeline';
+import analyticsRoutes from './routes/analytics';
+import learningRoutes from './routes/learning';
+import intelligenceRoutes from './routes/intelligence';
 
 const env = getEnv();
 
@@ -67,6 +78,17 @@ app.get('/api/v1/ready', async (_req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/workspaces', workspaceRoutes);
 app.use('/api/v1/profiles', profileRoutes);
+app.use('/api/v1/icps', icpRoutes);
+app.use('/api/v1/content-ideas', contentIdeaRoutes);
+app.use('/api/v1/content-drafts', contentDraftRoutes);
+app.use('/api/v1/content-versions', contentVersionRoutes);
+app.use('/api/v1/leads', leadRoutes);
+app.use('/api/v1/conversations', conversationRoutes);
+app.use('/api/v1/messages', messageRoutes);
+app.use('/api/v1/pipeline', pipelineRoutes);
+app.use('/api/v1/analytics', analyticsRoutes);
+app.use('/api/v1/learning', learningRoutes);
+app.use('/api/v1/intelligence', intelligenceRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

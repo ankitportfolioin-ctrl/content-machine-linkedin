@@ -46,3 +46,6 @@ export type NonEmptyArray<T> = [T, ...T[]];
 export function assertNever(value: never): never {
   throw new Error(`Unexpected value: ${value}`);
 }
+
+export * from './intelligence/urlCanonicalization';
+export * from './intelligence/sourceExtraction';

@@ -151,6 +151,29 @@ export const learningSignalCreateSchema = z.object({
   metadata: z.record(z.unknown()).optional(),
 });
 
+export const intelligenceSourceCreateSchema = z.object({
+  url: urlSchema,
+  sourceType: z.enum(['article', 'rss', 'atom', 'sitemap', 'website', 'user_url']).optional(),
+});
+
+export const intelligenceSourceUpdateSchema = z.object({
+  status: z.enum(['active', 'failed', 'blocked', 'stale']).optional(),
+});
+
+export const topicResearchSchema = z.object({
+  query: z.string().min(1).max(500),
+  sourceUrls: z.array(urlSchema).max(10).optional(),
+});
+
+export const opportunityFeedbackSchema = z.object({
+  feedback: z.enum(['useful', 'not_useful', 'already_covered', 'wrong_audience', 'weak_evidence', 'not_timely']),
+  reason: z.string().max(2000).optional(),
+});
+
+export const opportunityConvertSchema = z.object({
+  contentIdeaTitle: z.string().min(1).max(200).optional(),
+});
+
 export type UserCreate = z.infer<typeof userCreateSchema>;
 export type UserLogin = z.infer<typeof userLoginSchema>;
 export type WorkspaceCreate = z.infer<typeof workspaceCreateSchema>;
@@ -174,3 +197,8 @@ export type PipelineOpportunityCreate = z.infer<typeof pipelineOpportunityCreate
 export type PipelineOpportunityUpdate = z.infer<typeof pipelineOpportunityUpdateSchema>;
 export type AnalyticsEventCreate = z.infer<typeof analyticsEventCreateSchema>;
 export type LearningSignalCreate = z.infer<typeof learningSignalCreateSchema>;
+export type IntelligenceSourceCreate = z.infer<typeof intelligenceSourceCreateSchema>;
+export type IntelligenceSourceUpdate = z.infer<typeof intelligenceSourceUpdateSchema>;
+export type TopicResearch = z.infer<typeof topicResearchSchema>;
+export type OpportunityFeedback = z.infer<typeof opportunityFeedbackSchema>;
+export type OpportunityConvert = z.infer<typeof opportunityConvertSchema>;

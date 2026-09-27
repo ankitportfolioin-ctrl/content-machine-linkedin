@@ -62,6 +62,99 @@ enum LearningSignalSourceType {
   FEEDBACK
 }
 
+enum SourceType {
+  ARTICLE
+  RSS
+  ATOM
+  SITEMAP
+  WEBSITE
+  USER_URL
+}
+
+enum SourceStatus {
+  ACTIVE
+  FAILED
+  BLOCKED
+  STALE
+}
+
+enum PublishedAtConfidence {
+  VERIFIED
+  INFERRED
+  UNKNOWN
+}
+
+enum ContentType {
+  HTML
+  RSS_XML
+  ATOM_XML
+  SITEMAP_XML
+  TEXT
+}
+
+enum ExtractionMethod {
+  HTML
+  RSS
+  ATOM
+  SITEMAP
+  TEXT
+  USER_PROVIDED
+}
+
+enum ExtractionStatus {
+  SUCCESS
+  PARTIAL
+  FAILED
+}
+
+enum ClaimType {
+  FACT
+  OPINION
+  PREDICTION
+  RECOMMENDATION
+  OBSERVATION
+  STATISTIC
+}
+
+enum ClaimStatus {
+  SUPPORTED
+  CONTRADICTED
+  UNCERTAIN
+}
+
+enum TrendStatus {
+  INSUFFICIENT_HISTORY
+  EMERGING
+  RELEVANT
+  TRENDING
+  STALE
+}
+
+enum OpportunityStatus {
+  NEW
+  REVIEWED
+  CONVERTED
+  DISMISSED
+}
+
+enum GapType {
+  AUDIENCE
+  TOPIC
+  FORMAT
+  ANGLE
+  DEPTH
+  EVIDENCE
+}
+
+enum FeedbackType {
+  USEFUL
+  NOT_USEFUL
+  ALREADY_COVERED
+  WRONG_AUDIENCE
+  WEAK_EVIDENCE
+  NOT_TIMELY
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique @db.VarChar(255)
@@ -85,6 +178,7 @@ model User {
   opportunities PipelineOpportunity[] @relation("OpportunityOwner")
   analyticsEvents AnalyticsEvent[]
   learningSignals LearningSignal[]
+  opportunityFeedbacks OpportunityFeedback[]
 
   @@index([email])
   @@index([isActive])
@@ -99,18 +193,27 @@ model Workspace {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  memberships  WorkspaceMembership[]
-  profiles     Profile[]
-  icps         ICP[]
-  contentIdeas ContentIdea[]
-  contentDrafts ContentDraft[]
-  contentVersions ContentVersion[]
-  leads        Lead[]
-  conversations Conversation[]
-  messages     Message[]
-  opportunities PipelineOpportunity[]
-  analyticsEvents AnalyticsEvent[]
-  learningSignals LearningSignal[]
+  memberships         WorkspaceMembership[]
+  profiles            Profile[]
+  icps                ICP[]
+  contentIdeas        ContentIdea[]
+  contentDrafts       ContentDraft[]
+  contentVersions     ContentVersion[]
+  leads               Lead[]
+  conversations       Conversation[]
+  messages            Message[]
+  opportunities       PipelineOpportunity[]
+  analyticsEvents     AnalyticsEvent[]
+  learningSignals     LearningSignal[]
+  intelligenceSources IntelligenceSource[]
+  sourceDocuments     SourceDocument[]
+  sourceClaims        SourceClaim[]
+  topics              Topic[]
+  topicMentions       TopicMention[]
+  trendSignals        TrendSignal[]
+  contentOpportunities ContentOpportunity[]
+  contentGaps         ContentGap[]
+  opportunityFeedbacks OpportunityFeedback[]
 
   @@index([slug])
   @@index([isActive])
@@ -366,4 +469,218 @@ model LearningSignal {
   @@index([sourceId])
   @@index([signalType])
   @@index([createdAt])
+}
+
+model IntelligenceSource {
+  id                    String            @id @default(uuid())
+  workspaceId           String
+  url                   String            @db.VarChar(2048)
+  canonicalUrl          String            @db.VarChar(2048)
+  sourceType            SourceType
+  title                 String?           @db.VarChar(500)
+  publisher             String?           @db.VarChar(200)
+  author                String?           @db.VarChar(200)
+  publishedAt           DateTime?
+  publishedAtConfidence PublishedAtConfidence @default(UNKNOWN)
+  description           String?           @db.Text
+  contentHash           String            @db.VarChar(64)
+  urlHash               String            @db.VarChar(64)
+  status                SourceStatus      @default(ACTIVE)
+  lastFetchedAt         DateTime?
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  workspace             Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  documents             SourceDocument[]
+  claims                SourceClaim[]
+  topicMentions         TopicMention[]
+
+  @@unique([workspaceId, canonicalUrl])
+  @@unique([workspaceId, contentHash])
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, sourceType])
+  @@index([workspaceId, lastFetchedAt])
+}
+
+model SourceDocument {
+  id                  String            @id @default(uuid())
+  workspaceId         String
+  sourceId            String
+  rawContent          String            @db.Text
+  cleanContent        String            @db.Text
+  contentType         ContentType
+  wordCount           Int
+  language            String?           @db.VarChar(10)
+  extractionMethod    ExtractionMethod
+  extractionStatus    ExtractionStatus
+  extractionWarnings  String[]
+  fetchedAt           DateTime          @default(now())
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  source              IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  claims              SourceClaim[]
+
+  @@index([workspaceId])
+  @@index([sourceId])
+  @@index([workspaceId, extractionStatus])
+}
+
+model SourceClaim {
+  id                  String        @id @default(uuid())
+  workspaceId         String
+  sourceId            String
+  documentId          String
+  claimText           String        @db.Text
+  claimType           ClaimType
+  evidenceText        String        @db.Text
+  evidenceLocation    String?       @db.Text
+  confidence          Float
+  status              ClaimStatus   @default(UNCERTAIN)
+  provenance          Json?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  source              IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  document            SourceDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([sourceId])
+  @@index([documentId])
+  @@index([workspaceId, claimType])
+  @@index([workspaceId, status])
+}
+
+model Topic {
+  id              String        @id @default(uuid())
+  workspaceId     String
+  name            String        @db.VarChar(200)
+  canonicalName   String        @db.VarChar(200)
+  description     String?       @db.Text
+  aliases         String[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  mentions        TopicMention[]
+  trendSignals    TrendSignal[]
+  opportunities   ContentOpportunity[]
+  gaps            ContentGap[]
+
+  @@unique([workspaceId, canonicalName])
+  @@index([workspaceId])
+  @@index([workspaceId, canonicalName])
+}
+
+model TopicMention {
+  id              String    @id @default(uuid())
+  workspaceId     String
+  topicId         String
+  sourceId        String
+  mentionStrength Float
+  relevanceScore  Float
+  context         String?   @db.Text
+  createdAt       DateTime  @default(now())
+
+  workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  topic           Topic         @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  source          IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([topicId])
+  @@index([sourceId])
+  @@index([workspaceId, topicId])
+}
+
+model TrendSignal {
+  id                      String      @id @default(uuid())
+  workspaceId             String
+  topicId                 String
+  status                  TrendStatus @default(INSUFFICIENT_HISTORY)
+  mentionCount            Int
+  sourceCount             Int
+  firstSeenAt             DateTime
+  lastSeenAt              DateTime
+  recencyScore            Float
+  sourceDiversityScore    Float
+  frequencyScore          Float
+  evidenceSummary         String?     @db.Text
+  calculatedAt            DateTime    @default(now())
+
+  workspace               Workspace   @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  topic                   Topic       @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([topicId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, calculatedAt])
+}
+
+model ContentOpportunity {
+  id                  String            @id @default(uuid())
+  workspaceId         String
+  topicId             String
+  title               String            @db.VarChar(300)
+  thesis              String            @db.Text
+  problem             String            @db.Text
+  audience            String            @db.Text
+  angle               String            @db.Text
+  objective           String            @db.Text
+  contentFormat       String?           @db.VarChar(50)
+  opportunityScore    Float
+  status              OpportunityStatus @default(NEW)
+  sourceIds           Json
+  claimIds            Json
+  trendSignalIds      Json
+  reasoning           String            @db.Text
+  evidenceSummary     String            @db.Text
+  createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
+
+  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  topic               Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([topicId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, opportunityScore])
+}
+
+model ContentGap {
+  id              String    @id @default(uuid())
+  workspaceId     String
+  topicId         String
+  gapType         GapType
+  description     String    @db.Text
+  importanceScore Float
+  evidence        String    @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  topic           Topic     @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([topicId])
+  @@index([workspaceId, gapType])
+}
+
+model OpportunityFeedback {
+  id          String        @id @default(uuid())
+  workspaceId String
+  opportunityId String
+  userId      String
+  feedback    FeedbackType
+  reason      String?       @db.Text
+  createdAt   DateTime      @default(now())
+
+  workspace   Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([opportunityId])
+  @@index([userId])
 }
