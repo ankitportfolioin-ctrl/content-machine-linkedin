@@ -424,6 +424,37 @@ export const pipelineStageUpdateSchema = z.object({
   stage: z.enum(['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost']),
 });
 
+export const publishRecordCreateSchema = z.object({
+  contentVersionId: idSchema.optional(),
+  outreachDraftId: idSchema.optional(),
+  pipelineOpportunityId: idSchema.optional(),
+  channel: z.string().min(1).max(100),
+  externalRef: z.string().max(2048).optional(),
+  recordedAt: isoDateSchema.optional(),
+});
+
+export const outcomeMetricCreateSchema = z.object({
+  publishRecordId: idSchema.optional(),
+  contentVersionId: idSchema.optional(),
+  outreachDraftId: idSchema.optional(),
+  pipelineOpportunityId: idSchema.optional(),
+  metricName: z.string().min(1).max(100),
+  metricValue: z.number().finite(),
+  unit: z.string().max(50).optional(),
+  source: z.string().min(3).max(2000),
+  recordedAt: isoDateSchema.optional(),
+  idempotencyKey: z.string().max(200).optional(),
+});
+
+export const learningDeriveSchema = z.object({
+  metricName: z.string().min(1).max(100).optional(),
+  minSampleSize: z.number().int().min(2).max(100).default(3),
+});
+
+export const learningConfirmSchema = z.object({
+  note: z.string().max(2000).optional(),
+});
+
 export type UserCreate = z.infer<typeof userCreateSchema>;
 export type UserLogin = z.infer<typeof userLoginSchema>;
 export type WorkspaceCreate = z.infer<typeof workspaceCreateSchema>;
@@ -473,3 +504,6 @@ export type OutreachDraftCompose = z.infer<typeof outreachDraftComposeSchema>;
 export type OutreachReviewAction = z.infer<typeof outreachReviewActionSchema>;
 export type PreparedActionCreate = z.infer<typeof preparedActionCreateSchema>;
 export type SalesContentSignalCreate = z.infer<typeof salesContentSignalCreateSchema>;
+export type PublishRecordCreate = z.infer<typeof publishRecordCreateSchema>;
+export type OutcomeMetricCreate = z.infer<typeof outcomeMetricCreateSchema>;
+export type LearningDerive = z.infer<typeof learningDeriveSchema>;

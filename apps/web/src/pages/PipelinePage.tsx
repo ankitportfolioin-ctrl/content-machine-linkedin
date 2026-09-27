@@ -3,14 +3,16 @@ import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
+  createOutcome,
   createPipelineOpportunity,
   deletePipelineOpportunity,
   friendlyErrorMessage,
   listFollowUps,
+  listOutcomes,
   listPipeline,
   updatePipelineOpportunity,
 } from '../services/api';
-import { FollowUpRecommendation, PipelineOpportunity } from '../types';
+import { FollowUpRecommendation, OutcomeMetric, PipelineOpportunity } from '../types';
 
 const STAGES = ['new', 'contacted', 'engaged', 'proposal', 'won', 'lost'];
 
@@ -408,6 +410,8 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
         ) : null}
       </div>
 
+      <PipelineOutcomeSection opportunityId={opportunityId} />
+
       <div className="card">
         <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
           Remove deal
@@ -419,6 +423,144 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
           {deleting ? 'Removing...' : 'Remove deal'}
         </button>
       </div>
+    </div>
+  );
+}
+
+function PipelineOutcomeSection({ opportunityId }: { opportunityId: string }) {
+  const [outcomes, setOutcomes] = useState<OutcomeMetric[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [metricName, setMetricName] = useState('');
+  const [metricValue, setMetricValue] = useState('');
+  const [source, setSource] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [formMessage, setFormMessage] = useState<string | null>(null);
+
+  const fetchOutcomes = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listOutcomes();
+      setOutcomes(
+        (data.outcomeMetrics ?? []).filter(
+          (m) => String(m.pipelineOpportunityId ?? '') === opportunityId,
+        ),
+      );
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [opportunityId]);
+
+  useEffect(() => {
+    void fetchOutcomes();
+  }, [fetchOutcomes]);
+
+  async function handleRecord(event: React.FormEvent) {
+    event.preventDefault();
+    if (!metricName.trim() || !metricValue.trim() || !source.trim()) {
+      setFormMessage('Metric name, value, and source are required.');
+      return;
+    }
+    const parsedValue = Number(metricValue.trim());
+    if (!Number.isFinite(parsedValue)) {
+      setFormMessage('Metric value must be a number.');
+      return;
+    }
+    setSaving(true);
+    setFormMessage(null);
+    try {
+      const result = await createOutcome({
+        pipelineOpportunityId: opportunityId,
+        metricName: metricName.trim(),
+        metricValue: parsedValue,
+        source: source.trim(),
+      });
+      setMetricName('');
+      setMetricValue('');
+      setSource('');
+      setFormMessage(
+        `Outcome recorded (user assertion, not verified).${result.notice ? ` ${result.notice}` : ''}`,
+      );
+      await fetchOutcomes();
+    } catch (err) {
+      setFormMessage(friendlyErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+        Recorded results ({outcomes.length})
+      </h3>
+      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>
+        Recording only. Values are stored as recorded, never estimated or inferred.
+      </p>
+      <form onSubmit={(e) => void handleRecord(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+        <input
+          value={metricName}
+          onChange={(e) => setMetricName(e.target.value)}
+          placeholder="Metric name * (e.g. deal_value)"
+          style={{ ...fieldStyle, flex: '1 1 150px' }}
+        />
+        <input
+          value={metricValue}
+          onChange={(e) => setMetricValue(e.target.value)}
+          placeholder="Value * (number)"
+          inputMode="decimal"
+          style={{ ...fieldStyle, flex: '1 1 120px' }}
+        />
+        <input
+          value={source}
+          onChange={(e) => setSource(e.target.value)}
+          placeholder="Source * (e.g. manual)"
+          style={{ ...fieldStyle, flex: '1 1 140px' }}
+        />
+        <button type="submit" className="btn btn-secondary" disabled={saving}>
+          {saving ? 'Recording...' : 'Record outcome'}
+        </button>
+      </form>
+      {formMessage ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+          {formMessage}
+        </p>
+      ) : null}
+      {loading ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>Loading recorded results...</p>
+      ) : null}
+      {!loading && error ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-error)' }}>{error}</p>
+      ) : null}
+      {!loading && !error && outcomes.length === 0 ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+          No recorded results yet for this deal.
+        </p>
+      ) : null}
+      {!loading && !error && outcomes.length > 0 ? (
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
+          {outcomes.map((metric) => (
+            <li
+              key={String(metric.id)}
+              style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}
+            >
+              <p style={{ fontWeight: 600 }}>
+                {String(metric.metricName)}: {String(metric.metricValue)}
+                {metric.unit ? ` ${String(metric.unit)}` : ''}
+              </p>
+              <p style={{ color: 'var(--color-text-secondary)' }}>Source: {String(metric.source)}</p>
+              {metric.recordedAt ? (
+                <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                  Recorded at {String(metric.recordedAt)}
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }

@@ -639,3 +639,106 @@ export interface PipelineOpportunity {
   probability?: number;
   [key: string]: unknown;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 5: Recorded outcomes + derived learning (recorded data only)
+// ---------------------------------------------------------------------------
+
+export interface PublishRecord {
+  id: string;
+  contentVersionId?: string | null;
+  outreachDraftId?: string | null;
+  pipelineOpportunityId?: string | null;
+  channel?: string;
+  externalRef?: string | null;
+  recordedAt?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export interface PublishRecordsResponse {
+  publishRecords: PublishRecord[];
+}
+
+export interface PublishRecordDetailResponse {
+  publishRecord: PublishRecord;
+}
+
+export interface OutcomeMetric {
+  id: string;
+  publishRecordId?: string | null;
+  contentVersionId?: string | null;
+  outreachDraftId?: string | null;
+  pipelineOpportunityId?: string | null;
+  metricName: string;
+  metricValue: number;
+  unit?: string | null;
+  source: string;
+  recordedAt?: string;
+  [key: string]: unknown;
+}
+
+export interface OutcomeMetricsResponse {
+  outcomeMetrics: OutcomeMetric[];
+}
+
+export interface AnalyticsAggregate {
+  metricName: string;
+  count: number;
+  sum: number;
+  avg: number | null;
+  min: number | null;
+  max: number | null;
+  sources: string[];
+  sampleSize: number;
+  period: { from: string | null; to: string | null };
+  metricIds: string[];
+  [key: string]: unknown;
+}
+
+export interface AnalyticsRate {
+  name: string;
+  numerator: number;
+  denominator: number;
+  value: number;
+  numeratorMetricIds?: string[];
+  denominatorMetricIds?: string[];
+  [key: string]: unknown;
+}
+
+export interface AnalyticsOmittedRate {
+  name: string;
+  reason: string;
+  [key: string]: unknown;
+}
+
+export interface AnalyticsSummary {
+  aggregates: AnalyticsAggregate[];
+  rates: AnalyticsRate[];
+  omittedRates: AnalyticsOmittedRate[];
+  totalMetrics: number;
+  [key: string]: unknown;
+}
+
+export type LearningProposalStatus = 'PROPOSED' | 'CONFIRMED' | 'REJECTED' | 'REVOKED' | string;
+
+export interface LearningProposal {
+  id: string;
+  dimension: string;
+  observedPattern: string;
+  supportingMeasurements?: unknown;
+  sourceMetricIds?: string[];
+  sampleSize: number;
+  denominator?: number | null;
+  proposedAdjustment: number;
+  reason: string;
+  confidence?: number | null;
+  status: LearningProposalStatus;
+  confirmedBy?: string | null;
+  confirmedAt?: string | null;
+  [key: string]: unknown;
+}
+
+export interface LearningProposalsResponse {
+  proposals: LearningProposal[];
+}

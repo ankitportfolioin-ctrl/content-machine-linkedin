@@ -9,7 +9,9 @@ import {
   composeDraft,
   createContentIdea,
   createDraftRevision,
+  createOutcome,
   createPlan,
+  createPublishRecord,
   decideReview,
   deleteVersion,
   finalizeVersion,
@@ -23,7 +25,9 @@ import {
   isAiUnavailable,
   listContentIdeas,
   listDraftBindings,
+  listOutcomes,
   listPlans,
+  listPublishRecords,
   listReviews,
   listVersions,
   submitReview,
@@ -39,6 +43,8 @@ import {
   ContentVersion,
   DraftValidationResponse,
   EvidenceBinding,
+  OutcomeMetric,
+  PublishRecord,
   QualityGate,
 } from '../types';
 
@@ -1250,8 +1256,252 @@ function VersionsSection({ draftId }: { draftId: string }) {
           <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.875rem' }}>
             {String(selectedVersion.body ?? 'No body saved for this version.')}
           </div>
+          <VersionRecordingPanel version={selectedVersion} />
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function VersionRecordingPanel({ version }: { version: ContentVersion }) {
+  const versionId = String(version.id);
+  const isFinal = Boolean(version.isFinal || version.final);
+  const [publishRecords, setPublishRecords] = useState<PublishRecord[]>([]);
+  const [outcomes, setOutcomes] = useState<OutcomeMetric[]>([]);
+  const [loadingLinks, setLoadingLinks] = useState(true);
+  const [linksError, setLinksError] = useState<string | null>(null);
+
+  const [channel, setChannel] = useState('');
+  const [externalRef, setExternalRef] = useState('');
+  const [recordingPublish, setRecordingPublish] = useState(false);
+  const [publishMessage, setPublishMessage] = useState<string | null>(null);
+
+  const [metricName, setMetricName] = useState('');
+  const [metricValue, setMetricValue] = useState('');
+  const [unit, setUnit] = useState('');
+  const [source, setSource] = useState('');
+  const [recordingOutcome, setRecordingOutcome] = useState(false);
+  const [outcomeMessage, setOutcomeMessage] = useState<string | null>(null);
+
+  const fetchLinks = useCallback(async () => {
+    setLoadingLinks(true);
+    setLinksError(null);
+    try {
+      const [publishData, outcomeData] = await Promise.all([
+        listPublishRecords(),
+        listOutcomes(),
+      ]);
+      setPublishRecords(
+        (publishData.publishRecords ?? []).filter(
+          (r) => String(r.contentVersionId ?? '') === versionId,
+        ),
+      );
+      setOutcomes(
+        (outcomeData.outcomeMetrics ?? []).filter(
+          (m) => String(m.contentVersionId ?? '') === versionId,
+        ),
+      );
+    } catch (err) {
+      setLinksError(friendlyErrorMessage(err));
+    } finally {
+      setLoadingLinks(false);
+    }
+  }, [versionId]);
+
+  useEffect(() => {
+    void fetchLinks();
+  }, [fetchLinks]);
+
+  async function handleRecordPublish(event: React.FormEvent) {
+    event.preventDefault();
+    if (!channel.trim()) {
+      setPublishMessage('Channel is required.');
+      return;
+    }
+    setRecordingPublish(true);
+    setPublishMessage(null);
+    try {
+      const result = await createPublishRecord({
+        contentVersionId: versionId,
+        channel: channel.trim(),
+        externalRef: externalRef.trim() || undefined,
+      });
+      setChannel('');
+      setExternalRef('');
+      setPublishMessage(
+        `Publication recorded (user assertion, not verified).${result.notice ? ` ${result.notice}` : ''}`,
+      );
+      await fetchLinks();
+    } catch (err) {
+      setPublishMessage(friendlyErrorMessage(err));
+    } finally {
+      setRecordingPublish(false);
+    }
+  }
+
+  async function handleRecordOutcome(event: React.FormEvent) {
+    event.preventDefault();
+    if (!metricName.trim() || !metricValue.trim() || !source.trim()) {
+      setOutcomeMessage('Metric name, value, and source are required.');
+      return;
+    }
+    const parsedValue = Number(metricValue.trim());
+    if (!Number.isFinite(parsedValue)) {
+      setOutcomeMessage('Metric value must be a number.');
+      return;
+    }
+    setRecordingOutcome(true);
+    setOutcomeMessage(null);
+    try {
+      const result = await createOutcome({
+        contentVersionId: versionId,
+        metricName: metricName.trim(),
+        metricValue: parsedValue,
+        unit: unit.trim() || undefined,
+        source: source.trim(),
+      });
+      setMetricName('');
+      setMetricValue('');
+      setUnit('');
+      setSource('');
+      setOutcomeMessage(
+        `Outcome recorded (user assertion, not verified).${result.notice ? ` ${result.notice}` : ''}`,
+      );
+      await fetchLinks();
+    } catch (err) {
+      setOutcomeMessage(friendlyErrorMessage(err));
+    } finally {
+      setRecordingOutcome(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', marginTop: '1rem' }}>
+      {isFinal ? (
+        <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem' }}>
+          <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem' }}>Record publication</p>
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+            Recording only. External publication is not verified by the system.
+          </p>
+          <form onSubmit={(e) => void handleRecordPublish(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+            <input
+              value={channel}
+              onChange={(e) => setChannel(e.target.value)}
+              placeholder="Channel (e.g. linkedin)"
+              style={{ ...fieldStyle, flex: '1 1 160px' }}
+            />
+            <input
+              value={externalRef}
+              onChange={(e) => setExternalRef(e.target.value)}
+              placeholder="External ref (optional)"
+              style={{ ...fieldStyle, flex: '1 1 160px' }}
+            />
+            <button type="submit" className="btn btn-secondary" disabled={recordingPublish || !channel.trim()}>
+              {recordingPublish ? 'Recording...' : 'Record publication'}
+            </button>
+          </form>
+          {publishMessage ? (
+            <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+              {publishMessage}
+            </p>
+          ) : null}
+        </div>
+      ) : null}
+
+      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem' }}>
+        <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem' }}>Record outcome</p>
+        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.5rem' }}>
+          Values are stored as recorded, never estimated or inferred.
+        </p>
+        <form onSubmit={(e) => void handleRecordOutcome(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <input
+            value={metricName}
+            onChange={(e) => setMetricName(e.target.value)}
+            placeholder="Metric name * (e.g. views)"
+            style={{ ...fieldStyle, flex: '1 1 140px' }}
+          />
+          <input
+            value={metricValue}
+            onChange={(e) => setMetricValue(e.target.value)}
+            placeholder="Value * (number)"
+            inputMode="decimal"
+            style={{ ...fieldStyle, flex: '1 1 120px' }}
+          />
+          <input
+            value={unit}
+            onChange={(e) => setUnit(e.target.value)}
+            placeholder="Unit (optional)"
+            style={{ ...fieldStyle, flex: '1 1 110px' }}
+          />
+          <input
+            value={source}
+            onChange={(e) => setSource(e.target.value)}
+            placeholder="Source * (e.g. manual)"
+            style={{ ...fieldStyle, flex: '1 1 140px' }}
+          />
+          <button type="submit" className="btn btn-secondary" disabled={recordingOutcome}>
+            {recordingOutcome ? 'Recording...' : 'Record outcome'}
+          </button>
+        </form>
+        {outcomeMessage ? (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {outcomeMessage}
+          </p>
+        ) : null}
+      </div>
+
+      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem' }}>
+        <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+          Recorded results ({publishRecords.length} publication(s), {outcomes.length} outcome(s))
+        </p>
+        {loadingLinks ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>Loading recorded results...</p>
+        ) : null}
+        {!loadingLinks && linksError ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-error)' }}>{linksError}</p>
+        ) : null}
+        {!loadingLinks && !linksError && publishRecords.length === 0 && outcomes.length === 0 ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            No recorded results yet for this version.
+          </p>
+        ) : null}
+        {!loadingLinks && !linksError && publishRecords.length > 0 ? (
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0, marginBottom: '0.5rem' }}>
+            {publishRecords.map((record) => (
+              <li key={String(record.id)} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}>
+                <p style={{ fontWeight: 600 }}>Publication recorded (user assertion, not verified)</p>
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  Channel: {String(record.channel ?? 'unknown')}
+                  {record.externalRef ? ` · Ref: ${String(record.externalRef)}` : ''}
+                </p>
+                {record.recordedAt ? (
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                    Recorded at {String(record.recordedAt)}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+        {!loadingLinks && !linksError && outcomes.length > 0 ? (
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
+            {outcomes.map((metric) => (
+              <li key={String(metric.id)} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}>
+                <p style={{ fontWeight: 600 }}>
+                  {String(metric.metricName)}: {String(metric.metricValue)}
+                  {metric.unit ? ` ${String(metric.unit)}` : ''}
+                </p>
+                <p style={{ color: 'var(--color-text-secondary)' }}>Source: {String(metric.source)}</p>
+                {metric.recordedAt ? (
+                  <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                    Recorded at {String(metric.recordedAt)}
+                  </p>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        ) : null}
+      </div>
     </div>
   );
 }

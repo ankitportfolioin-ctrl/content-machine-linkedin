@@ -33,6 +33,8 @@ import intelligenceRoutes from './routes/intelligence';
 import prospectRoutes from './routes/prospects';
 import outreachRoutes from './routes/outreach';
 import salesIntelligenceRoutes from './routes/salesIntelligence';
+import publishRecordRoutes from './routes/publishRecords';
+import outcomeRoutes from './routes/outcomes';
 
 const env = getEnv();
 
@@ -107,6 +109,8 @@ app.use('/api/v1/intelligence', intelligenceRoutes);
 app.use('/api/v1/prospects', prospectRoutes);
 app.use('/api/v1/outreach', outreachRoutes);
 app.use('/api/v1/sales-intelligence', salesIntelligenceRoutes);
+app.use('/api/v1/publish-records', publishRecordRoutes);
+app.use('/api/v1/outcomes', outcomeRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

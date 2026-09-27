@@ -6,9 +6,9 @@
   "scripts": {
     "dev": "pnpm --filter=@growth-operator/api dev --parallel",
     "build": "pnpm --filter=@growth-operator/api build && pnpm --filter=@growth-operator/web build",
-    "typecheck": "pnpm --filter=@growth-operator/api typecheck && pnpm --filter=@growth-operator/web typecheck && pnpm --filter=@growth-operator/db typecheck && pnpm --filter=@growth-operator/ai typecheck && pnpm --filter=@growth-operator/schemas typecheck && pnpm --filter=@growth-operator/shared typecheck && pnpm --filter=@growth-operator/content typecheck && pnpm --filter=@growth-operator/sales typecheck",
+    "typecheck": "pnpm --filter=@growth-operator/api typecheck && pnpm --filter=@growth-operator/web typecheck && pnpm --filter=@growth-operator/db typecheck && pnpm --filter=@growth-operator/ai typecheck && pnpm --filter=@growth-operator/schemas typecheck && pnpm --filter=@growth-operator/shared typecheck && pnpm --filter=@growth-operator/content typecheck && pnpm --filter=@growth-operator/sales typecheck && pnpm --filter=@growth-operator/learning typecheck",
     "test": "pnpm --filter=@growth-operator/api test && pnpm --filter=@growth-operator/web test",
-    "test:all": "pnpm --filter=@growth-operator/api test && pnpm --filter=@growth-operator/web test && pnpm --filter=@growth-operator/intelligence test && pnpm --filter=@growth-operator/content test && pnpm --filter=@growth-operator/sales test",
+    "test:all": "pnpm --filter=@growth-operator/api test && pnpm --filter=@growth-operator/web test && pnpm --filter=@growth-operator/intelligence test && pnpm --filter=@growth-operator/content test && pnpm --filter=@growth-operator/sales test && pnpm --filter=@growth-operator/learning test",
     "test:watch": "pnpm --filter=@growth-operator/api test:watch",
     "db:generate": "pnpm --filter=@growth-operator/db db:generate",
     "db:migrate": "pnpm --filter=@growth-operator/db db:migrate",

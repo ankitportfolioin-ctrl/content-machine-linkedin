@@ -3,28 +3,34 @@ import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
+  confirmLearningProposal,
   convertOpportunity,
   createSource,
+  deriveLearningProposalAuto,
   friendlyErrorMessage,
   getIntelligenceOverview,
   getOpportunity,
   isAiUnavailable,
   listGaps,
+  listLearningProposals,
   listOpportunities,
   listSources,
   listTrends,
+  rejectLearningProposal,
+  revokeLearningProposal,
   submitOpportunityFeedback,
 } from '../services/api';
 import {
   ContentGap,
   IntelligenceOverview,
+  LearningProposal,
   Opportunity,
   OpportunityFeedbackKind,
   Source,
   TrendSignal,
 } from '../types';
 
-type BrainTab = 'overview' | 'opportunities' | 'trends' | 'gaps' | 'sources';
+type BrainTab = 'overview' | 'opportunities' | 'trends' | 'gaps' | 'sources' | 'learning';
 
 const TABS: { id: BrainTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
@@ -32,6 +38,7 @@ const TABS: { id: BrainTab; label: string }[] = [
   { id: 'trends', label: 'Trends' },
   { id: 'gaps', label: 'Gaps' },
   { id: 'sources', label: 'Sources' },
+  { id: 'learning', label: 'Learning' },
 ];
 
 const FEEDBACK_OPTIONS: { value: OpportunityFeedbackKind; label: string }[] = [
@@ -105,6 +112,7 @@ export function BrainPage() {
       {tab === 'trends' ? <TrendsSection /> : null}
       {tab === 'gaps' ? <GapsSection /> : null}
       {tab === 'sources' ? <SourcesSection /> : null}
+      {tab === 'learning' ? <LearningSection /> : null}
     </div>
   );
 }
@@ -638,6 +646,230 @@ function SourcesSection() {
           </ul>
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function LearningSection() {
+  const [proposals, setProposals] = useState<LearningProposal[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [aiUnavailable, setAiUnavailable] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('');
+  const [metricName, setMetricName] = useState('');
+  const [minSample, setMinSample] = useState('5');
+  const [deriving, setDeriving] = useState(false);
+  const [formMessage, setFormMessage] = useState<string | null>(null);
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+
+  const fetchProposals = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setAiUnavailable(false);
+    try {
+      const data = await listLearningProposals({
+        status: statusFilter.trim() || undefined,
+      });
+      setProposals(data.proposals ?? []);
+    } catch (err) {
+      if (isAiUnavailable(err)) {
+        setAiUnavailable(true);
+      } else {
+        setError(friendlyErrorMessage(err));
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [statusFilter]);
+
+  useEffect(() => {
+    void fetchProposals();
+  }, [fetchProposals]);
+
+  async function handleDerive(event: React.FormEvent) {
+    event.preventDefault();
+    setDeriving(true);
+    setFormMessage(null);
+    try {
+      const parsedMin = Number.parseInt(minSample.trim(), 10);
+      const result = await deriveLearningProposalAuto({
+        metricName: metricName.trim() || undefined,
+        minSampleSize: Number.isFinite(parsedMin) && parsedMin > 0 ? parsedMin : undefined,
+      });
+      setFormMessage(`Proposed learning recorded (${result.proposal.id.slice(0, 8)}…). It is proposed, not active.`);
+      setMetricName('');
+      await fetchProposals();
+    } catch (err) {
+      setFormMessage(friendlyErrorMessage(err));
+    } finally {
+      setDeriving(false);
+    }
+  }
+
+  async function handleTransition(
+    id: string,
+    action: 'confirm' | 'reject' | 'revoke',
+  ) {
+    setWorkingId(id);
+    setActionMessage(null);
+    try {
+      if (action === 'confirm') {
+        await confirmLearningProposal(id);
+        setActionMessage('Proposal confirmed. Confirmed influence is shown below.');
+      } else if (action === 'reject') {
+        await rejectLearningProposal(id);
+        setActionMessage('Proposal rejected.');
+      } else {
+        await revokeLearningProposal(id);
+        setActionMessage('Confirmed proposal revoked.');
+      }
+      await fetchProposals();
+    } catch (err) {
+      setActionMessage(friendlyErrorMessage(err));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Proposed learning</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+          Derived only from recorded measurements. Proposed items are not active until explicitly confirmed.
+        </p>
+        <form onSubmit={(e) => void handleDerive(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <input
+            value={metricName}
+            onChange={(e) => setMetricName(e.target.value)}
+            placeholder="Metric name (e.g. replies)"
+            style={{ ...fieldStyle, flex: '2 1 200px' }}
+          />
+          <input
+            value={minSample}
+            onChange={(e) => setMinSample(e.target.value)}
+            placeholder="Min sample size"
+            inputMode="numeric"
+            style={{ ...fieldStyle, flex: '1 1 140px' }}
+          />
+          <button type="submit" className="btn btn-primary" disabled={deriving}>
+            {deriving ? 'Deriving...' : 'Derive proposal'}
+          </button>
+        </form>
+        {formMessage ? (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {formMessage}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
+          <h3 className="health-card-title">Proposals ({proposals.length})</h3>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              style={{ ...fieldStyle, width: 'auto' }}
+              aria-label="Filter by status"
+            >
+              <option value="">All statuses</option>
+              <option value="PROPOSED">Proposed</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="REJECTED">Rejected</option>
+              <option value="REVOKED">Revoked</option>
+            </select>
+            <button className="btn btn-secondary" onClick={() => void fetchProposals()}>
+              Refresh
+            </button>
+          </div>
+        </div>
+        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', marginBottom: '0.75rem' }}>
+          Confirming or revoking requires an owner or admin role. Other roles will see an access message.
+        </p>
+        {actionMessage ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
+            {actionMessage}
+          </p>
+        ) : null}
+        {loading ? <LoadingBlock label="Loading proposals..." /> : null}
+        {!loading && aiUnavailable ? <AiUnavailableBlock /> : null}
+        {!loading && !aiUnavailable && error ? (
+          <ErrorBlock message={error} onRetry={() => void fetchProposals()} />
+        ) : null}
+        {!loading && !aiUnavailable && !error && proposals.length === 0 ? (
+          <EmptyBlock title="No proposals yet" description="Insufficient data: derive a proposal from recorded measurements above, or adjust the status filter." />
+        ) : null}
+        {!loading && !aiUnavailable && !error && proposals.length > 0 ? (
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
+            {proposals.map((proposal) => {
+              const status = String(proposal.status ?? 'PROPOSED').toUpperCase();
+              const isConfirmed = status === 'CONFIRMED';
+              return (
+                <li
+                  key={String(proposal.id)}
+                  style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '1rem', fontSize: '0.875rem' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+                    <p style={{ fontWeight: 600 }}>Dimension: {String(proposal.dimension)}</p>
+                    <span className={`badge ${isConfirmed ? 'badge-success' : 'badge-neutral'}`}>
+                      {status === 'PROPOSED' ? 'Proposed (not active)' : status.charAt(0) + status.slice(1).toLowerCase()}
+                    </span>
+                  </div>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                    Observed pattern: {String(proposal.observedPattern)}
+                  </p>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>
+                    Sample size {String(proposal.sampleSize)}
+                    {typeof proposal.denominator !== 'undefined' && proposal.denominator !== null
+                      ? ` of ${String(proposal.denominator)}`
+                      : ''}
+                    {' · '}Source measurements: {(proposal.sourceMetricIds ?? []).length}
+                  </p>
+                  <p>Proposed adjustment: {String(proposal.proposedAdjustment)}</p>
+                  <p style={{ color: 'var(--color-text-secondary)' }}>Reason: {String(proposal.reason)}</p>
+                  {isConfirmed ? (
+                    <div style={{ marginTop: '0.5rem', borderTop: '1px solid var(--color-border)', paddingTop: '0.5rem' }}>
+                      <p style={{ fontWeight: 600 }}>Confirmed influence</p>
+                      <p>Dimension: {String(proposal.dimension)}</p>
+                      <p>Adjustment: {String(proposal.proposedAdjustment)}</p>
+                      <p style={{ color: 'var(--color-text-secondary)' }}>Reason: {String(proposal.reason)}</p>
+                      <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                        Confirmed by {String(proposal.confirmedBy ?? 'unknown')}
+                        {proposal.confirmedAt ? ` at ${String(proposal.confirmedAt)}` : ''}
+                      </p>
+                    </div>
+                  ) : null}
+                  <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.75rem' }}>
+                    <button
+                      className="btn btn-secondary"
+                      disabled={workingId === String(proposal.id)}
+                      onClick={() => void handleTransition(String(proposal.id), 'confirm')}
+                    >
+                      Confirm
+                    </button>
+                    <button
+                      className="btn btn-secondary"
+                      disabled={workingId === String(proposal.id)}
+                      onClick={() => void handleTransition(String(proposal.id), 'reject')}
+                    >
+                      Reject
+                    </button>
+                    <button
+                      className="btn btn-ghost"
+                      disabled={workingId === String(proposal.id)}
+                      onClick={() => void handleTransition(String(proposal.id), 'revoke')}
+                    >
+                      Revoke
+                    </button>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        ) : null}
+      </div>
     </div>
   );
 }

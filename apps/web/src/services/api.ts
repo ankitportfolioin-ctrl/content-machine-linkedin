@@ -67,6 +67,14 @@ import {
   VoiceSample as VoiceSampleType,
   WorkspacesResponse,
   ContentReview,
+  PublishRecord,
+  PublishRecordsResponse,
+  PublishRecordDetailResponse,
+  OutcomeMetric,
+  OutcomeMetricsResponse,
+  AnalyticsSummary,
+  LearningProposal,
+  LearningProposalsResponse,
 } from '../types';
 
 export type { HealthResponse, ApiError };
@@ -1093,4 +1101,188 @@ export async function updatePipelineOpportunity(
 export async function deletePipelineOpportunity(id: string): Promise<void> {
   const response = await authedFetch(`/pipeline/${encodeURIComponent(id)}`, { method: 'DELETE' });
   await handleResponse<unknown>(response);
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: Publish records (recording only — user assertions, not verified)
+// ---------------------------------------------------------------------------
+
+export interface CreatePublishRecordInput {
+  contentVersionId?: string;
+  outreachDraftId?: string;
+  pipelineOpportunityId?: string;
+  channel: string;
+  externalRef?: string;
+  recordedAt?: string;
+}
+
+export async function createPublishRecord(
+  input: CreatePublishRecordInput,
+): Promise<{ publishRecord: PublishRecord; notice?: string }> {
+  return authedRequest<{ publishRecord: PublishRecord; notice?: string }>('/publish-records', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listPublishRecords(): Promise<PublishRecordsResponse> {
+  const data = await authedRequest<Record<string, unknown>>('/publish-records');
+  return {
+    publishRecords: (Array.isArray(data['publishRecords'])
+      ? data['publishRecords']
+      : []) as PublishRecord[],
+  };
+}
+
+export async function getPublishRecord(id: string): Promise<PublishRecordDetailResponse> {
+  return authedRequest<PublishRecordDetailResponse>(
+    `/publish-records/${encodeURIComponent(id)}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: Outcome metrics (recorded values only, never estimated)
+// ---------------------------------------------------------------------------
+
+export interface CreateOutcomeInput {
+  publishRecordId?: string;
+  contentVersionId?: string;
+  outreachDraftId?: string;
+  pipelineOpportunityId?: string;
+  metricName: string;
+  metricValue: number;
+  unit?: string;
+  source: string;
+  recordedAt?: string;
+  idempotencyKey?: string;
+}
+
+export async function createOutcome(
+  input: CreateOutcomeInput,
+): Promise<{ outcomeMetric: OutcomeMetric; notice?: string }> {
+  return authedRequest<{ outcomeMetric: OutcomeMetric; notice?: string }>('/outcomes', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listOutcomes(params?: {
+  metricName?: string;
+  publishRecordId?: string;
+}): Promise<OutcomeMetricsResponse> {
+  const query = new URLSearchParams();
+  if (params?.metricName) query.set('metricName', params.metricName);
+  if (params?.publishRecordId) query.set('publishRecordId', params.publishRecordId);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const data = await authedRequest<Record<string, unknown>>(`/outcomes${suffix}`);
+  return {
+    outcomeMetrics: (Array.isArray(data['outcomeMetrics'])
+      ? data['outcomeMetrics']
+      : []) as OutcomeMetric[],
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: Analytics summary (computed from recorded rows only)
+// ---------------------------------------------------------------------------
+
+export interface AnalyticsRateInput {
+  name: string;
+  numeratorMetric: string;
+  denominatorMetric: string;
+}
+
+export async function getAnalyticsSummary(params?: {
+  metricName?: string;
+  from?: string;
+  to?: string;
+  rates?: AnalyticsRateInput[];
+}): Promise<{ summary: AnalyticsSummary; notice?: string }> {
+  const query = new URLSearchParams();
+  if (params?.metricName) query.set('metricName', params.metricName);
+  if (params?.from) query.set('from', params.from);
+  if (params?.to) query.set('to', params.to);
+  if (params?.rates && params.rates.length > 0) query.set('rates', JSON.stringify(params.rates));
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return authedRequest<{ summary: AnalyticsSummary; notice?: string }>(
+    `/analytics/summary${suffix}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5: Derived learning proposals (proposed until explicitly confirmed)
+// ---------------------------------------------------------------------------
+
+export interface CreateLearningProposalInput {
+  dimension?: string;
+  observedPattern?: string;
+  supportingMeasurements?: unknown;
+  sourceMetricIds?: string[];
+  sampleSize?: number;
+  denominator?: number;
+  proposedAdjustment?: number;
+  reason?: string;
+  confidence?: number;
+  metricName?: string;
+  minSampleSize?: number;
+}
+
+export async function listLearningProposals(params?: {
+  status?: string;
+  dimension?: string;
+}): Promise<LearningProposalsResponse> {
+  const query = new URLSearchParams();
+  if (params?.status) query.set('status', params.status);
+  if (params?.dimension) query.set('dimension', params.dimension);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const data = await authedRequest<Record<string, unknown>>(`/learning/derived${suffix}`);
+  return {
+    proposals: (Array.isArray(data['proposals']) ? data['proposals'] : []) as LearningProposal[],
+  };
+}
+
+export async function createLearningProposal(
+  input: CreateLearningProposalInput,
+): Promise<{ proposal: LearningProposal }> {
+  return authedRequest<{ proposal: LearningProposal }>('/learning/derived', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function deriveLearningProposalAuto(input: {
+  metricName?: string;
+  minSampleSize?: number;
+}): Promise<{ proposal: LearningProposal }> {
+  return createLearningProposal({
+    metricName: input.metricName,
+    minSampleSize: input.minSampleSize,
+  });
+}
+
+export async function confirmLearningProposal(
+  id: string,
+): Promise<{ proposal: LearningProposal }> {
+  return authedRequest<{ proposal: LearningProposal }>(
+    `/learning/derived/${encodeURIComponent(id)}/confirm`,
+    { method: 'POST', body: JSON.stringify({}) },
+  );
+}
+
+export async function rejectLearningProposal(
+  id: string,
+): Promise<{ proposal: LearningProposal }> {
+  return authedRequest<{ proposal: LearningProposal }>(
+    `/learning/derived/${encodeURIComponent(id)}/reject`,
+    { method: 'POST', body: JSON.stringify({}) },
+  );
+}
+
+export async function revokeLearningProposal(
+  id: string,
+): Promise<{ proposal: LearningProposal }> {
+  return authedRequest<{ proposal: LearningProposal }>(
+    `/learning/derived/${encodeURIComponent(id)}/revoke`,
+    { method: 'POST', body: JSON.stringify({}) },
+  );
 }

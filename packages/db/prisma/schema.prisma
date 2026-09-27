@@ -297,6 +297,13 @@ enum SalesSignalType {
   COMPANY_INITIATIVE
 }
 
+enum LearningProposalStatus {
+  PROPOSED
+  CONFIRMED
+  REJECTED
+  REVOKED
+}
+
 model User {
   id            String    @id @default(uuid())
   email         String    @unique @db.VarChar(255)
@@ -367,6 +374,9 @@ model Workspace {
   conversationClassifications ConversationClassificationResult[]
   followUpRecommendations FollowUpRecommendation[]
   salesContentSignals SalesContentSignal[]
+  publishRecords      PublishRecord[]
+  outcomeMetrics      OutcomeMetric[]
+  learningProposals   LearningProposal[]
   contentPlans        ContentPlan[]
   draftClaimBindings  DraftClaimBinding[]
   contentGateResults  ContentQualityGateResult[]
@@ -513,6 +523,8 @@ model ContentVersion {
   workspace       Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contentDraft    ContentDraft  @relation(fields: [contentDraftId], references: [id], onDelete: Cascade)
   author          User          @relation("ContentVersionAuthor", fields: [authorId], references: [id], onDelete: Restrict)
+  publishRecords  PublishRecord[]
+  outcomeMetrics  OutcomeMetric[]
 
   @@unique([contentDraftId, version])
   @@index([workspaceId])
@@ -616,6 +628,8 @@ model PipelineOpportunity {
   workspace         Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   lead              Lead           @relation(fields: [leadId], references: [id], onDelete: Cascade)
   owner             User           @relation("OpportunityOwner", fields: [ownerId], references: [id], onDelete: Restrict)
+  publishRecords    PublishRecord[]
+  outcomeMetrics    OutcomeMetric[]
 
   @@index([workspaceId])
   @@index([leadId])
@@ -1177,6 +1191,8 @@ model OutreachDraft {
   lead          Lead?            @relation(fields: [leadId], references: [id], onDelete: SetNull)
   reviews       OutreachReview[]
   preparedActions PreparedAction[]
+  publishRecords PublishRecord[]
+  outcomeMetrics OutcomeMetric[]
 
   @@index([workspaceId])
   @@index([strategyId])
@@ -1278,4 +1294,82 @@ model SalesContentSignal {
 
   @@index([workspaceId])
   @@index([workspaceId, signalType])
+}
+
+model PublishRecord {
+  id                   String   @id @default(uuid())
+  workspaceId          String
+  contentVersionId     String?
+  outreachDraftId      String?
+  pipelineOpportunityId String?
+  channel              String   @db.VarChar(100)
+  externalRef          String?  @db.VarChar(2048)
+  recordedBy           String
+  recordedAt           DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentVersion       ContentVersion?      @relation(fields: [contentVersionId], references: [id], onDelete: SetNull)
+  outreachDraft        OutreachDraft?       @relation(fields: [outreachDraftId], references: [id], onDelete: SetNull)
+  pipelineOpportunity  PipelineOpportunity? @relation(fields: [pipelineOpportunityId], references: [id], onDelete: SetNull)
+  outcomeMetrics       OutcomeMetric[]
+
+  @@index([workspaceId])
+  @@index([contentVersionId])
+  @@index([outreachDraftId])
+  @@index([pipelineOpportunityId])
+}
+
+model OutcomeMetric {
+  id                   String   @id @default(uuid())
+  workspaceId          String
+  publishRecordId      String?
+  contentVersionId     String?
+  outreachDraftId      String?
+  pipelineOpportunityId String?
+  metricName           String   @db.VarChar(100)
+  metricValue          Float
+  unit                 String?  @db.VarChar(50)
+  source               String   @db.Text
+  recordedBy           String
+  recordedAt           DateTime @default(now())
+  idempotencyKey       String?  @db.VarChar(200)
+  createdAt            DateTime @default(now())
+
+  workspace            Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  publishRecord        PublishRecord?       @relation(fields: [publishRecordId], references: [id], onDelete: SetNull)
+  contentVersion       ContentVersion?      @relation(fields: [contentVersionId], references: [id], onDelete: SetNull)
+  outreachDraft        OutreachDraft?       @relation(fields: [outreachDraftId], references: [id], onDelete: SetNull)
+  pipelineOpportunity  PipelineOpportunity? @relation(fields: [pipelineOpportunityId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, idempotencyKey])
+  @@index([workspaceId])
+  @@index([publishRecordId])
+  @@index([workspaceId, metricName])
+}
+
+model LearningProposal {
+  id                   String                 @id @default(uuid())
+  workspaceId          String
+  dimension            String                 @db.VarChar(100)
+  observedPattern      String                 @db.Text
+  supportingMeasurements Json
+  sourceMetricIds      String[]               @default([])
+  sampleSize           Int
+  denominator          Int?
+  proposedAdjustment   Float
+  reason               String                 @db.Text
+  confidence           Float?
+  status               LearningProposalStatus @default(PROPOSED)
+  confirmedBy          String?
+  confirmedAt          DateTime?
+  createdAt            DateTime               @default(now())
+  updatedAt            DateTime               @updatedAt
+
+  workspace            Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, dimension])
 }

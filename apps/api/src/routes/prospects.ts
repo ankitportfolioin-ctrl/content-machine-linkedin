@@ -18,6 +18,7 @@ import {
   intentStatusForSignals,
   BriefService,
 } from '@growth-operator/sales';
+import { LearningDerivationService, applyLearningInfluence } from '@growth-operator/learning';
 import { forwardSalesError } from '../utils/salesErrors';
 import { getEnv } from '../config/env';
 
@@ -33,6 +34,7 @@ const researchService = new ProspectResearchService(prisma, aiRegistry);
 const qualificationService = new QualificationService(prisma);
 const signalService = new SignalService(prisma);
 const briefService = new BriefService(prisma, aiRegistry);
+const learningDerivation = new LearningDerivationService(prisma);
 
 router.post('/discover', async (req, res, next) => {
   try {
@@ -180,11 +182,25 @@ router.get('/qualification', async (req, res, next) => {
       where: { workspaceId_leadId: { workspaceId: authReq.workspaceId, leadId } },
     });
     if (!qualification) throw new NotFoundError('Qualification Result');
-    const score = scoreProspect({
+    const baseScore = scoreProspect({
       dimensions: qualification.dimensions as never,
       researchConfidence: qualification.confidence,
     });
-    res.json({ qualification, score });
+    const confirmed = await learningDerivation.confirmedInfluences(authReq.workspaceId);
+    const withLearning = applyLearningInfluence(
+      baseScore.dimensions.map((d) => ({ name: d.name, score: d.score, reason: d.reason, evidence: d.evidence })),
+      confirmed
+    );
+    res.json({
+      qualification,
+      score: baseScore,
+      learningInfluence: {
+        dimensions: withLearning.dimensions,
+        applied: withLearning.applied,
+        ignored: withLearning.ignored,
+        overallScore: withLearning.overallScore,
+      },
+    });
   } catch (error) {
     forwardSalesError(error, next);
   }
