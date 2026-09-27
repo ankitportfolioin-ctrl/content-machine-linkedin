@@ -1,17 +1,433 @@
-import { EmptyPage } from './EmptyPage';
+import { useCallback, useEffect, useState } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { LoginForm } from '../components/LoginForm';
+import { WorkspaceSelector } from '../components/WorkspaceSelector';
+import {
+  createPipelineOpportunity,
+  deletePipelineOpportunity,
+  friendlyErrorMessage,
+  listFollowUps,
+  listPipeline,
+  updatePipelineOpportunity,
+} from '../services/api';
+import { FollowUpRecommendation, PipelineOpportunity } from '../types';
+
+const STAGES = ['new', 'contacted', 'engaged', 'proposal', 'won', 'lost'];
 
 export function PipelinePage() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+
+  if (authLoading) {
+    return (
+      <div className="card">
+        <div className="empty-state">
+          <h2 className="empty-state-title">Loading...</h2>
+          <p className="empty-state-description">Checking your session</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="card">
+          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+            Pipeline
+          </h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            Sign in to track deal stages and next actions.
+          </p>
+        </div>
+        <LoginForm />
+      </div>
+    );
+  }
+
+  if (selectedId) {
+    return <OpportunityDetail opportunityId={selectedId} onBack={() => setSelectedId(null)} />;
+  }
+
   return (
-    <EmptyPage
-      title="Pipeline"
-      description="Sales pipeline and opportunity management will be implemented in future phases."
-      icon={
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-          <line x1="12" y1="22.08" x2="12" y2="12" />
-        </svg>
-      }
-    />
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div
+        className="card"
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          flexWrap: 'wrap',
+          gap: '0.75rem',
+        }}
+      >
+        <div>
+          <h2 className="health-card-title">Pipeline</h2>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            Track open deals by stage. Stages only move forward through valid steps.
+          </p>
+        </div>
+        <WorkspaceSelector />
+      </div>
+      <PipelineList onSelect={setSelectedId} />
+    </div>
   );
 }
+
+function PipelineList({ onSelect }: { onSelect: (id: string) => void }) {
+  const [opportunities, setOpportunities] = useState<PipelineOpportunity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [leadId, setLeadId] = useState('');
+  const [name, setName] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listPipeline();
+      setOpportunities(data.opportunities ?? []);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  async function handleCreate(event: React.FormEvent) {
+    event.preventDefault();
+    if (!leadId.trim() || !name.trim()) {
+      setMessage('Lead ID and deal name are required.');
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    try {
+      const result = await createPipelineOpportunity({ leadId: leadId.trim(), name: name.trim() });
+      setOpportunities((prev) => [result.opportunity, ...prev]);
+      setLeadId('');
+      setName('');
+      setMessage('Deal added.');
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+          Add a deal
+        </h3>
+        <form onSubmit={(e) => void handleCreate(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <input value={leadId} onChange={(e) => setLeadId(e.target.value)} placeholder="Lead ID" style={{ ...fieldStyle, flex: '1 1 160px' }} />
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Deal name" style={{ ...fieldStyle, flex: '2 1 220px' }} />
+          <button type="submit" className="btn btn-primary" disabled={saving}>
+            {saving ? 'Adding...' : 'Add deal'}
+          </button>
+        </form>
+        {message ? (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {message}
+          </p>
+        ) : null}
+      </div>
+
+      {loading ? (
+        <div className="card">
+          <div className="empty-state">
+            <h2 className="empty-state-title">Loading deals...</h2>
+            <p className="empty-state-description">Please wait while we fetch the latest data</p>
+          </div>
+        </div>
+      ) : null}
+      {!loading && error ? (
+        <div className="card">
+          <div className="empty-state">
+            <h2 className="empty-state-title">Something went wrong</h2>
+            <p className="empty-state-description">{error}</p>
+            <button className="btn btn-secondary" onClick={() => void fetchData()} style={{ marginTop: '1rem' }}>
+              Retry
+            </button>
+          </div>
+        </div>
+      ) : null}
+      {!loading && !error && opportunities.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <h2 className="empty-state-title">No deals yet</h2>
+            <p className="empty-state-description">Add your first deal above to start tracking stages.</p>
+          </div>
+        </div>
+      ) : null}
+      {!loading && !error && opportunities.length > 0 ? (
+        <div className="card">
+          <h3 className="health-card-title" style={{ marginBottom: '1rem' }}>
+            Deals ({opportunities.length})
+          </h3>
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
+            {opportunities.map((o) => (
+              <li
+                key={String(o.id)}
+                style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '1rem' }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <div>
+                    <p style={{ fontWeight: 600 }}>{String(o.name ?? o.title ?? o.id)}</p>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                      {o.stage ? <span className="badge badge-neutral">{String(o.stage)}</span> : null}
+                      {typeof o.value !== 'undefined' && o.value !== null ? (
+                        <span className="badge badge-neutral">Value: {String(o.value)}</span>
+                      ) : null}
+                    </div>
+                  </div>
+                  <button className="btn btn-secondary" onClick={() => onSelect(String(o.id))}>
+                    View details
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; onBack: () => void }) {
+  const [opportunity, setOpportunity] = useState<PipelineOpportunity | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [stage, setStage] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [nextAction, setNextAction] = useState<FollowUpRecommendation | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listPipeline();
+      const found = (data.opportunities ?? []).find((o) => String(o.id) === opportunityId) ?? null;
+      setOpportunity(found);
+      if (found && found.stage) setStage(String(found.stage));
+      if (found && found.leadId) {
+        try {
+          const all = await listFollowUps();
+          const related = all.followUps.filter(
+            (f) => String(f.leadId ?? '') === String(found.leadId),
+          );
+          setNextAction(related.length > 0 ? (related[related.length - 1] as FollowUpRecommendation) : null);
+        } catch {
+          setNextAction(null);
+        }
+      } else {
+        setNextAction(null);
+      }
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [opportunityId]);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  async function handleStageUpdate() {
+    if (!stage.trim()) {
+      setMessage('Choose a stage first.');
+      return;
+    }
+    setSaving(true);
+    setMessage(null);
+    try {
+      const result = await updatePipelineOpportunity(opportunityId, { stage: stage.trim() });
+      setOpportunity(result.opportunity);
+      setMessage('Stage updated.');
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    setMessage(null);
+    try {
+      await deletePipelineOpportunity(opportunityId);
+      onBack();
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+      setDeleting(false);
+    }
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <button className="btn btn-ghost" onClick={onBack} style={{ alignSelf: 'flex-start' }}>
+          ← Back to deals
+        </button>
+        <div className="card">
+          <div className="empty-state">
+            <h2 className="empty-state-title">Loading deal...</h2>
+            <p className="empty-state-description">Please wait while we fetch the latest data</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <button className="btn btn-ghost" onClick={onBack} style={{ alignSelf: 'flex-start' }}>
+          ← Back to deals
+        </button>
+        <div className="card">
+          <div className="empty-state">
+            <h2 className="empty-state-title">Something went wrong</h2>
+            <p className="empty-state-description">{error}</p>
+            <button className="btn btn-secondary" onClick={() => void fetchData()} style={{ marginTop: '1rem' }}>
+              Retry
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!opportunity) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <button className="btn btn-ghost" onClick={onBack} style={{ alignSelf: 'flex-start' }}>
+          ← Back to deals
+        </button>
+        <div className="card">
+          <div className="empty-state">
+            <h2 className="empty-state-title">Deal not found</h2>
+            <p className="empty-state-description">This deal may have been removed.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <button className="btn btn-ghost" onClick={onBack} style={{ alignSelf: 'flex-start' }}>
+        ← Back to deals
+      </button>
+      <div className="card">
+        <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+          {String(opportunity.name ?? opportunity.title ?? opportunity.id)}
+        </h2>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+          {opportunity.stage ? <span className="badge badge-neutral">{String(opportunity.stage)}</span> : null}
+          {typeof opportunity.value !== 'undefined' && opportunity.value !== null ? (
+            <span className="badge badge-neutral">Value: {String(opportunity.value)}</span>
+          ) : null}
+          {typeof opportunity.probability !== 'undefined' && opportunity.probability !== null ? (
+            <span className="badge badge-neutral">Likelihood: {String(opportunity.probability)}</span>
+          ) : null}
+        </div>
+        {opportunity.leadId ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            Source lead: {String(opportunity.leadId)}
+          </p>
+        ) : (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            No source lead linked.
+          </p>
+        )}
+        {opportunity.expectedCloseDate ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            Expected close: {String(opportunity.expectedCloseDate)}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+          Next step
+        </h3>
+        {!nextAction ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            No suggested next step yet. Check the Inbox for follow-up suggestions for this lead.
+          </p>
+        ) : (
+          <div>
+            <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>
+              {String(nextAction.recommendation ?? nextAction.suggestedMessage ?? 'Follow up')}
+            </p>
+            {nextAction.suggestedMessage && nextAction.recommendation ? (
+              <p style={{ fontSize: '0.875rem' }}>{String(nextAction.suggestedMessage)}</p>
+            ) : null}
+            {nextAction.reason ? (
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                {String(nextAction.reason)}
+              </p>
+            ) : null}
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+          Change stage
+        </h3>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <select value={stage} onChange={(e) => setStage(e.target.value)} style={{ ...fieldStyle, width: 'auto' }}>
+            <option value="">Select a stage</option>
+            {STAGES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <button className="btn btn-primary" disabled={saving} onClick={() => void handleStageUpdate()}>
+            {saving ? 'Updating...' : 'Update stage'}
+          </button>
+        </div>
+        {message ? (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {message}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+          Remove deal
+        </h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+          Removing a deal is permanent.
+        </p>
+        <button className="btn btn-secondary" disabled={deleting} onClick={() => void handleDelete()}>
+          {deleting ? 'Removing...' : 'Remove deal'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const fieldStyle: React.CSSProperties = {
+  backgroundColor: 'var(--color-bg)',
+  border: '1px solid var(--color-border)',
+  borderRadius: 'var(--radius)',
+  color: 'var(--color-text)',
+  padding: '0.625rem 0.75rem',
+  width: '100%',
+};

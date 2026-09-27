@@ -316,6 +316,114 @@ export const writingSampleCreateSchema = z.object({
   content: z.string().min(1).max(20000),
 });
 
+export const prospectResearchCreateSchema = z.object({
+  leadId: idSchema.optional(),
+  name: z.string().max(100).optional(),
+  title: z.string().max(220).optional(),
+  company: z.string().max(200).optional(),
+  companyDomain: z.string().max(255).optional(),
+  location: z.string().max(100).optional(),
+  publicSourceUrls: z.array(urlSchema).max(20).default([]),
+});
+
+export const prospectSignalCreateSchema = z.object({
+  leadId: idSchema.optional(),
+  signalType: z.enum([
+    'hiring',
+    'product_launch',
+    'tech_migration',
+    'expansion',
+    'operational_change',
+    'announcement',
+    'problem_content',
+    'company_initiative',
+  ]),
+  source: z.string().min(1).max(2000),
+  observedAt: isoDateSchema.optional(),
+  confidence: z.number().min(0).max(1),
+  evidence: z.string().min(1).max(5000),
+  interpretation: z.string().min(1).max(5000),
+});
+
+export const qualificationRunSchema = z.object({
+  leadId: idSchema,
+});
+
+export const prospectBriefCreateSchema = z.object({
+  leadId: idSchema.optional(),
+  researchId: idSchema.optional(),
+});
+
+export const outreachStrategyCreateSchema = z.object({
+  leadId: idSchema.optional(),
+  briefId: idSchema.optional(),
+  objective: z.string().min(1).max(100),
+  audience: z.string().min(1).max(5000),
+  relationshipStage: z.enum(['cold', 'aware', 'engaged', 'conversation', 'opportunity', 'customer']).default('cold'),
+  angle: z.string().min(1).max(100),
+  reasonForContact: z.string().min(1).max(5000),
+  relevantEvidence: z.array(z.object({
+    statement: z.string().min(1).max(2000),
+    sourceRef: z.string().max(500).optional(),
+  })).max(30).default([]),
+  personalizationLevel: z.enum(['none', 'light', 'moderate', 'high']).default('light'),
+  ctaType: z.string().max(100).optional(),
+  riskFlags: z.array(z.string().max(500)).max(20).default([]),
+  mustNotClaim: z.array(z.string().min(1).max(1000)).max(30).default([]),
+  relevantContentId: idSchema.optional(),
+  contentReason: z.string().max(2000).optional(),
+});
+
+export const outreachDraftComposeSchema = z.object({
+  strategyId: idSchema,
+  draftType: z.enum(['connection_note', 'first_message', 'follow_up', 'value_message', 'content_based_outreach']),
+});
+
+export const outreachDraftReviseSchema = z.object({
+  opening: z.string().max(2000).optional(),
+  relevance: z.string().max(5000).optional(),
+  evidence: z.string().max(5000).optional().nullable(),
+  value: z.string().max(5000).optional(),
+  cta: z.string().max(1000).optional().nullable(),
+  body: z.string().max(10000).optional(),
+});
+
+export const outreachReviewActionSchema = z.object({
+  action: z.enum(['submit', 'approve', 'reject', 'request_changes']),
+  note: z.string().max(5000).optional(),
+});
+
+export const preparedActionCreateSchema = z.object({
+  actionType: z.string().min(1).max(100),
+  target: z.string().max(500).optional(),
+  draftId: idSchema.optional(),
+  approvalId: idSchema.optional(),
+  evidence: z.record(z.unknown()).optional(),
+  expiresAt: isoDateSchema.optional(),
+});
+
+export const conversationClassifySchema = z.object({
+  conversationId: idSchema,
+});
+
+export const followUpRecommendSchema = z.object({
+  conversationId: idSchema.optional(),
+  leadId: idSchema.optional(),
+});
+
+export const salesContentSignalCreateSchema = z.object({
+  signalType: z.string().min(1).max(100),
+  sourceConversationIds: z.array(idSchema).max(50).default([]),
+  evidence: z.string().min(1).max(5000),
+  frequency: z.number().int().nonnegative().optional(),
+  recommendedAngle: z.string().max(200).optional(),
+  reasoning: z.string().max(5000).optional(),
+});
+
+export const pipelineStageUpdateSchema = z.object({
+  stage: z.enum(['prospecting', 'qualification', 'proposal', 'negotiation', 'closed_won', 'closed_lost']),
+});
+
 export type UserCreate = z.infer<typeof userCreateSchema>;
 export type UserLogin = z.infer<typeof userLoginSchema>;
 export type WorkspaceCreate = z.infer<typeof workspaceCreateSchema>;
@@ -357,3 +465,11 @@ export type VoiceProfileCreate = z.infer<typeof voiceProfileCreateSchema>;
 export type VoiceProfileUpdate = z.infer<typeof voiceProfileUpdateSchema>;
 export type VoiceReceiptCreate = z.infer<typeof voiceReceiptCreateSchema>;
 export type WritingSampleCreate = z.infer<typeof writingSampleCreateSchema>;
+export type ProspectResearchCreate = z.infer<typeof prospectResearchCreateSchema>;
+export type ProspectSignalCreate = z.infer<typeof prospectSignalCreateSchema>;
+export type ProspectBriefCreate = z.infer<typeof prospectBriefCreateSchema>;
+export type OutreachStrategyCreate = z.infer<typeof outreachStrategyCreateSchema>;
+export type OutreachDraftCompose = z.infer<typeof outreachDraftComposeSchema>;
+export type OutreachReviewAction = z.infer<typeof outreachReviewActionSchema>;
+export type PreparedActionCreate = z.infer<typeof preparedActionCreateSchema>;
+export type SalesContentSignalCreate = z.infer<typeof salesContentSignalCreateSchema>;

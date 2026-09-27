@@ -30,6 +30,9 @@ import pipelineRoutes from './routes/pipeline';
 import analyticsRoutes from './routes/analytics';
 import learningRoutes from './routes/learning';
 import intelligenceRoutes from './routes/intelligence';
+import prospectRoutes from './routes/prospects';
+import outreachRoutes from './routes/outreach';
+import salesIntelligenceRoutes from './routes/salesIntelligence';
 
 const env = getEnv();
 
@@ -101,6 +104,9 @@ app.use('/api/v1/pipeline', pipelineRoutes);
 app.use('/api/v1/analytics', analyticsRoutes);
 app.use('/api/v1/learning', learningRoutes);
 app.use('/api/v1/intelligence', intelligenceRoutes);
+app.use('/api/v1/prospects', prospectRoutes);
+app.use('/api/v1/outreach', outreachRoutes);
+app.use('/api/v1/sales-intelligence', salesIntelligenceRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

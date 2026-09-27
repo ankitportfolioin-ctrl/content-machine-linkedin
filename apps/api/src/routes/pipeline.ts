@@ -3,6 +3,8 @@ import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, Aut
 import { pipelineOpportunityCreateSchema, pipelineOpportunityUpdateSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
+import { validateStageTransition } from '@growth-operator/sales';
+import { forwardSalesError } from '../utils/salesErrors';
 
 const router: ExpressRouter = Router();
 
@@ -114,6 +116,13 @@ router.patch('/:opportunityId', async (req, res, next) => {
       throw new NotFoundError('Pipeline Opportunity');
     }
 
+    if (data.stage) {
+      validateStageTransition(
+        opportunity.stage as 'PROSPECTING' | 'QUALIFICATION' | 'PROPOSAL' | 'NEGOTIATION' | 'CLOSED_WON' | 'CLOSED_LOST',
+        data.stage.toUpperCase() as 'PROSPECTING' | 'QUALIFICATION' | 'PROPOSAL' | 'NEGOTIATION' | 'CLOSED_WON' | 'CLOSED_LOST'
+      );
+    }
+
     const updated = await prisma.pipelineOpportunity.update({
       where: { id: opportunityId },
       data: {
@@ -122,12 +131,13 @@ router.patch('/:opportunityId', async (req, res, next) => {
         value: data.value,
         expectedCloseDate: data.expectedCloseDate ? new Date(data.expectedCloseDate) : undefined,
         probability: data.probability,
+        closedAt: data.stage && ['closed_won', 'closed_lost'].includes(data.stage) ? new Date() : undefined,
       },
     });
 
     res.json({ opportunity: updated });
   } catch (error) {
-    next(error);
+    forwardSalesError(error, next);
   }
 });
 

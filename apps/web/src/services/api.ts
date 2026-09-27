@@ -1,16 +1,20 @@
 import {
   ApiError,
   BindingsResponse,
+  BriefSynthesis,
   ComposeDraftResponse,
   ContentIdea,
   ContentIdeaDetailResponse,
   ContentIdeasResponse,
   ContentPlan,
+  ContentSignalItem,
   ContentVersion,
+  ConversationClassification,
   ConvertOpportunityResponse,
   DraftDetailResponse,
   DraftPreview,
   DraftValidationResponse,
+  FollowUpRecommendation,
   GapsResponse,
   GatesResponse,
   HealthResponse,
@@ -23,13 +27,30 @@ import {
   OpportunityDetailResponse,
   OpportunityFeedback,
   OpportunityFeedbackKind,
+  OutreachDraft,
+  OutreachQualityGate,
+  OutreachReview,
+  OutreachStrategy,
+  OutreachValidation,
+  PipelineOpportunity,
   PlanDetailResponse,
   PlanValidation,
   PlansResponse,
+  PreparedAction,
   ProfileResponse,
+  ProspectBrief,
+  ProspectCandidate,
+  ProspectIntent,
+  ProspectQualification,
+  ProspectResearch,
+  ProspectSignal,
+  QualificationScore,
   ReviewDetailResponse,
   ReviewDecision,
   ReviewsResponse,
+  SalesConversation,
+  SalesLead,
+  SalesMessage,
   SourcesResponse,
   Source,
   TrendsResponse,
@@ -589,4 +610,487 @@ export async function updateIcp(id: string, fields: Partial<Icp>): Promise<IcpDe
     method: 'PATCH',
     body: JSON.stringify(fields),
   });
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4: Leads
+// ---------------------------------------------------------------------------
+
+export interface CreateSalesLeadInput {
+  linkedinUrl: string;
+  name: string;
+  headline?: string;
+  company?: string;
+  location?: string;
+  status?: string;
+  tags?: string[];
+  notes?: string;
+}
+
+export async function listSalesLeads(): Promise<{ leads: SalesLead[] }> {
+  const data = await authedRequest<Record<string, unknown>>('/leads');
+  return { leads: (Array.isArray(data['leads']) ? data['leads'] : []) as SalesLead[] };
+}
+
+export async function createSalesLead(input: CreateSalesLeadInput): Promise<{ lead: SalesLead }> {
+  return authedRequest<{ lead: SalesLead }>('/leads', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4: Prospects (discover / research / signals / qualification / briefs)
+// ---------------------------------------------------------------------------
+
+export interface DiscoverProspectInput {
+  name?: string;
+  title?: string;
+  company?: string;
+  companyDomain?: string;
+  location?: string;
+  publicSourceUrls?: string[];
+}
+
+export async function discoverProspect(
+  input: DiscoverProspectInput,
+): Promise<{ candidate: ProspectCandidate }> {
+  return authedRequest<{ candidate: ProspectCandidate }>('/prospects/discover', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export interface ResearchProspectInput extends DiscoverProspectInput {
+  leadId?: string;
+}
+
+export async function researchProspect(
+  input: ResearchProspectInput,
+): Promise<{ research: ProspectResearch }> {
+  return authedRequest<{ research: ProspectResearch }>('/prospects/research', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function getProspectResearch(leadId: string): Promise<{ research: ProspectResearch }> {
+  return authedRequest<{ research: ProspectResearch }>(
+    `/prospects/research?leadId=${encodeURIComponent(leadId)}`,
+  );
+}
+
+export interface RecordSignalInput {
+  leadId?: string;
+  signalType: string;
+  source: string;
+  observedAt?: string;
+  confidence: number;
+  evidence: unknown;
+  interpretation: string;
+}
+
+export async function recordProspectSignal(input: RecordSignalInput): Promise<{ signal: ProspectSignal }> {
+  return authedRequest<{ signal: ProspectSignal }>('/prospects/signals', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listProspectSignals(leadId: string): Promise<{ signals: ProspectSignal[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/prospects/signals?leadId=${encodeURIComponent(leadId)}`,
+  );
+  return { signals: (Array.isArray(data['signals']) ? data['signals'] : []) as ProspectSignal[] };
+}
+
+export async function getProspectIntent(leadId: string): Promise<ProspectIntent> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/prospects/intent?leadId=${encodeURIComponent(leadId)}`,
+  );
+  return {
+    status: typeof data['status'] === 'string' ? (data['status'] as string) : undefined,
+    signals: (Array.isArray(data['signals']) ? data['signals'] : []) as ProspectSignal[],
+  };
+}
+
+export async function qualifyProspect(
+  leadId: string,
+): Promise<{ qualification: ProspectQualification }> {
+  return authedRequest<{ qualification: ProspectQualification }>('/prospects/qualify', {
+    method: 'POST',
+    body: JSON.stringify({ leadId }),
+  });
+}
+
+export async function getProspectQualification(
+  leadId: string,
+): Promise<{ qualification: ProspectQualification; score: QualificationScore }> {
+  return authedRequest<{ qualification: ProspectQualification; score: QualificationScore }>(
+    `/prospects/qualification?leadId=${encodeURIComponent(leadId)}`,
+  );
+}
+
+export async function createProspectBrief(leadId?: string, researchId?: string): Promise<{ brief: ProspectBrief }> {
+  return authedRequest<{ brief: ProspectBrief }>('/prospects/briefs', {
+    method: 'POST',
+    body: JSON.stringify({ leadId, researchId }),
+  });
+}
+
+export async function listProspectBriefs(leadId: string): Promise<{ briefs: ProspectBrief[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/prospects/briefs?leadId=${encodeURIComponent(leadId)}`,
+  );
+  const list = Array.isArray(data['briefs'])
+    ? data['briefs']
+    : Array.isArray(data['brief']) && data['brief']
+      ? [data['brief']]
+      : [];
+  return { briefs: list as ProspectBrief[] };
+}
+
+export async function synthesizeBrief(
+  id: string,
+  material: unknown[],
+): Promise<{ synthesis: BriefSynthesis }> {
+  return authedRequest<{ synthesis: BriefSynthesis }>(
+    `/prospects/briefs/${encodeURIComponent(id)}/synthesize`,
+    { method: 'POST', body: JSON.stringify({ material }) },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4: Outreach (strategies / drafts / reviews / prepared actions)
+// ---------------------------------------------------------------------------
+
+export interface CreateStrategyInput {
+  leadId?: string;
+  briefId?: string;
+  objective: string;
+  audience: string;
+  relationshipStage?: string;
+  angle: string;
+  reasonForContact: string;
+  relevantEvidence?: unknown[];
+  personalizationLevel?: string;
+  ctaType?: string;
+  riskFlags?: string[];
+  mustNotClaim?: string[];
+  relevantContentId?: string;
+  contentReason?: string;
+}
+
+export async function createOutreachStrategy(
+  input: CreateStrategyInput,
+): Promise<{ strategy: OutreachStrategy }> {
+  return authedRequest<{ strategy: OutreachStrategy }>('/outreach/strategies', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listOutreachStrategies(leadId: string): Promise<{ strategies: OutreachStrategy[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/outreach/strategies?leadId=${encodeURIComponent(leadId)}`,
+  );
+  return {
+    strategies: (Array.isArray(data['strategies']) ? data['strategies'] : []) as OutreachStrategy[],
+  };
+}
+
+export async function approveOutreachStrategy(id: string): Promise<{ strategy: OutreachStrategy }> {
+  return authedRequest<{ strategy: OutreachStrategy }>(
+    `/outreach/strategies/${encodeURIComponent(id)}/approve`,
+    { method: 'POST' },
+  );
+}
+
+export async function createOutreachDraft(
+  strategyId: string,
+  draftType: string,
+): Promise<{ draft: OutreachDraft }> {
+  return authedRequest<{ draft: OutreachDraft }>('/outreach/drafts', {
+    method: 'POST',
+    body: JSON.stringify({ strategyId, draftType }),
+  });
+}
+
+export async function listOutreachDrafts(params: {
+  strategyId?: string;
+  leadId?: string;
+}): Promise<{ drafts: OutreachDraft[] }> {
+  const query = new URLSearchParams();
+  if (params.strategyId) query.set('strategyId', params.strategyId);
+  if (params.leadId) query.set('leadId', params.leadId);
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  const data = await authedRequest<Record<string, unknown>>(`/outreach/drafts${suffix}`);
+  return { drafts: (Array.isArray(data['drafts']) ? data['drafts'] : []) as OutreachDraft[] };
+}
+
+export async function getOutreachDraft(id: string): Promise<{ draft: OutreachDraft }> {
+  return authedRequest<{ draft: OutreachDraft }>(`/outreach/drafts/${encodeURIComponent(id)}`);
+}
+
+export async function updateOutreachDraft(
+  id: string,
+  fields: Record<string, unknown>,
+): Promise<{ draft: OutreachDraft }> {
+  return authedRequest<{ draft: OutreachDraft }>(`/outreach/drafts/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(fields),
+  });
+}
+
+export async function createOutreachDraftRevision(id: string): Promise<{ draft: OutreachDraft }> {
+  return authedRequest<{ draft: OutreachDraft }>(
+    `/outreach/drafts/${encodeURIComponent(id)}/revisions`,
+    { method: 'POST' },
+  );
+}
+
+export async function validateOutreachDraft(
+  id: string,
+): Promise<{ validation: OutreachValidation }> {
+  return authedRequest<{ validation: OutreachValidation }>(
+    `/outreach/drafts/${encodeURIComponent(id)}/validate`,
+    { method: 'POST' },
+  );
+}
+
+export async function getOutreachDraftGates(
+  id: string,
+): Promise<{ gates: OutreachQualityGate[]; finalStatus?: string; overallScore?: number }> {
+  return authedRequest<{ gates: OutreachQualityGate[]; finalStatus?: string; overallScore?: number }>(
+    `/outreach/drafts/${encodeURIComponent(id)}/gates`,
+  );
+}
+
+export async function submitOutreachReview(
+  draftId: string,
+  note?: string,
+): Promise<{ review: OutreachReview }> {
+  return authedRequest<{ review: OutreachReview }>('/outreach/reviews', {
+    method: 'POST',
+    body: JSON.stringify({ draftId, note }),
+  });
+}
+
+export async function listOutreachReviews(draftId: string): Promise<{ reviews: OutreachReview[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/outreach/reviews?draftId=${encodeURIComponent(draftId)}`,
+  );
+  return { reviews: (Array.isArray(data['reviews']) ? data['reviews'] : []) as OutreachReview[] };
+}
+
+export async function decideOutreachReview(
+  id: string,
+  action: 'approve' | 'reject' | 'request_changes',
+): Promise<{ review: OutreachReview }> {
+  return authedRequest<{ review: OutreachReview }>(
+    `/outreach/reviews/${encodeURIComponent(id)}/decision`,
+    { method: 'POST', body: JSON.stringify({ action }) },
+  );
+}
+
+export interface CreatePreparedActionInput {
+  actionType: string;
+  target?: string;
+  draftId?: string;
+  approvalId?: string;
+  evidence?: unknown;
+  expiresAt?: string;
+}
+
+export async function createPreparedAction(
+  input: CreatePreparedActionInput,
+): Promise<{ preparedAction: PreparedAction }> {
+  return authedRequest<{ preparedAction: PreparedAction }>('/outreach/prepared-actions', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listPreparedActions(): Promise<{ preparedActions: PreparedAction[] }> {
+  const data = await authedRequest<Record<string, unknown>>('/outreach/prepared-actions');
+  return {
+    preparedActions: (Array.isArray(data['preparedActions'])
+      ? data['preparedActions']
+      : []) as PreparedAction[],
+  };
+}
+
+export async function markPreparedActionReady(id: string): Promise<{ preparedAction: PreparedAction }> {
+  return authedRequest<{ preparedAction: PreparedAction }>(
+    `/outreach/prepared-actions/${encodeURIComponent(id)}/ready`,
+    { method: 'POST' },
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4: Sales intelligence (classification / follow-ups / content signals)
+// ---------------------------------------------------------------------------
+
+export async function classifyConversation(
+  conversationId: string,
+): Promise<{ classification: ConversationClassification }> {
+  return authedRequest<{ classification: ConversationClassification }>(
+    '/sales-intelligence/classify',
+    { method: 'POST', body: JSON.stringify({ conversationId }) },
+  );
+}
+
+export async function listClassifications(
+  conversationId: string,
+): Promise<{ classifications: ConversationClassification[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/sales-intelligence/classifications?conversationId=${encodeURIComponent(conversationId)}`,
+  );
+  const list = Array.isArray(data['classifications'])
+    ? data['classifications']
+    : Array.isArray(data['classification']) && data['classification']
+      ? [data['classification']]
+      : [];
+  return { classifications: list as ConversationClassification[] };
+}
+
+export async function recommendFollowUp(input: {
+  conversationId?: string;
+  leadId?: string;
+}): Promise<{ followUp: FollowUpRecommendation }> {
+  return authedRequest<{ followUp: FollowUpRecommendation }>('/sales-intelligence/follow-ups', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listFollowUps(): Promise<{ followUps: FollowUpRecommendation[] }> {
+  const data = await authedRequest<Record<string, unknown>>('/sales-intelligence/follow-ups');
+  return {
+    followUps: (Array.isArray(data['followUps']) ? data['followUps'] : []) as FollowUpRecommendation[],
+  };
+}
+
+export interface CreateContentSignalInput {
+  signalType: string;
+  sourceConversationIds: string[];
+  evidence: unknown;
+  frequency?: string;
+  recommendedAngle?: string;
+  reasoning?: string;
+}
+
+export async function createContentSignal(
+  input: CreateContentSignalInput,
+): Promise<{ signal: ContentSignalItem }> {
+  return authedRequest<{ signal: ContentSignalItem }>('/sales-intelligence/content-signals', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listContentSignals(): Promise<{ signals: ContentSignalItem[] }> {
+  const data = await authedRequest<Record<string, unknown>>('/sales-intelligence/content-signals');
+  return { signals: (Array.isArray(data['signals']) ? data['signals'] : []) as ContentSignalItem[] };
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4: Conversations + messages
+// ---------------------------------------------------------------------------
+
+export async function listSalesConversations(): Promise<{ conversations: SalesConversation[] }> {
+  const data = await authedRequest<Record<string, unknown>>('/conversations');
+  return {
+    conversations: (Array.isArray(data['conversations'])
+      ? data['conversations']
+      : []) as SalesConversation[],
+  };
+}
+
+export async function createSalesConversation(input: {
+  leadId: string;
+  subject?: string;
+}): Promise<{ conversation: SalesConversation }> {
+  return authedRequest<{ conversation: SalesConversation }>('/conversations', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function listSalesMessages(
+  conversationId: string,
+): Promise<{ messages: SalesMessage[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/messages?conversationId=${encodeURIComponent(conversationId)}`,
+  );
+  let list: unknown[] = [];
+  if (Array.isArray(data['messages'])) {
+    list = data['messages'] as unknown[];
+  } else if (Array.isArray(data)) {
+    list = data as unknown[];
+  }
+  const filtered = (list as SalesMessage[]).filter((m) => {
+    if (!m || typeof m !== 'object') return true;
+    const cid = (m as Record<string, unknown>)['conversationId'];
+    return typeof cid === 'undefined' || cid === null || cid === conversationId;
+  });
+  return { messages: filtered };
+}
+
+export async function recordSalesMessage(input: {
+  conversationId: string;
+  body: string;
+  direction: string;
+}): Promise<{ message: SalesMessage }> {
+  return authedRequest<{ message: SalesMessage }>('/messages', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Phase 4: Pipeline
+// ---------------------------------------------------------------------------
+
+export interface CreatePipelineInput {
+  leadId: string;
+  name: string;
+  stage?: string;
+  value?: number;
+  expectedCloseDate?: string;
+  probability?: number;
+}
+
+export async function listPipeline(): Promise<{ opportunities: PipelineOpportunity[] }> {
+  const data = await authedRequest<Record<string, unknown>>('/pipeline');
+  const list = Array.isArray(data['opportunities'])
+    ? data['opportunities']
+    : Array.isArray(data['pipeline'])
+      ? data['pipeline']
+      : [];
+  return { opportunities: list as PipelineOpportunity[] };
+}
+
+export async function createPipelineOpportunity(
+  input: CreatePipelineInput,
+): Promise<{ opportunity: PipelineOpportunity }> {
+  return authedRequest<{ opportunity: PipelineOpportunity }>('/pipeline', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function updatePipelineOpportunity(
+  id: string,
+  fields: Partial<CreatePipelineInput>,
+): Promise<{ opportunity: PipelineOpportunity }> {
+  return authedRequest<{ opportunity: PipelineOpportunity }>(
+    `/pipeline/${encodeURIComponent(id)}`,
+    { method: 'PATCH', body: JSON.stringify(fields) },
+  );
+}
+
+export async function deletePipelineOpportunity(id: string): Promise<void> {
+  const response = await authedFetch(`/pipeline/${encodeURIComponent(id)}`, { method: 'DELETE' });
+  await handleResponse<unknown>(response);
 }

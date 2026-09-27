@@ -391,3 +391,251 @@ export interface IcpsResponse {
 export interface IcpDetailResponse {
   icp: Icp;
 }
+
+// ---------------------------------------------------------------------------
+// Phase 4: Sales domain types
+// ---------------------------------------------------------------------------
+
+export interface SalesLead {
+  id: string;
+  name: string;
+  headline?: string;
+  company?: string;
+  location?: string;
+  status?: string;
+  tags?: string[];
+  notes?: string;
+  linkedinUrl?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
+
+export interface SalesLeadsResponse {
+  leads: SalesLead[];
+}
+
+export interface SalesLeadDetailResponse {
+  lead: SalesLead;
+}
+
+export interface ProspectCandidate {
+  name?: string;
+  title?: string;
+  company?: string;
+  companyDomain?: string;
+  location?: string;
+  publicSourceUrls?: string[];
+  evidence?: unknown[];
+  confidence?: number;
+  unknownFields?: string[];
+  [key: string]: unknown;
+}
+
+export interface ProspectResearch {
+  id?: string;
+  leadId?: string;
+  summary?: string;
+  findings?: unknown;
+  [key: string]: unknown;
+}
+
+export interface ProspectSignal {
+  id?: string;
+  leadId?: string;
+  signalType?: string;
+  source?: string;
+  observedAt?: string;
+  confidence?: number;
+  evidence?: unknown;
+  interpretation?: string;
+  [key: string]: unknown;
+}
+
+export interface ProspectIntent {
+  status?: string;
+  signals?: ProspectSignal[];
+  [key: string]: unknown;
+}
+
+export interface QualificationDimension {
+  name?: string;
+  score?: number;
+  reason?: string;
+  evidence?: unknown[];
+  missing?: string;
+  [key: string]: unknown;
+}
+
+export interface ProspectQualification {
+  status?: string;
+  dimensions?: QualificationDimension[];
+  missingData?: string[];
+  reasoning?: string;
+  confidence?: number;
+  [key: string]: unknown;
+}
+
+export interface QualificationScore {
+  overallScore?: number;
+  dimensions?: unknown;
+  insufficientData?: boolean;
+  [key: string]: unknown;
+}
+
+export interface ProspectBrief {
+  id: string;
+  leadId?: string;
+  researchId?: string;
+  title?: string;
+  summary?: string;
+  content?: unknown;
+  [key: string]: unknown;
+}
+
+export interface BriefSynthesis {
+  synthesis?: unknown;
+  summary?: string;
+  [key: string]: unknown;
+}
+
+export interface OutreachStrategy {
+  id: string;
+  leadId?: string;
+  briefId?: string;
+  objective?: string;
+  audience?: string;
+  relationshipStage?: string;
+  angle?: string;
+  reasonForContact?: string;
+  relevantEvidence?: unknown[];
+  personalizationLevel?: string;
+  ctaType?: string;
+  riskFlags?: string[];
+  mustNotClaim?: string[];
+  status?: string;
+  approved?: boolean;
+  [key: string]: unknown;
+}
+
+export interface OutreachDraft {
+  id: string;
+  strategyId?: string;
+  leadId?: string;
+  draftType?: string;
+  body?: string;
+  content?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+export interface OutreachValidationResult {
+  gate?: string;
+  name?: string;
+  status?: string;
+  severity?: string;
+  message?: string;
+  [key: string]: unknown;
+}
+
+export interface OutreachValidation {
+  results?: OutreachValidationResult[];
+  finalStatus?: string;
+  overallScore?: number;
+  [key: string]: unknown;
+}
+
+export interface OutreachQualityGate {
+  id?: string;
+  name?: string;
+  status?: string;
+  score?: number;
+  message?: string;
+  [key: string]: unknown;
+}
+
+export interface OutreachReview {
+  id: string;
+  draftId?: string;
+  note?: string;
+  status?: string;
+  decision?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export interface PreparedAction {
+  id: string;
+  actionType?: string;
+  target?: string;
+  draftId?: string;
+  approvalId?: string;
+  evidence?: unknown;
+  expiresAt?: string;
+  status?: string;
+  [key: string]: unknown;
+}
+
+export interface SalesConversation {
+  id: string;
+  leadId?: string;
+  subject?: string;
+  status?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  [key: string]: unknown;
+}
+
+export interface SalesMessage {
+  id?: string;
+  conversationId?: string;
+  body?: string;
+  content?: string;
+  direction?: string;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export interface ConversationClassification {
+  id?: string;
+  conversationId?: string;
+  label?: string;
+  category?: string;
+  confidence?: number;
+  reasoning?: string;
+  [key: string]: unknown;
+}
+
+export interface FollowUpRecommendation {
+  id?: string;
+  conversationId?: string;
+  leadId?: string;
+  recommendation?: string;
+  suggestedMessage?: string;
+  reason?: string;
+  timing?: string;
+  [key: string]: unknown;
+}
+
+export interface ContentSignalItem {
+  id?: string;
+  signalType?: string;
+  sourceConversationIds?: string[];
+  evidence?: unknown;
+  frequency?: string;
+  recommendedAngle?: string;
+  reasoning?: string;
+  [key: string]: unknown;
+}
+
+export interface PipelineOpportunity {
+  id: string;
+  leadId?: string;
+  name?: string;
+  title?: string;
+  stage?: string;
+  value?: number;
+  expectedCloseDate?: string;
+  probability?: number;
+  [key: string]: unknown;
+}
