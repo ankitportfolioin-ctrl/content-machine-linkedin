@@ -31,6 +31,7 @@ import {
   OperatorAction,
   Opportunity,
   OpportunityFeedbackKind,
+  OpportunityFeedbackSummary,
   OpportunityScoring,
   Source,
   TrendSignal,
@@ -326,6 +327,7 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
   const [feedbackReason, setFeedbackReason] = useState('');
   const [feedbackState, setFeedbackState] = useState<string | null>(null);
   const [feedbackSending, setFeedbackSending] = useState(false);
+  const [feedbackSummary, setFeedbackSummary] = useState<OpportunityFeedbackSummary | null>(null);
   const [convertTitle, setConvertTitle] = useState('');
   const [converting, setConverting] = useState(false);
   const [convertMessage, setConvertMessage] = useState<string | null>(null);
@@ -336,6 +338,7 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
     try {
       const data = await getOpportunity(opportunityId);
       setOpportunity(data.opportunity);
+      setFeedbackSummary(data.feedbackSummary ?? null);
     } catch (err) {
       setError(friendlyErrorMessage(err));
     } finally {
@@ -352,6 +355,7 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
     setFeedbackState(null);
     try {
       await submitOpportunityFeedback(opportunityId, kind, feedbackReason.trim() || undefined);
+      await fetchDetail();
       setFeedbackState('Thanks — your feedback was recorded.');
     } catch (err) {
       setFeedbackState(friendlyErrorMessage(err));
@@ -456,6 +460,42 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
             {feedbackState}
           </p>
         ) : null}
+      </div>
+
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Workspace feedback</h3>
+        {!feedbackSummary || feedbackSummary.total === 0 ? (
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            No feedback recorded yet.
+          </p>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <p style={{ fontSize: '0.875rem' }}>Feedback: {feedbackSummary.total}</p>
+            <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+              {FEEDBACK_OPTIONS.filter(
+                (option) => (feedbackSummary.counts[option.value.toUpperCase()] ?? 0) > 0
+              ).map((option) => (
+                <li key={option.value}>
+                  {feedbackSummary.counts[option.value.toUpperCase()]}× {option.label}
+                </li>
+              ))}
+            </ul>
+            {feedbackSummary.reasons.length > 0 ? (
+              <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+                {feedbackSummary.reasons.map((entry, index) => {
+                  const label =
+                    FEEDBACK_OPTIONS.find((option) => option.value.toUpperCase() === entry.feedback)?.label ??
+                    entry.feedback;
+                  return (
+                    <li key={`${entry.feedback}-${index}`}>
+                      {entry.reason} <span style={{ color: 'var(--color-text-muted)' }}>({label})</span>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : null}
+          </div>
+        )}
       </div>
 
       <div className="card">

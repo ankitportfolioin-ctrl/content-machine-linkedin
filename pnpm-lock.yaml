@@ -235,6 +235,9 @@ importers:
       '@growth-operator/db':
         specifier: workspace:*
         version: link:../db
+      '@growth-operator/intelligence':
+        specifier: workspace:*
+        version: link:../intelligence
       '@growth-operator/learning':
         specifier: workspace:*
         version: link:../learning

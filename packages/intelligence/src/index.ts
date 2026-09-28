@@ -5,5 +5,6 @@ export * from './topicClustering';
 export * from './trendSignal';
 export * from './contentOpportunity';
 export * from './contentGap';
+export * from './opportunityFeedback';
 export * from './opportunityLearning';
 export * from './ssrfProtection';

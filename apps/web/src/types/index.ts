@@ -70,6 +70,7 @@ export interface OpportunitiesResponse {
 
 export interface OpportunityDetailResponse {
   opportunity: Opportunity;
+  feedbackSummary?: OpportunityFeedbackSummary;
 }
 
 export interface OpportunityScoringDimension {
@@ -97,6 +98,9 @@ export interface OpportunityScoringResponse {
   scoring: OpportunityScoring;
   scoringInputs: Record<string, unknown>;
   storedScore?: number;
+  feedbackSummary?: OpportunityFeedbackSummary;
+  rankedOverallScore?: number;
+  feedbackPenalty?: number;
 }
 
 export type OpportunityFeedbackKind =
@@ -106,6 +110,12 @@ export type OpportunityFeedbackKind =
   | 'wrong_audience'
   | 'weak_evidence'
   | 'not_timely';
+
+export interface OpportunityFeedbackSummary {
+  total: number;
+  counts: Record<string, number>;
+  reasons: Array<{ feedback: string; reason: string; createdAt: string }>;
+}
 
 export interface OpportunityFeedback {
   id?: string;

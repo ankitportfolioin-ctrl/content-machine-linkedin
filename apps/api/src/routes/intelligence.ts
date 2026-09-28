@@ -15,7 +15,9 @@ import { SourceUnderstandingService } from '@growth-operator/intelligence';
 import { ClaimLedgerService } from '@growth-operator/intelligence';
 import { TopicClusteringService } from '@growth-operator/intelligence';
 import { TrendSignalService } from '@growth-operator/intelligence';
-import { ContentOpportunityService, toOpportunityLearningView, ContentOpportunityInput } from '@growth-operator/intelligence';
+import { ContentOpportunityService, toOpportunityLearningView,
+  ContentOpportunityInput } from '@growth-operator/intelligence';
+import { fetchFeedbackSummary, applyFeedbackDemotion } from '@growth-operator/intelligence';
 import { ContentGapService } from '@growth-operator/intelligence';
 import { LearningDerivationService, applyLearningInfluence } from '@growth-operator/learning';
 import { AIProviderRegistry, createDefaultRegistry } from '@growth-operator/ai';
@@ -447,7 +449,9 @@ router.get('/opportunities/:opportunityId', async (req, res, next) => {
       throw new NotFoundError('Content Opportunity');
     }
 
-    res.json({ opportunity });
+    const feedbackSummary = await fetchFeedbackSummary(prisma, authReq.workspaceId, opportunity.id);
+
+    res.json({ opportunity, feedbackSummary });
   } catch (error) {
     next(error);
   }
@@ -503,7 +507,12 @@ router.get('/opportunities/:opportunityId/score', async (req, res, next) => {
       contentGaps: [] as Array<{ type: string; description: string; evidence: string }>,
     };
     const scoring = await scoreOpportunityWithLearning(authReq.workspaceId, scoringInputs);
-    res.json({ scoring, scoringInputs, storedScore: opportunity.opportunityScore });
+    const feedbackSummary = await fetchFeedbackSummary(prisma, authReq.workspaceId, opportunity.id);
+    const { rankedScore: rankedOverallScore, penalty: feedbackPenalty } = applyFeedbackDemotion(
+      scoring.overallScore,
+      feedbackSummary
+    );
+    res.json({ scoring, scoringInputs, storedScore: opportunity.opportunityScore, feedbackSummary, rankedOverallScore, feedbackPenalty });
   } catch (error) {
     next(error);
   }

@@ -20,6 +20,7 @@ const mockPrisma = {
   topic: { findMany: vi.fn().mockResolvedValue([]) },
   lead: { findMany: vi.fn().mockResolvedValue([]) },
   salesContentSignal: { findMany: vi.fn().mockResolvedValue([]) },
+  opportunityFeedback: { findMany: vi.fn().mockResolvedValue([]) },
 } as unknown as PrismaClient;
 
 describe('Candidate collection', () => {

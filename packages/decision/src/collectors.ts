@@ -1,5 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Candidate } from './types';
+import { fetchFeedbackSummaries, feedbackDemotion } from '@growth-operator/intelligence';
 import { objectionPatterns, prospectRelevance, salesContentSignals } from './signals';
 
 const id = (kind: string, subjectId: string) => `${kind}:${subjectId}`;
@@ -59,23 +60,43 @@ async function contentOpportunities(prisma: PrismaClient, workspaceId: string, n
     orderBy: { opportunityScore: 'desc' },
     take: 50,
   });
-  return rows.map((r: OpportunityRow) => ({
-    kind: 'content_opportunity' as const,
-    identityKey: id('content_opportunity', r.id),
-    subjectId: r.id,
-    title: `Review opportunity: ${r.title}`,
-    createdAt: r.createdAt,
-    facts: {
-      relevance01: normalize01(r.opportunityScore),
-      evidenceCount: (Array.isArray(r.sourceIds) ? (r.sourceIds as unknown[]).length : 0)
-        + (Array.isArray(r.claimIds) ? (r.claimIds as unknown[]).length : 0),
-      ready: true,
-      learningDimensions: ['relevance', 'evidence_strength'],
-      subjectMeta: { opportunityId: r.id, topicId: r.topicId, thesis: r.thesis, opportunityScore: r.opportunityScore },
-    },
-    reasons: [`Content opportunity scored ${r.opportunityScore} awaits review.`],
-    evidenceLinks: [{ label: 'Opportunity', ref: `contentOpportunity:${r.id}` }],
-  }));
+  // One batched read: workspace feedback demotes ranking through the shared
+  // helper. Opportunities without feedback keep their stored score exactly.
+  const summaries = await fetchFeedbackSummaries(
+    prisma,
+    workspaceId,
+    rows.map((r: OpportunityRow) => r.id)
+  );
+  return rows.map((r: OpportunityRow) => {
+    const base = normalize01(r.opportunityScore);
+    const summary = summaries.get(r.id);
+    const { negativeVotes, penalty } = summary
+      ? feedbackDemotion(summary)
+      : { negativeVotes: 0, penalty: 0 };
+    const relevance01 = Math.max(0, Math.round((base - penalty) * 100) / 100);
+    return {
+      kind: 'content_opportunity' as const,
+      identityKey: id('content_opportunity', r.id),
+      subjectId: r.id,
+      title: `Review opportunity: ${r.title}`,
+      createdAt: r.createdAt,
+      facts: {
+        relevance01,
+        evidenceCount: (Array.isArray(r.sourceIds) ? (r.sourceIds as unknown[]).length : 0)
+          + (Array.isArray(r.claimIds) ? (r.claimIds as unknown[]).length : 0),
+        ready: true,
+        learningDimensions: ['relevance', 'evidence_strength'],
+        subjectMeta: { opportunityId: r.id, topicId: r.topicId, thesis: r.thesis, opportunityScore: r.opportunityScore },
+      },
+      reasons: [
+        `Content opportunity scored ${r.opportunityScore} awaits review.`,
+        ...(penalty > 0
+          ? [`Workspace feedback demotes ranking: ${negativeVotes} negative vote(s), −${Math.round(penalty * 100)}%.`]
+          : []),
+      ],
+      evidenceLinks: [{ label: 'Opportunity', ref: `contentOpportunity:${r.id}` }],
+    };
+  });
 }
 
 async function contentGaps(prisma: PrismaClient, workspaceId: string): Promise<Candidate[]> {
