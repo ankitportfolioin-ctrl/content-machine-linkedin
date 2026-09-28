@@ -10,6 +10,7 @@ import {
   friendlyErrorMessage,
   isAiUnavailable,
   listNextActions,
+  researchProspectFromAction,
   startIdeaFromAction,
 } from '../services/api';
 
@@ -116,6 +117,10 @@ function RecommendedSteps() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [rowError, setRowError] = useState<Record<string, string>>({});
+  // Hooks must all run before any early return below: adding navigate here fixes
+  // a hooks-order crash (first render returned during loading, later renders
+  // called one extra hook).
+  const navigate = useNavigate();
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -202,8 +207,6 @@ function RecommendedSteps() {
     );
   }
 
-  const navigate = useNavigate();
-
   async function handleStartIdea(id: string) {
     setWorkingId(id);
     setRowError((prev) => {
@@ -219,6 +222,33 @@ function RecommendedSteps() {
       if (err instanceof ApiRequestError && err.status === 409 && err.code === 'CONFLICT') {
         await fetchData();
         navigate('/content');
+        return;
+      }
+      setRowError((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  function leadsTargetFor(leadId: string | null | undefined): string {
+    return leadId ? `/leads?leadId=${encodeURIComponent(leadId)}` : '/leads';
+  }
+
+  async function handleResearchProspect(id: string, leadId?: string | null) {
+    setWorkingId(id);
+    setRowError((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    try {
+      const result = await researchProspectFromAction(id);
+      await fetchData();
+      navigate(leadsTargetFor(result.research.leadId ?? leadId));
+    } catch (err) {
+      if (err instanceof ApiRequestError && err.status === 409 && err.code === 'CONFLICT') {
+        await fetchData();
+        navigate(leadsTargetFor(leadId));
         return;
       }
       setRowError((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
@@ -320,6 +350,15 @@ function RecommendedSteps() {
                         onClick={() => void handleStartIdea(String(action.id))}
                       >
                         {workingId === String(action.id) ? 'Saving...' : 'Start idea'}
+                      </button>
+                    ) : null}
+                    {String(action.kind) === 'prospect_relevance' ? (
+                      <button
+                        className="btn btn-secondary"
+                        disabled={workingId === String(action.id)}
+                        onClick={() => void handleResearchProspect(String(action.id), action.subjectId)}
+                      >
+                        {workingId === String(action.id) ? 'Saving...' : 'Research prospect'}
                       </button>
                     ) : null}
                     <button

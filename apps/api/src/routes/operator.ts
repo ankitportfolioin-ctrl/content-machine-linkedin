@@ -4,7 +4,7 @@ import { operatorActionsQuerySchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
 import { createDefaultRegistry } from '@growth-operator/ai';
-import { OperatorActionService, explainWithAi, extractResultKeys } from '@growth-operator/decision';
+import { OperatorActionService, explainWithAi, extractResultKeys, extractSalesResultKeys } from '@growth-operator/decision';
 import { forwardDecisionError } from '../utils/decisionErrors';
 import { getEnv } from '../config/env';
 
@@ -42,7 +42,7 @@ router.get('/next-actions', async (req, res, next) => {
         score: a.score,
         reasons: a.reasons,
         evidenceLinks: a.evidenceLinks,
-        subjectMeta: { ...((a.facts.subjectMeta ?? {}) as object), ...extractResultKeys(metaByKey.get(a.identityKey)) },
+        subjectMeta: { ...((a.facts.subjectMeta ?? {}) as object), ...extractResultKeys(metaByKey.get(a.identityKey)), ...extractSalesResultKeys(metaByKey.get(a.identityKey)) },
         status: 'PENDING' as const,
       })),
       total: filtered.length,
@@ -99,6 +99,18 @@ router.post('/actions/:actionId/ideas', async (req, res, next) => {
     const { actionId } = req.params;
     if (!actionId) throw new NotFoundError('Operator Action');
     const result = await actionService.initiateIdea(authReq.workspaceId, actionId, authReq.user.id);
+    res.status(201).json(result);
+  } catch (error) {
+    forwardDecisionError(error, next);
+  }
+});
+
+router.post('/actions/:actionId/research', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { actionId } = req.params;
+    if (!actionId) throw new NotFoundError('Operator Action');
+    const result = await actionService.initiateSalesResearch(authReq.workspaceId, actionId);
     res.status(201).json(result);
   } catch (error) {
     forwardDecisionError(error, next);

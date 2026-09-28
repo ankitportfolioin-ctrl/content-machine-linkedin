@@ -1,20 +1,26 @@
 import { PrismaClient } from '@prisma/client';
+import { createDefaultRegistry } from '@growth-operator/ai';
 import { LearningDerivationService } from '@growth-operator/learning';
+import { ProspectResearchService, SalesError } from '@growth-operator/sales';
 import { DecisionError } from './errors';
 import { ActionStatus, ScoredAction } from './types';
 import { collectCandidates } from './collectors';
 import { checkEligibility } from './eligibility';
 import { rankScored, scoreCandidate } from './scoring';
 import { explainAction } from './explain';
-import { buildObjectionIdea, buildRelevanceIdea, extractResultKeys } from './initiation';
+import { buildObjectionIdea, buildRelevanceIdea, buildRelevanceResearch, extractResultKeys, extractSalesResultKeys } from './initiation';
 
 export class OperatorActionService {
   private prisma: PrismaClient;
   private learning: LearningDerivationService;
+  private research: ProspectResearchService;
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
     this.learning = new LearningDerivationService(prisma);
+    // Empty registry: createResearch never touches AI (only synthesize does,
+    // which this service never calls). Passed for constructor compatibility only.
+    this.research = new ProspectResearchService(prisma, createDefaultRegistry());
   }
 
   /**
@@ -57,10 +63,14 @@ export class OperatorActionService {
     );
 
     for (const action of ranked) {
-      // Initiation linkage (resultIdeaId/Title/initiatedAt) is operator history:
-      // freshly collected candidates never carry it, so re-merge it on update
-      // rather than letting refresh erase it.
-      const preserved = extractResultKeys(persistedMeta.get(action.identityKey));
+      // Initiation linkage (resultIdeaId/Title/initiatedAt for content ideas,
+      // resultResearchId/Title/initiatedResearchAt for sales research) is operator
+      // history: freshly collected candidates never carry it, so re-merge it on
+      // update rather than letting refresh erase it.
+      const preserved = {
+        ...extractResultKeys(persistedMeta.get(action.identityKey)),
+        ...extractSalesResultKeys(persistedMeta.get(action.identityKey)),
+      };
       const subjectMeta = { ...((action.facts.subjectMeta ?? {}) as object), ...preserved };
       await this.prisma.operatorAction.upsert({
         where: { workspaceId_identityKey: { workspaceId, identityKey: action.identityKey } },
@@ -236,6 +246,121 @@ export class OperatorActionService {
       return { idea, action };
     } catch (error) {
       await this.prisma.contentIdea.delete({ where: { id: idea.id } }).catch(() => undefined);
+      throw error;
+    }
+  }
+
+  /**
+   * Human-initiated sales scaffolding: records exactly one ProspectResearch row
+   * from a PENDING prospect_relevance action's recorded evidence, then links it
+   * in the action subjectMeta. The research row carries facts only (no profile
+   * fields, no unknowns, no confidence estimate) so downstream brief assembly
+   * keeps falling back to the lead's real profile. No outreach, draft, review,
+   * or approval is created, and the action stays PENDING for the operator to
+   * complete manually. The create + linkage update run atomically.
+   */
+  async initiateSalesResearch(workspaceId: string, actionId: string) {
+    const row = await this.prisma.operatorAction.findFirst({ where: { id: actionId, workspaceId } });
+    if (!row) {
+      throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
+    }
+    if (row.kind !== 'prospect_relevance') {
+      throw new DecisionError('CONFLICT', `Only prospect_relevance actions can start sales research (kind: ${row.kind}).`);
+    }
+    if (row.status !== 'PENDING') {
+      throw new DecisionError('CONFLICT', `Only PENDING actions can start sales research (current: ${row.status}).`);
+    }
+    const meta = (row.subjectMeta ?? {}) as Record<string, unknown>;
+    if (typeof meta['resultResearchId'] === 'string') {
+      const prior = await this.prisma.prospectResearch.findFirst({
+        where: { id: meta['resultResearchId'] as string, workspaceId },
+      });
+      if (prior) {
+        throw new DecisionError('CONFLICT', 'Sales research was already started from this action.', {
+          researchId: prior.id,
+          researchTitle: meta['resultResearchTitle'] ?? null,
+        });
+      }
+    }
+
+    const candidates = await collectCandidates(this.prisma, workspaceId, Date.now());
+    const candidate = candidates.find((c) => c.identityKey === row.identityKey);
+    if (!candidate) {
+      throw new DecisionError('CONFLICT', 'The operator action no longer qualifies; nothing was created.');
+    }
+    const verdict = await checkEligibility(this.prisma, workspaceId, candidate);
+    if (!verdict.eligible) {
+      throw new DecisionError('CONFLICT', verdict.reason ?? 'The operator action is no longer eligible; nothing was created.');
+    }
+
+    const candidateMeta = (candidate.facts.subjectMeta ?? {}) as Record<string, unknown>;
+    const leadId = typeof candidate.subjectId === 'string' ? candidate.subjectId : '';
+    const lead = leadId
+      ? await this.prisma.lead.findFirst({ where: { id: leadId, workspaceId } })
+      : null;
+    if (!lead) {
+      throw new DecisionError('CONFLICT', 'The prospect no longer exists in this workspace; nothing was created.');
+    }
+    const researchInput = buildRelevanceResearch({
+      topicId:
+        typeof candidateMeta['topicId'] === 'string' ? (candidateMeta['topicId'] as string) : '',
+      topicName:
+        typeof candidateMeta['topicName'] === 'string' ? (candidateMeta['topicName'] as string) : '',
+      leadId,
+      leadName:
+        typeof candidateMeta['leadName'] === 'string' ? (candidateMeta['leadName'] as string) : '',
+      relevance:
+        typeof candidateMeta['relevance'] === 'number' ? (candidateMeta['relevance'] as number) : 0,
+      dimensions: Array.isArray(candidateMeta['dimensions'])
+        ? (candidateMeta['dimensions'] as unknown[])
+            .filter(
+              (v): v is Record<string, unknown> => typeof v === 'object' && v !== null
+            )
+            .map((d) => ({
+              name: typeof d['name'] === 'string' ? (d['name'] as string) : 'unknown',
+              score: typeof d['score'] === 'number' ? (d['score'] as number) : 0,
+              reason: typeof d['reason'] === 'string' ? (d['reason'] as string) : '',
+            }))
+        : [],
+      icp: (() => {
+        const raw = candidateMeta['icpUsed'] as Record<string, unknown> | null | undefined;
+        if (raw && typeof raw['id'] === 'string' && typeof raw['name'] === 'string') {
+          return { id: raw['id'] as string, name: raw['name'] as string };
+        }
+        return null;
+      })(),
+      identityKey: candidate.identityKey,
+    });
+
+    const initiatedResearchAt = new Date().toISOString();
+    let research: { id: string };
+    try {
+      research = await this.research.createResearch({
+        workspaceId,
+        leadId,
+        facts: researchInput.facts,
+      });
+    } catch (error) {
+      if (error instanceof SalesError) {
+        throw new DecisionError('CONFLICT', error.message);
+      }
+      throw error;
+    }
+    try {
+      const action = await this.prisma.operatorAction.update({
+        where: { id: row.id },
+        data: {
+          subjectMeta: {
+            ...(meta as object),
+            resultResearchId: research.id,
+            resultResearchTitle: researchInput.resultTitle,
+            initiatedResearchAt,
+          } as object,
+        },
+      });
+      return { research, action };
+    } catch (error) {
+      await this.prisma.prospectResearch.delete({ where: { id: research.id } }).catch(() => undefined);
       throw error;
     }
   }

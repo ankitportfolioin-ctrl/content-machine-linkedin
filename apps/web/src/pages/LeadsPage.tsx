@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
@@ -54,6 +55,33 @@ import {
 export function LeadsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [selectedLead, setSelectedLead] = useState<SalesLead | null>(null);
+  const [searchParams] = useSearchParams();
+  const [deepLinkAttemptedFor, setDeepLinkAttemptedFor] = useState<string | null>(null);
+
+  // Deep-link: /leads?leadId=<id> opens that exact existing lead once
+  // authenticated. Unknown ids select nothing (normal list view); the attempt is
+  // recorded per id so Back-to-leads never re-triggers selection.
+  useEffect(() => {
+    if (authLoading || !isAuthenticated) return;
+    const leadId = searchParams.get('leadId');
+    if (!leadId || selectedLead || deepLinkAttemptedFor === leadId) return;
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = await listSalesLeads();
+        if (cancelled) return;
+        const exact = (data.leads ?? []).find((l) => l.id === leadId) ?? null;
+        if (exact) setSelectedLead(exact);
+      } catch {
+        // Fall through to the normal list view on lookup failure.
+      } finally {
+        if (!cancelled) setDeepLinkAttemptedFor(leadId);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authLoading, isAuthenticated, searchParams, selectedLead, deepLinkAttemptedFor]);
 
   if (authLoading) {
     return (

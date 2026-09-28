@@ -13,6 +13,11 @@ export const RELEVANCE_TAG = 'relevance-driven';
 /** subjectMeta keys recording an initiation. Merged, never replacing provenance. */
 export const RESULT_KEYS = ['resultIdeaId', 'resultIdeaTitle', 'initiatedAt'] as const;
 
+/** subjectMeta keys recording a sales-research initiation. Separate from idea keys:
+ * one action may legitimately initiate both a content idea (Phase 10) and sales
+ * research (Phase 11), so the two linkages must never collide. */
+export const SALES_RESULT_KEYS = ['resultResearchId', 'resultResearchTitle', 'initiatedResearchAt'] as const;
+
 export interface ObjectionPrefillInput {
   normalizedObjection: string;
   count: number;
@@ -112,4 +117,83 @@ export function buildRelevanceIdea(input: RelevancePrefillInput): RelevancePrefi
     `Originating operator action: ${input.identityKey}. Draft created from an operator recommendation; planning, review, and approval still required.`,
   ];
   return { title, description: lines.join('\n'), tags: [RELEVANCE_TAG] };
+}
+
+/** Keep only sales-initiation linkage keys from a persisted subjectMeta blob. */
+export function extractSalesResultKeys(meta: unknown): Record<string, unknown> {
+  if (!meta || typeof meta !== 'object') return {};
+  const source = meta as Record<string, unknown>;
+  const out: Record<string, unknown> = {};
+  for (const key of SALES_RESULT_KEYS) {
+    if (typeof source[key] === 'string') out[key] = source[key];
+  }
+  return out;
+}
+
+export interface RelevanceResearchFact {
+  statement: string;
+  sourceRef: string;
+  // Always null: recorded relevance evidence carries scores and reasons but no
+  // legitimate per-statement confidence value, and none is invented.
+  confidence: null;
+}
+
+export interface RelevanceResearchInput {
+  topicId: string;
+  topicName: string;
+  leadId: string;
+  leadName: string;
+  relevance: number;
+  dimensions: RelevanceDimensionInput[];
+  icp: { id: string; name: string } | null;
+  identityKey: string;
+}
+
+export interface RelevanceResearch {
+  facts: RelevanceResearchFact[];
+  /** Display label for the action linkage only; never written to the research row. */
+  resultTitle: string;
+}
+
+/**
+ * Deterministic research facts from recorded relevance evidence only. Profile fields
+ * (name/title/company/…) are intentionally left unset by the caller: BriefService
+ * assembles `who.title = research?.title ?? lead?.headline`, so any label written here
+ * would shadow the lead's real headline in briefs. Traceability lives in the facts
+ * (ids + action identity) and in the action subjectMeta linkage instead.
+ */
+export function buildRelevanceResearch(input: RelevanceResearchInput): RelevanceResearch {
+  const pct = Math.round(input.relevance * 100);
+  const topicName = input.topicName.trim().length > 0 ? input.topicName.trim() : 'Untitled topic';
+  const leadName = input.leadName.trim().length > 0 ? input.leadName.trim() : 'Unnamed prospect';
+  const sourceRef = `operatorAction:${input.identityKey}`;
+  const facts: RelevanceResearchFact[] = [
+    {
+      statement: (
+        `Recorded topic relevance ${pct}% (${input.relevance}) for prospect ${leadName}. ` +
+        `Topic ${input.topicId} (${topicName}) × prospect ${input.leadId} (${leadName}). ` +
+        `Originating operator action: ${input.identityKey}.`
+      ).slice(0, 2000),
+      sourceRef,
+      confidence: null,
+    },
+  ];
+  for (const d of input.dimensions.slice(0, 8)) {
+    facts.push({
+      statement: `- ${d.name} (${d.score}): ${d.reason}`.slice(0, 2000),
+      sourceRef,
+      confidence: null,
+    });
+  }
+  if (input.icp) {
+    facts.push({
+      statement: `ICP used for relevance: ${input.icp.name} (${input.icp.id}).`.slice(0, 2000),
+      sourceRef,
+      confidence: null,
+    });
+  }
+  return {
+    facts,
+    resultTitle: `Topic relevance: ${topicName} × ${leadName}`.slice(0, 200),
+  };
 }

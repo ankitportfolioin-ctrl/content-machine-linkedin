@@ -1356,6 +1356,17 @@ export async function startIdeaFromAction(id: string): Promise<StartIdeaResponse
   });
 }
 
+export interface StartResearchResponse {
+  research: { id: string; leadId: string | null };
+  action: { id: string };
+}
+
+export async function researchProspectFromAction(id: string): Promise<StartResearchResponse> {
+  return authedRequest<StartResearchResponse>(`/operator/actions/${encodeURIComponent(id)}/research`, {
+    method: 'POST',
+  });
+}
+
 export async function getExplanation(id: string): Promise<ExplanationResponse> {
   return authedRequest<ExplanationResponse>(`/operator/explanations/${encodeURIComponent(id)}`);
 }

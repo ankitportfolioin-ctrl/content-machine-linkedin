@@ -20,7 +20,9 @@ export type ResearchSynthesis = z.infer<typeof ResearchSynthesisSchema>;
 export interface ResearchFactInput {
   statement: string;
   sourceRef: string;
-  confidence: number;
+  // Null when the recorded source carries no legitimate confidence value.
+  // Callers must not invent one (e.g. a relevance score is not a confidence).
+  confidence: number | null;
 }
 
 export class ProspectResearchService {

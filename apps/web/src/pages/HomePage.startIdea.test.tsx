@@ -32,3 +32,26 @@ describe('Home Start-idea button surface', () => {
     expect(startIdeaCount).toBeLessThanOrEqual(2);
   });
 });
+
+describe('Home Research-prospect button surface', () => {
+  it('shows Research prospect only for prospect_relevance', () => {
+    expect(source).toContain('Research prospect');
+    expect(source).toContain('handleResearchProspect');
+    expect(source).toContain('researchProspectFromAction');
+    expect(source).toContain('leadsTargetFor');
+    expect(source).toContain('/leads?leadId=${encodeURIComponent(leadId)}');
+  });
+
+  it('does not add Research prospect for any other kind', () => {
+    const guardLines = source
+      .split('\n')
+      .filter((line) => line.includes("=== 'prospect_relevance'") && line.includes('? ('));
+    // Start-idea guard (both kinds) + Research-prospect guard (relevance only).
+    expect(guardLines.length).toBeGreaterThanOrEqual(2);
+    const researchOnly = guardLines.filter((line) => !line.includes('objection_pattern'));
+    expect(researchOnly).toHaveLength(1);
+    const researchCount = (source.match(/Research prospect/g) ?? []).length;
+    expect(researchCount).toBeGreaterThan(0);
+    expect(researchCount).toBeLessThanOrEqual(2);
+  });
+});
