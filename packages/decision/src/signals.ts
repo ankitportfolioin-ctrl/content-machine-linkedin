@@ -16,6 +16,7 @@ export const MIN_PROSPECT_RELEVANCE = 0.5;
 export const MAX_RELEVANCE_TOPICS = 10;
 export const MAX_RELEVANCE_LEADS = 10;
 export const MAX_RELEVANCE_ACTIONS = 10;
+export const MAX_SIGNAL_ACTIONS = 10;
 /** Max provenance ids stored per action (full counts always preserved). */
 export const MAX_STORED_IDS = 50;
 
@@ -198,6 +199,78 @@ export async function prospectRelevance(
       evidenceLinks: [
         { label: 'Topic', ref: `topic:${topic.id}` },
         { label: 'Prospect', ref: `lead:${lead.id}` },
+      ],
+    };
+  });
+}
+
+/**
+ * Scoring-dimension mapping for sales-signal candidates (existing framework,
+ * no changes):
+ * - relevance01 = recurrence (conversationCount/5, capped): more conversations,
+ *   more relevant — same recurrence semantics as objection candidates.
+ * - evidenceCount = distinct conversations (each is an evidence reference).
+ * - ready = false: acting means manual content work, like content_gap.
+ * - urgency: default (no manufactured time pressure).
+ * - learningDimensions: [] (no confirmed-learning dimension honestly describes signals).
+ */
+export async function salesContentSignals(
+  prisma: PrismaClient,
+  workspaceId: string,
+  now: number
+): Promise<Candidate[]> {
+  void now;
+  interface SignalRow {
+    id: string;
+    signalType: string;
+    sourceConversationIds: unknown;
+    evidence: string;
+    frequency: number | null;
+    recommendedAngle: string | null;
+    createdAt: Date;
+  }
+  const rows = (await prisma.salesContentSignal.findMany({
+    where: { workspaceId },
+    orderBy: [{ createdAt: 'desc' }, { id: 'asc' }],
+    take: MAX_SIGNAL_ACTIONS,
+  })) as SignalRow[];
+  return rows.map((signal: SignalRow) => {
+    const conversationIds = Array.isArray(signal.sourceConversationIds)
+      ? (signal.sourceConversationIds as unknown[]).filter((v): v is string => typeof v === 'string')
+      : [];
+    const count = conversationIds.length;
+    const angle = typeof signal.recommendedAngle === 'string' ? signal.recommendedAngle : null;
+    return {
+      kind: 'sales_content_signal' as const,
+      identityKey: `sales_content_signal:${signal.id}`,
+      subjectId: signal.id,
+      title:
+        angle && angle.trim().length > 0
+          ? `Turn signal into content: "${angle.slice(0, 120)}"`
+          : `Turn ${signal.signalType} signal into content`,
+      createdAt: signal.createdAt,
+      facts: {
+        relevance01: Math.min(1, round2(count / 5)),
+        evidenceCount: count,
+        ready: false,
+        learningDimensions: [],
+        subjectMeta: {
+          signalId: signal.id,
+          signalType: signal.signalType,
+          frequency: signal.frequency,
+          conversationCount: count,
+          conversationIds: conversationIds.slice(0, MAX_STORED_IDS),
+          recommendedAngle: signal.recommendedAngle,
+        },
+      },
+      reasons: [
+        `Recorded sales signal (${signal.signalType}) across ${count} conversation(s): "${signal.evidence.slice(0, 200)}".`,
+        ...(angle && angle.trim().length > 0 ? [`Recorded angle: "${angle.slice(0, 200)}".`] : []),
+        'Suggested next step: create a content idea from this signal via Content (manual; nothing is created automatically).',
+      ],
+      evidenceLinks: [
+        { label: 'Sales signal', ref: `salesContentSignal:${signal.id}` },
+        ...conversationIds.slice(0, 3).map((cid) => ({ label: 'Conversation', ref: `conversation:${cid}` })),
       ],
     };
   });

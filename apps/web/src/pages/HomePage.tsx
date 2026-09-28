@@ -45,6 +45,7 @@ function kindLabel(kind: string): string {
   if (normalized === 'learning_proposal') return 'Suggested improvement';
   if (normalized === 'objection_pattern') return 'Recurring objection';
   if (normalized === 'prospect_relevance') return 'Prospect fit';
+  if (normalized === 'sales_content_signal') return 'Sales signal';
   if (normalized.includes('review')) return 'Review';
   if (normalized.includes('pipeline') || normalized.includes('deal')) return 'Pipeline';
   if (normalized.includes('lead') || normalized.includes('prospect') || normalized.includes('outreach'))
@@ -65,6 +66,9 @@ function kindLabel(kind: string): string {
 function kindTarget(kind: string): string {
   const normalized = (kind ?? '').toLowerCase();
   if (normalized === 'objection_pattern') return '/content';
+  // Explicit before the substring fallbacks below: 'sales_content_signal'
+  // contains 'content', but signals live in the Inbox workflow.
+  if (normalized === 'sales_content_signal') return '/inbox';
   if (
     normalized.includes('content') ||
     normalized.includes('review') ||
@@ -343,7 +347,7 @@ function RecommendedSteps() {
                     <NavLink to={kindTarget(String(action.kind))} className="btn btn-secondary">
                       Open
                     </NavLink>
-                    {(String(action.kind) === 'objection_pattern' || String(action.kind) === 'prospect_relevance') ? (
+                    {(String(action.kind) === 'objection_pattern' || String(action.kind) === 'prospect_relevance' || String(action.kind) === 'sales_content_signal') ? (
                       <button
                         className="btn btn-secondary"
                         disabled={workingId === String(action.id)}

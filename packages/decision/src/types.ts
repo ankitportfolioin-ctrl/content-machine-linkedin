@@ -9,7 +9,8 @@ export type ActionKind =
   | 'learning_proposal'
   | 'stale_draft'
   | 'objection_pattern'
-  | 'prospect_relevance';
+  | 'prospect_relevance'
+  | 'sales_content_signal';
 
 export type ActionStatus = 'PENDING' | 'DISMISSED' | 'COMPLETED';
 

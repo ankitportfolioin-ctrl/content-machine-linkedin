@@ -1,14 +1,14 @@
 import { PrismaClient } from '@prisma/client';
 import { createDefaultRegistry } from '@growth-operator/ai';
 import { LearningDerivationService } from '@growth-operator/learning';
-import { ProspectResearchService, SalesError } from '@growth-operator/sales';
+import { ProspectResearchService, SalesBridgeService, SalesError } from '@growth-operator/sales';
 import { DecisionError } from './errors';
 import { ActionStatus, ScoredAction } from './types';
 import { collectCandidates } from './collectors';
 import { checkEligibility } from './eligibility';
 import { rankScored, scoreCandidate } from './scoring';
 import { explainAction } from './explain';
-import { buildObjectionIdea, buildRelevanceIdea, buildRelevanceResearch, extractResultKeys, extractSalesResultKeys } from './initiation';
+import { buildObjectionIdea, buildRelevanceIdea, buildRelevanceResearch, buildSignalIdea, extractResultKeys, extractSalesResultKeys } from './initiation';
 
 export class OperatorActionService {
   private prisma: PrismaClient;
@@ -133,18 +133,19 @@ export class OperatorActionService {
 
   /**
    * Human-initiated workflow scaffolding: creates exactly one DRAFT ContentIdea
-   * prefilled from a PENDING objection_pattern or prospect_relevance action's
-   * recorded evidence. The idea is a draft only — no plan, draft, review,
-   * approval, or publication is created, and the action stays PENDING for the
-   * operator to complete manually. The create + linkage update run atomically.
+   * prefilled from a PENDING objection_pattern, prospect_relevance, or
+   * sales_content_signal action's recorded evidence. The idea is a draft only —
+   * no plan, draft, review, approval, or publication is created, and the action
+   * stays PENDING for the operator to complete manually. The create + linkage
+   * update run atomically.
    */
   async initiateIdea(workspaceId: string, actionId: string, authorId: string) {
     const row = await this.prisma.operatorAction.findFirst({ where: { id: actionId, workspaceId } });
     if (!row) {
       throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
     }
-    if (row.kind !== 'objection_pattern' && row.kind !== 'prospect_relevance') {
-      throw new DecisionError('CONFLICT', `Only objection_pattern and prospect_relevance actions can start ideas (kind: ${row.kind}).`);
+    if (row.kind !== 'objection_pattern' && row.kind !== 'prospect_relevance' && row.kind !== 'sales_content_signal') {
+      throw new DecisionError('CONFLICT', `Only objection_pattern, prospect_relevance, and sales_content_signal actions can start ideas (kind: ${row.kind}).`);
     }
     if (row.status !== 'PENDING') {
       throw new DecisionError('CONFLICT', `Only PENDING actions can start ideas (current: ${row.status}).`);
@@ -173,7 +174,46 @@ export class OperatorActionService {
     }
 
     const candidateMeta = (candidate.facts.subjectMeta ?? {}) as Record<string, unknown>;
-    const prefill =
+    let prefill: { title: string; description: string; tags: string[] };
+    if (row.kind === 'sales_content_signal') {
+      // Live bridge read doubles as workspace-scoped existence revalidation:
+      // a deleted or foreign signal throws SalesError here, converted below.
+      const signalId =
+        typeof candidateMeta['signalId'] === 'string'
+          ? (candidateMeta['signalId'] as string)
+          : (typeof candidate.subjectId === 'string' ? candidate.subjectId : '');
+      let contentInput: {
+        signalType: string;
+        evidence: string;
+        frequency: number | null;
+        recommendedAngle: string | null;
+        reasoning: string | null;
+        conversationCount: number;
+      };
+      try {
+        const bridge = new SalesBridgeService(this.prisma);
+        contentInput = await bridge.toContentInput(workspaceId, signalId);
+      } catch (error) {
+        if (error instanceof SalesError) {
+          throw new DecisionError('CONFLICT', 'The sales signal no longer exists in this workspace; nothing was created.');
+        }
+        throw error;
+      }
+      const conversationIds = Array.isArray(candidateMeta['conversationIds'])
+        ? (candidateMeta['conversationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
+        : [];
+      prefill = buildSignalIdea({
+        signalId,
+        signalType: contentInput.signalType,
+        evidence: contentInput.evidence,
+        frequency: contentInput.frequency,
+        conversationCount: contentInput.conversationCount,
+        recommendedAngle: contentInput.recommendedAngle,
+        reasoning: contentInput.reasoning,
+        conversationIds,
+        identityKey: candidate.identityKey,
+      });
+    } else prefill =
       row.kind === 'prospect_relevance'
         ? buildRelevanceIdea({
             topicId:

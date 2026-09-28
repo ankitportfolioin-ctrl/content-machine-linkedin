@@ -63,6 +63,7 @@ function mockPrisma(overrides: Record<string, unknown> = {}) {
       create: vi.fn().mockImplementation(async ({ data }: never) => ({ id: 'research-1', ...(data as object) })),
       delete: vi.fn().mockResolvedValue({ id: 'research-1' }),
     },
+    salesContentSignal: { findMany: vi.fn().mockResolvedValue([]) },
     contentOpportunity: { findMany: vi.fn().mockResolvedValue([]) },
     contentGap: { findMany: vi.fn().mockResolvedValue([]) },
     trendSignal: { findMany: vi.fn().mockResolvedValue([]) },

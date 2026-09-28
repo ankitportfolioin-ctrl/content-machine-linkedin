@@ -9,6 +9,7 @@
 
 export const INITIATION_TAG = 'objection-driven';
 export const RELEVANCE_TAG = 'relevance-driven';
+export const SIGNAL_TAG = 'signal-driven';
 
 /** subjectMeta keys recording an initiation. Merged, never replacing provenance. */
 export const RESULT_KEYS = ['resultIdeaId', 'resultIdeaTitle', 'initiatedAt'] as const;
@@ -117,6 +118,54 @@ export function buildRelevanceIdea(input: RelevancePrefillInput): RelevancePrefi
     `Originating operator action: ${input.identityKey}. Draft created from an operator recommendation; planning, review, and approval still required.`,
   ];
   return { title, description: lines.join('\n'), tags: [RELEVANCE_TAG] };
+}
+
+export interface SignalPrefillInput {
+  signalId: string;
+  signalType: string;
+  evidence: string;
+  frequency: number | null;
+  conversationCount: number;
+  recommendedAngle: string | null;
+  reasoning: string | null;
+  conversationIds: string[];
+  identityKey: string;
+}
+
+export interface SignalPrefill {
+  title: string;
+  description: string;
+  tags: string[];
+}
+
+/**
+ * Deterministic prefill from recorded sales-signal evidence only. Consumes the
+ * shape produced by the existing bridge toContentInput contract (plus stored
+ * conversation ids and the action identity for provenance). Title bounded to
+ * the 200-character ContentIdea limit; description carries traceable
+ * provenance. No invented pain points, intent, engagement, or statistics.
+ */
+export function buildSignalIdea(input: SignalPrefillInput): SignalPrefill {
+  const angle = (input.recommendedAngle ?? '').trim();
+  const title = (
+    angle.length > 0
+      ? `Address signal: "${angle}"`
+      : `Turn ${input.signalType} signal into content (${input.conversationCount} conversation(s))`
+  ).slice(0, 200);
+  const shown = input.conversationIds.slice(0, 20);
+  const extra = input.conversationIds.length - shown.length;
+  const lines = [
+    `Sales signal recorded (${input.signalType}) across ${input.conversationCount} conversation(s).`,
+    `Signal: ${input.signalId}`,
+    `Evidence: ${input.evidence.slice(0, 2000)}`,
+    ...(angle.length > 0 ? [`Recommended angle: ${angle.slice(0, 500)}`] : []),
+    ...((input.reasoning ?? '').trim().length > 0
+      ? [`Reasoning: ${input.reasoning!.trim().slice(0, 2000)}`]
+      : []),
+    `Conversations: ${shown.join(', ')}${extra > 0 ? ` (and ${extra} more)` : ''}`,
+    `Originating operator action: ${input.identityKey}. Draft created from an operator recommendation; planning, review, and approval still required.`,
+  ];
+  return { title, description: lines.join('\n'), tags: [SIGNAL_TAG] };
 }
 
 /** Keep only sales-initiation linkage keys from a persisted subjectMeta blob. */

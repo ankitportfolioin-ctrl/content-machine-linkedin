@@ -156,6 +156,15 @@ export async function checkEligibility(
       }
       return { eligible: true, reason: null };
     }
+    case 'sales_content_signal': {
+      if (!candidate.subjectId) return missing('Sales content signal');
+      const row = await prisma.salesContentSignal.findFirst({ where: { id: candidate.subjectId, workspaceId } });
+      if (!row) return missing('Sales content signal');
+      if (!row.evidence?.trim()) {
+        return { eligible: false, reason: 'Sales content signal has no recorded evidence.' };
+      }
+      return { eligible: true, reason: null };
+    }
     default: {
       const exhaustive: never = candidate.kind;
       return { eligible: false, reason: `Unknown candidate kind: ${String(exhaustive)}.` };

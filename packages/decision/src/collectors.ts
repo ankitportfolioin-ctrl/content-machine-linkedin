@@ -1,6 +1,6 @@
 import { PrismaClient } from '@prisma/client';
 import { Candidate } from './types';
-import { objectionPatterns, prospectRelevance } from './signals';
+import { objectionPatterns, prospectRelevance, salesContentSignals } from './signals';
 
 const id = (kind: string, subjectId: string) => `${kind}:${subjectId}`;
 const daysSince = (date: Date, now: number) => Math.max(0, Math.floor((now - date.getTime()) / 86400000));
@@ -289,6 +289,7 @@ export async function collectCandidates(prisma: PrismaClient, workspaceId: strin
     staleDrafts(prisma, workspaceId, now),
     objectionPatterns(prisma, workspaceId, now),
     prospectRelevance(prisma, workspaceId, now),
+    salesContentSignals(prisma, workspaceId, now),
   ]);
   const seen = new Set<string>();
   const out: Candidate[] = [];

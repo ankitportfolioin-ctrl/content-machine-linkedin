@@ -20,6 +20,7 @@ function basePrisma() {
     iCP: { findFirst: vi.fn().mockResolvedValue(null) },
     topic: { findMany: vi.fn().mockResolvedValue([]) },
     lead: { findMany: vi.fn().mockResolvedValue([]) },
+    salesContentSignal: { findMany: vi.fn().mockResolvedValue([]) },
     operatorAction: {
       findMany: vi.fn().mockResolvedValue([]),
       findFirst: vi.fn(),
