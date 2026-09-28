@@ -6,17 +6,18 @@ import {
   topicResearchSchema,
   opportunityFeedbackSchema,
   opportunityConvertSchema,
+  opportunityTriageSchema,
   opportunityScoreSchema,
 } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
-import { NotFoundError, ValidationError } from '../utils/errors';
+import { AppError, NotFoundError, ValidationError } from '../utils/errors';
 import { SourceIngestionService } from '@growth-operator/intelligence';
 import { SourceUnderstandingService } from '@growth-operator/intelligence';
 import { ClaimLedgerService } from '@growth-operator/intelligence';
 import { TopicClusteringService } from '@growth-operator/intelligence';
 import { TrendSignalService } from '@growth-operator/intelligence';
 import { ContentOpportunityService, toOpportunityLearningView,
-  ContentOpportunityInput } from '@growth-operator/intelligence';
+  ContentOpportunityInput, validateOpportunityTriage } from '@growth-operator/intelligence';
 import { fetchFeedbackSummary, applyFeedbackDemotion } from '@growth-operator/intelligence';
 import { ContentGapService } from '@growth-operator/intelligence';
 import { LearningDerivationService, applyLearningInfluence } from '@growth-operator/learning';
@@ -610,6 +611,37 @@ router.post('/opportunities/:opportunityId/convert', async (req, res, next) => {
         trendSignalIds,
       },
     });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.patch('/opportunities/:opportunityId/status', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { opportunityId } = req.params;
+    const data = opportunityTriageSchema.parse(req.body);
+
+    const opportunity = await prisma.contentOpportunity.findFirst({
+      where: { id: opportunityId, workspaceId: authReq.workspaceId },
+    });
+
+    if (!opportunity) {
+      throw new NotFoundError('Content Opportunity');
+    }
+
+    const to = data.status.toUpperCase();
+    const verdict = validateOpportunityTriage(opportunity.status, to);
+    if (!verdict.valid) {
+      throw new AppError(verdict.reason ?? 'Invalid opportunity transition.', 422, 'INVALID_TRANSITION');
+    }
+
+    const updated = await prisma.contentOpportunity.update({
+      where: { id: opportunityId },
+      data: { status: to as 'REVIEWED' | 'DISMISSED' },
+    });
+
+    res.json({ opportunity: updated });
   } catch (error) {
     next(error);
   }

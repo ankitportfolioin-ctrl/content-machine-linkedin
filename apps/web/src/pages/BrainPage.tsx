@@ -22,6 +22,7 @@ import {
   rejectLearningProposal,
   revokeLearningProposal,
   submitOpportunityFeedback,
+  triageOpportunity,
 } from '../services/api';
 import {
   ActionExplanation,
@@ -33,6 +34,7 @@ import {
   OpportunityFeedbackKind,
   OpportunityFeedbackSummary,
   OpportunityScoring,
+  OpportunityTriageStatus,
   Source,
   TrendSignal,
 } from '../types';
@@ -242,19 +244,35 @@ function OverviewSection() {
   );
 }
 
+function StatusFilterSelect({ value, onChange }: { value: string; onChange: (value: string) => void }) {
+  return (
+    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+      Status
+      <select aria-label="Filter by status" value={value} onChange={(e) => onChange(e.target.value)}>
+        <option value="NEW">New</option>
+        <option value="REVIEWED">Reviewed</option>
+        <option value="DISMISSED">Dismissed</option>
+        <option value="CONVERTED">Converted</option>
+        <option value="">All</option>
+      </select>
+    </label>
+  );
+}
+
 function OpportunitiesSection() {
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [aiUnavailable, setAiUnavailable] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState('NEW');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     setError(null);
     setAiUnavailable(false);
     try {
-      const data = await listOpportunities();
+      const data = await listOpportunities({ status: statusFilter });
       setOpportunities(data.opportunities ?? []);
     } catch (err) {
       if (isAiUnavailable(err)) {
@@ -265,7 +283,7 @@ function OpportunitiesSection() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [statusFilter]);
 
   useEffect(() => {
     void fetchData();
@@ -285,7 +303,19 @@ function OpportunitiesSection() {
   }
 
   if (opportunities.length === 0) {
-    return <EmptyBlock title="No opportunities yet" description="New content opportunities will appear here when they are detected." />;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} />
+        <EmptyBlock
+          title="No opportunities yet"
+          description={
+            statusFilter === 'NEW'
+              ? 'New content opportunities will appear here when they are detected.'
+              : `No ${statusFilter.toLowerCase()} opportunities.`
+          }
+        />
+      </div>
+    );
   }
 
   return (
@@ -293,6 +323,9 @@ function OpportunitiesSection() {
       <h3 className="health-card-title" style={{ marginBottom: '1rem' }}>
         Opportunities ({opportunities.length})
       </h3>
+      <div style={{ marginBottom: '0.75rem' }}>
+        <StatusFilterSelect value={statusFilter} onChange={setStatusFilter} />
+      </div>
       <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
         {opportunities.map((opp) => (
           <li
@@ -331,6 +364,8 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
   const [convertTitle, setConvertTitle] = useState('');
   const [converting, setConverting] = useState(false);
   const [convertMessage, setConvertMessage] = useState<string | null>(null);
+  const [triaging, setTriaging] = useState(false);
+  const [triageMessage, setTriageMessage] = useState<string | null>(null);
 
   const fetchDetail = useCallback(async () => {
     setLoading(true);
@@ -380,6 +415,24 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
       }
     } finally {
       setConverting(false);
+    }
+  }
+
+  async function handleTriage(status: OpportunityTriageStatus) {
+    setTriaging(true);
+    setTriageMessage(null);
+    try {
+      const result = await triageOpportunity(opportunityId, status);
+      setOpportunity(result.opportunity);
+      setTriageMessage(
+        status === 'REVIEWED'
+          ? 'Marked as reviewed. It stays here for history.'
+          : 'Dismissed. It stays here for history.',
+      );
+    } catch (err) {
+      setTriageMessage(friendlyErrorMessage(err));
+    } finally {
+      setTriaging(false);
     }
   }
 
@@ -517,6 +570,27 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
         {convertMessage ? (
           <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
             {convertMessage}
+          </p>
+        ) : null}
+      </div>
+
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Triage</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+          Acknowledge this opportunity or dismiss it. Either way it stays here for history and
+          leaves the active queue.
+        </p>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button className="btn btn-secondary" disabled={triaging} onClick={() => void handleTriage('REVIEWED')}>
+            {triaging ? 'Saving...' : 'Mark reviewed'}
+          </button>
+          <button className="btn btn-secondary" disabled={triaging} onClick={() => void handleTriage('DISMISSED')}>
+            {triaging ? 'Saving...' : 'Dismiss'}
+          </button>
+        </div>
+        {triageMessage ? (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {triageMessage}
           </p>
         ) : null}
       </div>

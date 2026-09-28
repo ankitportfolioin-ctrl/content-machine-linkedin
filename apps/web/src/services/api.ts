@@ -31,6 +31,7 @@ import {
   OpportunitiesResponse,
   OpportunityDetailResponse,
   OpportunityScoringResponse,
+  Opportunity,
   OpportunityFeedback,
   OpportunityFeedbackKind,
   OutreachDraft,
@@ -231,8 +232,9 @@ export async function getIntelligenceOverview(): Promise<IntelligenceOverview> {
   return (data ?? {}) as IntelligenceOverview;
 }
 
-export async function listOpportunities(): Promise<OpportunitiesResponse> {
-  const data = await authedRequest<Record<string, unknown>>('/intelligence/opportunities');
+export async function listOpportunities(params?: { status?: string }): Promise<OpportunitiesResponse> {
+  const query = params?.status ? `?status=${encodeURIComponent(params.status)}` : '';
+  const data = await authedRequest<Record<string, unknown>>(`/intelligence/opportunities${query}`);
   const opportunities = Array.isArray(data['opportunities']) ? data['opportunities'] : [];
   return {
     opportunities: opportunities as OpportunitiesResponse['opportunities'],
@@ -266,6 +268,18 @@ export async function convertOpportunity(
   return authedRequest<ConvertOpportunityResponse>(
     `/intelligence/opportunities/${encodeURIComponent(id)}/convert`,
     { method: 'POST', body: JSON.stringify({ contentIdeaTitle }) },
+  );
+}
+
+export type OpportunityTriageStatus = 'REVIEWED' | 'DISMISSED';
+
+export async function triageOpportunity(
+  id: string,
+  status: OpportunityTriageStatus,
+): Promise<{ opportunity: Opportunity }> {
+  return authedRequest<{ opportunity: Opportunity }>(
+    `/intelligence/opportunities/${encodeURIComponent(id)}/status`,
+    { method: 'PATCH', body: JSON.stringify({ status }) },
   );
 }
 

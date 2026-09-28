@@ -11,6 +11,26 @@ export interface OpportunityScoreDimension {
   evidence: string[];
 }
 
+/**
+ * Triage transition contract for content opportunities. Only NEW opportunities
+ * may be triaged, and only to REVIEWED (acknowledged, retained as history) or
+ * DISMISSED (rejected, retained as history). Every other combination —
+ * including any transition out of a terminal state and any unknown status —
+ * is invalid. Pure and exhaustive; the route maps a negative verdict to 422.
+ */
+export function validateOpportunityTriage(
+  from: string,
+  to: string
+): { valid: boolean; reason: string | null } {
+  if (to !== 'REVIEWED' && to !== 'DISMISSED') {
+    return { valid: false, reason: `Unknown triage destination: ${to}. Allowed: REVIEWED, DISMISSED.` };
+  }
+  if (from !== 'NEW') {
+    return { valid: false, reason: `Opportunity is ${from}; only NEW opportunities can be reviewed or dismissed.` };
+  }
+  return { valid: true, reason: null };
+}
+
 export interface OpportunityScoreResult {
   overallScore: number;
   dimensions: OpportunityScoreDimension[];

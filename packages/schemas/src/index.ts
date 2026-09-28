@@ -193,6 +193,10 @@ export const opportunityConvertSchema = z.object({
   contentIdeaTitle: z.string().min(1).max(200).optional(),
 });
 
+export const opportunityTriageSchema = z.object({
+  status: z.string().min(1).max(50),
+});
+
 export const contentObjectiveSchema = z.enum([
   'educate',
   'explain',
@@ -521,6 +525,7 @@ export type IntelligenceSourceUpdate = z.infer<typeof intelligenceSourceUpdateSc
 export type TopicResearch = z.infer<typeof topicResearchSchema>;
 export type OpportunityFeedback = z.infer<typeof opportunityFeedbackSchema>;
 export type OpportunityConvert = z.infer<typeof opportunityConvertSchema>;
+export type OpportunityTriage = z.infer<typeof opportunityTriageSchema>;
 export type ContentObjective = z.infer<typeof contentObjectiveSchema>;
 export type ContentAngle = z.infer<typeof contentAngleSchema>;
 export type ContentNarrative = z.infer<typeof contentNarrativeSchema>;

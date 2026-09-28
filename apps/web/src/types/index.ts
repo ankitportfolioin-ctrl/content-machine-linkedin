@@ -111,6 +111,8 @@ export type OpportunityFeedbackKind =
   | 'weak_evidence'
   | 'not_timely';
 
+export type OpportunityTriageStatus = 'REVIEWED' | 'DISMISSED';
+
 export interface OpportunityFeedbackSummary {
   total: number;
   counts: Record<string, number>;
