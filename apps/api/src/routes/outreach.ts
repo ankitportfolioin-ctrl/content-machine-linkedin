@@ -16,6 +16,7 @@ import {
   OutreachReviewService,
   PreparedActionService,
   runOutreachGates,
+  suggestRelevantContent,
 } from '@growth-operator/sales';
 import { forwardSalesError } from '../utils/salesErrors';
 import { getEnv } from '../config/env';
@@ -102,6 +103,20 @@ router.get('/strategies', async (req, res, next) => {
     res.json({ strategies });
   } catch (error) {
     next(error);
+  }
+});
+
+router.get('/strategies/relevant-content', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { leadId } = req.query;
+    if (typeof leadId !== 'string' || leadId.length === 0) {
+      return res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'leadId query parameter is required.' } });
+    }
+    const suggestions = await suggestRelevantContent(prisma, authReq.workspaceId, { leadId });
+    res.json({ suggestions });
+  } catch (error) {
+    forwardSalesError(error, next);
   }
 });
 

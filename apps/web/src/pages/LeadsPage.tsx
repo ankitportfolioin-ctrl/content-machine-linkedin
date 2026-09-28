@@ -26,6 +26,7 @@ import {
   listPreparedActions,
   listProspectBriefs,
   listProspectSignals,
+  listRelevantContent,
   listSalesLeads,
   markPreparedActionReady,
   qualifyProspect,
@@ -49,6 +50,7 @@ import {
   ProspectResearch,
   ProspectSignal,
   QualificationScore,
+  RelevantContentSuggestion,
   SalesLead,
 } from '../types';
 
@@ -972,6 +974,11 @@ function StrategiesSection({ leadId }: { leadId: string }) {
   const [reason, setReason] = useState('');
   const [working, setWorking] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<RelevantContentSuggestion[]>([]);
+  const [suggestionsError, setSuggestionsError] = useState<string | null>(null);
+  const [selectedContentId, setSelectedContentId] = useState<string | null>(null);
+  const [selectedContentTitle, setSelectedContentTitle] = useState<string | null>(null);
+  const [contentReason, setContentReason] = useState('');
 
   const fetchData = useCallback(async () => {
     setLoading(true);
@@ -995,6 +1002,37 @@ function StrategiesSection({ leadId }: { leadId: string }) {
     void fetchData();
   }, [fetchData]);
 
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const data = await listRelevantContent(leadId);
+        if (cancelled) return;
+        setSuggestions(data.suggestions ?? []);
+        setSuggestionsError(null);
+      } catch (err) {
+        if (cancelled) return;
+        setSuggestions([]);
+        setSuggestionsError(friendlyErrorMessage(err));
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [leadId]);
+
+  function handleSelectSuggestion(suggestion: RelevantContentSuggestion) {
+    setSelectedContentId(suggestion.ideaId);
+    setSelectedContentTitle(suggestion.title);
+    setContentReason(suggestion.reason);
+  }
+
+  function handleClearSelection() {
+    setSelectedContentId(null);
+    setSelectedContentTitle(null);
+    setContentReason('');
+  }
+
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
     if (!objective.trim() || !audience.trim() || !angle.trim() || !reason.trim()) {
@@ -1010,12 +1048,15 @@ function StrategiesSection({ leadId }: { leadId: string }) {
         audience: audience.trim(),
         angle: angle.trim(),
         reasonForContact: reason.trim(),
+        ...(selectedContentId ? { relevantContentId: selectedContentId } : {}),
+        ...(contentReason.trim() ? { contentReason: contentReason.trim() } : {}),
       });
       setStrategies((prev) => [result.strategy, ...prev]);
       setObjective('');
       setAudience('');
       setAngle('');
       setReason('');
+      handleClearSelection();
     } catch (err) {
       if (isAiUnavailable(err)) {
         setMessage('AI assistance is temporarily unavailable. Please try again later.');
@@ -1053,6 +1094,50 @@ function StrategiesSection({ leadId }: { leadId: string }) {
           {working ? 'Creating...' : 'Create outreach plan'}
         </button>
       </form>
+      <div style={{ marginBottom: '0.75rem' }}>
+        <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem' }}>Suggested content for this prospect</p>
+        {suggestionsError ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>Could not load suggestions.</p>
+        ) : suggestions.length === 0 ? (
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>No relevant content recorded for this prospect yet.</p>
+        ) : (
+          <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0 }}>
+            {suggestions.map((s) => (
+              <li key={String(s.ideaId)} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+                <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>{String(s.title)}</p>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+                  {String(s.topicName)} · relevance {Math.round(Number(s.relevance) * 100)}%
+                </p>
+                <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{String(s.reason)}</p>
+                <button
+                  className="btn btn-secondary"
+                  disabled={working || selectedContentId === String(s.ideaId)}
+                  onClick={() => handleSelectSuggestion(s)}
+                  style={{ marginTop: '0.25rem' }}
+                >
+                  {selectedContentId === String(s.ideaId) ? 'Selected' : 'Select'}
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {selectedContentId ? (
+          <div style={{ marginTop: '0.5rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            <p style={{ fontSize: '0.875rem' }}>
+              Selected content: {selectedContentTitle ?? selectedContentId}{' '}
+              <button className="btn btn-secondary" onClick={handleClearSelection} style={{ marginLeft: '0.5rem' }}>
+                Clear
+              </button>
+            </p>
+            <input
+              value={contentReason}
+              onChange={(e) => setContentReason(e.target.value)}
+              placeholder="Why this content fits (optional)"
+              style={fieldStyle}
+            />
+          </div>
+        ) : null}
+      </div>
       {message ? <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{message}</p> : null}
       {loading ? <p style={{ fontSize: '0.875rem' }}>Loading outreach plans...</p> : null}
       {!loading && aiUnavailable ? <p style={{ fontSize: '0.875rem' }}>AI assistance is temporarily unavailable. Please try again later.</p> : null}

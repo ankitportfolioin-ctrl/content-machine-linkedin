@@ -545,6 +545,15 @@ export interface OutreachStrategy {
   [key: string]: unknown;
 }
 
+export interface RelevantContentSuggestion {
+  ideaId: string;
+  title: string;
+  topicId: string;
+  topicName: string;
+  relevance: number;
+  reason: string;
+}
+
 export interface OutreachDraft {
   id: string;
   strategyId?: string;

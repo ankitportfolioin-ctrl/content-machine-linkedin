@@ -16,4 +16,5 @@ export * from './classify';
 export * from './pipeline';
 export * from './bridge';
 export * from './objections';
+export * from './relevantContent';
 export * from './topicRelevance';

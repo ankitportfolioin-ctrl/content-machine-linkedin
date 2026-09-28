@@ -51,6 +51,7 @@ import {
   ProspectResearch,
   ProspectSignal,
   QualificationScore,
+  RelevantContentSuggestion,
   ReviewDetailResponse,
   ReviewDecision,
   ReviewsResponse,
@@ -814,6 +815,15 @@ export async function listOutreachStrategies(leadId: string): Promise<{ strategi
   );
   return {
     strategies: (Array.isArray(data['strategies']) ? data['strategies'] : []) as OutreachStrategy[],
+  };
+}
+
+export async function listRelevantContent(leadId: string): Promise<{ suggestions: RelevantContentSuggestion[] }> {
+  const data = await authedRequest<Record<string, unknown>>(
+    `/outreach/strategies/relevant-content?leadId=${encodeURIComponent(leadId)}`,
+  );
+  return {
+    suggestions: (Array.isArray(data['suggestions']) ? data['suggestions'] : []) as RelevantContentSuggestion[],
   };
 }
 
