@@ -6,7 +6,7 @@ import { collectCandidates } from './collectors';
 import { checkEligibility } from './eligibility';
 import { rankScored, scoreCandidate } from './scoring';
 import { explainAction } from './explain';
-import { buildObjectionIdea, extractResultKeys } from './initiation';
+import { buildObjectionIdea, buildRelevanceIdea, extractResultKeys } from './initiation';
 
 export class OperatorActionService {
   private prisma: PrismaClient;
@@ -123,18 +123,18 @@ export class OperatorActionService {
 
   /**
    * Human-initiated workflow scaffolding: creates exactly one DRAFT ContentIdea
-   * prefilled from a PENDING objection_pattern action's recorded evidence.
-   * The idea is a draft only — no plan, draft, review, approval, or publication
-   * is created, and the action stays PENDING for the operator to complete
-   * manually. The create + linkage update run atomically.
+   * prefilled from a PENDING objection_pattern or prospect_relevance action's
+   * recorded evidence. The idea is a draft only — no plan, draft, review,
+   * approval, or publication is created, and the action stays PENDING for the
+   * operator to complete manually. The create + linkage update run atomically.
    */
   async initiateIdea(workspaceId: string, actionId: string, authorId: string) {
     const row = await this.prisma.operatorAction.findFirst({ where: { id: actionId, workspaceId } });
     if (!row) {
       throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
     }
-    if (row.kind !== 'objection_pattern') {
-      throw new DecisionError('CONFLICT', `Only objection_pattern actions can start ideas (kind: ${row.kind}).`);
+    if (row.kind !== 'objection_pattern' && row.kind !== 'prospect_relevance') {
+      throw new DecisionError('CONFLICT', `Only objection_pattern and prospect_relevance actions can start ideas (kind: ${row.kind}).`);
     }
     if (row.status !== 'PENDING') {
       throw new DecisionError('CONFLICT', `Only PENDING actions can start ideas (current: ${row.status}).`);
@@ -155,28 +155,60 @@ export class OperatorActionService {
     const candidates = await collectCandidates(this.prisma, workspaceId, Date.now());
     const candidate = candidates.find((c) => c.identityKey === row.identityKey);
     if (!candidate) {
-      throw new DecisionError('CONFLICT', 'The objection pattern no longer qualifies; nothing was created.');
+      throw new DecisionError('CONFLICT', 'The operator action no longer qualifies; nothing was created.');
     }
     const verdict = await checkEligibility(this.prisma, workspaceId, candidate);
     if (!verdict.eligible) {
-      throw new DecisionError('CONFLICT', verdict.reason ?? 'The objection pattern is no longer eligible; nothing was created.');
+      throw new DecisionError('CONFLICT', verdict.reason ?? 'The operator action is no longer eligible; nothing was created.');
     }
 
     const candidateMeta = (candidate.facts.subjectMeta ?? {}) as Record<string, unknown>;
-    const prefill = buildObjectionIdea({
-      normalizedObjection: typeof candidateMeta['normalizedObjection'] === 'string' ? (candidateMeta['normalizedObjection'] as string) : '',
-      count: typeof candidateMeta['count'] === 'number' ? (candidateMeta['count'] as number) : 0,
-      conversationIds: Array.isArray(candidateMeta['conversationIds'])
-        ? (candidateMeta['conversationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
-        : [],
-      classificationIds: Array.isArray(candidateMeta['classificationIds'])
-        ? (candidateMeta['classificationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
-        : [],
-      sampleEvidence: Array.isArray(candidateMeta['sampleEvidence'])
-        ? (candidateMeta['sampleEvidence'] as unknown[]).filter((v): v is string => typeof v === 'string')
-        : [],
-      identityKey: candidate.identityKey,
-    });
+    const prefill =
+      row.kind === 'prospect_relevance'
+        ? buildRelevanceIdea({
+            topicId:
+              typeof candidateMeta['topicId'] === 'string' ? (candidateMeta['topicId'] as string) : '',
+            topicName:
+              typeof candidateMeta['topicName'] === 'string' ? (candidateMeta['topicName'] as string) : '',
+            leadId: typeof candidate.subjectId === 'string' ? candidate.subjectId : '',
+            leadName:
+              typeof candidateMeta['leadName'] === 'string' ? (candidateMeta['leadName'] as string) : '',
+            relevance:
+              typeof candidateMeta['relevance'] === 'number' ? (candidateMeta['relevance'] as number) : 0,
+            dimensions: Array.isArray(candidateMeta['dimensions'])
+              ? (candidateMeta['dimensions'] as unknown[])
+                  .filter(
+                    (v): v is Record<string, unknown> => typeof v === 'object' && v !== null
+                  )
+                  .map((d) => ({
+                    name: typeof d['name'] === 'string' ? (d['name'] as string) : 'unknown',
+                    score: typeof d['score'] === 'number' ? (d['score'] as number) : 0,
+                    reason: typeof d['reason'] === 'string' ? (d['reason'] as string) : '',
+                  }))
+              : [],
+            icp: (() => {
+              const raw = candidateMeta['icpUsed'] as Record<string, unknown> | null | undefined;
+              if (raw && typeof raw['id'] === 'string' && typeof raw['name'] === 'string') {
+                return { id: raw['id'] as string, name: raw['name'] as string };
+              }
+              return null;
+            })(),
+            identityKey: candidate.identityKey,
+          })
+        : buildObjectionIdea({
+            normalizedObjection: typeof candidateMeta['normalizedObjection'] === 'string' ? (candidateMeta['normalizedObjection'] as string) : '',
+            count: typeof candidateMeta['count'] === 'number' ? (candidateMeta['count'] as number) : 0,
+            conversationIds: Array.isArray(candidateMeta['conversationIds'])
+              ? (candidateMeta['conversationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
+              : [],
+            classificationIds: Array.isArray(candidateMeta['classificationIds'])
+              ? (candidateMeta['classificationIds'] as unknown[]).filter((v): v is string => typeof v === 'string')
+              : [],
+            sampleEvidence: Array.isArray(candidateMeta['sampleEvidence'])
+              ? (candidateMeta['sampleEvidence'] as unknown[]).filter((v): v is string => typeof v === 'string')
+              : [],
+            identityKey: candidate.identityKey,
+          });
 
     const initiatedAt = new Date().toISOString();
     const idea = await this.prisma.contentIdea.create({

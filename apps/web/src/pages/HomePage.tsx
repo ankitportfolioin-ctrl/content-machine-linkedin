@@ -313,7 +313,7 @@ function RecommendedSteps() {
                     <NavLink to={kindTarget(String(action.kind))} className="btn btn-secondary">
                       Open
                     </NavLink>
-                    {String(action.kind) === 'objection_pattern' ? (
+                    {(String(action.kind) === 'objection_pattern' || String(action.kind) === 'prospect_relevance') ? (
                       <button
                         className="btn btn-secondary"
                         disabled={workingId === String(action.id)}
