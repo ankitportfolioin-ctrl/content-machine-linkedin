@@ -1,7 +1,10 @@
 import { Candidate, ScoredAction, ScoreDimension } from './types';
 import { LearningInfluence } from '@growth-operator/learning';
+import { calculateFreshness, FreshnessResult } from '@growth-operator/shared';
 
 const MAX_POINTS = { urgency: 30, relevance: 25, evidence_strength: 20, readiness: 15, freshness: 10, learning_boost: 10 } as const;
+
+type ConfidenceLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
 
 function daysSince(date: Date, now: number): number {
   return Math.max(0, Math.floor((now - date.getTime()) / 86400000));
@@ -46,11 +49,15 @@ function readinessFor(candidate: Candidate): { points: number; reason: string | 
   return { points: 6, reason: null };
 }
 
-function freshnessFor(candidate: Candidate, now: number): { points: number; reason: string | null } {
-  const ageDays = daysSince(candidate.createdAt, now);
-  if (ageDays <= 7) return { points: 10, reason: 'Created within the last 7 days.' };
-  if (ageDays <= 30) return { points: 6, reason: null };
-  return { points: 2, reason: null };
+function freshnessFor(candidate: Candidate, now: number): { points: number; reason: string | null; freshnessResult: FreshnessResult } {
+  const isCritical = candidate.facts.evidenceCount !== undefined && candidate.facts.evidenceCount >= 3;
+  const evidenceStrength = candidate.facts.relevance01 ?? 0;
+  const result = calculateFreshness(candidate.createdAt, now, {
+    isCriticalEvidence: isCritical,
+    evidenceStrength,
+  });
+  const points = Math.round(result.factor * 10);
+  return { points, reason: result.reason, freshnessResult: result };
 }
 
 function learningFor(
@@ -68,6 +75,37 @@ function learningFor(
     reason: points > 0 ? `Workspace-confirmed learning on ${matching.map((c) => c.dimension).join(', ')} supports this action.` : null,
     applied: matching.map((c) => ({ dimension: c.dimension, adjustment: c.adjustment, reason: c.reason, proposalId: c.proposalId })),
   };
+}
+
+function computeSignalConfidence(candidate: Candidate, dimensions: ScoreDimension[], now: number): ConfidenceLevel {
+  const evidenceDim = dimensions.find(d => d.name === 'evidence_strength');
+  const freshnessDim = dimensions.find(d => d.name === 'freshness');
+  const evidencePoints = evidenceDim?.points ?? 0;
+  const freshnessPoints = freshnessDim?.points ?? 0;
+  const evidenceCount = candidate.facts.evidenceCount ?? 0;
+  const ageDays = daysSince(candidate.createdAt, now);
+
+  if (evidenceCount === 0) return 'UNKNOWN';
+  if (evidenceCount >= 3 && freshnessPoints >= 6 && evidencePoints >= 15) return 'HIGH';
+  if (evidenceCount >= 2 && freshnessPoints >= 6 && evidencePoints >= 10) return 'MEDIUM';
+  if (evidenceCount >= 1 && freshnessPoints >= 2) return 'LOW';
+  return 'UNKNOWN';
+}
+
+function computeRecommendationConfidence(candidate: Candidate, dimensions: ScoreDimension[]): ConfidenceLevel {
+  const relevanceDim = dimensions.find(d => d.name === 'relevance');
+  const readinessDim = dimensions.find(d => d.name === 'readiness');
+  const evidenceDim = dimensions.find(d => d.name === 'evidence_strength');
+  const relevancePoints = relevanceDim?.points ?? 0;
+  const readinessPoints = readinessDim?.points ?? 0;
+  const evidencePoints = evidenceDim?.points ?? 0;
+  const hasRelevance = candidate.facts.relevance01 !== undefined;
+  const isReady = candidate.facts.ready === true;
+
+  if (isReady && relevancePoints >= 20 && evidencePoints >= 15) return 'HIGH';
+  if ((isReady || hasRelevance) && relevancePoints >= 15 && evidencePoints >= 10) return 'MEDIUM';
+  if (relevancePoints >= 8 || readinessPoints >= 10 || evidencePoints >= 8) return 'LOW';
+  return 'UNKNOWN';
 }
 
 export interface ScoreInput {
@@ -92,18 +130,24 @@ export function scoreCandidate({ candidate, confirmedLearning, now = Date.now() 
   push('relevance', MAX_POINTS.relevance, relevanceFor(candidate));
   push('evidence_strength', MAX_POINTS.evidence_strength, evidenceFor(candidate));
   push('readiness', MAX_POINTS.readiness, readinessFor(candidate));
-  push('freshness', MAX_POINTS.freshness, freshnessFor(candidate, now));
+  const freshnessResult = freshnessFor(candidate, now);
+  push('freshness', MAX_POINTS.freshness, { points: freshnessResult.points, reason: freshnessResult.reason });
   const learning = learningFor(candidate, confirmedLearning);
   push('learning_boost', MAX_POINTS.learning_boost, { points: learning.points, reason: learning.reason });
 
   const score = dimensions.reduce((a, d) => a + d.points, 0);
   const reasons = [...candidate.reasons, ...dimensions.map((d) => d.reason).filter((r): r is string => r !== null)];
 
+  const signalConfidence = computeSignalConfidence(candidate, dimensions, now);
+  const recommendationConfidence = computeRecommendationConfidence(candidate, dimensions);
+
   return {
     ...candidate,
     score: Math.max(0, Math.min(100, score)),
     dimensions,
     learningApplied: learning.applied,
+    signalConfidence,
+    recommendationConfidence,
   };
 }
 

@@ -3,6 +3,8 @@ import { NavItem } from './NavItem';
 export function Sidebar() {
   const navigation = [
     { to: '/', label: 'Home', icon: HomeIcon },
+    { to: '/dashboard', label: "Today's Brain", icon: BrainIcon },
+    { to: '/learning', label: 'Learning', icon: AnalyticsIcon },
     { to: '/content', label: 'Content', icon: ContentIcon },
     { to: '/brain', label: 'Brain / Intelligence', icon: BrainIcon },
     { to: '/leads', label: 'Leads', icon: LeadsIcon },
@@ -10,18 +12,24 @@ export function Sidebar() {
     { to: '/pipeline', label: 'Pipeline', icon: PipelineIcon },
     { to: '/analytics', label: 'Analytics', icon: AnalyticsIcon },
     { to: '/settings', label: 'Settings', icon: SettingsIcon },
+    { to: '/onboarding', label: 'Onboarding', icon: SettingsIcon },
   ];
 
   return (
     <aside className="sidebar" role="navigation" aria-label="Main navigation">
       <header className="sidebar-header">
         <div className="sidebar-brand">
-          <span className="sidebar-brand-icon" aria-hidden="true">
+          <span className="sidebar-brand-mark" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              <path d="M12 2a3 3 0 0 0-3 3v1a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z" />
+              <path d="M12 8a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0v-1a3 3 0 0 1 3-3z" />
+              <path d="M9 18a6 6 0 0 0 6 0" />
             </svg>
           </span>
-          Growth Operator
+          <span>
+            Growth Operator
+            <span className="sidebar-brand-sub">Content Brain</span>
+          </span>
         </div>
       </header>
       <nav className="sidebar-nav">
@@ -35,7 +43,7 @@ export function Sidebar() {
         </div>
         <div className="nav-section">
           <div className="nav-section-title">Intelligence</div>
-          {navigation.slice(2, 4).map((item) => (
+          {navigation.slice(2, 5).map((item) => (
             <NavItem key={item.to} to={item.to} icon={<item.icon />}>
               {item.label}
             </NavItem>
@@ -43,7 +51,7 @@ export function Sidebar() {
         </div>
         <div className="nav-section">
           <div className="nav-section-title">Sales</div>
-          {navigation.slice(4, 7).map((item) => (
+          {navigation.slice(5, 8).map((item) => (
             <NavItem key={item.to} to={item.to} icon={<item.icon />}>
               {item.label}
             </NavItem>
@@ -51,7 +59,7 @@ export function Sidebar() {
         </div>
         <div className="nav-section">
           <div className="nav-section-title">System</div>
-          {navigation.slice(7).map((item) => (
+          {navigation.slice(8).map((item) => (
             <NavItem key={item.to} to={item.to} icon={<item.icon />}>
               {item.label}
             </NavItem>

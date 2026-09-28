@@ -1,4 +1,5 @@
 import { PrismaClient } from '@prisma/client';
+import { calculateFreshness } from '@growth-operator/shared';
 
 export interface TrendCalculationInput {
   workspaceId: string;
@@ -181,8 +182,8 @@ export class TrendSignalService {
     if (dates.length === 0) return 0;
     const now = Date.now();
     const scores = dates.map(d => {
-      const daysAgo = (now - d.getTime()) / (1000 * 60 * 60 * 24);
-      return Math.max(0, 1 - daysAgo / 30);
+      const result = calculateFreshness(d, now, { halfLifeDays: 30 });
+      return result.factor;
     });
     return scores.reduce((a, b) => a + b, 0) / scores.length;
   }

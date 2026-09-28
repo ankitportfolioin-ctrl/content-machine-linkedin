@@ -1,0 +1,30 @@
+{
+  "name": "@growth-operator/business",
+  "version": "0.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@growth-operator/db": "workspace:*",
+    "@growth-operator/shared": "workspace:*",
+    "@prisma/client": "^5.22.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/node": "^22.5.0",
+    "typescript": "^5.5.4",
+    "vitest": "^2.0.5"
+  }
+}

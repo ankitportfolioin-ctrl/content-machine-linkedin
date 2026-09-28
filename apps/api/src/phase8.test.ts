@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { cleanupTestData } from './test/helpers';
 import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
@@ -38,6 +39,11 @@ async function registerAndLogin(email: string): Promise<string> {
 
 const authOwner = (ws: string) => ({ Authorization: `Bearer ${ownerToken}`, 'X-Workspace-ID': ws });
 const authOutsider = () => ({ Authorization: `Bearer ${outsiderToken}`, 'X-Workspace-ID': workspaceId });
+
+// Step A contract: remove exactly this file's rows; never touch other files' data.
+afterAll(async () => {
+  await cleanupTestData({ workspaceIds: [workspaceId, emptyWorkspaceId], userEmails: [ownerEmail, outsiderEmail] });
+});
 
 async function nextActions(ws: string): Promise<OperatorActionView[]> {
   const res = await request(app).get('/api/v1/operator/next-actions').set(authOwner(ws)).expect(200);

@@ -29,6 +29,48 @@ function lifecycleLine(action: ScoredAction): string {
   }
 }
 
+function generateWhyNot(action: ScoredAction): string[] {
+  const whyNot: string[] = [];
+  const dimensions = action.dimensions;
+  
+  const relevanceDim = dimensions.find(d => d.name === 'relevance');
+  const evidenceDim = dimensions.find(d => d.name === 'evidence_strength');
+  const freshnessDim = dimensions.find(d => d.name === 'freshness');
+  const readinessDim = dimensions.find(d => d.name === 'readiness');
+  const urgencyDim = dimensions.find(d => d.name === 'urgency');
+  
+  // Why not ranked higher
+  if (relevanceDim && relevanceDim.points < relevanceDim.maxPoints * 0.6) {
+    whyNot.push('Limited audience or topic relevance');
+  }
+  if (evidenceDim && evidenceDim.points < evidenceDim.maxPoints * 0.5) {
+    whyNot.push('Few or weak evidence references');
+  }
+  if (freshnessDim && freshnessDim.points < freshnessDim.maxPoints * 0.6) {
+    whyNot.push('Signal is not fresh');
+  }
+  if (readinessDim && readinessDim.points < readinessDim.maxPoints) {
+    whyNot.push('Not directly actionable in current workflow');
+  }
+  if (urgencyDim && urgencyDim.points < urgencyDim.maxPoints * 0.3) {
+    whyNot.push('No time-sensitive urgency');
+  }
+  if (action.signalConfidence === 'LOW' || action.signalConfidence === 'UNKNOWN') {
+    whyNot.push('Low confidence in underlying signal');
+  }
+  if (action.recommendationConfidence === 'LOW' || action.recommendationConfidence === 'UNKNOWN') {
+    whyNot.push('Recommendation confidence is low');
+  }
+  
+  // Check for missing objective
+  const subjectMeta = action.facts.subjectMeta ?? {};
+  if (!subjectMeta.objective) {
+    whyNot.push('No specific objective linked');
+  }
+  
+  return whyNot;
+}
+
 /**
  * Deterministic explanation. Built exclusively from the computed score,
  * dimensions, evidence links, and lifecycle — always available, no AI needed.
@@ -51,6 +93,9 @@ export function explainAction(action: ScoredAction, status: string): ActionExpla
     lifecycle: lifecycleLine(action),
     learningApplied: action.learningApplied,
     subjectMeta: action.facts.subjectMeta ?? {},
+    signalConfidence: action.signalConfidence,
+    recommendationConfidence: action.recommendationConfidence,
+    whyNot: generateWhyNot(action),
   };
 }
 

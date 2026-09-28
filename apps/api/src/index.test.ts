@@ -265,6 +265,9 @@ describe('Workspace Authorization', () => {
 
     expect(response.body.workspace.name).toBe('New Workspace');
     expect(response.body.workspace.memberships[0].role).toBe('OWNER');
+
+    // Step A contract: remove the workspace this test created.
+    await prisma.workspace.delete({ where: { id: response.body.workspace.id as string } });
   });
 
   it('POST /api/v1/workspaces/:id/members adds member', async () => {

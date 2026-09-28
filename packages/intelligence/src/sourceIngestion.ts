@@ -309,7 +309,12 @@ export class SourceIngestionService {
     error: string
   ) {
     const urlHash = getUrlHash(canonicalUrl);
-    const contentHash = getContentHash(error);
+    // Scope the failure hash to the URL: hashing the error text alone
+    // collides on (workspaceId, contentHash) when two different URLs fail
+    // with the same message (e.g. identical DNS errors), which threw a
+    // unique-constraint violation instead of returning FAILED. Identical
+    // re-failures of the same URL still dedupe via the pre-check in ingest.
+    const contentHash = getContentHash(`${canonicalUrl}\n${error}`);
 
     return this.prisma.intelligenceSource.create({
       data: {

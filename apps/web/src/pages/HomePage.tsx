@@ -8,11 +8,17 @@ import {
   completeAction,
   dismissAction,
   friendlyErrorMessage,
+  getReadiness,
+  getRun,
   isAiUnavailable,
   listNextActions,
+  listReports,
+  listRuns,
   researchProspectFromAction,
   startIdeaFromAction,
+  triggerRun,
 } from '../services/api';
+import { DailyRunSummary, IntelligenceReport, ReadinessState } from '../types';
 
 interface StatusBadgeProps {
   status: HealthResponse['status'];
@@ -23,14 +29,85 @@ function StatusBadge({ status, label }: StatusBadgeProps) {
   const statusClass = status === 'healthy' || status === 'ready'
     ? 'status-healthy'
     : status === 'not ready'
-    ? 'status-unhealthy'
-    : 'status-checking';
+      ? 'status-unhealthy'
+      : 'status-checking';
 
   return (
     <span className={`status-indicator ${statusClass}`}>
       <span className="status-dot" aria-hidden="true"></span>
       {label}: {status}
     </span>
+  );
+}
+
+function ReadinessDisplay({ readiness }: { readiness: ReadinessState }) {
+  const getStatusIcon = (ready: boolean) => ready ? '✓' : '✗';
+  const getStatusColor = (ready: boolean) => ready ? '#16a34a' : '#dc2626';
+  
+  const items = [
+    { key: 'workspaceIntelligenceReady', label: 'Workspace Intelligence Ready' },
+    { key: 'humanApprovalReady', label: 'Human Approval Ready' },
+    { key: 'linkedInExecution', label: 'LinkedIn Execution' },
+  ] as const;
+
+  return (
+    <div className="card" style={{ marginTop: '1rem' }}>
+      <h3 className="health-card-title" style={{ marginBottom: '0.75rem' }}>System Readiness</h3>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        {items.map(({ key, label }) => {
+          const item = readiness[key];
+          return (
+            <div key={key} style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '0.75rem',
+              padding: '0.5rem',
+              backgroundColor: 'var(--color-bg-secondary)',
+              borderRadius: 'var(--radius)'
+            }}>
+              <span style={{ 
+                fontSize: '1.25rem', 
+                color: getStatusColor(item.ready),
+                flexShrink: 0,
+                marginTop: '0.125rem'
+              }}>
+                {getStatusIcon(item.ready)}
+              </span>
+              <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <strong style={{ fontSize: '0.875rem' }}>{label}</strong>
+                  <span style={{ 
+                    fontSize: '0.75rem', 
+                    padding: '0.125rem 0.375rem', 
+                    borderRadius: '9999px',
+                    backgroundColor: item.ready ? '#16a34a20' : '#dc262620',
+                    color: getStatusColor(item.ready),
+                    fontWeight: 600
+                  }}>
+                    {item.ready ? 'Ready' : 'Not Ready'}
+                  </span>
+                </div>
+                <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', marginBottom: 0 }}>
+                  {item.reason}
+                </p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
+        <p style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>
+          Overall: 
+          <span style={{ 
+            color: readiness.overall === 'ready' ? '#16a34a' : 
+                   readiness.overall === 'partial' ? '#ca8a04' : '#dc2626',
+            textTransform: 'capitalize'
+          }}>
+            {readiness.overall.replace('_', ' ')}
+          </span>
+        </p>
+      </div>
+    </div>
   );
 }
 
@@ -109,6 +186,232 @@ function kindTarget(kind: string): string {
     return '/settings';
   }
   return '/brain';
+}
+
+function deepTarget(action: OperatorAction): string {
+  const base = kindTarget(String(action.kind));
+  const meta = (action.subjectMeta ?? {}) as Record<string, unknown>;
+  const leadId = typeof meta.leadId === 'string' && meta.leadId ? meta.leadId : null;
+  if (leadId && base === '/leads') {
+    return `/leads?leadId=${encodeURIComponent(leadId)}`;
+  }
+  return base;
+}
+
+function stageBadge(status: string): string {
+  const s = status.toUpperCase();
+  if (s === 'SUCCEEDED' || s === 'COMPLETED') return 'badge badge-success';
+  if (s === 'FAILED') return 'badge badge-error';
+  if (s === 'SKIPPED' || s.startsWith('SKIPPED')) return 'badge badge-warning';
+  if (s === 'RUNNING' || s === 'STARTED') return 'badge badge-info';
+  return 'badge badge-neutral';
+}
+
+function workflowPhaseForStage(stage: string): string {
+  const phaseMap: Record<string, string> = {
+    'INTELLIGENCE': 'Discovery',
+    'DECISION': 'Recommendation',
+    'CONTENT_PLAN': 'Preparation',
+    'CONTENT_COMPOSE': 'Preparation',
+    'CONTENT_REVIEW': 'Human Decision',
+    'SALES_RESEARCH': 'Preparation',
+    'SALES_QUALIFY': 'Preparation',
+    'SALES_BRIEF': 'Preparation',
+    'SALES_DRAFT': 'Preparation',
+    'SALES_REVIEW': 'Human Decision',
+    'APPROVAL_SNAPSHOT': 'Human Decision',
+    'EXECUTION': 'Execution',
+    'OBSERVE': 'Outcome',
+    'DIGEST': 'Learning',
+  };
+  return phaseMap[stage] ?? stage;
+}
+
+function stageDisplayName(stage: string): string {
+  const nameMap: Record<string, string> = {
+    'INTELLIGENCE': 'Intelligence (Discovery)',
+    'DECISION': 'Decision (Recommendation)',
+    'CONTENT_PLAN': 'Content Plan (Preparation)',
+    'CONTENT_COMPOSE': 'Content Compose (Preparation)',
+    'CONTENT_REVIEW': 'Content Review (Human Decision)',
+    'SALES_RESEARCH': 'Sales Research (Preparation)',
+    'SALES_QUALIFY': 'Sales Qualify (Preparation)',
+    'SALES_BRIEF': 'Sales Brief (Preparation)',
+    'SALES_DRAFT': 'Sales Draft (Preparation)',
+    'SALES_REVIEW': 'Sales Review (Human Decision)',
+    'APPROVAL_SNAPSHOT': 'Approval Snapshot (Human Decision)',
+    'EXECUTION': 'Execution',
+    'OBSERVE': 'Observe (Outcome)',
+    'DIGEST': 'Digest (Learning)',
+  };
+  return nameMap[stage] ?? stage;
+}
+
+function TodayBatch() {
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const [digest, setDigest] = useState<IntelligenceReport | null>(null);
+  const [run, setRun] = useState<DailyRunSummary | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [triggering, setTriggering] = useState(false);
+  const [triggerMsg, setTriggerMsg] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [reports, runs] = await Promise.all([
+        listReports({ frequency: 'DAILY', limit: 1 }),
+        listRuns({ take: 1 }),
+      ]);
+      setDigest(reports.reports?.[0] ?? null);
+      const latest = runs.runs?.[0] ?? null;
+      if (latest) {
+        try {
+          const full = await getRun(String(latest.id));
+          setRun(full.run ?? latest);
+        } catch {
+          setRun(latest);
+        }
+      } else {
+        setRun(null);
+      }
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (authLoading) return;
+    if (!isAuthenticated) {
+      setLoading(false);
+      return;
+    }
+    void fetchData();
+  }, [authLoading, isAuthenticated, fetchData]);
+
+  async function handleTrigger() {
+    setTriggering(true);
+    setTriggerMsg(null);
+    try {
+      const res = await triggerRun();
+      setTriggerMsg(`Loop finished with status ${res.result.status}${res.result.resumed ? ' (resumed existing run)' : ''}.`);
+      await fetchData();
+    } catch (err) {
+      setTriggerMsg(friendlyErrorMessage(err));
+    } finally {
+      setTriggering(false);
+    }
+  }
+
+  if (authLoading || loading) {
+    return <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Loading today's batch...</p>;
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+        Sign in to see today's batch.
+      </p>
+    );
+  }
+
+  if (error) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>
+          {error}
+        </p>
+        <div>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>
+            Refresh
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  const topics = digest?.emergingTopics ?? [];
+  const strong = digest?.strongSignals ?? [];
+  const weak = digest?.weakSignals ?? [];
+  const patterns = digest?.learnedPatterns ?? [];
+  const experiments = digest?.experiments ?? [];
+  const recommended = digest?.recommendedTopics ?? [];
+  const stages = run?.stages ?? [];
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <div className="row-between" style={{ marginBottom: '0.5rem' }}>
+          <h3 className="section-title">Daily digest</h3>
+          {digest ? <span className="badge badge-info">{String(digest.frequency)}</span> : null}
+        </div>
+        {!digest ? (
+          <p className="muted">No digest yet. Trigger the loop to generate today's batch.</p>
+        ) : (
+          <div className="stack-sm">
+            <p className="tiny">
+              Period {String(digest.periodStart).slice(0, 10)} → {String(digest.periodEnd).slice(0, 10)}
+              {digest.confidenceLevel ? ` · confidence ${String(digest.confidenceLevel)}` : ''}
+            </p>
+            <ul className="bullet-list">
+              <li>Emerging topics: {topics.length}{topics[0]?.title ? ` — ${String(topics[0].title)}` : ''}</li>
+              <li>Strong signals: {strong.length} · weak signals: {weak.length}</li>
+              <li>Learned patterns: {patterns.length} · experiments: {experiments.length}</li>
+              <li>Recommended topics: {recommended.length}{recommended[0]?.title ? ` — ${String(recommended[0].title)}` : ''}</li>
+            </ul>
+            <div className="actions">
+              <NavLink to="/brain" className="btn btn-secondary">Review opportunities</NavLink>
+              <NavLink to="/learning" className="btn btn-secondary">Learning</NavLink>
+            </div>
+          </div>
+        )}
+      </div>
+
+      <div className="card">
+        <div className="row-between" style={{ marginBottom: '0.5rem' }}>
+          <h3 className="section-title">Latest loop run</h3>
+          {run ? <span className={stageBadge(String(run.status))}>{String(run.status)}</span> : null}
+        </div>
+        {!run ? (
+          <p className="muted">No runs recorded yet.</p>
+        ) : (
+          <div className="stack-sm">
+            <p className="tiny">
+              {String(run.runDate).slice(0, 10)}
+              {run.finishedAt ? ` · finished ${String(run.finishedAt).slice(11, 16)} UTC` : ' · still running'}
+            </p>
+            {stages.length > 0 ? (
+              <div className="actions">
+                {stages.map((s) => (
+                  <span key={s.stage} className={stageBadge(String(s.status))} title={`${s.stage} (${workflowPhaseForStage(s.stage)}): ${s.status}`}>
+                    {stageDisplayName(s.stage)}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p className="muted">Blocked before any stage ran (see status).</p>
+            )}
+          </div>
+        )}
+        <div className="actions" style={{ marginTop: '0.75rem' }}>
+          <button className="btn btn-primary" disabled={triggering} onClick={() => void handleTrigger()}>
+            {triggering ? 'Running...' : 'Run today’s loop now'}
+          </button>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>
+            Refresh
+          </button>
+        </div>
+        {triggerMsg ? (
+          <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {triggerMsg}
+          </p>
+        ) : null}
+      </div>
+    </div>
+  );
 }
 
 function RecommendedSteps() {
@@ -289,7 +592,7 @@ function RecommendedSteps() {
           Refresh
         </button>
       </div>
-      <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0 }}>
+      <ul className="plain-list">
         {actions.map((action, index) => {
           const expanded = expandedId === String(action.id);
           const topReason = Array.isArray(action.reasons) && action.reasons.length > 0
@@ -298,7 +601,7 @@ function RecommendedSteps() {
           return (
             <li
               key={String(action.id)}
-              style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '1rem' }}
+              className="card-row"
             >
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                 <p style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
@@ -344,7 +647,7 @@ function RecommendedSteps() {
                     </div>
                   ) : null}
                   <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.25rem' }}>
-                    <NavLink to={kindTarget(String(action.kind))} className="btn btn-secondary">
+                    <NavLink to={deepTarget(action)} className="btn btn-secondary">
                       Open
                     </NavLink>
                     {(String(action.kind) === 'objection_pattern' || String(action.kind) === 'prospect_relevance' || String(action.kind) === 'sales_content_signal') ? (
@@ -397,6 +700,26 @@ function RecommendedSteps() {
 
 export function HomePage() {
   const { health, ready, loading, error, refetch } = useHealth();
+  const [readiness, setReadiness] = useState<ReadinessState | null>(null);
+  const [readinessLoading, setReadinessLoading] = useState(true);
+  const [readinessError, setReadinessError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (loading) return;
+    async function fetchReadiness() {
+      setReadinessLoading(true);
+      setReadinessError(null);
+      try {
+        const res = await getReadiness();
+        setReadiness(res.readiness);
+      } catch (err) {
+        setReadinessError(friendlyErrorMessage(err));
+      } finally {
+        setReadinessLoading(false);
+      }
+    }
+    void fetchReadiness();
+  }, [loading]);
 
   if (loading) {
     return (
@@ -478,21 +801,41 @@ export function HomePage() {
         </div>
       </div>
 
+      {readiness && <ReadinessDisplay readiness={readiness} />}
+      {readinessLoading && !readiness && (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Loading readiness...</p>
+        </div>
+      )}
+      {readinessError && (
+        <div className="card" style={{ marginTop: '1rem' }}>
+          <p style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>Failed to load readiness: {readinessError}</p>
+        </div>
+      )}
+
       <div className="card" style={{ marginTop: '1.5rem' }}>
-        <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Recommended next steps</h2>
+        <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Today</h2>
+        <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
+          What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        </p>
+        <TodayBatch />
+        <h2 className="health-card-title" style={{ marginBottom: '0.5rem', marginTop: '1.5rem' }}>Recommended next steps</h2>
         <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
           Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
         </p>
         <RecommendedSteps />
         <h2 className="health-card-title" style={{ marginBottom: '1rem', marginTop: '1.5rem' }}>Sections</h2>
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+          <NavLink to="/dashboard" className="btn btn-secondary">Today's Brain</NavLink>
           <NavLink to="/content" className="btn btn-secondary">Content</NavLink>
           <NavLink to="/brain" className="btn btn-secondary">Brain / Intelligence</NavLink>
+          <NavLink to="/learning" className="btn btn-secondary">Learning</NavLink>
           <NavLink to="/leads" className="btn btn-secondary">Leads</NavLink>
           <NavLink to="/inbox" className="btn btn-secondary">Inbox</NavLink>
           <NavLink to="/pipeline" className="btn btn-secondary">Pipeline</NavLink>
           <NavLink to="/analytics" className="btn btn-secondary">Analytics</NavLink>
           <NavLink to="/settings" className="btn btn-secondary">Settings</NavLink>
+          <NavLink to="/onboarding" className="btn btn-secondary">Onboarding</NavLink>
         </div>
       </div>
     </div>

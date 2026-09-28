@@ -1,4 +1,21 @@
+import path from 'path';
+import dotenv from 'dotenv';
 import { z } from 'zod';
+
+// This module validates env at import time (`export const env = getEnv()`
+// below), so it must load .env files itself instead of relying on the
+// entrypoint: ES import hoisting means this file evaluates before any
+// dotenv.config() call in index.ts. Candidates cover running from the repo
+// root (`pnpm dev`) and from the package dir (`pnpm --filter ... dev`).
+// dotenv never overwrites already-set variables, so loading several is safe.
+for (const candidate of [
+  path.resolve(__dirname, '../../../.env'),
+  path.resolve(__dirname, '../../.env'),
+  path.resolve(process.cwd(), '.env'),
+  path.resolve(process.cwd(), '../../.env'),
+]) {
+  dotenv.config({ path: candidate });
+}
 
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),

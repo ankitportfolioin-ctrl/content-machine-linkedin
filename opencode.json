@@ -23,7 +23,22 @@
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "-y", "@playwright/mcp"],
+      "command": ["npx", "-y", "@playwright/mcp@latest"],
+      "enabled": true
+    },
+    "context7": {
+      "type": "remote",
+      "url": "https://mcp.context7.com/mcp",
+      "enabled": true
+    },
+    "postgres": {
+      "type": "local",
+      "command": ["npx", "-y", "@bytebase/dbhub", "--transport", "stdio", "--dsn", "{env:DATABASE_URL_READONLY}"],
+      "enabled": true
+    },
+    "stitch": {
+      "type": "remote",
+      "url": "https://stitch.googleapis.com/mcp",
       "enabled": true
     }
   }

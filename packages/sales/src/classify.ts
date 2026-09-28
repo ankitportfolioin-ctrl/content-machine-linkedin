@@ -62,7 +62,7 @@ export function classifyDeterministic(text: string): DeterministicClassification
 
 export function recommendFollowUp(
   classification: ConversationClassification,
-  input: { daysSinceLastMessage?: number; hasOpenQuestion?: boolean }
+  input: { daysSinceLastMessage?: number; hasOpenQuestion?: boolean; relationshipStage?: string; lastInteractionDays?: number }
 ): { recommendation: FollowUpRecommendation; why: string; timing?: string } {
   switch (classification) {
     case 'MEETING_REQUEST':
@@ -88,6 +88,66 @@ export function recommendFollowUp(
         ? { recommendation: 'ASK_CLARIFYING_QUESTION', why: 'Ambiguous thread with an open question.' }
         : { recommendation: 'NO_FOLLOW_UP', why: 'Ambiguous thread; no evidence supports follow-up.' };
   }
+}
+
+export function recommendFollowUpAdvanced(
+  classification: ConversationClassification,
+  input: { 
+    daysSinceLastMessage?: number; 
+    hasOpenQuestion?: boolean; 
+    relationshipStage?: string; 
+    lastInteractionDays?: number;
+    engagementScore?: number;
+  }
+): { recommendation: FollowUpRecommendation; why: string; timing?: string } {
+  const baseRec = recommendFollowUp(classification, input);
+  
+  // If base recommendation is already decisive, keep it
+  if (['CLOSE_OUT', 'NO_FOLLOW_UP', 'MOVE_TO_OPPORTUNITY', 'RESPOND_TO_QUESTION'].includes(baseRec.recommendation)) {
+    return baseRec;
+  }
+
+  const stage = input.relationshipStage ?? 'COLD';
+  const lastDays = input.lastInteractionDays ?? (input.daysSinceLastMessage ?? 0);
+  const engagement = input.engagementScore ?? 0;
+
+  // WAIT: timing not right, revisit later
+  if (stage === 'AWARE' && lastDays > 7 && lastDays <= 30 && engagement < 0.3) {
+    return {
+      recommendation: 'WAIT',
+      why: 'Relationship is early and recent interaction was weak; better to wait for a stronger signal.',
+      timing: 'Re-evaluate in 14 days.',
+    };
+  }
+
+  // NURTURE: maintain longer-term relationship, monitor signals
+  if (['ENGAGED', 'CONVERSATION'].includes(stage) && lastDays > 30 && engagement > 0.4) {
+    return {
+      recommendation: 'NURTURE',
+      why: 'Established relationship gone quiet; maintain connection with value-based touches.',
+      timing: 'Monthly light touch with relevant content.',
+    };
+  }
+
+  // NO_OUTREACH: do not initiate contact
+  if (stage === 'COLD' && lastDays > 60 && engagement < 0.2) {
+    return {
+      recommendation: 'NO_OUTREACH',
+      why: 'No meaningful relationship or engagement history; initiating contact is unlikely to succeed.',
+      timing: 'Do not initiate.',
+    };
+  }
+
+  // DISMISS: remove from active consideration
+  if (classification === 'NOT_INTERESTED' || classification === 'NEGATIVE') {
+    return {
+      recommendation: 'DISMISS',
+      why: 'Explicit negative signal; remove from active follow-up queue.',
+      timing: 'Do not revisit.',
+    };
+  }
+
+  return baseRec;
 }
 
 export class ClassificationService {
@@ -160,6 +220,10 @@ export class ClassificationService {
     }
     let classification: ConversationClassification = 'UNCLEAR';
     let conversationId = input.conversationId ?? null;
+    let relationshipStage: string | undefined;
+    let lastInteractionDays: number | undefined;
+    let engagementScore: number | undefined;
+
     if (conversationId) {
       const conversation = await this.prisma.conversation.findFirst({ where: { id: conversationId, workspaceId } });
       if (!conversation) {
@@ -170,13 +234,37 @@ export class ClassificationService {
         orderBy: { createdAt: 'desc' },
       });
       if (latest) classification = latest.classification as ConversationClassification;
+
+      // Get relationship stage from lead if linked
+      if (conversation.leadId) {
+        const lead = await this.prisma.lead.findFirst({ where: { id: conversation.leadId, workspaceId } });
+        if (lead) {
+          relationshipStage = lead.status;
+        }
+      }
+
+      // Calculate days since last message
+      const lastMessage = await this.prisma.message.findFirst({
+        where: { workspaceId, conversationId },
+        orderBy: { sentAt: 'desc' },
+      });
+      if (lastMessage) {
+        lastInteractionDays = Math.floor((Date.now() - lastMessage.sentAt.getTime()) / (1000 * 60 * 60 * 24));
+      }
     } else if (input.leadId) {
       const lead = await this.prisma.lead.findFirst({ where: { id: input.leadId, workspaceId } });
       if (!lead) {
         throw new SalesError('INSUFFICIENT_DATA', 'Lead not found in this workspace.');
       }
+      relationshipStage = lead.status;
     }
-    const rec = recommendFollowUp(classification, {});
+
+    const rec = recommendFollowUpAdvanced(classification, {
+      daysSinceLastMessage: lastInteractionDays,
+      relationshipStage,
+      lastInteractionDays,
+      engagementScore,
+    });
     return this.prisma.followUpRecommendation.create({
       data: {
         workspaceId,
@@ -185,9 +273,13 @@ export class ClassificationService {
         recommendation: rec.recommendation,
         why: rec.why,
         evidence: `Based on classification ${classification}.`,
-        risk: rec.recommendation === 'NO_FOLLOW_UP' || rec.recommendation === 'CLOSE_OUT'
-          ? 'None: recommendation is to stop.'
-          : 'Recommendation only: sending anything remains a human decision.',
+        risk: ['NO_FOLLOW_UP', 'CLOSE_OUT', 'NO_OUTREACH', 'DISMISS'].includes(rec.recommendation)
+          ? 'None: recommendation is to stop or not outreach.'
+          : rec.recommendation === 'WAIT'
+            ? 'Timing not right; revisit later.'
+            : rec.recommendation === 'NURTURE'
+              ? 'Long-term nurture only; no immediate outreach.'
+              : 'Recommendation only: sending anything remains a human decision.',
         timing: rec.timing ?? null,
       },
     });

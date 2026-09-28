@@ -6,7 +6,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "worker": "tsx src/worker/index.ts",
+    "worker:once": "tsx src/worker/runOnce.ts",
     "build": "tsc",
+    "seed:demo": "tsx src/seed-demo.ts",
     "start": "node dist/index.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
@@ -14,15 +17,16 @@
     "lint": "eslint src --ext .ts"
   },
   "dependencies": {
+    "@growth-operator/ai": "workspace:*",
+    "@growth-operator/business": "workspace:*",
     "@growth-operator/content": "workspace:*",
+    "@growth-operator/db": "workspace:*",
     "@growth-operator/decision": "workspace:*",
+    "@growth-operator/intelligence": "workspace:*",
     "@growth-operator/learning": "workspace:*",
     "@growth-operator/sales": "workspace:*",
-    "@growth-operator/db": "workspace:*",
     "@growth-operator/schemas": "workspace:*",
     "@growth-operator/shared": "workspace:*",
-    "@growth-operator/ai": "workspace:*",
-    "@growth-operator/intelligence": "workspace:*",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -31,6 +35,7 @@
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
     "morgan": "^1.10.0",
+    "pg-boss": "^12.35.0",
     "uuid": "^10.0.0",
     "zod": "^3.23.8"
   },
@@ -41,11 +46,11 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.5.0",
+    "@types/supertest": "^6.0.2",
     "@types/uuid": "^10.0.0",
+    "supertest": "^7.0.0",
     "tsx": "^4.19.0",
     "typescript": "^5.5.4",
-    "vitest": "^2.0.5",
-    "supertest": "^7.0.0",
-    "@types/supertest": "^6.0.2"
+    "vitest": "^2.0.5"
   }
 }

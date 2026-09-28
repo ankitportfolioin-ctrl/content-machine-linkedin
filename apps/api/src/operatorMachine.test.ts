@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
+import { cleanupTestData } from './test/helpers';
 import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
@@ -11,6 +12,7 @@ const password = 'testpassword123';
 let ownerToken = '';
 let outsiderToken = '';
 let workspaceId = '';
+let emptyWorkspaceId = '';
 
 async function registerAndLogin(email: string): Promise<string> {
   await request(app).post('/api/v1/auth/register').send({ email, password, name: 'Phase6 User' }).expect(201);
@@ -20,6 +22,14 @@ async function registerAndLogin(email: string): Promise<string> {
 
 const authOwner = () => ({ Authorization: `Bearer ${ownerToken}`, 'X-Workspace-ID': workspaceId });
 const authOutsider = () => ({ Authorization: `Bearer ${outsiderToken}`, 'X-Workspace-ID': workspaceId });
+
+// Step A contract: remove exactly this file's rows; never touch other files' data.
+afterAll(async () => {
+  await cleanupTestData({
+    workspaceIds: [workspaceId, emptyWorkspaceId],
+    userEmails: [ownerEmail, outsiderEmail, `phase6-empty-${stamp}@example.com`],
+  });
+});
 
 describe('Phase 6 setup', () => {
   it('registers users and creates an isolated workspace with artifacts', async () => {
@@ -195,8 +205,8 @@ describe('Operator next-actions', () => {
     const login = await request(app).post('/api/v1/auth/login').send({ email, password }).expect(200);
     const token = login.body.token as string;
     const ws = await request(app).post('/api/v1/workspaces').set('Authorization', `Bearer ${token}`).send({ name: `Empty WS ${stamp}` }).expect(201);
-    const wid = (ws.body.workspace?.id ?? ws.body.id) as string;
-    const headers = { Authorization: `Bearer ${token}`, 'X-Workspace-ID': wid };
+    emptyWorkspaceId = (ws.body.workspace?.id ?? ws.body.id) as string;
+    const headers = { Authorization: `Bearer ${token}`, 'X-Workspace-ID': emptyWorkspaceId };
     const response = await request(app).get('/api/v1/operator/next-actions').set(headers).expect(200);
     expect(response.body.actions).toEqual([]);
     expect(response.body.total).toBe(0);

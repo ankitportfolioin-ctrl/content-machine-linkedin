@@ -111,7 +111,19 @@ export class OperatorActionService {
     });
   }
 
-  async transition(workspaceId: string, actionId: string, to: 'DISMISSED' | 'COMPLETED') {
+  async transition(
+    workspaceId: string,
+    actionId: string,
+    to: 'DISMISSED' | 'COMPLETED',
+    provenance?: {
+      decidedBy?: string;
+      decisionReason?: string;
+      evidenceRefs?: string[];
+      model?: string;
+      modelVersion?: string;
+      policySnapshot?: Record<string, unknown>;
+    }
+  ) {
     const row = await this.prisma.operatorAction.findFirst({ where: { id: actionId, workspaceId } });
     if (!row) {
       throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
@@ -122,11 +134,27 @@ export class OperatorActionService {
         `Only PENDING actions can transition (current: ${row.status}). DISMISSED actions cannot become COMPLETED.`
       );
     }
+    const now = new Date();
+    const policy = await this.prisma.autonomyPolicy.findUnique({ where: { workspaceId } });
+    const settings = await this.prisma.workspaceSettings.findUnique({ where: { workspaceId } });
+    const policySnapshot = provenance?.policySnapshot ?? {
+      tier1PostingEnabled: policy?.tier1PostingEnabled ?? false,
+      tier2HumanApprovalAck: policy?.tier2HumanApprovalAck ?? false,
+      dailyPreparationCap: settings?.dailyPreparationCap ?? 0,
+    };
+
     return this.prisma.operatorAction.update({
       where: { id: row.id },
       data: {
         status: to,
-        ...(to === 'DISMISSED' ? { dismissedAt: new Date() } : { completedAt: new Date() }),
+        ...(to === 'DISMISSED' ? { dismissedAt: now } : { completedAt: now }),
+        decidedBy: provenance?.decidedBy ?? 'system',
+        decidedAt: now,
+        decisionReason: provenance?.decisionReason ?? null,
+        evidenceRefs: provenance?.evidenceRefs ?? [],
+        model: provenance?.model ?? null,
+        modelVersion: provenance?.modelVersion ?? null,
+        policySnapshot: policySnapshot as object,
       },
     });
   }
@@ -427,6 +455,8 @@ export class OperatorActionService {
           score: row.score,
           dimensions: [],
           learningApplied: [],
+          signalConfidence: 'UNKNOWN' as const,
+          recommendationConfidence: 'UNKNOWN' as const,
         },
         row.status
       );

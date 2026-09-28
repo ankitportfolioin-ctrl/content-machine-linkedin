@@ -249,7 +249,7 @@ describe('Phase 8 scoring and explanation mapping', () => {
       expect(byName.get('evidence_strength')!.points).toBe(12);
       expect(byName.get('readiness')!.points).toBe(6);
       expect(byName.get('urgency')!.points).toBe(4);
-      expect(scored.score).toBe(42);
+      expect(scored.score).toBe(41);
       const explanation = explainAction(scored, 'PENDING');
       expect(explanation.lifecycle).toMatch(/human decision/);
       expect(explanation.reasons).toEqual(scored.reasons);

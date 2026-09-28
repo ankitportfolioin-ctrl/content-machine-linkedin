@@ -553,3 +553,193 @@ export type LearningDerive = z.infer<typeof learningDeriveSchema>;
 export type ContentOutcomeDerive = z.infer<typeof contentOutcomeDeriveSchema>;
 export type OpportunityScore = z.infer<typeof opportunityScoreSchema>;
 export type OperatorActionKind = z.infer<typeof operatorActionKindSchema>;
+
+export const businessProfileSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(5000).optional(),
+  mission: z.string().max(5000).optional(),
+  products: z.array(z.record(z.unknown())).default([]),
+  services: z.array(z.record(z.unknown())).default([]),
+  skills: z.array(z.record(z.unknown())).default([]),
+  ebooks: z.array(z.record(z.unknown())).default([]),
+  guides: z.array(z.record(z.unknown())).default([]),
+  targetOutcomes: z.array(z.record(z.unknown())).default([]),
+  monetizationGoals: z.array(z.record(z.unknown())).default([]),
+});
+
+export const brandProfileSchema = z.object({
+  tone: z.string().max(5000).optional(),
+  writingStyle: z.string().max(5000).optional(),
+  bannedPhrases: z.array(z.string().max(200)).max(100).default([]),
+  preferredVocabulary: z.array(z.string().max(200)).max(100).default([]),
+  visualIdentity: z.record(z.unknown()).optional(),
+  contentBoundaries: z.string().max(5000).optional(),
+});
+
+export const strategyProfileSchema = z.object({
+  businessGoals: z.array(z.record(z.unknown())).default([]),
+  audienceGoals: z.array(z.record(z.unknown())).default([]),
+  contentGoals: z.array(z.record(z.unknown())).default([]),
+  growthGoals: z.array(z.record(z.unknown())).default([]),
+  productGoals: z.array(z.record(z.unknown())).default([]),
+});
+
+export const audienceSegmentSchema = z.object({
+  name: z.string().min(1).max(100),
+  type: z.enum([
+    'BEGINNER_DEVELOPER',
+    'AI_LEARNER',
+    'AI_BUILDER',
+    'SOFTWARE_DEVELOPER',
+    'STARTUP_BUILDER',
+    'TECH_STUDENT',
+    'TECHNOLOGY_ENTHUSIAST',
+    'CUSTOM',
+  ]),
+  description: z.string().max(2000).optional(),
+  problems: z.array(z.string().max(500)).max(50).default([]),
+  goals: z.array(z.string().max(500)).max(50).default([]),
+  interests: z.array(z.string().max(200)).max(50).default([]),
+  tools: z.array(z.string().max(200)).max(50).default([]),
+  skills: z.array(z.string().max(200)).max(50).default([]),
+  painPoints: z.array(z.string().max(500)).max(50).default([]),
+  motivations: z.array(z.string().max(500)).max(50).default([]),
+  contentPreferences: z.array(z.string().max(200)).max(50).default([]),
+});
+
+export const contentDNASchema = z.object({
+  contentIdeaId: idSchema.optional(),
+  contentDraftId: idSchema.optional(),
+  contentVersionId: idSchema.optional(),
+  topic: z.string().max(200).optional(),
+  subtopic: z.string().max(200).optional(),
+  audienceSegmentId: idSchema.optional(),
+  skillLevel: z.string().max(50).optional(),
+  pillar: z.string().max(100).optional(),
+  format: z.enum([
+    'TEXT_POST','CAROUSEL','DOCUMENT','IMAGE','VIDEO_SCRIPT','TUTORIAL',
+    'NEWS_EXPLANATION','HOW_TO','LIST','COMPARISON','CASE_STUDY','EXPERIMENT',
+    'MYTH_VS_FACT','TOOL_BREAKDOWN','PROJECT_WALKTHROUGH',
+  ]).optional(),
+  angle: z.string().max(5000).optional(),
+  hookType: z.enum(['PROBLEM','QUESTION','STATEMENT','STORY','STATISTIC','CONTRARIAN','PREDICTION','FRAMEWORK']).optional(),
+  hook: z.string().max(5000).optional(),
+  hookLength: z.number().int().nonnegative().optional(),
+  title: z.string().max(300).optional(),
+  structure: z.record(z.unknown()).optional(),
+  bodyLength: z.number().int().nonnegative().optional(),
+  visualType: z.string().max(50).optional(),
+  visualConcept: z.string().max(5000).optional(),
+  ctaType: z.enum(['COMMENT','SHARE','FOLLOW','DOWNLOAD','SIGNUP','BUY','LEARN_MORE','DM','SAVE']).optional(),
+  cta: z.string().max(1000).optional(),
+  hashtags: z.array(z.string().max(100)).max(30).default([]),
+  sourceIds: z.array(idSchema).max(100).default([]),
+  freshness: z.string().max(50).optional(),
+  publishTime: isoDateSchema.optional(),
+  stage: z.enum([
+    'RESEARCH','OPPORTUNITY','IDEA','ANGLE','HOOK','SCRIPT','VISUAL_CONCEPT',
+    'CAPTION','HASHTAGS','FACT_CHECK','ORIGINALITY_CHECK','QUALITY_CHECK','HUMAN_APPROVAL','PUBLISHING',
+  ]).default('RESEARCH'),
+});
+
+export const contentStageAdvanceSchema = z.object({
+  toStage: z.enum([
+    'RESEARCH','OPPORTUNITY','IDEA','ANGLE','HOOK','SCRIPT','VISUAL_CONCEPT',
+    'CAPTION','HASHTAGS','FACT_CHECK','ORIGINALITY_CHECK','QUALITY_CHECK','HUMAN_APPROVAL','PUBLISHING',
+  ]),
+  notes: z.string().max(2000).optional(),
+});
+
+export const originalityCheckSchema = z.object({
+  draft: z.string().min(1).max(50000),
+  sources: z.array(z.object({ id: z.string().max(200), text: z.string().min(1).max(20000) })).max(20).default([]),
+});
+
+export const commentIngestSchema = z.object({
+  contentVersionId: idSchema.optional(),
+  platform: z.string().max(50).default('linkedin'),
+  authorName: z.string().max(100).optional(),
+  authorUrl: z.string().max(2048).optional(),
+  text: z.string().min(1).max(5000),
+  externalId: z.string().max(200).optional(),
+  postedAt: isoDateSchema.optional(),
+});
+
+export const experimentCreateSchema = z.object({
+  hypothesis: z.string().min(10).max(2000),
+  variable: z.string().min(1).max(100),
+  controlDescription: z.string().min(1).max(2000),
+  variantDescription: z.string().min(1).max(2000),
+  controlContentDNAId: idSchema.optional(),
+  variantContentDNAId: idSchema.optional(),
+  metricName: z.string().min(1).max(100).default('saves'),
+});
+
+export const experimentCompleteSchema = z.object({
+  controlMetrics: z.record(z.number()).default({}),
+  variantMetrics: z.record(z.number()).default({}),
+  sampleSize: z.number().int().min(2),
+  conclusion: z.string().max(2000).optional(),
+  nextTest: z.string().max(2000).optional(),
+});
+
+export const runsTriggerSchema = z.object({
+  runDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'runDate must be YYYY-MM-DD').optional(),
+});
+
+// Step D: onboarding / workspace settings. Autonomy stays Tier 0 until the
+// §6 LinkedIn report is approved: autonomyTier accepts only 0 for now.
+export const scheduleUpdateSchema = z.object({
+  timezone: z.string().min(1).max(100),
+  dailyRunTime: z.string().regex(/^\d{2}:\d{2}$/, 'dailyRunTime must be HH:mm'),
+  dailyLlmCallCap: z.number().int().min(0).max(1000),
+  dailyFetchCap: z.number().int().min(0).max(5000),
+  dailyPreparationCap: z.number().int().min(0).max(500),
+  autonomyTier: z.literal(0),
+});
+
+export const policyUpdateSchema = z.object({
+  tier1PostingEnabled: z.boolean(),
+  tier1PostingDailyCap: z.number().int().min(0).max(10),
+  tier1RequireApprovedPost: z.boolean(),
+  tier2HumanApprovalAck: z.boolean(),
+});
+
+export const killUpdateSchema = z.object({
+  paused: z.boolean().optional(),
+  killSwitch: z.boolean().optional(),
+}).refine((o) => o.paused !== undefined || o.killSwitch !== undefined, {
+  message: 'Provide at least one of paused or killSwitch.',
+});
+
+export const feedSourceCreateSchema = z.object({
+  url: urlSchema,
+  type: z.enum(['rss', 'atom', 'hackernews', 'github_releases', 'blog', 'site']).default('rss'),
+  name: z.string().max(200).optional(),
+  active: z.boolean().default(true),
+});
+
+export const feedSourceUpdateSchema = z.object({
+  name: z.string().max(200).optional(),
+  type: z.enum(['rss', 'atom', 'hackernews', 'github_releases', 'blog', 'site']).optional(),
+  active: z.boolean().optional(),
+});
+
+export const leadImportSchema = z.object({
+  csv: z.string().min(1).max(500000),
+  filename: z.string().max(255).optional(),
+});
+
+export const performanceRecordSchema = z.object({
+  impressions: z.number().int().nonnegative().optional(),
+  reach: z.number().int().nonnegative().optional(),
+  reactions: z.number().int().nonnegative().optional(),
+  comments: z.number().int().nonnegative().optional(),
+  reposts: z.number().int().nonnegative().optional(),
+  saves: z.number().int().nonnegative().optional(),
+  sends: z.number().int().nonnegative().optional(),
+  linkClicks: z.number().int().nonnegative().optional(),
+  profileViews: z.number().int().nonnegative().optional(),
+  followerGain: z.number().int().optional(),
+  businessActions: z.number().int().nonnegative().optional(),
+});

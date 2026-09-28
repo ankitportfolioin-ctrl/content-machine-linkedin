@@ -712,6 +712,13 @@ export interface OperatorAction {
   status: OperatorActionStatus;
   dismissedAt?: string | null;
   completedAt?: string | null;
+  decidedBy?: string | null;
+  decidedAt?: string | null;
+  decisionReason?: string | null;
+  evidenceRefs?: string[];
+  model?: string | null;
+  modelVersion?: string | null;
+  policySnapshot?: Record<string, unknown> | null;
 }
 
 export interface NextActionsResponse {
@@ -746,6 +753,9 @@ export interface ActionExplanation {
   lifecycle?: string | null;
   learningApplied?: string[];
   subjectMeta: Record<string, unknown>;
+  signalConfidence?: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
+  recommendationConfidence?: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
+  whyNot?: string[];
 }
 
 export interface ExplanationResponse {
@@ -860,4 +870,167 @@ export interface LearningProposal {
 
 export interface LearningProposalsResponse {
   proposals: LearningProposal[];
+}
+
+export interface TodayBrainRecommendation {
+  text: string;
+  why: string[];
+  confidence: 'HIGH' | 'MEDIUM' | 'LOW' | 'INSUFFICIENT DATA';
+}
+
+export interface TodayBrain {
+  newSignals: number;
+  highPotentialOpportunities: number;
+  readyForApproval: number;
+  awaitingAnalytics: number;
+  newAudienceSignals: number;
+  runningExperiments: number;
+  newLearnedPatterns: number;
+  recommendation: TodayBrainRecommendation | null;
+}
+
+export interface AudienceSegment {
+  id: string;
+  name: string;
+  type: string;
+  description?: string | null;
+  problems?: string[];
+  goals?: string[];
+  interests?: string[];
+  tools?: string[];
+  [key: string]: unknown;
+}
+
+export interface LearningDashboard {
+  whatWeKnow: Array<{ id: string; dimension: string; pattern: string; sample: number; confidence?: number | null }>;
+  whatWeThink: Array<{ id: string; dimension: string; pattern: string; confidence?: number | null }>;
+  whatWeAreTesting: Array<{ id: string; hypothesis: string; variable: string; metric: string }>;
+  whatWeDontKnow: string[];
+}
+
+export interface ExperimentItem {
+  id: string;
+  hypothesis: string;
+  variable: string;
+  metricName: string;
+  status: string;
+  result?: string | null;
+  confidence?: number | null;
+  conclusion?: string | null;
+  [key: string]: unknown;
+}
+
+export interface OnboardingProgress {
+  steps: Record<string, boolean>;
+  currentStep: string | null;
+  complete: boolean;
+  counts: {
+    writingSamples: number;
+    icps: number;
+    audienceSegments: number;
+    activeFeedSources: number;
+    completedLeadBatches: number;
+    leads: number;
+  };
+  state?: unknown;
+}
+
+export interface WorkspaceSettings {
+  id: string;
+  timezone: string;
+  dailyRunTime: string;
+  dailyLlmCallCap: number;
+  dailyFetchCap: number;
+  dailyPreparationCap: number;
+  paused: boolean;
+  killSwitch: boolean;
+  autonomyTier: number;
+  [key: string]: unknown;
+}
+
+export interface AutonomyPolicy {
+  id: string;
+  tier1PostingEnabled: boolean;
+  tier1PostingDailyCap: number;
+  tier1RequireApprovedPost: boolean;
+  tier2HumanApprovalAck: boolean;
+  [key: string]: unknown;
+}
+
+export interface ReadinessDetail {
+  ready: boolean;
+  reason: string;
+  details: Record<string, boolean | string>;
+}
+
+export interface ReadinessState {
+  workspaceIntelligenceReady: ReadinessDetail;
+  humanApprovalReady: ReadinessDetail;
+  linkedInExecution: ReadinessDetail;
+  overall: 'ready' | 'partial' | 'not_ready';
+}
+
+export interface ReadinessResponse {
+  readiness: ReadinessState;
+}
+
+export interface FeedSource {
+  id: string;
+  url: string;
+  type: string;
+  name?: string | null;
+  active: boolean;
+  lastFetchedAt?: string | null;
+  lastError?: string | null;
+  [key: string]: unknown;
+}
+
+export interface LeadImportBatch {
+  id: string;
+  filename?: string | null;
+  totalRows: number;
+  importedRows: number;
+  skippedRows: number;
+  status: string;
+  error?: string | null;
+  [key: string]: unknown;
+}
+
+export interface IntelligenceReport {
+  id: string;
+  frequency: string;
+  periodStart: string;
+  periodEnd: string;
+  audienceCaredAbout?: unknown;
+  emergingTopics?: Array<{ id?: string; title?: string; score?: number }>;
+  strongSignals?: Array<{ id?: string; title?: string }>;
+  weakSignals?: Array<{ id?: string; title?: string }>;
+  learnedPatterns?: Array<{ id?: string; dimension?: string; pattern?: string; status?: string }>;
+  experiments?: Array<{ id?: string; hypothesis?: string; status?: string; result?: string | null }>;
+  recommendedTopics?: Array<{ id?: string; title?: string }>;
+  confidenceLevel?: string | null;
+  generatedAt: string;
+  [key: string]: unknown;
+}
+
+export interface DailyRunSummary {
+  id: string;
+  runDate: string;
+  status: string;
+  startedAt: string;
+  finishedAt?: string | null;
+  summary?: unknown;
+  stages?: Array<{ stage: string; status: string }>;
+  [key: string]: unknown;
+}
+
+export interface BrainComment {
+  id: string;
+  text: string;
+  type: string;
+  sentiment?: string | null;
+  isQuestion: boolean;
+  isRequest: boolean;
+  isLeadSignal: boolean;
+  [key: string]: unknown;
 }

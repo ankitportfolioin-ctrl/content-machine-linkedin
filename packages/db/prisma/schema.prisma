@@ -284,6 +284,10 @@ enum FollowUpAction {
   ASK_CLARIFYING_QUESTION
   MOVE_TO_OPPORTUNITY
   CLOSE_OUT
+  WAIT
+  NURTURE
+  NO_OUTREACH
+  DISMISS
 }
 
 enum SalesSignalType {
@@ -302,6 +306,148 @@ enum LearningProposalStatus {
   CONFIRMED
   REJECTED
   REVOKED
+}
+
+enum ContentStage {
+  RESEARCH
+  OPPORTUNITY
+  IDEA
+  ANGLE
+  HOOK
+  SCRIPT
+  VISUAL_CONCEPT
+  CAPTION
+  HASHTAGS
+  FACT_CHECK
+  ORIGINALITY_CHECK
+  QUALITY_CHECK
+  HUMAN_APPROVAL
+  PUBLISHING
+}
+
+enum ContentDNAFormat {
+  TEXT_POST
+  CAROUSEL
+  DOCUMENT
+  IMAGE
+  VIDEO_SCRIPT
+  TUTORIAL
+  NEWS_EXPLANATION
+  HOW_TO
+  LIST
+  COMPARISON
+  CASE_STUDY
+  EXPERIMENT
+  MYTH_VS_FACT
+  TOOL_BREAKDOWN
+  PROJECT_WALKTHROUGH
+}
+
+enum HookType {
+  PROBLEM
+  QUESTION
+  STATEMENT
+  STORY
+  STATISTIC
+  CONTRARIAN
+  PREDICTION
+  FRAMEWORK
+}
+
+enum CTAType {
+  COMMENT
+  SHARE
+  FOLLOW
+  DOWNLOAD
+  SIGNUP
+  BUY
+  LEARN_MORE
+  DM
+  SAVE
+}
+
+enum AudienceSegmentType {
+  BEGINNER_DEVELOPER
+  AI_LEARNER
+  AI_BUILDER
+  SOFTWARE_DEVELOPER
+  STARTUP_BUILDER
+  TECH_STUDENT
+  TECHNOLOGY_ENTHUSIAST
+  CUSTOM
+}
+
+enum CommentType {
+  QUESTION
+  REQUEST
+  PRAISE
+  CRITICISM
+  DISAGREEMENT
+  TECHNICAL_QUESTION
+  LEAD_SIGNAL
+  SPAM
+  CONVERSATION
+}
+
+enum ExperimentStatus {
+  DESIGNED
+  RUNNING
+  COMPLETED
+  ARCHIVED
+}
+
+enum ReportFrequency {
+  DAILY
+  WEEKLY
+  MONTHLY
+}
+
+// Step B: Autonomous Daily Loop foundation. All run/schedule/policy state is
+// workspace-scoped. Tier 3 (scraping, automation, mass messaging) is never
+// built, so no enum or model represents it by design.
+enum FeedSourceType {
+  RSS
+  ATOM
+  HACKERNEWS
+  GITHUB_RELEASES
+  BLOG
+  SITE
+}
+
+enum DailyRunStatus {
+  STARTED
+  RUNNING
+  COMPLETED
+  COMPLETED_WITH_FAILURES
+  FAILED
+  SKIPPED_PAUSED
+  SKIPPED_KILLED
+}
+
+enum RunStageName {
+  INTELLIGENCE
+  DECISION
+  CONTENT
+  SALES
+  APPROVAL_SNAPSHOT
+  EXECUTION
+  OBSERVE_LEARN
+  DIGEST
+}
+
+enum RunStageStatus {
+  PENDING
+  RUNNING
+  SUCCEEDED
+  FAILED
+  SKIPPED
+}
+
+enum LeadImportStatus {
+  PENDING
+  COMPLETED
+  COMPLETED_WITH_SKIPS
+  FAILED
 }
 
 model User {
@@ -333,6 +479,483 @@ model User {
   @@index([isActive])
 }
 
+model BusinessProfile {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  name            String   @db.VarChar(100)
+  description     String?  @db.Text
+  mission         String?  @db.Text
+  products        Json?    @default("[]")
+  services        Json?    @default("[]")
+  skills          Json?    @default("[]")
+  ebooks          Json?    @default("[]")
+  guides          Json?    @default("[]")
+  targetOutcomes  Json?    @default("[]")
+  monetizationGoals Json?  @default("[]")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId])
+  @@index([workspaceId])
+}
+
+model BrandProfile {
+  id                String   @id @default(uuid())
+  workspaceId       String
+  tone              String?  @db.Text
+  writingStyle      String?  @db.Text
+  bannedPhrases     String[] @default([])
+  preferredVocabulary String[] @default([])
+  visualIdentity    Json?
+  contentBoundaries String?  @db.Text
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId])
+  @@index([workspaceId])
+}
+
+model StrategyProfile {
+  id             String   @id @default(uuid())
+  workspaceId    String
+  businessGoals  Json?    @default("[]")
+  audienceGoals  Json?    @default("[]")
+  contentGoals   Json?    @default("[]")
+  growthGoals    Json?    @default("[]")
+  productGoals   Json?    @default("[]")
+  salesGoals     Json?    @default("[]")
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId])
+  @@index([workspaceId])
+}
+
+model AudienceSegment {
+  id              String             @id @default(uuid())
+  workspaceId     String
+  name            String             @db.VarChar(100)
+  type            AudienceSegmentType
+  description     String?            @db.Text
+  problems        Json?              @default("[]")
+  goals           Json?              @default("[]")
+  interests       Json?              @default("[]")
+  tools           Json?              @default("[]")
+  skills          Json?              @default("[]")
+  painPoints      Json?              @default("[]")
+  motivations     Json?              @default("[]")
+  contentPreferences Json?           @default("[]")
+  isDefault       Boolean            @default(false)
+  createdAt       DateTime           @default(now())
+  updatedAt       DateTime           @updatedAt
+
+  workspace       Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  linkedProblems  Problem[]
+  contentDNAs     ContentDNA[]
+  audienceSignals AudienceSignal[]
+
+  @@index([workspaceId])
+  @@index([workspaceId, type])
+}
+
+model Problem {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  audienceSegmentId String?
+  title           String   @db.VarChar(300)
+  description     String?  @db.Text
+  severity        Int      @default(5)
+  frequency       String?  @db.VarChar(50)
+  source          String?  @db.VarChar(100)
+  evidence        String?  @db.Text
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspace       Workspace          @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  audienceSegment AudienceSegment?   @relation(fields: [audienceSegmentId], references: [id], onDelete: SetNull)
+  products        Product[]
+
+  @@index([workspaceId])
+  @@index([audienceSegmentId])
+}
+
+model Product {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  problemId       String?
+  name            String   @db.VarChar(200)
+  description     String?  @db.Text
+  type            String   @db.VarChar(50)
+  price           Decimal? @db.Decimal(10, 2)
+  url             String?  @db.VarChar(2048)
+  features        Json?    @default("[]")
+  targetOutcomes  Json?    @default("[]")
+  status          String   @default("ACTIVE")
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  problem         Problem?  @relation(fields: [problemId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([problemId])
+}
+
+model ContentDNA {
+  id                    String           @id @default(uuid())
+  workspaceId           String
+  contentIdeaId         String?          @unique
+  contentDraftId        String?          @unique
+  contentVersionId      String?          @unique
+  
+  topic                 String?          @db.VarChar(200)
+  subtopic              String?          @db.VarChar(200)
+  audienceSegmentId     String?
+  skillLevel            String?          @db.VarChar(50)
+  pillar                String?          @db.VarChar(100)
+  format                ContentDNAFormat?
+  angle                 String?          @db.Text
+  hookType              HookType?
+  hook                  String?          @db.Text
+  hookLength            Int?
+  title                 String?          @db.VarChar(300)
+  structure             Json?
+  bodyLength            Int?
+  visualType            String?          @db.VarChar(50)
+  visualConcept         String?          @db.Text
+  ctaType               CTAType?
+  cta                   String?          @db.Text
+  hashtags              String[]
+  sourceIds             Json?
+  freshness             String?          @db.VarChar(50)
+  publishTime           DateTime?
+  stage                 ContentStage     @default(RESEARCH)
+  
+  impressions           Int?
+  reach                 Int?
+  reactions             Int?
+  comments              Int?
+  reposts               Int?
+  saves                 Int?
+  sends                 Int?
+  linkClicks            Int?
+  profileViews          Int?
+  followerGain          Int?
+  businessActions       Int?
+  
+  createdAt             DateTime         @default(now())
+  updatedAt             DateTime         @updatedAt
+
+  workspace             Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentIdea           ContentIdea?     @relation("ContentIdeaDNA", fields: [contentIdeaId], references: [id], onDelete: Cascade)
+  contentDraft          ContentDraft?    @relation("ContentDraftDNA", fields: [contentDraftId], references: [id], onDelete: Cascade)
+  contentVersion        ContentVersion?  @relation("ContentVersionDNA", fields: [contentVersionId], references: [id], onDelete: Cascade)
+  audienceSegment       AudienceSegment? @relation(fields: [audienceSegmentId], references: [id], onDelete: SetNull)
+  stageHistories        ContentStageHistory[]
+  experimentsAsControl  Experiment[]     @relation("ExperimentControl")
+  experimentsAsVariant  Experiment[]     @relation("ExperimentVariant")
+
+  @@index([workspaceId])
+  @@index([contentIdeaId])
+  @@index([contentDraftId])
+  @@index([contentVersionId])
+  @@index([workspaceId, stage])
+  @@index([workspaceId, pillar])
+  @@index([workspaceId, format])
+}
+
+model ContentStageHistory {
+  id              String       @id @default(uuid())
+  workspaceId     String
+  contentDNAId    String
+  fromStage       ContentStage?
+  toStage         ContentStage
+  actorId         String?
+  notes           String?      @db.Text
+  metadata        Json?
+  createdAt       DateTime     @default(now())
+
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentDNA      ContentDNA   @relation(fields: [contentDNAId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([contentDNAId])
+  @@index([createdAt])
+}
+
+model Comment {
+  id              String       @id @default(uuid())
+  workspaceId     String
+  contentVersionId String?
+  externalId      String?      @db.VarChar(200)
+  platform        String       @db.VarChar(50)
+  authorName      String?      @db.VarChar(100)
+  authorUrl       String?      @db.VarChar(2048)
+  text            String       @db.Text
+  type            CommentType  @default(CONVERSATION)
+  sentiment       String?      @db.VarChar(20)
+  isQuestion      Boolean      @default(false)
+  isRequest       Boolean      @default(false)
+  isLeadSignal    Boolean      @default(false)
+  parentId        String?
+  threadId        String?
+  postedAt        DateTime
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  contentVersion  ContentVersion? @relation(fields: [contentVersionId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([contentVersionId])
+  @@index([workspaceId, type])
+  @@index([workspaceId, postedAt])
+}
+
+model AudienceSignal {
+  id              String       @id @default(uuid())
+  workspaceId     String
+  audienceSegmentId String?
+  signalType      String       @db.VarChar(50)
+  source          String       @db.VarChar(100)
+  description     String       @db.Text
+  evidence        Json?
+  strength        Float        @default(1.0)
+  createdAt       DateTime     @default(now())
+
+  workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  audienceSegment AudienceSegment? @relation(fields: [audienceSegmentId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([audienceSegmentId])
+  @@index([workspaceId, signalType])
+}
+
+model Experiment {
+  id                  String          @id @default(uuid())
+  workspaceId         String
+  hypothesis          String          @db.Text
+  variable            String          @db.VarChar(100)
+  controlDescription  String          @db.Text
+  variantDescription  String          @db.Text
+  controlContentDNAId String?
+  variantContentDNAId String?
+  metricName          String          @db.VarChar(100)
+  status              ExperimentStatus @default(DESIGNED)
+  sampleSize          Int?
+  controlMetrics      Json?
+  variantMetrics      Json?
+  result              String?
+  confidence          Float?
+  conclusion          String?         @db.Text
+  nextTest            String?         @db.Text
+  startedAt           DateTime?
+  completedAt         DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  workspace           Workspace       @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  controlContentDNA   ContentDNA?     @relation("ExperimentControl", fields: [controlContentDNAId], references: [id], onDelete: SetNull)
+  variantContentDNA   ContentDNA?     @relation("ExperimentVariant", fields: [variantContentDNAId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+}
+model IntelligenceReport {
+  id                  String           @id @default(uuid())
+  workspaceId         String
+  frequency           ReportFrequency  @default(WEEKLY)
+  periodStart         DateTime
+  periodEnd           DateTime
+  audienceCaredAbout  Json?
+  emergingTopics      Json?
+  strongSignals       Json?
+  weakSignals         Json?
+  hookObservations    Json?
+  formatObservations  Json?
+  audienceObservations Json?
+  businessSignals     Json?
+  experiments         Json?
+  learnedPatterns     Json?
+  contradictoryEvidence Json?
+  recommendedExperiments Json?
+  recommendedTopics   Json?
+  topicsToAvoid       Json?
+  confidenceLevel     String?          @db.VarChar(20)
+  generatedAt         DateTime         @default(now())
+  createdAt           DateTime         @default(now())
+
+  workspace           Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, frequency, periodStart, periodEnd])
+  @@index([workspaceId])
+  @@index([workspaceId, generatedAt])
+}
+
+model ContentDiversitySnapshot {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  periodStart     DateTime
+  periodEnd       DateTime
+  pillarDist      Json?
+  topicDist       Json?
+  formatDist      Json?
+  audienceDist    Json?
+  angleDist       Json?
+  createdAt       DateTime @default(now())
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, periodStart])
+}
+
+// Step B: Autonomous Daily Loop foundation. Every model here is
+// workspace-scoped (workspaceId on every row, Cascade delete).
+// No changes were made to any pre-existing model or table.
+model WorkspaceSettings {
+  id                  String   @id @default(uuid())
+  workspaceId         String   @unique
+  timezone            String   @default("UTC") @db.VarChar(100)
+  dailyRunTime        String   @default("06:00") @db.VarChar(5)
+  dailyLlmCallCap     Int      @default(50)
+  dailyFetchCap       Int      @default(100)
+  dailyPreparationCap Int      @default(20)
+  paused              Boolean  @default(false)
+  killSwitch          Boolean  @default(false)
+  autonomyTier        Int      @default(0)
+  scheduleConfigured  Boolean  @default(false)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model AutonomyPolicy {
+  id                      String   @id @default(uuid())
+  workspaceId             String   @unique
+  tier1PostingEnabled     Boolean  @default(false)
+  tier1PostingDailyCap    Int      @default(1)
+  tier1RequireApprovedPost Boolean @default(true)
+  tier2HumanApprovalAck   Boolean  @default(false)
+  updatedBy               String?  @db.VarChar(100)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  workspace               Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model FeedSource {
+  id            String         @id @default(uuid())
+  workspaceId   String
+  url           String         @db.VarChar(2048)
+  type          FeedSourceType @default(RSS)
+  name          String?        @db.VarChar(200)
+  active        Boolean        @default(true)
+  lastFetchedAt DateTime?
+  lastCursor    String?        @db.VarChar(500)
+  lastError     String?        @db.Text
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  workspace     Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, url])
+  @@index([workspaceId, active])
+}
+
+model DailyRun {
+  id          String         @id @default(uuid())
+  workspaceId String
+  runDate     DateTime       @db.Date
+  status      DailyRunStatus @default(STARTED)
+  startedAt   DateTime       @default(now())
+  finishedAt  DateTime?
+  summary     Json?
+  error       String?        @db.Text
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  stages      RunStage[]
+
+  @@unique([workspaceId, runDate])
+  @@index([workspaceId, runDate])
+}
+
+model RunStage {
+  id          String         @id @default(uuid())
+  workspaceId String
+  dailyRunId  String
+  stage       RunStageName
+  status      RunStageStatus @default(PENDING)
+  counts      Json?
+  durationMs  Int?
+  error       String?        @db.Text
+  startedAt   DateTime?
+  finishedAt  DateTime?
+  attempt     Int            @default(1)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+
+  workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  dailyRun    DailyRun       @relation(fields: [dailyRunId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, dailyRunId, stage, attempt])
+  @@index([workspaceId, dailyRunId])
+}
+
+model OnboardingState {
+  id             String    @id @default(uuid())
+  workspaceId    String    @unique
+  currentStep    String    @default("profile") @db.VarChar(50)
+  completedSteps String[]  @default([])
+  profileDone    Boolean   @default(false)
+  audienceDone   Boolean   @default(false)
+  pillarsDone    Boolean   @default(false)
+  offersDone     Boolean   @default(false)
+  sourcesDone    Boolean   @default(false)
+  leadsDone      Boolean   @default(false)
+  policyDone     Boolean   @default(false)
+  scheduleDone   Boolean   @default(false)
+  completedAt    DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model LeadImportBatch {
+  id           String           @id @default(uuid())
+  workspaceId  String
+  filename     String?          @db.VarChar(255)
+  fileHash     String           @db.VarChar(64)
+  totalRows    Int
+  importedRows Int              @default(0)
+  skippedRows  Int              @default(0)
+  status       LeadImportStatus @default(PENDING)
+  error        String?          @db.Text
+  importedBy   String?          @db.VarChar(100)
+  createdAt    DateTime         @default(now())
+
+  workspace    Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, fileHash])
+  @@index([workspaceId])
+}
+
 model Workspace {
   id          String   @id @default(uuid())
   name        String   @db.VarChar(100)
@@ -342,49 +965,69 @@ model Workspace {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  memberships         WorkspaceMembership[]
-  profiles            Profile[]
-  icps                ICP[]
-  contentIdeas        ContentIdea[]
-  contentDrafts       ContentDraft[]
-  contentVersions     ContentVersion[]
-  leads               Lead[]
-  conversations       Conversation[]
-  messages            Message[]
-  opportunities       PipelineOpportunity[]
-  analyticsEvents     AnalyticsEvent[]
-  learningSignals     LearningSignal[]
-  intelligenceSources IntelligenceSource[]
-  sourceDocuments     SourceDocument[]
-  sourceClaims        SourceClaim[]
-  topics              Topic[]
-  topicMentions       TopicMention[]
-  trendSignals        TrendSignal[]
-  contentOpportunities ContentOpportunity[]
-  contentGaps         ContentGap[]
-  opportunityFeedbacks OpportunityFeedback[]
-  prospectResearch    ProspectResearch[]
-  prospectSignals     ProspectSignal[]
-  qualificationResults QualificationResult[]
-  prospectBriefs      ProspectBrief[]
-  outreachStrategies  OutreachStrategy[]
-  outreachDrafts      OutreachDraft[]
-  outreachReviews     OutreachReview[]
-  preparedActions     PreparedAction[]
+  memberships              WorkspaceMembership[]
+  profiles                 Profile[]
+  icps                     ICP[]
+  contentIdeas             ContentIdea[]
+  contentDrafts            ContentDraft[]
+  contentVersions          ContentVersion[]
+  leads                    Lead[]
+  conversations            Conversation[]
+  messages                 Message[]
+  opportunities            PipelineOpportunity[]
+  analyticsEvents          AnalyticsEvent[]
+  learningSignals          LearningSignal[]
+  intelligenceSources      IntelligenceSource[]
+  sourceDocuments          SourceDocument[]
+  sourceClaims             SourceClaim[]
+  topics                   Topic[]
+  topicMentions            TopicMention[]
+  trendSignals             TrendSignal[]
+  contentOpportunities     ContentOpportunity[]
+  contentGaps              ContentGap[]
+  opportunityFeedbacks     OpportunityFeedback[]
+  prospectResearch         ProspectResearch[]
+  prospectSignals          ProspectSignal[]
+  qualificationResults     QualificationResult[]
+  prospectBriefs           ProspectBrief[]
+  outreachStrategies       OutreachStrategy[]
+  outreachDrafts           OutreachDraft[]
+  outreachReviews          OutreachReview[]
+  preparedActions          PreparedAction[]
   conversationClassifications ConversationClassificationResult[]
-  followUpRecommendations FollowUpRecommendation[]
-  salesContentSignals SalesContentSignal[]
-  publishRecords      PublishRecord[]
-  outcomeMetrics      OutcomeMetric[]
-  learningProposals   LearningProposal[]
-  operatorActions     OperatorAction[]
-  contentPlans        ContentPlan[]
-  draftClaimBindings  DraftClaimBinding[]
-  contentGateResults  ContentQualityGateResult[]
-  contentReviews      ContentReview[]
-  voiceProfiles       VoiceProfile[]
-  voiceReceipts       VoiceReceipt[]
-  writingSamples      WritingSample[]
+  followUpRecommendations  FollowUpRecommendation[]
+  salesContentSignals      SalesContentSignal[]
+  publishRecords           PublishRecord[]
+  outcomeMetrics           OutcomeMetric[]
+  learningProposals        LearningProposal[]
+  operatorActions          OperatorAction[]
+  contentPlans             ContentPlan[]
+  draftClaimBindings       DraftClaimBinding[]
+  contentGateResults       ContentQualityGateResult[]
+  contentReviews           ContentReview[]
+  voiceProfiles            VoiceProfile[]
+  voiceReceipts            VoiceReceipt[]
+  writingSamples           WritingSample[]
+  businessProfile          BusinessProfile?
+  brandProfile             BrandProfile?
+  strategyProfile          StrategyProfile?
+  audienceSegments         AudienceSegment[]
+  problems                 Problem[]
+  products                 Product[]
+  contentDNAs              ContentDNA[]
+  contentStageHistories    ContentStageHistory[]
+  comments                 Comment[]
+  audienceSignals          AudienceSignal[]
+  experiments              Experiment[]
+  intelligenceReports      IntelligenceReport[]
+  contentDiversitySnapshots ContentDiversitySnapshot[]
+  workspaceSettings        WorkspaceSettings?
+  autonomyPolicy           AutonomyPolicy?
+  feedSources              FeedSource[]
+  dailyRuns                DailyRun[]
+  runStages                RunStage[]
+  onboardingState          OnboardingState?
+  leadImportBatches        LeadImportBatch[]
 
   @@index([slug])
   @@index([isActive])
@@ -476,6 +1119,7 @@ model ContentIdea {
   author      User          @relation("ContentIdeaAuthor", fields: [authorId], references: [id], onDelete: Restrict)
   drafts      ContentDraft[]
   plans       ContentPlan[]
+  contentDNA  ContentDNA?   @relation("ContentIdeaDNA")
 
   @@index([workspaceId])
   @@index([authorId])
@@ -503,6 +1147,7 @@ model ContentDraft {
   claimBindings   DraftClaimBinding[]
   gateResults     ContentQualityGateResult[]
   reviews         ContentReview[]
+  contentDNA      ContentDNA?   @relation("ContentDraftDNA")
 
   @@unique([contentIdeaId, version])
   @@index([workspaceId])
@@ -526,6 +1171,8 @@ model ContentVersion {
   author          User          @relation("ContentVersionAuthor", fields: [authorId], references: [id], onDelete: Restrict)
   publishRecords  PublishRecord[]
   outcomeMetrics  OutcomeMetric[]
+  contentDNA      ContentDNA?   @relation("ContentVersionDNA")
+  comments        Comment[]
 
   @@unique([contentDraftId, version])
   @@index([workspaceId])
@@ -1366,6 +2013,15 @@ model OperatorAction {
   completedAt   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
+
+  // Audit / Provenance fields
+  decidedBy     String?  @db.VarChar(100)  // actor: 'system' | userId | 'ai'
+  decidedAt     DateTime?
+  decisionReason String? @db.Text          // human-provided reason for transition
+  evidenceRefs  String[] @default([])      // refs to evidence used in decision
+  model         String?  @db.VarChar(100)  // model name if AI was involved
+  modelVersion  String?  @db.VarChar(50)   // model version if AI was involved
+  policySnapshot Json?                    // relevant policy state at decision time
 
   workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 

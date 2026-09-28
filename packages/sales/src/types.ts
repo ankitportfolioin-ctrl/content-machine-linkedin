@@ -45,7 +45,11 @@ export type FollowUpRecommendation =
   | 'SEND_VALUE'
   | 'ASK_CLARIFYING_QUESTION'
   | 'MOVE_TO_OPPORTUNITY'
-  | 'CLOSE_OUT';
+  | 'CLOSE_OUT'
+  | 'WAIT'
+  | 'NURTURE'
+  | 'NO_OUTREACH'
+  | 'DISMISS';
 
 export interface QualificationDimension {
   name: string;

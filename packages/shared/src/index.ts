@@ -49,3 +49,4 @@ export function assertNever(value: never): never {
 
 export * from './intelligence/urlCanonicalization';
 export * from './intelligence/sourceExtraction';
+export * from './freshness';

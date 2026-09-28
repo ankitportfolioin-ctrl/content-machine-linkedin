@@ -48,6 +48,8 @@ export interface ScoredAction extends Candidate {
   score: number;
   dimensions: ScoreDimension[];
   learningApplied: Array<{ dimension: string; adjustment: number; reason: string; proposalId: string }>;
+  signalConfidence: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
+  recommendationConfidence: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
 }
 
 export interface ActionExplanation {
@@ -62,4 +64,7 @@ export interface ActionExplanation {
   lifecycle: string;
   learningApplied: ScoredAction['learningApplied'];
   subjectMeta: Record<string, unknown>;
+  signalConfidence: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
+  recommendationConfidence: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
+  whyNot?: string[];
 }

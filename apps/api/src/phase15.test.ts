@@ -1,4 +1,5 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, afterAll } from 'vitest';
+import { cleanupTestData } from './test/helpers';
 import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
@@ -11,6 +12,7 @@ const password = 'testpassword123';
 let ownerToken = '';
 let outsiderToken = '';
 let workspaceId = '';
+let otherWorkspaceId = '';
 let oppNewId = '';
 let oppReviewId = '';
 let oppDismissId = '';
@@ -23,6 +25,11 @@ async function registerAndLogin(email: string): Promise<string> {
 
 const authOwner = () => ({ Authorization: `Bearer ${ownerToken}`, 'X-Workspace-ID': workspaceId });
 const authOutsider = () => ({ Authorization: `Bearer ${outsiderToken}`, 'X-Workspace-ID': workspaceId });
+
+// Step A contract: remove exactly this file's rows; never touch other files' data.
+afterAll(async () => {
+  await cleanupTestData({ workspaceIds: [workspaceId, otherWorkspaceId], userEmails: [ownerEmail, outsiderEmail] });
+});
 
 async function mkOpp(title: string, score: number): Promise<string> {
   const topic = await prisma.topic.create({
@@ -157,13 +164,13 @@ describe('Opportunity triage transitions', () => {
       .set('Authorization', `Bearer ${ownerToken}`)
       .send({ name: `Phase15 Other WS ${stamp}` })
       .expect(201);
-    const otherWs = (other.body.workspace?.id ?? other.body.id) as string;
+    otherWorkspaceId = (other.body.workspace?.id ?? other.body.id) as string;
     const otherTopic = await prisma.topic.create({
-      data: { workspaceId: otherWs, name: `Other ${stamp}`, canonicalName: `other-${stamp}` },
+      data: { workspaceId: otherWorkspaceId, name: `Other ${stamp}`, canonicalName: `other-${stamp}` },
     });
     const otherOpp = await prisma.contentOpportunity.create({
       data: {
-        workspaceId: otherWs, topicId: otherTopic.id, title: `Other ${stamp}`, thesis: 'T.',
+        workspaceId: otherWorkspaceId, topicId: otherTopic.id, title: `Other ${stamp}`, thesis: 'T.',
         problem: 'P.', audience: 'A.', angle: 'A.', objective: 'TEACH_PRACTICAL',
         opportunityScore: 0.9, sourceIds: [], claimIds: [], trendSignalIds: [],
         reasoning: 'S.', evidenceSummary: 'S.',

@@ -1,4 +1,5 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
+import { cleanupTestData } from './test/helpers';
 import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
@@ -26,6 +27,11 @@ async function registerAndLogin(email: string): Promise<string> {
 const authOwner = () => ({ Authorization: `Bearer ${ownerToken}`, 'X-Workspace-ID': workspaceId });
 const authViewer = () => ({ Authorization: `Bearer ${viewerToken}`, 'X-Workspace-ID': workspaceId });
 const authOutsider = () => ({ Authorization: `Bearer ${outsiderToken}`, 'X-Workspace-ID': workspaceId });
+
+// Step A contract: remove exactly this file's rows; never touch other files' data.
+afterAll(async () => {
+  await cleanupTestData({ workspaceIds: [workspaceId], userEmails: [ownerEmail, viewerEmail, outsiderEmail] });
+});
 
 describe('Phase 3 setup', () => {
   it('registers owner, viewer, outsider and creates an isolated workspace', async () => {

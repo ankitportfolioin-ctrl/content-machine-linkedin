@@ -1179,17 +1179,63 @@ function WhyRecommended({ matchKeys }: { matchKeys: Record<string, string> }) {
   const dimensions = explanation?.dimensions ?? [];
   const lifecycle = explanation?.lifecycle ?? null;
   const learning = explanation?.learningApplied ?? [];
+  const signalConfidence = explanation?.signalConfidence;
+  const recommendationConfidence = explanation?.recommendationConfidence;
+  const whyNot = explanation?.whyNot;
+
+  const confidenceLabel = (c?: string) => {
+    if (!c) return null;
+    const colors: Record<string, string> = { HIGH: '#16a34a', MEDIUM: '#ca8a04', LOW: '#dc2626', UNKNOWN: '#6b7280' };
+    return (
+      <span style={{ 
+        display: 'inline-block', 
+        padding: '0.125rem 0.5rem', 
+        borderRadius: '9999px', 
+        fontSize: '0.75rem', 
+        fontWeight: 600,
+        backgroundColor: colors[c] + '20',
+        color: colors[c],
+        marginLeft: '0.5rem'
+      }}>
+        {c}
+      </span>
+    );
+  };
 
   return (
     <div className="card">
       <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Why recommended</h3>
       <p style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>Score: {String(score)}</p>
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem', flexWrap: 'wrap' }}>
+        {signalConfidence && (
+          <span style={{ fontSize: '0.875rem' }}>
+            <strong>Signal Confidence:</strong>
+            {confidenceLabel(signalConfidence)}
+          </span>
+        )}
+        {recommendationConfidence && (
+          <span style={{ fontSize: '0.875rem' }}>
+            <strong>Recommendation Confidence:</strong>
+            {confidenceLabel(recommendationConfidence)}
+          </span>
+        )}
+      </div>
       {reasons.length > 0 ? (
         <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.5rem' }}>
           {reasons.map((reason, i) => (
             <li key={i}>{String(reason)}</li>
           ))}
         </ul>
+      ) : null}
+      {whyNot && whyNot.length > 0 ? (
+        <div style={{ marginBottom: '0.5rem', padding: '0.5rem', backgroundColor: 'var(--color-bg-secondary)', borderRadius: 'var(--radius)' }}>
+          <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.25rem', color: '#dc2626' }}>Why not ranked higher</p>
+          <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+            {whyNot.map((reason, i) => (
+              <li key={i}>{String(reason)}</li>
+            ))}
+          </ul>
+        </div>
       ) : null}
       {dimensions.length > 0 ? (
         <div style={{ marginBottom: '0.5rem' }}>

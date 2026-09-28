@@ -23,6 +23,7 @@
     "@growth-operator/learning": "workspace:*",
     "@growth-operator/sales": "workspace:*",
     "@growth-operator/schemas": "workspace:*",
+    "@growth-operator/shared": "workspace:*",
     "@prisma/client": "^5.22.0",
     "zod": "^3.23.8"
   },

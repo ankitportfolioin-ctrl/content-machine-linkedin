@@ -1,9 +1,10 @@
 import path from 'path';
 import dotenv from 'dotenv';
 // Load the repository-root .env regardless of the process working directory
-// (e.g. `pnpm --filter @growth-operator/api dev` runs with CWD=apps/api),
+// (e.g. `pnpm --filter @growth-operator/api dev` runs with CWD=apps/api,
+// so from apps/api/src the repo root is three levels up),
 // then fall back to default dotenv behavior for a package-local .env.
-dotenv.config({ path: path.resolve(__dirname, '../../.env') });
+dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config();
 import express, { Application } from 'express';
 import cors from 'cors';
@@ -36,6 +37,16 @@ import salesIntelligenceRoutes from './routes/salesIntelligence';
 import publishRecordRoutes from './routes/publishRecords';
 import outcomeRoutes from './routes/outcomes';
 import operatorRoutes from './routes/operator';
+import businessRoutes from './routes/business';
+import audienceRoutes from './routes/audience';
+import contentDNARoutes from './routes/contentDNA';
+import experimentRoutes from './routes/experiments';
+import commentRoutes from './routes/comments';
+import brainRoutes from './routes/brain';
+import runsRoutes from './routes/runs';
+import onboardingRoutes from './routes/onboarding';
+import feedsRoutes from './routes/feeds';
+import readinessRoutes from './routes/readiness';
 
 const env = getEnv();
 
@@ -113,6 +124,16 @@ app.use('/api/v1/sales-intelligence', salesIntelligenceRoutes);
 app.use('/api/v1/publish-records', publishRecordRoutes);
 app.use('/api/v1/outcomes', outcomeRoutes);
 app.use('/api/v1/operator', operatorRoutes);
+app.use('/api/v1/business', businessRoutes);
+app.use('/api/v1/audience', audienceRoutes);
+app.use('/api/v1/content-dna', contentDNARoutes);
+app.use('/api/v1/experiments', experimentRoutes);
+app.use('/api/v1/comments', commentRoutes);
+app.use('/api/v1/brain', brainRoutes);
+app.use('/api/v1/runs', runsRoutes);
+app.use('/api/v1/onboarding', onboardingRoutes);
+app.use('/api/v1/feeds', feedsRoutes);
+app.use('/api/v1/readiness', readinessRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);

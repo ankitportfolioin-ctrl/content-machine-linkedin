@@ -74,7 +74,15 @@ router.post('/actions/:actionId/dismiss', async (req, res, next) => {
     const authReq = req as unknown as AuthenticatedRequest;
     const { actionId } = req.params;
     if (!actionId) throw new NotFoundError('Operator Action');
-    const action = await actionService.transition(authReq.workspaceId, actionId, 'DISMISSED');
+    const provenance = {
+      decidedBy: authReq.user.id,
+      decisionReason: req.body?.reason ?? null,
+      evidenceRefs: req.body?.evidenceRefs ?? [],
+      model: req.body?.model ?? null,
+      modelVersion: req.body?.modelVersion ?? null,
+      policySnapshot: req.body?.policySnapshot ?? null,
+    };
+    const action = await actionService.transition(authReq.workspaceId, actionId, 'DISMISSED', provenance);
     res.json({ action });
   } catch (error) {
     forwardDecisionError(error, next);
@@ -86,7 +94,15 @@ router.post('/actions/:actionId/complete', async (req, res, next) => {
     const authReq = req as unknown as AuthenticatedRequest;
     const { actionId } = req.params;
     if (!actionId) throw new NotFoundError('Operator Action');
-    const action = await actionService.transition(authReq.workspaceId, actionId, 'COMPLETED');
+    const provenance = {
+      decidedBy: authReq.user.id,
+      decisionReason: req.body?.reason ?? null,
+      evidenceRefs: req.body?.evidenceRefs ?? [],
+      model: req.body?.model ?? null,
+      modelVersion: req.body?.modelVersion ?? null,
+      policySnapshot: req.body?.policySnapshot ?? null,
+    };
+    const action = await actionService.transition(authReq.workspaceId, actionId, 'COMPLETED', provenance);
     res.json({ action });
   } catch (error) {
     forwardDecisionError(error, next);

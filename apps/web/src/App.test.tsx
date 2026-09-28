@@ -20,8 +20,10 @@ describe('Web Application', () => {
 
   it('renders navigation links', () => {
     renderApp();
-    expect(screen.getByRole('link', { name: /content/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /brain/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^content$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /brain \/ intelligence/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /today's brain/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^learning$/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /leads/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /inbox/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /pipeline/i })).toBeInTheDocument();

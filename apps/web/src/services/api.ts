@@ -83,9 +83,11 @@ import {
   AnalyticsSummary,
   LearningProposal,
   LearningProposalsResponse,
+ReadinessResponse,
+  ReadinessState,
 } from '../types';
 
-export type { HealthResponse, ApiError };
+export type { HealthResponse, ApiError, ReadinessResponse, ReadinessState };
 
 const API_BASE = '/api/v1';
 
@@ -1357,15 +1359,25 @@ export async function listActions(params?: { status?: string; limit?: number }):
   return { actions: Array.isArray(data.actions) ? data.actions : [] };
 }
 
-export async function dismissAction(id: string): Promise<ActionDetailResponse> {
+export interface ProvenanceInput {
+  reason?: string;
+  evidenceRefs?: string[];
+  model?: string;
+  modelVersion?: string;
+  policySnapshot?: Record<string, unknown>;
+}
+
+export async function dismissAction(id: string, provenance?: ProvenanceInput): Promise<ActionDetailResponse> {
   return authedRequest<ActionDetailResponse>(`/operator/actions/${encodeURIComponent(id)}/dismiss`, {
     method: 'POST',
+    body: JSON.stringify(provenance ?? {}),
   });
 }
 
-export async function completeAction(id: string): Promise<ActionDetailResponse> {
+export async function completeAction(id: string, provenance?: ProvenanceInput): Promise<ActionDetailResponse> {
   return authedRequest<ActionDetailResponse>(`/operator/actions/${encodeURIComponent(id)}/complete`, {
     method: 'POST',
+    body: JSON.stringify(provenance ?? {}),
   });
 }
 
@@ -1399,4 +1411,114 @@ export async function getAiExplanation(id: string): Promise<AiExplanationRespons
   return authedRequest<AiExplanationResponse>(
     `/operator/explanations/${encodeURIComponent(id)}?format=ai`,
   );
+}
+
+export async function getTodayBrain(): Promise<{ brain: import('../types').TodayBrain }> {
+  return authedRequest<{ brain: import('../types').TodayBrain }>(`/brain/today`);
+}
+
+export async function getLearningDashboard(): Promise<import('../types').LearningDashboard> {
+  return authedRequest<import('../types').LearningDashboard>(`/brain/learning`);
+}
+
+export async function listAudienceSegments(): Promise<{ segments: import('../types').AudienceSegment[] }> {
+  return authedRequest<{ segments: import('../types').AudienceSegment[] }>(`/audience`);
+}
+
+export async function seedDefaultAudiences(): Promise<{ segments: import('../types').AudienceSegment[] }> {
+  return authedRequest<{ segments: import('../types').AudienceSegment[] }>(`/audience/seed-defaults`, { method: 'POST' });
+}
+
+export async function listExperiments(params?: { status?: string }): Promise<{ experiments: import('../types').ExperimentItem[] }> {
+  const q = params?.status ? `?status=${encodeURIComponent(params.status)}` : '';
+  return authedRequest<{ experiments: import('../types').ExperimentItem[] }>(`/experiments${q}`);
+}
+
+export async function createExperiment(input: { hypothesis: string; variable: string; controlDescription: string; variantDescription: string; metricName?: string }): Promise<{ experiment: import('../types').ExperimentItem }> {
+  return authedRequest(`/experiments`, { method: 'POST', body: JSON.stringify(input) });
+}
+
+export async function listBrainComments(): Promise<{ comments: import('../types').BrainComment[] }> {
+  return authedRequest<{ comments: import('../types').BrainComment[] }>(`/comments`);
+}
+
+export async function getBusinessProfile(): Promise<{ business: unknown; brand: unknown; strategy: unknown }> {
+  return authedRequest(`/business`);
+}
+
+export async function checkOriginality(draft: string, sources: Array<{ id: string; text: string }>): Promise<{ result: { status: string; explanation: string; guidance: string; jaccard: number; longestCommonSubstringChars: number } }> {
+  return authedRequest(`/content-dna/originality-check`, { method: 'POST', body: JSON.stringify({ draft, sources }) });
+}
+
+export async function getReadiness(): Promise<ReadinessResponse> {
+  return authedRequest<ReadinessResponse>(`/readiness`);
+}
+
+export async function getOnboarding(): Promise<{ onboarding: import('../types').OnboardingProgress; settings: import('../types').WorkspaceSettings | null; policy: import('../types').AutonomyPolicy | null }> {
+  return authedRequest(`/onboarding`);
+}
+
+export async function refreshOnboarding(): Promise<{ onboarding: import('../types').OnboardingProgress }> {
+  return authedRequest(`/onboarding/refresh`, { method: 'POST' });
+}
+
+export async function updateSchedule(input: { timezone: string; dailyRunTime: string; dailyLlmCallCap: number; dailyFetchCap: number; dailyPreparationCap: number; autonomyTier: 0 }): Promise<{ settings: import('../types').WorkspaceSettings }> {
+  return authedRequest(`/onboarding/schedule`, { method: 'PUT', body: JSON.stringify(input) });
+}
+
+export async function updatePolicy(input: { tier1PostingEnabled: boolean; tier1PostingDailyCap: number; tier1RequireApprovedPost: boolean; tier2HumanApprovalAck: boolean }): Promise<{ policy: import('../types').AutonomyPolicy; effectiveTier1: string; effectiveTier1Reason: string }> {
+  return authedRequest(`/onboarding/policy`, { method: 'PUT', body: JSON.stringify(input) });
+}
+
+export async function updateKillSwitch(input: { paused?: boolean; killSwitch?: boolean }): Promise<{ settings: import('../types').WorkspaceSettings }> {
+  return authedRequest(`/onboarding/kill`, { method: 'PUT', body: JSON.stringify(input) });
+}
+
+export async function listFeeds(): Promise<{ feeds: import('../types').FeedSource[] }> {
+  return authedRequest(`/feeds`);
+}
+
+export async function createFeed(input: { url: string; type?: string; name?: string; active?: boolean }): Promise<{ feed: import('../types').FeedSource }> {
+  return authedRequest(`/feeds`, { method: 'POST', body: JSON.stringify(input) });
+}
+
+export async function updateFeed(id: string, input: { name?: string; type?: string; active?: boolean }): Promise<{ feed: import('../types').FeedSource }> {
+  return authedRequest(`/feeds/${encodeURIComponent(id)}`, { method: 'PATCH', body: JSON.stringify(input) });
+}
+
+export async function deleteFeed(id: string): Promise<void> {
+  await authedRequest(`/feeds/${encodeURIComponent(id)}`, { method: 'DELETE' });
+}
+
+export async function importLeads(csv: string, filename?: string): Promise<{ batch: import('../types').LeadImportBatch; deduped: boolean; imported: number; skipped: Array<{ rowNumber: number; reason: string }> }> {
+  return authedRequest(`/leads/import`, { method: 'POST', body: JSON.stringify({ csv, filename }) });
+}
+
+export async function updateBusiness(input: Record<string, unknown>): Promise<{ business: unknown }> {
+  return authedRequest(`/business/business`, { method: 'PUT', body: JSON.stringify(input) });
+}
+
+export async function updateStrategy(input: Record<string, unknown>): Promise<{ strategy: unknown }> {
+  return authedRequest(`/business/strategy`, { method: 'PUT', body: JSON.stringify(input) });
+}
+
+export async function listReports(params?: { frequency?: string; limit?: number }): Promise<{ reports: import('../types').IntelligenceReport[] }> {
+  const query = new URLSearchParams();
+  if (params?.frequency) query.set('frequency', params.frequency);
+  if (typeof params?.limit !== 'undefined') query.set('limit', String(params.limit));
+  const suffix = query.toString() ? `?${query.toString()}` : '';
+  return authedRequest(`/brain/reports${suffix}`);
+}
+
+export async function listRuns(params?: { take?: number }): Promise<{ runs: import('../types').DailyRunSummary[] }> {
+  const suffix = typeof params?.take !== 'undefined' ? `?take=${params.take}` : '';
+  return authedRequest(`/runs${suffix}`);
+}
+
+export async function getRun(id: string): Promise<{ run: import('../types').DailyRunSummary }> {
+  return authedRequest(`/runs/${encodeURIComponent(id)}`);
+}
+
+export async function triggerRun(runDate?: string): Promise<{ result: { runId: string; status: string; stages: Array<{ stage: string; status: string }>; resumed: boolean } }> {
+  return authedRequest(`/runs/trigger`, { method: 'POST', body: JSON.stringify(runDate ? { runDate } : {}) });
 }

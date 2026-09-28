@@ -15,6 +15,8 @@ function scored(): ScoredAction {
     score: 62,
     dimensions: [{ name: 'urgency', points: 18, maxPoints: 30, reason: 'Awaiting review for 3 day(s).' }],
     learningApplied: [],
+    signalConfidence: 'UNKNOWN' as const,
+    recommendationConfidence: 'UNKNOWN' as const,
   };
 }
 
