@@ -398,13 +398,33 @@ export interface VoiceSampleDetailResponse {
   sample: VoiceSample;
 }
 
+/**
+ * Mirrors the Prisma Profile model (user facts for this workspace).
+ * The signed-in account's name/email live on User (AuthContext), not here.
+ */
 export interface UserProfile {
   id: string;
-  name?: string;
-  email?: string;
+  userId?: string;
+  workspaceId?: string;
+  linkedinUrl?: string | null;
+  headline?: string | null;
+  role?: string | null;
+  summary?: string | null;
+  professionalContext?: string | null;
+  industry?: string | null;
+  location?: string | null;
+  avatarUrl?: string | null;
+}
+
+export interface CreateProfileInput {
+  linkedinUrl?: string;
   headline?: string;
-  bio?: string;
-  [key: string]: unknown;
+  role?: string;
+  summary?: string;
+  professionalContext?: string;
+  industry?: string;
+  location?: string;
+  avatarUrl?: string;
 }
 
 export interface ProfileResponse {

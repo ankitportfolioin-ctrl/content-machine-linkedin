@@ -297,6 +297,64 @@ async function staleDrafts(prisma: PrismaClient, workspaceId: string, now: numbe
   }));
 }
 
+interface CommentSignalRow {
+  id: string;
+  signalType: string;
+  evidence: string;
+  reason: string;
+  status: string;
+  reviewedAt: Date | null;
+  createdAt: Date;
+  comment: { id: string; text: string; authorName: string | null; type: string } | null;
+}
+
+/**
+ * Comment sales signals that a human already reviewed (REVIEWED only —
+ * PENDING_REVIEW stays in the review queue, DISMISSED stays buried, SPAM
+ * never produces signals upstream). Surfacing, not actuation: the action
+ * points at the reviewed signal for a prospecting decision. Never creates
+ * prospects, conversations, or messages.
+ */
+async function commentSignals(prisma: PrismaClient, workspaceId: string, now: number): Promise<Candidate[]> {
+  void now;
+  const rows = (await prisma.commentSalesSignal.findMany({
+    where: { workspaceId, status: 'REVIEWED' },
+    include: { comment: { select: { id: true, text: true, authorName: true, type: true } } },
+    orderBy: { reviewedAt: 'desc' },
+    take: 20,
+  })) as CommentSignalRow[];
+  const live = rows.filter((r) => r.comment && r.comment.type !== 'SPAM');
+  return live.map((r) => {
+    const quote = r.comment!.text.slice(0, 160);
+    return {
+      kind: 'comment_signal' as const,
+      identityKey: id('comment_signal', r.id),
+      subjectId: r.id,
+      title: `Review sales signal from comments (${r.signalType}): "${quote.slice(0, 80)}"`,
+      createdAt: r.reviewedAt ?? r.createdAt,
+      facts: {
+        ready: true,
+        evidenceCount: 2,
+        learningDimensions: [],
+        subjectMeta: {
+          signalId: r.id,
+          commentId: r.comment!.id,
+          signalType: r.signalType,
+          authorName: r.comment!.authorName,
+        },
+      },
+      reasons: [
+        `Human-reviewed sales signal (${r.signalType}) from ${r.comment!.authorName ?? 'a reader'}: "${quote}".`,
+        'Reviewed intelligence only — creating a prospect stays a separate explicit human action.',
+      ],
+      evidenceLinks: [
+        { label: 'Comment sales signal', ref: `commentSalesSignal:${r.id}` },
+        { label: 'Comment', ref: `comment:${r.comment!.id}` },
+      ],
+    };
+  });
+}
+
 export async function collectCandidates(prisma: PrismaClient, workspaceId: string, now = Date.now()): Promise<Candidate[]> {
   const groups = await Promise.all([
     contentOpportunities(prisma, workspaceId, now),
@@ -311,6 +369,7 @@ export async function collectCandidates(prisma: PrismaClient, workspaceId: strin
     objectionPatterns(prisma, workspaceId, now),
     prospectRelevance(prisma, workspaceId, now),
     salesContentSignals(prisma, workspaceId, now),
+    commentSignals(prisma, workspaceId, now),
   ]);
   const seen = new Set<string>();
   const out: Candidate[] = [];

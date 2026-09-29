@@ -77,25 +77,10 @@ const COMMENT_AUDIENCE_SIGNALS: Record<string, { signalType: string; insight: st
   LEAD_SIGNAL: { signalType: 'COMMENT_LEAD_SIGNAL', insight: 'A reader shows buying intent — flagged for human sales review.', strength: 0.9 },
 };
 
-interface CommentSalesSignalStore {
-  commentSalesSignal: {
-    findFirst(args: unknown): Promise<{ id: string } | null>;
-    findMany(args: unknown): Promise<unknown[]>;
-    create(args: unknown): Promise<{ id: string }>;
-    update(args: unknown): Promise<unknown>;
-  };
-}
-
 export class CommentBrainService {
   private prisma: PrismaClient;
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
-  }
-
-  private signalStore(): CommentSalesSignalStore {
-    // CommentSalesSignal rides on the Batch 2 migration; cast until
-    // generated types refresh.
-    return this.prisma as unknown as CommentSalesSignalStore;
   }
 
   async ingest(workspaceId: string, input: CommentInput) {
@@ -144,7 +129,7 @@ export class CommentBrainService {
     // conversation, or revenue record is created here.
     let salesSignalId: string | null = null;
     if (c.type === 'LEAD_SIGNAL' && audienceSignalId) {
-      const sales = await this.signalStore().commentSalesSignal.create({
+      const sales = await this.prisma.commentSalesSignal.create({
         data: {
           workspaceId,
           commentId: created.id,
@@ -155,7 +140,7 @@ export class CommentBrainService {
           status: 'PENDING_REVIEW',
         },
       });
-      salesSignalId = (sales as { id: string }).id;
+      salesSignalId = sales.id;
     }
 
     return {
@@ -184,14 +169,14 @@ export class CommentBrainService {
   async salesSignalsForComment(workspaceId: string, commentId: string) {
     const comment = await this.prisma.comment.findFirst({ where: { id: commentId, workspaceId } });
     if (!comment) return [];
-    return this.signalStore().commentSalesSignal.findMany({
+    return this.prisma.commentSalesSignal.findMany({
       where: { workspaceId, commentId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
   async listSalesSignals(workspaceId: string, status?: string, take = 50) {
-    return this.signalStore().commentSalesSignal.findMany({
+    return this.prisma.commentSalesSignal.findMany({
       where: { workspaceId, ...(status ? { status } : {}) },
       orderBy: { createdAt: 'desc' },
       take: Math.min(100, Math.max(1, take)),
@@ -209,13 +194,13 @@ export class CommentBrainService {
     decision: 'REVIEWED' | 'DISMISSED',
     reviewerId?: string
   ) {
-    const existing = await this.signalStore().commentSalesSignal.findFirst({
+    const existing = await this.prisma.commentSalesSignal.findFirst({
       where: { id: signalId, workspaceId },
     });
     if (!existing) {
       throw new Error('Sales signal not found in this workspace.');
     }
-    return this.signalStore().commentSalesSignal.update({
+    return this.prisma.commentSalesSignal.update({
       where: { id: signalId },
       data: {
         status: decision === 'REVIEWED' ? 'REVIEWED' : 'DISMISSED',

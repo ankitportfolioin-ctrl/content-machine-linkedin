@@ -10,6 +10,9 @@ const mockPrisma = {
     findUnique: vi.fn(),
     update: vi.fn(),
   },
+  intelligenceSource: {
+    findUnique: vi.fn().mockResolvedValue({ id: 'source-1', url: 'https://example.com/article', canonicalUrl: 'https://example.com/article' }),
+  },
 } as unknown as PrismaClient;
 
 describe('ClaimLedgerService', () => {
@@ -97,6 +100,112 @@ describe('ClaimLedgerService', () => {
       expect(result[0].status).toBe('SUPPORTED');
       expect(result[1].status).toBe('UNCERTAIN');
       expect(result[2].status).toBe('UNCERTAIN');
+    });
+
+    it('skips exact duplicates within one source but keeps them across sources', async () => {
+      const understanding: SourceUnderstanding = {
+        thesis: 'Test',
+        mainProblem: 'Test',
+        observations: [],
+        claims: [
+          { text: 'Too expensive for our budget!', type: 'OBSERVATION', evidence: 'Quote', confidence: 0.8 },
+          { text: 'too   expensive for our budget', type: 'OBSERVATION', evidence: 'Quote', confidence: 0.8 },
+          { text: 'Genuinely different claim about timelines', type: 'OBSERVATION', evidence: 'Quote', confidence: 0.8 },
+        ],
+        evidence: [],
+        implications: [],
+        uncertainties: [],
+        contradictions: [],
+        audienceRelevance: [],
+        possibleAngles: [],
+      };
+
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.create.mockImplementation(({ data }: { data: { claimText: string } }) =>
+        Promise.resolve({ id: `id-${data.claimText.slice(0, 4)}`, ...data })
+      );
+
+      const result = await service.persistClaims('workspace-1', 'source-1', 'doc-1', understanding);
+
+      // Case/punctuation/whitespace variants collapse; the different claim stays.
+      expect(result).toHaveLength(2);
+      expect(mockPrisma.sourceClaim.create).toHaveBeenCalledTimes(2);
+    });
+
+    it('skips claims already persisted for the source (re-run safety)', async () => {
+      const understanding: SourceUnderstanding = {
+        thesis: 'Test',
+        mainProblem: 'Test',
+        observations: [],
+        claims: [{ text: 'Repeated claim', type: 'FACT', evidence: 'Evidence', confidence: 0.9 }],
+        evidence: [],
+        implications: [],
+        uncertainties: [],
+        contradictions: [],
+        audienceRelevance: [],
+        possibleAngles: [],
+      };
+
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([{ claimText: 'repeated CLAIM.' }]);
+      const result = await service.persistClaims('workspace-1', 'source-1', 'doc-1', understanding);
+
+      expect(result).toHaveLength(0);
+      expect(mockPrisma.sourceClaim.create).not.toHaveBeenCalled();
+    });
+
+    it('never marks evidence-less claims SUPPORTED', async () => {
+      const understanding: SourceUnderstanding = {
+        thesis: 'Test',
+        mainProblem: 'Test',
+        observations: [],
+        claims: [{ text: 'Confident but unevidenced', type: 'FACT', evidence: '   ', confidence: 0.95 }],
+        evidence: [],
+        implications: [],
+        uncertainties: [],
+        contradictions: [],
+        audienceRelevance: [],
+        possibleAngles: [],
+      };
+
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.create.mockImplementation(({ data }: { data: Record<string, unknown> }) =>
+        Promise.resolve({ id: 'claim-id', ...data })
+      );
+
+      const result = await service.persistClaims('workspace-1', 'source-1', 'doc-1', understanding);
+
+      expect(result).toHaveLength(1);
+      expect(result[0]?.status).toBe('UNCERTAIN');
+      expect((result[0]?.provenance as Record<string, unknown>)['evidenceStatus']).toBe('SOURCE_REVIEW_REQUIRED');
+    });
+
+    it('records the real source URL in provenance', async () => {
+      const understanding: SourceUnderstanding = {
+        thesis: 'Test',
+        mainProblem: 'Test',
+        observations: [],
+        claims: [{ text: 'Claim', type: 'FACT', evidence: 'Evidence', confidence: 0.8 }],
+        evidence: [],
+        implications: [],
+        uncertainties: [],
+        contradictions: [],
+        audienceRelevance: [],
+        possibleAngles: [],
+      };
+
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.create.mockImplementation(({ data }: { data: Record<string, unknown> }) =>
+        Promise.resolve({ id: 'claim-id', ...data })
+      );
+
+      const result = await service.persistClaims('workspace-1', 'source-1', 'doc-1', understanding);
+      const provenance = result[0]?.provenance as Record<string, unknown>;
+
+      expect(provenance['sourceUrl']).toBe('https://example.com/article');
+      expect(provenance['canonicalUrl']).toBe('https://example.com/article');
+      expect(provenance['sourceId']).toBe('source-1');
+      expect(provenance['documentId']).toBe('doc-1');
+      expect(provenance['evidenceStatus']).toBe('RECORDED');
     });
 
     it('includes provenance in created claims', async () => {

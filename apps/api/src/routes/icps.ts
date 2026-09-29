@@ -37,6 +37,9 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const authReq = req as AuthenticatedRequest;
+    // icpCreateSchema already accepts the full product surface (targetRoles,
+    // industries, companySize, problems, exclusions) — persist all of it so
+    // qualification reads real values instead of empty arrays.
     const data = icpCreateSchema.parse(req.body);
 
     const icp = await prisma.iCP.create({
@@ -45,6 +48,11 @@ router.post('/', async (req, res, next) => {
         name: data.name,
         description: data.description,
         criteria: data.criteria as any,
+        targetRoles: data.targetRoles ?? [],
+        industries: data.industries ?? [],
+        companySize: data.companySize,
+        problems: data.problems,
+        exclusions: data.exclusions,
       },
     });
 
@@ -90,9 +98,14 @@ router.patch('/:icpId', async (req, res, next) => {
     const updated = await prisma.iCP.update({
       where: { id: icpId },
       data: {
-        name: data.name,
-        description: data.description,
-        criteria: data.criteria as any,
+        ...(data.name !== undefined ? { name: data.name } : {}),
+        ...(data.description !== undefined ? { description: data.description } : {}),
+        ...(data.criteria !== undefined ? { criteria: data.criteria as any } : {}),
+        ...(data.targetRoles !== undefined ? { targetRoles: data.targetRoles } : {}),
+        ...(data.industries !== undefined ? { industries: data.industries } : {}),
+        ...(data.companySize !== undefined ? { companySize: data.companySize } : {}),
+        ...(data.problems !== undefined ? { problems: data.problems } : {}),
+        ...(data.exclusions !== undefined ? { exclusions: data.exclusions } : {}),
       },
     });
 

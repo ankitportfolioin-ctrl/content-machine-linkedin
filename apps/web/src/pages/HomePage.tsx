@@ -11,6 +11,7 @@ import {
   dismissAction,
   friendlyErrorMessage,
   getAutoPrepStatus,
+  getOnboarding,
   getReadiness,
   getRun,
   isAiUnavailable,
@@ -126,6 +127,7 @@ function kindLabel(kind: string): string {
   if (normalized === 'objection_pattern') return 'Recurring objection';
   if (normalized === 'prospect_relevance') return 'Prospect fit';
   if (normalized === 'sales_content_signal') return 'Sales signal';
+  if (normalized === 'comment_signal') return 'Comment signal';
   if (normalized.includes('review')) return 'Review';
   if (normalized.includes('pipeline') || normalized.includes('deal')) return 'Pipeline';
   if (normalized.includes('lead') || normalized.includes('prospect') || normalized.includes('outreach'))
@@ -746,12 +748,25 @@ function RecommendedSteps() {
   );
 }
 
+const ONBOARDING_STEP_LABELS: Record<string, string> = {
+  profile: 'Profile & voice',
+  audience: 'Audience & ICP',
+  pillars: 'Pillars & objectives',
+  offers: 'Offers',
+  sources: 'Signal sources',
+  leads: 'Lead import',
+  policy: 'Autonomy policy',
+  schedule: 'Schedule & controls',
+};
+
 export function HomePage() {
   const { health, ready, loading, error, refetch } = useHealth();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [readiness, setReadiness] = useState<ReadinessState | null>(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
   const [readinessError, setReadinessError] = useState<string | null>(null);
+  const [onboardingNext, setOnboardingNext] = useState<string | null>(null);
+  const [onboardingDone, setOnboardingDone] = useState(true);
 
   useEffect(() => {
     if (loading || authLoading) return;
@@ -773,7 +788,20 @@ export function HomePage() {
         setReadinessLoading(false);
       }
     }
+    // Onboarding progress is derived server-side from real workspace data;
+    // a failure here hides the nudge card but never blocks the page.
+    async function fetchOnboardingState() {
+      try {
+        const res = await getOnboarding();
+        setOnboardingDone(res.onboarding.complete);
+        setOnboardingNext(res.onboarding.complete ? null : (res.onboarding.currentStep ?? null));
+      } catch {
+        setOnboardingDone(true);
+        setOnboardingNext(null);
+      }
+    }
     void fetchReadiness();
+    void fetchOnboardingState();
   }, [loading, authLoading, isAuthenticated]);
 
   if (loading) {
@@ -823,6 +851,16 @@ export function HomePage() {
             Register a local account, create a workspace, then work the onboarding checklist.
           </p>
           <LoginForm />
+        </div>
+      ) : null}
+      {!showSignIn && !onboardingDone ? (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Finish workspace setup</h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
+            Onboarding is incomplete{onboardingNext ? ` — next: ${ONBOARDING_STEP_LABELS[onboardingNext] ?? onboardingNext}` : ''}.
+            Recommendations improve as each step lands in the workspace.
+          </p>
+          <NavLink to="/onboarding" className="btn btn-primary">Continue onboarding</NavLink>
         </div>
       ) : null}
       <div className="health-grid">

@@ -164,7 +164,9 @@ export class QualificationService {
         id: icp.id, name: icp.name, description: icp.description, targetRoles: icp.targetRoles,
         industries: icp.industries, companySize: icp.companySize, problems: icp.problems, exclusions: icp.exclusions,
       } : null,
-      lead: { title: lead.title, headline: lead.headline, company: lead.company, location: lead.location },
+      // Lead has no `title` column: role assessment reads `headline` only.
+      // Passing a phantom title would silently degrade role_fit.
+      lead: { headline: lead.headline, company: lead.company, location: lead.location },
       problemEvidence: inputs.problemEvidence,
       timingEvidence: inputs.timingEvidence,
       researchFactCount: inputs.researchFactCount,

@@ -10,10 +10,12 @@ import { STAGES } from './worker/stages';
 const stamp = Date.now();
 const ownerEmailA = `faults-a-${stamp}@example.com`;
 const ownerEmailB = `faults-b-${stamp}@example.com`;
+const ownerEmailC = `faults-c-${stamp}@example.com`;
 const password = 'testpassword123';
 
 let workspaceA = '';
 let workspaceB = '';
+let workspaceC = '';
 
 async function registerWorkspace(email: string, wsName: string): Promise<string> {
   await request(app).post('/api/v1/auth/register').send({ email, password, name: 'Faults User' }).expect(201);
@@ -155,13 +157,13 @@ describe('Step G: loop fault injection', () => {
   it('tick enqueues due workspaces with idempotency keys, skips the rest', async () => {
     await prisma.workspaceSettings.upsert({
       where: { workspaceId: workspaceA },
-      create: { workspaceId: workspaceA, timezone: 'UTC', dailyRunTime: '00:00' },
-      update: { timezone: 'UTC', dailyRunTime: '00:00' },
+      create: { workspaceId: workspaceA, timezone: 'UTC', dailyRunTime: '00:00', scheduleConfigured: true },
+      update: { timezone: 'UTC', dailyRunTime: '00:00', scheduleConfigured: true },
     });
     await prisma.workspaceSettings.upsert({
       where: { workspaceId: workspaceB },
-      create: { workspaceId: workspaceB, timezone: 'UTC', dailyRunTime: '23:00' },
-      update: { timezone: 'UTC', dailyRunTime: '23:00' },
+      create: { workspaceId: workspaceB, timezone: 'UTC', dailyRunTime: '23:00', scheduleConfigured: true },
+      update: { timezone: 'UTC', dailyRunTime: '23:00', scheduleConfigured: true },
     });
     const { sent, boss } = fakeBoss();
     const result = await resolveDueRuns(boss, new Date('2026-10-10T12:00:00.000Z'));
@@ -199,6 +201,38 @@ describe('Step G: loop fault injection', () => {
     expect(forB).toEqual(['2026-10-09', '2026-10-10']);
   });
 
+  it('tick never enqueues a workspace that never configured a schedule', async () => {
+    workspaceC = await registerWorkspace(ownerEmailC, `Faults WS C ${stamp}`);
+    // Fresh workspace: settings auto-create with scheduleConfigured=false.
+    const { sent, boss } = fakeBoss();
+    const result = await resolveDueRuns(boss, new Date('2026-10-10T12:00:00.000Z'));
+    expect(result.checked).toBeGreaterThanOrEqual(3);
+    expect(sent.filter((s) => s.data.workspaceId === workspaceC)).toHaveLength(0);
+  });
+
+  it('tick respects the workspace timezone, not server UTC', async () => {
+    // 2026-10-10T12:30Z == 08:30 America/New_York (EDT). Due at 08:00, not at 09:00.
+    await prisma.workspaceSettings.upsert({
+      where: { workspaceId: workspaceC },
+      create: { workspaceId: workspaceC, timezone: 'America/New_York', dailyRunTime: '08:00', scheduleConfigured: true },
+      update: { timezone: 'America/New_York', dailyRunTime: '08:00', scheduleConfigured: true },
+    });
+    const due = fakeBoss();
+    await resolveDueRuns(due.boss, new Date('2026-10-10T12:30:00.000Z'));
+    expect(due.sent.filter((s) => s.data.workspaceId === workspaceC).map((s) => s.data.runDate)).toContain('2026-10-10');
+
+    await prisma.workspaceSettings.update({
+      where: { workspaceId: workspaceC },
+      data: { dailyRunTime: '09:00' },
+    });
+    const notDue = fakeBoss();
+    await resolveDueRuns(notDue.boss, new Date('2026-10-10T12:30:00.000Z'));
+    // Today already has a run queued logic-wise is irrelevant here: the tick
+    // must not enqueue 2026-10-10 for C while its local time is before 09:00.
+    // (A same-day DailyRun row does not exist, so any send would be today's.)
+    expect(notDue.sent.filter((s) => s.data.workspaceId === workspaceC)).toHaveLength(0);
+  });
+
   it('full loops stay isolated across both workspaces', async () => {
     const a = await runDailyLoop(workspaceA, '2026-10-11');
     const b = await runDailyLoop(workspaceB, '2026-10-11');
@@ -224,5 +258,5 @@ describe('Step G: loop fault injection', () => {
 });
 
 afterAll(async () => {
-  await cleanupTestData({ workspaceIds: [workspaceA, workspaceB], userEmails: [ownerEmailA, ownerEmailB] });
+  await cleanupTestData({ workspaceIds: [workspaceA, workspaceB, workspaceC], userEmails: [ownerEmailA, ownerEmailB, ownerEmailC] });
 });

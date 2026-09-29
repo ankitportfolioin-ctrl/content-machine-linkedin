@@ -8,6 +8,59 @@ export interface EligibilityVerdict {
   reason: string | null;
 }
 
+/** Follow-up outcomes that suppress NEW outreach initiation for a lead. */
+const OUTREACH_BLOCKING_FOLLOW_UPS = new Set([
+  'NO_OUTREACH',
+  'DISMISS',
+  'CLOSE_OUT',
+  'NO_FOLLOW_UP',
+]);
+
+const CLOSED_LEAD_STATUSES = new Set(['DISQUALIFIED', 'CLOSED']);
+
+interface LeadProgress {
+  status: string;
+  closed: boolean;
+  latestFollowUp: string | null;
+  outreachBlockedBy: string | null;
+  hasApprovedStrategy: boolean;
+  hasSubmittedReview: boolean;
+}
+
+/** Live lead lifecycle read: status, latest follow-up, in-flight strategy/review. */
+async function leadProgress(
+  prisma: PrismaClient,
+  workspaceId: string,
+  leadId: string
+): Promise<LeadProgress | null> {
+  const [lead, latestFollowUpRow, approvedStrategy, submittedReview] = await Promise.all([
+    prisma.lead.findFirst({ where: { id: leadId, workspaceId }, select: { status: true } }),
+    prisma.followUpRecommendation.findFirst({
+      where: { workspaceId, leadId },
+      orderBy: { createdAt: 'desc' },
+      select: { recommendation: true },
+    }),
+    prisma.outreachStrategy.findFirst({
+      where: { workspaceId, leadId, status: 'APPROVED' },
+      select: { id: true },
+    }),
+    prisma.outreachReview.findFirst({
+      where: { workspaceId, status: 'SUBMITTED', draft: { leadId } },
+      select: { id: true },
+    }),
+  ]);
+  if (!lead) return null;
+  const latestFollowUp = latestFollowUpRow?.recommendation ?? null;
+  return {
+    status: lead.status,
+    closed: CLOSED_LEAD_STATUSES.has(lead.status),
+    latestFollowUp,
+    outreachBlockedBy: latestFollowUp && OUTREACH_BLOCKING_FOLLOW_UPS.has(latestFollowUp) ? latestFollowUp : null,
+    hasApprovedStrategy: !!approvedStrategy,
+    hasSubmittedReview: !!submittedReview,
+  };
+}
+
 /**
  * Re-validates a candidate against live artifact state. Every rule is
  * documented here; a candidate failing any rule stops appearing.
@@ -66,6 +119,12 @@ export async function checkEligibility(
       if (!row) return missing('Follow-up recommendation');
       if (row.recommendation === 'NO_FOLLOW_UP' || row.recommendation === 'CLOSE_OUT') {
         return { eligible: false, reason: `Recommendation ${row.recommendation} requires no operator action.` };
+      }
+      if (row.leadId) {
+        const progress = await leadProgress(prisma, workspaceId, row.leadId);
+        if (progress?.closed) {
+          return { eligible: false, reason: `Lead is ${progress.status}; follow-up suppressed.` };
+        }
       }
       return { eligible: true, reason: null };
     }
@@ -154,6 +213,21 @@ export async function checkEligibility(
       if (relevance.relevance < MIN_PROSPECT_RELEVANCE) {
         return { eligible: false, reason: `Relevance ${relevance.relevance} is below the ${MIN_PROSPECT_RELEVANCE} floor.` };
       }
+      // Lead lifecycle: never initiate outreach work for closed, blocked,
+      // or already-progressed leads — and say why.
+      const progress = await leadProgress(prisma, workspaceId, leadId);
+      if (progress?.closed) {
+        return { eligible: false, reason: `Lead is ${progress.status}; outreach initiation suppressed.` };
+      }
+      if (progress?.outreachBlockedBy) {
+        return { eligible: false, reason: `Lead marked ${progress.outreachBlockedBy}; outreach initiation suppressed by human follow-up.` };
+      }
+      if (progress?.hasApprovedStrategy) {
+        return { eligible: false, reason: 'Lead already has an approved outreach strategy; no duplicate work.' };
+      }
+      if (progress?.hasSubmittedReview) {
+        return { eligible: false, reason: 'Lead has an outreach review awaiting decision; no duplicate work.' };
+      }
       return { eligible: true, reason: null };
     }
     case 'sales_content_signal': {
@@ -162,6 +236,23 @@ export async function checkEligibility(
       if (!row) return missing('Sales content signal');
       if (!row.evidence?.trim()) {
         return { eligible: false, reason: 'Sales content signal has no recorded evidence.' };
+      }
+      return { eligible: true, reason: null };
+    }
+    case 'comment_signal': {
+      if (!candidate.subjectId) return missing('Comment sales signal');
+      const row = await prisma.commentSalesSignal.findFirst({
+        where: { id: candidate.subjectId, workspaceId },
+        include: { comment: { select: { id: true, type: true } } },
+      });
+      if (!row) return missing('Comment sales signal');
+      if (row.status !== 'REVIEWED') {
+        return { eligible: false, reason: `Comment signal is ${row.status}; only human-reviewed signals surface.` };
+      }
+      const comment = row.comment as { id: string; type: string } | null;
+      if (!comment) return missing('Comment');
+      if (comment.type === 'SPAM') {
+        return { eligible: false, reason: 'Comment classified as SPAM; never surfaced.' };
       }
       return { eligible: true, reason: null };
     }

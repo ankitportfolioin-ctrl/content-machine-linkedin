@@ -32,9 +32,32 @@ function urgencyFor(candidate: Candidate, now: number): { points: number; reason
 
 function relevanceFor(candidate: Candidate): { points: number; reason: string | null } {
   const relevance = candidate.facts.relevance01;
-  if (relevance === undefined) return { points: 8, reason: 'Relevance assessed qualitatively.' };
-  const points = Math.round(relevance * 25);
-  return { points, reason: points >= 15 ? `High relevance score (${(relevance * 100).toFixed(0)}%).` : null };
+  const meta = candidate.facts.subjectMeta;
+  const matches = Array.isArray(meta?.objectiveMatches) ? meta.objectiveMatches : [];
+  const configured = meta?.objectivesConfigured === true;
+  let points: number;
+  let reason: string | null;
+  if (relevance === undefined) {
+    points = 8;
+    reason = 'Relevance assessed qualitatively.';
+  } else {
+    points = Math.round(relevance * 25);
+    reason = points >= 15 ? `High relevance score (${(relevance * 100).toFixed(0)}%).` : null;
+  }
+  // Objective alignment folds into the existing relevance dimension (no new
+  // dimension, no rescaling): supporting a configured objective earns a
+  // bounded bonus with a stated reason; a configured-but-unmatched workspace
+  // costs a small, reasoned deduction. Candidates without enrichment markers
+  // (unit tests, legacy callers) score exactly as before.
+  if (matches.length > 0) {
+    const levels = [...new Set(matches.map((m) => String(m.level)))].join('/');
+    const goals = matches.map((m) => `"${String(m.goal).slice(0, 80)}"`).join('; ');
+    points = Math.min(25, points + 5);
+    reason = [reason, `Supports ${levels} objective(s): ${goals}.`].filter(Boolean).join(' ');
+  } else if (configured) {
+    points = Math.max(0, points - 3);
+  }
+  return { points, reason };
 }
 
 function evidenceFor(candidate: Candidate): { points: number; reason: string | null } {
@@ -145,6 +168,7 @@ export function scoreCandidate({ candidate, confirmedLearning, now = Date.now() 
     ...candidate,
     score: Math.max(0, Math.min(100, score)),
     dimensions,
+    reasons,
     learningApplied: learning.applied,
     signalConfidence,
     recommendationConfidence,

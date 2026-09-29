@@ -452,6 +452,17 @@ exports.Prisma.RunStageScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.ApprovalSnapshotScalarFieldEnum = {
+  id: 'id',
+  workspaceId: 'workspaceId',
+  dailyRunId: 'dailyRunId',
+  runDate: 'runDate',
+  capturedAt: 'capturedAt',
+  items: 'items',
+  counts: 'counts',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.OnboardingStateScalarFieldEnum = {
   id: 'id',
   workspaceId: 'workspaceId',
@@ -769,6 +780,8 @@ exports.Prisma.ContentOpportunityScalarFieldEnum = {
   trendSignalIds: 'trendSignalIds',
   reasoning: 'reasoning',
   evidenceSummary: 'evidenceSummary',
+  originKind: 'originKind',
+  originId: 'originId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -1672,6 +1685,7 @@ exports.Prisma.ModelName = {
   FeedSource: 'FeedSource',
   DailyRun: 'DailyRun',
   RunStage: 'RunStage',
+  ApprovalSnapshot: 'ApprovalSnapshot',
   OnboardingState: 'OnboardingState',
   LeadImportBatch: 'LeadImportBatch',
   Workspace: 'Workspace',

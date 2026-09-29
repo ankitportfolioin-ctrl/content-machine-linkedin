@@ -3,7 +3,9 @@ import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
+  ApiRequestError,
   createIcp,
+  createProfile,
   createReceipt,
   createSample,
   deleteReceipt,
@@ -18,7 +20,7 @@ import {
   updateProfile,
   updateVoiceProfile,
 } from '../services/api';
-import { Icp, UserProfile, VoiceProfile, VoiceReceipt, VoiceSample } from '../types';
+import { CreateProfileInput, Icp, UserProfile, VoiceProfile, VoiceReceipt, VoiceSample } from '../types';
 
 export function SettingsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -69,14 +71,31 @@ export function SettingsPage() {
 }
 
 function ProfileSection() {
+  const { user } = useAuth();
   const [profile, setProfile] = useState<UserProfile | null>(null);
+  // 404 from GET /profiles/me means "no profile yet" → create mode.
+  const [missing, setMissing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [name, setName] = useState('');
   const [headline, setHeadline] = useState('');
-  const [bio, setBio] = useState('');
+  const [role, setRole] = useState('');
+  const [summary, setSummary] = useState('');
+  const [professionalContext, setProfessionalContext] = useState('');
+  const [industry, setIndustry] = useState('');
+  const [location, setLocation] = useState('');
+  const [linkedinUrl, setLinkedinUrl] = useState('');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+
+  const fillForm = useCallback((p: UserProfile) => {
+    setHeadline(String(p.headline ?? ''));
+    setRole(String(p.role ?? ''));
+    setSummary(String(p.summary ?? ''));
+    setProfessionalContext(String(p.professionalContext ?? ''));
+    setIndustry(String(p.industry ?? ''));
+    setLocation(String(p.location ?? ''));
+    setLinkedinUrl(String(p.linkedinUrl ?? ''));
+  }, []);
 
   const fetchProfile = useCallback(async () => {
     setLoading(true);
@@ -84,33 +103,57 @@ function ProfileSection() {
     try {
       const data = await getMyProfile();
       setProfile(data.profile);
-      setName(String(data.profile.name ?? ''));
-      setHeadline(String((data.profile.headline as string | undefined) ?? ''));
-      setBio(String((data.profile.bio as string | undefined) ?? ''));
+      setMissing(false);
+      fillForm(data.profile);
     } catch (err) {
-      setError(friendlyErrorMessage(err));
+      if (err instanceof ApiRequestError && err.status === 404) {
+        setProfile(null);
+        setMissing(true);
+      } else {
+        setError(friendlyErrorMessage(err));
+      }
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [fillForm]);
 
   useEffect(() => {
     void fetchProfile();
   }, [fetchProfile]);
 
+  function collectInput(): CreateProfileInput {
+    const clean = (v: string): string | undefined => {
+      const t = v.trim();
+      return t.length > 0 ? t : undefined;
+    };
+    return {
+      headline: clean(headline),
+      role: clean(role),
+      summary: clean(summary),
+      professionalContext: clean(professionalContext),
+      industry: clean(industry),
+      location: clean(location),
+      linkedinUrl: clean(linkedinUrl),
+    };
+  }
+
   async function handleSave(event: React.FormEvent) {
     event.preventDefault();
-    if (!profile) return;
     setSaving(true);
     setMessage(null);
     try {
-      const data = await updateProfile(String(profile.id), {
-        name: name.trim() || undefined,
-        headline: headline.trim() || undefined,
-        bio: bio.trim() || undefined,
-      });
-      setProfile(data.profile);
-      setMessage('Profile saved.');
+      if (!profile) {
+        const data = await createProfile(collectInput());
+        setProfile(data.profile);
+        setMissing(false);
+        fillForm(data.profile);
+        setMessage('Profile created.');
+      } else {
+        const data = await updateProfile(String(profile.id), collectInput());
+        setProfile(data.profile);
+        fillForm(data.profile);
+        setMessage('Profile saved.');
+      }
     } catch (err) {
       setMessage(friendlyErrorMessage(err));
     } finally {
@@ -121,6 +164,11 @@ function ProfileSection() {
   return (
     <div className="card">
       <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Profile</h3>
+      {user?.email ? (
+        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
+          Signed in as {user.email} — the fields below are your workspace profile facts.
+        </p>
+      ) : null}
       {loading ? <p style={mutedStyle}>Loading profile...</p> : null}
       {!loading && error ? (
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -128,17 +176,20 @@ function ProfileSection() {
           <button className="btn btn-secondary" onClick={() => void fetchProfile()}>Retry</button>
         </div>
       ) : null}
-      {!loading && !error && !profile ? (
-        <p style={mutedStyle}>No profile found yet.</p>
-      ) : null}
-      {!loading && !error && profile ? (
+      {!loading && !error && (profile || missing) ? (
         <form onSubmit={(e) => void handleSave(e)} style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>{String(profile.email ?? '')}</p>
-          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Name" style={fieldStyle} />
-          <input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Headline" style={fieldStyle} />
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} placeholder="Bio" rows={3} style={fieldStyle} />
+          {missing ? (
+            <p style={mutedStyle}>No profile in this workspace yet — describe yourself to begin onboarding.</p>
+          ) : null}
+          <input value={headline} onChange={(e) => setHeadline(e.target.value)} placeholder="Headline (e.g. Founder at Acme)" aria-label="Headline" style={fieldStyle} />
+          <input value={role} onChange={(e) => setRole(e.target.value)} placeholder="Role (e.g. Founder)" aria-label="Role" style={fieldStyle} />
+          <textarea value={summary} onChange={(e) => setSummary(e.target.value)} placeholder="Summary" aria-label="Summary" rows={3} style={fieldStyle} />
+          <textarea value={professionalContext} onChange={(e) => setProfessionalContext(e.target.value)} placeholder="Professional context" aria-label="Professional context" rows={2} style={fieldStyle} />
+          <input value={industry} onChange={(e) => setIndustry(e.target.value)} placeholder="Industry" aria-label="Industry" style={fieldStyle} />
+          <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" aria-label="Location" style={fieldStyle} />
+          <input value={linkedinUrl} onChange={(e) => setLinkedinUrl(e.target.value)} placeholder="LinkedIn URL (optional)" aria-label="LinkedIn URL" inputMode="url" style={fieldStyle} />
           <button type="submit" className="btn btn-primary" disabled={saving} style={{ alignSelf: 'flex-start' }}>
-            {saving ? 'Saving...' : 'Save profile'}
+            {saving ? 'Saving...' : missing ? 'Create profile' : 'Save profile'}
           </button>
           {message ? <p style={mutedStyle}>{message}</p> : null}
         </form>

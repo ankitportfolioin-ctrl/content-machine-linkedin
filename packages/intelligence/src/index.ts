@@ -1,4 +1,5 @@
 export * from './sourceIngestion';
+export * from './feedAdapters';
 export * from './sourceUnderstanding';
 export * from './claimLedger';
 export * from './topicClustering';

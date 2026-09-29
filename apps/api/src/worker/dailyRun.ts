@@ -97,11 +97,9 @@ export async function runDailyLoop(
 
   const settings = await getWorkspaceSettings(workspaceId);
   // Batch 2 (E): execution draws from its own cap (default 0 = unavailable).
-  // dailyExecutionCap rides on the Batch 2 migration; read through a cast.
-  const executionCap =
-    typeof (settings as unknown as { dailyExecutionCap?: unknown }).dailyExecutionCap === 'number'
-      ? ((settings as unknown as { dailyExecutionCap: number }).dailyExecutionCap)
-      : 0;
+  // Policy-configurable, but EXECUTION stays SKIPPED until a real authorized
+  // integration exists — the cap alone never enables execution.
+  const executionCap = settings.dailyExecutionCap ?? 0;
   const budget = new RunBudget({
     llmCalls: settings.dailyLlmCallCap,
     fetches: settings.dailyFetchCap,

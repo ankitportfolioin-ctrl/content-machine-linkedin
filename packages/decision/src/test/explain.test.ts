@@ -33,6 +33,65 @@ describe('Deterministic explanation', () => {
     expect(explanation.lifecycle).toMatch(/review/i);
     expect(explanation.subjectMeta).toEqual({ reviewId: 'r1' });
   });
+
+  it('states objective alignment from persisted markers, never placeholders', () => {
+    const aligned = explainAction(
+      {
+        ...scored(),
+        facts: {
+          subjectMeta: {
+            objectivesConfigured: true,
+            objectiveMatches: [{ level: 'CONTENT', goal: 'Publish checklists', terms: ['checklist'] }],
+          },
+        },
+      },
+      'PENDING'
+    );
+    expect(aligned.whyNot ?? []).not.toContain('No specific objective linked');
+    expect(aligned.whyNot ?? []).not.toContainEqual(expect.stringMatching(/Does not visibly support/));
+
+    const mismatched = explainAction(
+      {
+        ...scored(),
+        facts: { subjectMeta: { objectivesConfigured: true, objectiveMatches: [] } },
+      },
+      'PENDING'
+    );
+    expect(mismatched.whyNot ?? []).toContain('Does not visibly support any configured objective');
+
+    const unconfigured = explainAction(scored(), 'PENDING');
+    expect(unconfigured.whyNot ?? []).toContain(
+      'No workspace objectives configured — ranked on signal strength alone'
+    );
+  });
+
+  it('reports attribution and lead-state caveats honestly', () => {
+    const explanation = explainAction(
+      {
+        ...scored(),
+        facts: {
+          subjectMeta: {
+            objectivesConfigured: false,
+            attribution: { strongest: 'UNKNOWN', linkCount: 0, reason: null, target: 'lead:lead-1' },
+            leadState: {
+              status: 'NEW',
+              qualificationStatus: 'INSUFFICIENT_DATA',
+              hasApprovedStrategy: false,
+              hasSubmittedReview: false,
+              hasReadyAction: false,
+              latestFollowUp: null,
+              outreachBlockedBy: null,
+            },
+          },
+        },
+      },
+      'PENDING'
+    );
+    expect(explanation.whyNot ?? []).toContain('No recorded attribution — evidence is unlinked');
+    expect(explanation.whyNot ?? []).toContain(
+      'Lead qualification is insufficient-data — research before outreach'
+    );
+  });
 });
 
 describe('Optional AI explanation', () => {

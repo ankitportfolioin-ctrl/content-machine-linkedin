@@ -902,6 +902,7 @@ model DailyRun {
 
   workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   stages      RunStage[]
+  snapshots   ApprovalSnapshot[]
 
   @@unique([workspaceId, runDate])
   @@index([workspaceId, runDate])
@@ -925,11 +926,33 @@ model RunStage {
   workspace   Workspace      @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   dailyRun    DailyRun       @relation(fields: [dailyRunId], references: [id], onDelete: Cascade)
 
-  @@unique([workspaceId, dailyRunId, stage, attempt])
-  @@index([workspaceId, dailyRunId])
-}
+    @@unique([workspaceId, dailyRunId, stage, attempt])
+    @@index([workspaceId, dailyRunId])
+  }
 
-model OnboardingState {
+  model ApprovalSnapshot {
+    // Batch 3 (#12): frozen approval state per daily run. Items are plain
+    // copied values (ids, scores, reasons, version identifiers) captured at
+    // snapshot time — never live references — so later human decisions
+    // cannot silently rewrite what the run saw. One row per run (upsert);
+    // resume skips SUCCEEDED stages, so a snapshot is written once.
+    id          String   @id @default(uuid())
+    workspaceId String
+    dailyRunId  String
+    runDate     DateTime @db.Date
+    capturedAt  DateTime @default(now())
+    items       Json
+    counts      Json?
+    createdAt   DateTime @default(now())
+
+    workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    dailyRun    DailyRun  @relation(fields: [dailyRunId], references: [id], onDelete: Cascade)
+
+    @@unique([workspaceId, dailyRunId])
+    @@index([workspaceId])
+  }
+
+  model OnboardingState {
   id             String    @id @default(uuid())
   workspaceId    String    @unique
   currentStep    String    @default("profile") @db.VarChar(50)
@@ -1045,6 +1068,7 @@ model Workspace {
   attributionLinks         AttributionLink[]
   preparationLogs          PreparationLog[]
   commentSalesSignals      CommentSalesSignal[]
+  approvalSnapshots        ApprovalSnapshot[]
 
   @@index([slug])
   @@index([isActive])
@@ -1511,17 +1535,26 @@ model ContentOpportunity {
   sourceIds           Json
   claimIds            Json
   trendSignalIds      Json
-  reasoning           String            @db.Text
-  evidenceSummary     String            @db.Text
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
-
-  workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
-  topic               Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
-
-  @@index([workspaceId])
-  @@index([topicId])
-  @@index([workspaceId, status])
+    reasoning           String            @db.Text
+    evidenceSummary     String            @db.Text
+    // Batch 3: signal provenance. Opportunities proposed from sales-side
+    // signals record their origin here so the same signal never spawns
+    // duplicates (unique per workspace+origin, any status) and triage can
+    // trace NEW → idea back to the originating signal. NULL for
+    // feed-derived opportunities. NULLs stay mutually distinct in Postgres,
+    // so legacy rows are unaffected.
+    originKind          String?           @db.VarChar(50)
+    originId            String?           @db.VarChar(200)
+    createdAt           DateTime          @default(now())
+    updatedAt           DateTime          @updatedAt
+  
+    workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    topic               Topic             @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  
+    @@index([workspaceId])
+    @@index([topicId])
+    @@index([workspaceId, status])
+    @@unique([workspaceId, originKind, originId])
   @@index([workspaceId, opportunityScore])
 }
 

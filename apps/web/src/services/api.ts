@@ -680,6 +680,13 @@ export async function getMyProfile(): Promise<ProfileResponse> {
   return authedRequest<ProfileResponse>('/profiles/me');
 }
 
+export async function createProfile(input: import('../types').CreateProfileInput): Promise<ProfileResponse> {
+  return authedRequest<ProfileResponse>('/profiles', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
 export async function updateProfile(id: string, fields: Partial<UserProfile>): Promise<ProfileResponse> {
   return authedRequest<ProfileResponse>(`/profiles/${encodeURIComponent(id)}`, {
     method: 'PATCH',

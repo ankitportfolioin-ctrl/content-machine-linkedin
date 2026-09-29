@@ -12,6 +12,21 @@ export interface ClaimLedgerEntry {
   provenance: Record<string, unknown>;
 }
 
+/**
+ * Normalizes claim text for duplicate detection: case, punctuation, and
+ * whitespace are insignificant ("Too expensive!" == "too expensive").
+ * Deliberately equality-only (no fuzzy/containment matching): near-duplicate
+ * phrasing across one source is usually the same model output repeated,
+ * while genuinely different claims must never be merged away.
+ */
+export function normalizeClaimText(text: string): string {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 export class ClaimLedgerService {
   private prisma: PrismaClient;
 
@@ -27,21 +42,40 @@ export class ClaimLedgerService {
   ): Promise<ClaimLedgerEntry[]> {
     const entries: ClaimLedgerEntry[] = [];
 
+    // One read for the whole batch (the old per-claim query's result was
+    // discarded, so exact duplicates were silently re-inserted).
+    const prior = await this.prisma.sourceClaim.findMany({
+      where: { workspaceId, sourceId },
+      select: { claimText: true },
+    });
+    const seen = new Set(
+      (prior as Array<{ claimText: string }>).map((r) => normalizeClaimText(r.claimText))
+    );
+
+    // Real provenance (was sourceUrl: ''): the source row this ledger
+    // entry belongs to. Missing row degrades to UNKNOWN, never invented.
+    const source = (await this.prisma.intelligenceSource
+      .findUnique({ where: { id: sourceId } })
+      .catch(() => null)) as { url?: unknown; canonicalUrl?: unknown } | null;
+    const sourceUrl = typeof source?.url === 'string' && source.url ? source.url : 'UNKNOWN';
+    const canonicalUrl =
+      typeof source?.canonicalUrl === 'string' && source.canonicalUrl ? source.canonicalUrl : 'UNKNOWN';
+
     for (const claim of understanding.claims) {
-      const existingClaims = await this.prisma.sourceClaim.findMany({
-        where: {
-          workspaceId,
-          sourceId,
-          claimText: claim.text,
-        },
-      });
+      const normalized = normalizeClaimText(claim.text ?? '');
+      if (!normalized) continue;
+      // Same normalized claim from the SAME source: duplicate output, skip.
+      // Same text from a DIFFERENT source is independent corroboration and
+      // is intentionally kept (this query is source-scoped).
+      if (seen.has(normalized)) continue;
+      seen.add(normalized);
 
+      // A claim is never marked SUPPORTED on confidence alone: without
+      // recorded evidence it stays UNCERTAIN and flagged for review.
+      const evidence = (claim.evidence ?? '').trim();
       let status: 'SUPPORTED' | 'CONTRADICTED' | 'UNCERTAIN' = 'UNCERTAIN';
-
-      if (claim.confidence >= 0.7) {
+      if (claim.confidence >= 0.7 && evidence) {
         status = 'SUPPORTED';
-      } else if (claim.confidence < 0.4) {
-        status = 'UNCERTAIN';
       }
 
       const created = await this.prisma.sourceClaim.create({
@@ -56,10 +90,14 @@ export class ClaimLedgerService {
           confidence: claim.confidence,
           status,
           provenance: {
-            sourceUrl: '',
+            sourceId,
+            sourceUrl,
+            canonicalUrl,
+            documentId,
             extractedAt: new Date().toISOString(),
             evidence: claim.evidence,
             evidenceLocation: claim.evidenceLocation,
+            evidenceStatus: evidence ? 'RECORDED' : 'SOURCE_REVIEW_REQUIRED',
           },
         },
       });
@@ -76,6 +114,8 @@ export class ClaimLedgerService {
       });
     }
 
+    // Returns newly created rows only: re-running the same understanding
+    // honestly yields [] instead of duplicate rows.
     return entries;
   }
 

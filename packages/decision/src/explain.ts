@@ -24,6 +24,8 @@ function lifecycleLine(action: ScoredAction): string {
       return 'Recurring recorded objection; creating content from it remains a human decision.';
     case 'prospect_relevance':
       return 'Recorded-fit signal only; any outreach remains a human decision.';
+    case 'comment_signal':
+      return 'Human-reviewed comment intelligence; creating a prospect stays a separate explicit human action.';
     default:
       return 'Informational candidate; opening its workflow is the action.';
   }
@@ -62,12 +64,56 @@ function generateWhyNot(action: ScoredAction): string[] {
     whyNot.push('Recommendation confidence is low');
   }
   
-  // Check for missing objective
+  // Objective linkage, reconstructed from persisted workspace state: a
+  // candidate either names the objectives it supports, mismatches the
+  // configured set, or ran in a workspace with no objectives at all. Each
+  // case says so explicitly instead of the old always-on placeholder.
   const subjectMeta = action.facts.subjectMeta ?? {};
-  if (!subjectMeta.objective) {
-    whyNot.push('No specific objective linked');
+  const objectiveMatches = Array.isArray(subjectMeta.objectiveMatches)
+    ? (subjectMeta.objectiveMatches as Array<{ level?: unknown; goal?: unknown }>)
+    : [];
+  if (objectiveMatches.length > 0) {
+    // Alignment itself is stated in reasons; nothing to caution here.
+  } else if (subjectMeta.objectivesConfigured === true) {
+    whyNot.push('Does not visibly support any configured objective');
+  } else {
+    whyNot.push('No workspace objectives configured — ranked on signal strength alone');
   }
-  
+
+  // Attribution honesty: recorded linkage strengthens the story; a mapped
+  // target with no links is explicit uncertainty, never implied proof.
+  const attribution = subjectMeta.attribution as
+    | { strongest?: unknown; linkCount?: unknown; target?: unknown }
+    | null
+    | undefined;
+  if (attribution && typeof attribution.target === 'string') {
+    // Recorded DIRECT/INFERRED linkage is stated in reasons; only the
+    // unlinked case cautions here.
+    if (attribution.strongest !== 'DIRECT' && attribution.strongest !== 'INFERRED') {
+      whyNot.push('No recorded attribution — evidence is unlinked');
+    }
+  }
+
+  // Lead lifecycle caveats for lead-bound candidates.
+  const leadState = subjectMeta.leadState as
+    | { qualificationStatus?: unknown; outreachBlockedBy?: unknown; hasApprovedStrategy?: unknown; hasSubmittedReview?: unknown }
+    | null
+    | undefined;
+  if (leadState && typeof leadState === 'object') {
+    if (leadState.qualificationStatus === 'INSUFFICIENT_DATA') {
+      whyNot.push('Lead qualification is insufficient-data — research before outreach');
+    }
+    if (typeof leadState.outreachBlockedBy === 'string' && leadState.outreachBlockedBy) {
+      whyNot.push(`Lead outreach blocked by follow-up: ${leadState.outreachBlockedBy}`);
+    }
+    if (leadState.hasApprovedStrategy === true) {
+      whyNot.push('Lead already has an approved strategy — further work may duplicate it');
+    }
+    if (leadState.hasSubmittedReview === true) {
+      whyNot.push('Lead has a review awaiting decision — further work may duplicate it');
+    }
+  }
+
   return whyNot;
 }
 

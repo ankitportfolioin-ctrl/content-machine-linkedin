@@ -1,5 +1,6 @@
 import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, AuthenticatedRequest } from '../middleware/auth';
+import { profileCreateSchema, profileUpdateSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
 
@@ -26,7 +27,7 @@ router.get('/', async (req, res, next) => {
 router.post('/', async (req, res, next) => {
   try {
     const authReq = req as AuthenticatedRequest;
-    const { linkedinUrl, headline, summary, industry, location, avatarUrl } = req.body;
+    const data = profileCreateSchema.parse(req.body);
 
     const existing = await prisma.profile.findUnique({
       where: { userId_workspaceId: { userId: authReq.user.id, workspaceId: authReq.workspaceId } },
@@ -35,7 +36,16 @@ router.post('/', async (req, res, next) => {
     if (existing) {
       const updated = await prisma.profile.update({
         where: { id: existing.id },
-        data: { linkedinUrl, headline, summary, industry, location, avatarUrl },
+        data: {
+          linkedinUrl: data.linkedinUrl,
+          headline: data.headline,
+          role: data.role,
+          summary: data.summary,
+          professionalContext: data.professionalContext,
+          industry: data.industry,
+          location: data.location,
+          avatarUrl: data.avatarUrl,
+        },
       });
       return res.json({ profile: updated });
     }
@@ -44,12 +54,14 @@ router.post('/', async (req, res, next) => {
       data: {
         userId: authReq.user.id,
         workspaceId: authReq.workspaceId,
-        linkedinUrl,
-        headline,
-        summary,
-        industry,
-        location,
-        avatarUrl,
+        linkedinUrl: data.linkedinUrl,
+        headline: data.headline,
+        role: data.role,
+        summary: data.summary,
+        professionalContext: data.professionalContext,
+        industry: data.industry,
+        location: data.location,
+        avatarUrl: data.avatarUrl,
       },
     });
 
@@ -100,9 +112,22 @@ router.patch('/:profileId', async (req, res, next) => {
       }
     }
 
+    // Allowlisted + validated: unknown keys (e.g. legacy `name`/`bio`) are
+    // stripped by zod instead of crashing Prisma.
+    const data = profileUpdateSchema.parse(req.body);
+
     const updated = await prisma.profile.update({
       where: { id: profileId },
-      data: req.body,
+      data: {
+        linkedinUrl: data.linkedinUrl,
+        headline: data.headline,
+        role: data.role,
+        summary: data.summary,
+        professionalContext: data.professionalContext,
+        industry: data.industry,
+        location: data.location,
+        avatarUrl: data.avatarUrl,
+      },
     });
 
     res.json({ profile: updated });

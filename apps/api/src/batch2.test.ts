@@ -317,10 +317,7 @@ describe('C. evidence maturity ladder', () => {
   });
 
   it('walks UNKNOWN -> OBSERVED -> REPEATED_SIGNAL through recorded occurrences', async () => {
-    const store = prisma as unknown as {
-      learningProposal: { create(a: unknown): Promise<{ id: string }>; findUnique(a: unknown): Promise<{ maturity: string; evidenceCount: number } | null> };
-    };
-    const created = await store.learningProposal.create({
+    const created = await prisma.learningProposal.create({
       data: {
         workspaceId, dimension: 'timeliness', observedPattern: 'Ladder walk.',
         supportingMeasurements: {}, sourceMetricIds: [], sampleSize: 0,

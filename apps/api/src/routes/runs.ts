@@ -2,6 +2,7 @@ import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, AuthenticatedRequest } from '../middleware/auth';
 import { runsTriggerSchema } from '@growth-operator/schemas';
 import { NotFoundError } from '../utils/errors';
+import { prisma } from '@growth-operator/db';
 import { getLatestRuns, getRunWithStages, runDailyLoop } from '../worker/dailyRun';
 
 const router: ExpressRouter = Router();
@@ -28,6 +29,23 @@ router.get('/:runId', async (req, res, next) => {
     const run = await getRunWithStages(authReq.workspaceId, runId);
     if (!run) throw new NotFoundError('Daily Run');
     res.json({ run });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/:runId/approval-snapshot', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { runId } = req.params;
+    if (!runId) throw new NotFoundError('Daily Run');
+    const run = await getRunWithStages(authReq.workspaceId, runId);
+    if (!run) throw new NotFoundError('Daily Run');
+    const snapshot = await prisma.approvalSnapshot.findFirst({
+      where: { dailyRunId: runId, workspaceId: authReq.workspaceId },
+    });
+    if (!snapshot) throw new NotFoundError('Approval Snapshot');
+    res.json({ snapshot });
   } catch (error) {
     next(error);
   }

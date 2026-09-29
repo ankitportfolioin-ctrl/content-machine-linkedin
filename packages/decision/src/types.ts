@@ -10,7 +10,8 @@ export type ActionKind =
   | 'stale_draft'
   | 'objection_pattern'
   | 'prospect_relevance'
-  | 'sales_content_signal';
+  | 'sales_content_signal'
+  | 'comment_signal';
 
 // Batch 2 (A): ACCEPTED authorizes preparation of internal work from a
 // recommendation. It is NOT execution approval: accepted actions still need
@@ -20,6 +21,29 @@ export type ActionStatus = 'PENDING' | 'ACCEPTED' | 'DISMISSED' | 'COMPLETED';
 export interface EvidenceLink {
   label: string;
   ref: string;
+}
+
+export interface ObjectiveLink {
+  level: string;
+  goal: string;
+  terms: string[];
+}
+
+export interface AttributionMarker {
+  strongest: string;
+  linkCount: number;
+  reason: string | null;
+  target: string;
+}
+
+export interface LeadStateMarker {
+  status: string;
+  qualificationStatus: string | null;
+  hasApprovedStrategy: boolean;
+  hasSubmittedReview: boolean;
+  hasReadyAction: boolean;
+  latestFollowUp: string | null;
+  outreachBlockedBy: string | null;
 }
 
 export interface Candidate {
@@ -34,7 +58,12 @@ export interface Candidate {
     evidenceCount?: number;
     ready?: boolean;
     learningDimensions?: string[];
-    subjectMeta?: Record<string, unknown>;
+    subjectMeta?: Record<string, unknown> & {
+      objectiveMatches?: ObjectiveLink[];
+      objectivesConfigured?: boolean;
+      attribution?: AttributionMarker | null;
+      leadState?: LeadStateMarker | null;
+    };
   };
   reasons: string[];
   evidenceLinks: EvidenceLink[];

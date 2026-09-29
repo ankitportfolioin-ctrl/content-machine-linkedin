@@ -2,13 +2,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
-import { friendlyErrorMessage, getLearningDashboard, listExperiments } from '../services/api';
-import { ExperimentItem, LearningDashboard } from '../types';
+import { confirmLearningProposal, friendlyErrorMessage, getLearningDashboard, listExperiments, listLearningProposals, rejectLearningProposal } from '../services/api';
+import { ExperimentItem, LearningDashboard, LearningProposal } from '../types';
 
 export function LearningPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [data, setData] = useState<LearningDashboard | null>(null);
   const [experiments, setExperiments] = useState<ExperimentItem[]>([]);
+  const [proposals, setProposals] = useState<LearningProposal[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [hypothesis, setHypothesis] = useState('');
@@ -16,20 +17,61 @@ export function LearningPage() {
   const [control, setControl] = useState('');
   const [variant, setVariant] = useState('');
   const [formMsg, setFormMsg] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+  const [rowMsg, setRowMsg] = useState<Record<string, string>>({});
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const [dash, exps] = await Promise.all([getLearningDashboard(), listExperiments()]);
+      const [dash, exps, props] = await Promise.all([
+        getLearningDashboard(),
+        listExperiments(),
+        listLearningProposals({ status: 'PROPOSED' }).catch(() => ({ proposals: [] as LearningProposal[] })),
+      ]);
       setData(dash);
       setExperiments(exps.experiments ?? []);
+      setProposals(props.proposals ?? []);
     } catch (err) {
       setError(friendlyErrorMessage(err));
     } finally {
       setLoading(false);
     }
   }, []);
+
+  async function handleConfirm(id: string) {
+    setWorkingId(id);
+    setRowMsg((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    try {
+      await confirmLearningProposal(id);
+      await fetchAll();
+    } catch (err) {
+      setRowMsg((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  async function handleReject(id: string) {
+    setWorkingId(id);
+    setRowMsg((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    try {
+      await rejectLearningProposal(id);
+      await fetchAll();
+    } catch (err) {
+      setRowMsg((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
+    } finally {
+      setWorkingId(null);
+    }
+  }
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) void fetchAll();
@@ -82,6 +124,41 @@ export function LearningPage() {
         {!data || data.whatWeThink.length === 0 ? <p className="muted">No proposed patterns.</p> : (
           <ul className="bullet-list">
             {data.whatWeThink.map((k) => <li key={k.id}><strong>{k.dimension}</strong>: {k.pattern} (evidence {String(k.maturity ?? 'HYPOTHESIS')}{typeof k.evidenceCount === 'number' ? `, ${k.evidenceCount} occurrence${k.evidenceCount === 1 ? '' : 's'}` : ''})</li>)}
+          </ul>
+        )}
+      </div>
+
+      <div className="card stack-sm">
+        <h3 className="section-title">Needs your confirmation</h3>
+        <p className="muted">Proposed learnings with their evidence. Confirming records you as the decider and lets the proposal influence future recommendations; rejecting drops it. Confirmation requires owner/admin.</p>
+        {proposals.length === 0 ? <p className="muted">Nothing awaiting confirmation.</p> : (
+          <ul className="plain-list">
+            {proposals.map((p) => (
+              <li key={String(p.id)} className="card-row">
+                <p style={{ fontWeight: 600 }}>{String(p.dimension)} ({String(p.maturity ?? 'HYPOTHESIS')})</p>
+                <p className="muted">{String(p.observedPattern ?? '')}</p>
+                <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+                  Evidence: {typeof p.evidenceCount === 'number' ? `${p.evidenceCount} occurrence${p.evidenceCount === 1 ? '' : 's'}` : 'n/a'}
+                  {typeof p.sampleSize === 'number' ? ` · sample n=${p.sampleSize}` : ''}
+                  {typeof p.proposedAdjustment === 'number' ? ` · proposed adjustment ${p.proposedAdjustment > 0 ? '+' : ''}${p.proposedAdjustment}` : ''}
+                  {p.reason ? ` · ${String(p.reason)}` : ''}
+                </p>
+                <p style={{ fontSize: '0.8125rem', color: 'var(--color-text-secondary)' }}>
+                  Confirming lets this learning adjust future recommendation ranking for “{String(p.dimension)}”.
+                </p>
+                <div className="actions" style={{ marginTop: '0.5rem' }}>
+                  <button className="btn btn-primary" disabled={workingId === String(p.id)} onClick={() => void handleConfirm(String(p.id))}>
+                    {workingId === String(p.id) ? 'Working...' : 'Confirm learning'}
+                  </button>
+                  <button className="btn btn-secondary" disabled={workingId === String(p.id)} onClick={() => void handleReject(String(p.id))}>
+                    Reject
+                  </button>
+                </div>
+                {rowMsg[String(p.id)] ? (
+                  <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>{rowMsg[String(p.id)]}</p>
+                ) : null}
+              </li>
+            ))}
           </ul>
         )}
       </div>

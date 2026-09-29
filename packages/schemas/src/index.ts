@@ -582,6 +582,9 @@ export const strategyProfileSchema = z.object({
   contentGoals: z.array(z.record(z.unknown())).default([]),
   growthGoals: z.array(z.record(z.unknown())).default([]),
   productGoals: z.array(z.record(z.unknown())).default([]),
+  // Prisma StrategyProfile.salesGoals exists and StrategyProfileService
+  // validates/persists it — the API layer must not strip it.
+  salesGoals: z.array(z.record(z.unknown())).default([]),
 });
 
 export const audienceSegmentSchema = z.object({
@@ -696,6 +699,10 @@ export const scheduleUpdateSchema = z.object({
   dailyFetchCap: z.number().int().min(0).max(5000),
   dailyPreparationCap: z.number().int().min(0).max(500),
   autonomyTier: z.literal(0),
+  // Policy setting only: persisted so the autonomy posture is explicit, but
+  // the worker's EXECUTION stage stays SKIPPED until a real authorized
+  // integration exists — this value never enables execution by itself.
+  dailyExecutionCap: z.number().int().min(0).max(10).optional(),
 });
 
 export const policyUpdateSchema = z.object({

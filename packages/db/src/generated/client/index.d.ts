@@ -109,6 +109,11 @@ export type DailyRun = $Result.DefaultSelection<Prisma.$DailyRunPayload>
  */
 export type RunStage = $Result.DefaultSelection<Prisma.$RunStagePayload>
 /**
+ * Model ApprovalSnapshot
+ * 
+ */
+export type ApprovalSnapshot = $Result.DefaultSelection<Prisma.$ApprovalSnapshotPayload>
+/**
  * Model OnboardingState
  * 
  */
@@ -1441,6 +1446,16 @@ export class PrismaClient<
   get runStage(): Prisma.RunStageDelegate<ExtArgs>;
 
   /**
+   * `prisma.approvalSnapshot`: Exposes CRUD operations for the **ApprovalSnapshot** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more ApprovalSnapshots
+    * const approvalSnapshots = await prisma.approvalSnapshot.findMany()
+    * ```
+    */
+  get approvalSnapshot(): Prisma.ApprovalSnapshotDelegate<ExtArgs>;
+
+  /**
    * `prisma.onboardingState`: Exposes CRUD operations for the **OnboardingState** model.
     * Example usage:
     * ```ts
@@ -2389,6 +2404,7 @@ export namespace Prisma {
     FeedSource: 'FeedSource',
     DailyRun: 'DailyRun',
     RunStage: 'RunStage',
+    ApprovalSnapshot: 'ApprovalSnapshot',
     OnboardingState: 'OnboardingState',
     LeadImportBatch: 'LeadImportBatch',
     Workspace: 'Workspace',
@@ -2453,7 +2469,7 @@ export namespace Prisma {
 
   export type TypeMap<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, ClientOptions = {}> = {
     meta: {
-      modelProps: "user" | "businessProfile" | "brandProfile" | "strategyProfile" | "audienceSegment" | "problem" | "product" | "contentDNA" | "contentStageHistory" | "comment" | "audienceSignal" | "experiment" | "intelligenceReport" | "contentDiversitySnapshot" | "workspaceSettings" | "autonomyPolicy" | "feedSource" | "dailyRun" | "runStage" | "onboardingState" | "leadImportBatch" | "workspace" | "workspaceMembership" | "profile" | "iCP" | "contentIdea" | "contentDraft" | "contentVersion" | "lead" | "conversation" | "message" | "pipelineOpportunity" | "analyticsEvent" | "learningSignal" | "intelligenceSource" | "sourceDocument" | "sourceClaim" | "topic" | "topicMention" | "trendSignal" | "contentOpportunity" | "contentGap" | "opportunityFeedback" | "contentPlan" | "draftClaimBinding" | "contentQualityGateResult" | "contentReview" | "voiceProfile" | "voiceReceipt" | "writingSample" | "prospectResearch" | "prospectSignal" | "qualificationResult" | "prospectBrief" | "outreachStrategy" | "outreachDraft" | "outreachReview" | "preparedAction" | "conversationClassificationResult" | "followUpRecommendation" | "salesContentSignal" | "publishRecord" | "outcomeMetric" | "operatorAction" | "learningProposal" | "attributionLink" | "preparationLog" | "commentSalesSignal"
+      modelProps: "user" | "businessProfile" | "brandProfile" | "strategyProfile" | "audienceSegment" | "problem" | "product" | "contentDNA" | "contentStageHistory" | "comment" | "audienceSignal" | "experiment" | "intelligenceReport" | "contentDiversitySnapshot" | "workspaceSettings" | "autonomyPolicy" | "feedSource" | "dailyRun" | "runStage" | "approvalSnapshot" | "onboardingState" | "leadImportBatch" | "workspace" | "workspaceMembership" | "profile" | "iCP" | "contentIdea" | "contentDraft" | "contentVersion" | "lead" | "conversation" | "message" | "pipelineOpportunity" | "analyticsEvent" | "learningSignal" | "intelligenceSource" | "sourceDocument" | "sourceClaim" | "topic" | "topicMention" | "trendSignal" | "contentOpportunity" | "contentGap" | "opportunityFeedback" | "contentPlan" | "draftClaimBinding" | "contentQualityGateResult" | "contentReview" | "voiceProfile" | "voiceReceipt" | "writingSample" | "prospectResearch" | "prospectSignal" | "qualificationResult" | "prospectBrief" | "outreachStrategy" | "outreachDraft" | "outreachReview" | "preparedAction" | "conversationClassificationResult" | "followUpRecommendation" | "salesContentSignal" | "publishRecord" | "outcomeMetric" | "operatorAction" | "learningProposal" | "attributionLink" | "preparationLog" | "commentSalesSignal"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -3784,6 +3800,76 @@ export namespace Prisma {
           count: {
             args: Prisma.RunStageCountArgs<ExtArgs>
             result: $Utils.Optional<RunStageCountAggregateOutputType> | number
+          }
+        }
+      }
+      ApprovalSnapshot: {
+        payload: Prisma.$ApprovalSnapshotPayload<ExtArgs>
+        fields: Prisma.ApprovalSnapshotFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.ApprovalSnapshotFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.ApprovalSnapshotFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>
+          }
+          findFirst: {
+            args: Prisma.ApprovalSnapshotFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.ApprovalSnapshotFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>
+          }
+          findMany: {
+            args: Prisma.ApprovalSnapshotFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>[]
+          }
+          create: {
+            args: Prisma.ApprovalSnapshotCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>
+          }
+          createMany: {
+            args: Prisma.ApprovalSnapshotCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.ApprovalSnapshotCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>[]
+          }
+          delete: {
+            args: Prisma.ApprovalSnapshotDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>
+          }
+          update: {
+            args: Prisma.ApprovalSnapshotUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>
+          }
+          deleteMany: {
+            args: Prisma.ApprovalSnapshotDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.ApprovalSnapshotUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          upsert: {
+            args: Prisma.ApprovalSnapshotUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$ApprovalSnapshotPayload>
+          }
+          aggregate: {
+            args: Prisma.ApprovalSnapshotAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateApprovalSnapshot>
+          }
+          groupBy: {
+            args: Prisma.ApprovalSnapshotGroupByArgs<ExtArgs>
+            result: $Utils.Optional<ApprovalSnapshotGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.ApprovalSnapshotCountArgs<ExtArgs>
+            result: $Utils.Optional<ApprovalSnapshotCountAggregateOutputType> | number
           }
         }
       }
@@ -7669,10 +7755,12 @@ export namespace Prisma {
 
   export type DailyRunCountOutputType = {
     stages: number
+    snapshots: number
   }
 
   export type DailyRunCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     stages?: boolean | DailyRunCountOutputTypeCountStagesArgs
+    snapshots?: boolean | DailyRunCountOutputTypeCountSnapshotsArgs
   }
 
   // Custom InputTypes
@@ -7691,6 +7779,13 @@ export namespace Prisma {
    */
   export type DailyRunCountOutputTypeCountStagesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RunStageWhereInput
+  }
+
+  /**
+   * DailyRunCountOutputType without action
+   */
+  export type DailyRunCountOutputTypeCountSnapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApprovalSnapshotWhereInput
   }
 
 
@@ -7759,6 +7854,7 @@ export namespace Prisma {
     attributionLinks: number
     preparationLogs: number
     commentSalesSignals: number
+    approvalSnapshots: number
   }
 
   export type WorkspaceCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -7822,6 +7918,7 @@ export namespace Prisma {
     attributionLinks?: boolean | WorkspaceCountOutputTypeCountAttributionLinksArgs
     preparationLogs?: boolean | WorkspaceCountOutputTypeCountPreparationLogsArgs
     commentSalesSignals?: boolean | WorkspaceCountOutputTypeCountCommentSalesSignalsArgs
+    approvalSnapshots?: boolean | WorkspaceCountOutputTypeCountApprovalSnapshotsArgs
   }
 
   // Custom InputTypes
@@ -8253,6 +8350,13 @@ export namespace Prisma {
    */
   export type WorkspaceCountOutputTypeCountCommentSalesSignalsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: CommentSalesSignalWhereInput
+  }
+
+  /**
+   * WorkspaceCountOutputType without action
+   */
+  export type WorkspaceCountOutputTypeCountApprovalSnapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApprovalSnapshotWhereInput
   }
 
 
@@ -27799,6 +27903,7 @@ export namespace Prisma {
     updatedAt?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     stages?: boolean | DailyRun$stagesArgs<ExtArgs>
+    snapshots?: boolean | DailyRun$snapshotsArgs<ExtArgs>
     _count?: boolean | DailyRunCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["dailyRun"]>
 
@@ -27832,6 +27937,7 @@ export namespace Prisma {
   export type DailyRunInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
     stages?: boolean | DailyRun$stagesArgs<ExtArgs>
+    snapshots?: boolean | DailyRun$snapshotsArgs<ExtArgs>
     _count?: boolean | DailyRunCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type DailyRunIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -27843,6 +27949,7 @@ export namespace Prisma {
     objects: {
       workspace: Prisma.$WorkspacePayload<ExtArgs>
       stages: Prisma.$RunStagePayload<ExtArgs>[]
+      snapshots: Prisma.$ApprovalSnapshotPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -28221,6 +28328,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     workspace<T extends WorkspaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WorkspaceDefaultArgs<ExtArgs>>): Prisma__WorkspaceClient<$Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
     stages<T extends DailyRun$stagesArgs<ExtArgs> = {}>(args?: Subset<T, DailyRun$stagesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RunStagePayload<ExtArgs>, T, "findMany"> | Null>
+    snapshots<T extends DailyRun$snapshotsArgs<ExtArgs> = {}>(args?: Subset<T, DailyRun$snapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -28595,6 +28703,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: RunStageScalarFieldEnum | RunStageScalarFieldEnum[]
+  }
+
+  /**
+   * DailyRun.snapshots
+   */
+  export type DailyRun$snapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    where?: ApprovalSnapshotWhereInput
+    orderBy?: ApprovalSnapshotOrderByWithRelationInput | ApprovalSnapshotOrderByWithRelationInput[]
+    cursor?: ApprovalSnapshotWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ApprovalSnapshotScalarFieldEnum | ApprovalSnapshotScalarFieldEnum[]
   }
 
   /**
@@ -29678,6 +29806,973 @@ export namespace Prisma {
      * Choose, which related nodes to fetch as well
      */
     include?: RunStageInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model ApprovalSnapshot
+   */
+
+  export type AggregateApprovalSnapshot = {
+    _count: ApprovalSnapshotCountAggregateOutputType | null
+    _min: ApprovalSnapshotMinAggregateOutputType | null
+    _max: ApprovalSnapshotMaxAggregateOutputType | null
+  }
+
+  export type ApprovalSnapshotMinAggregateOutputType = {
+    id: string | null
+    workspaceId: string | null
+    dailyRunId: string | null
+    runDate: Date | null
+    capturedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type ApprovalSnapshotMaxAggregateOutputType = {
+    id: string | null
+    workspaceId: string | null
+    dailyRunId: string | null
+    runDate: Date | null
+    capturedAt: Date | null
+    createdAt: Date | null
+  }
+
+  export type ApprovalSnapshotCountAggregateOutputType = {
+    id: number
+    workspaceId: number
+    dailyRunId: number
+    runDate: number
+    capturedAt: number
+    items: number
+    counts: number
+    createdAt: number
+    _all: number
+  }
+
+
+  export type ApprovalSnapshotMinAggregateInputType = {
+    id?: true
+    workspaceId?: true
+    dailyRunId?: true
+    runDate?: true
+    capturedAt?: true
+    createdAt?: true
+  }
+
+  export type ApprovalSnapshotMaxAggregateInputType = {
+    id?: true
+    workspaceId?: true
+    dailyRunId?: true
+    runDate?: true
+    capturedAt?: true
+    createdAt?: true
+  }
+
+  export type ApprovalSnapshotCountAggregateInputType = {
+    id?: true
+    workspaceId?: true
+    dailyRunId?: true
+    runDate?: true
+    capturedAt?: true
+    items?: true
+    counts?: true
+    createdAt?: true
+    _all?: true
+  }
+
+  export type ApprovalSnapshotAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ApprovalSnapshot to aggregate.
+     */
+    where?: ApprovalSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApprovalSnapshots to fetch.
+     */
+    orderBy?: ApprovalSnapshotOrderByWithRelationInput | ApprovalSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: ApprovalSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApprovalSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApprovalSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned ApprovalSnapshots
+    **/
+    _count?: true | ApprovalSnapshotCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: ApprovalSnapshotMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: ApprovalSnapshotMaxAggregateInputType
+  }
+
+  export type GetApprovalSnapshotAggregateType<T extends ApprovalSnapshotAggregateArgs> = {
+        [P in keyof T & keyof AggregateApprovalSnapshot]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateApprovalSnapshot[P]>
+      : GetScalarType<T[P], AggregateApprovalSnapshot[P]>
+  }
+
+
+
+
+  export type ApprovalSnapshotGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: ApprovalSnapshotWhereInput
+    orderBy?: ApprovalSnapshotOrderByWithAggregationInput | ApprovalSnapshotOrderByWithAggregationInput[]
+    by: ApprovalSnapshotScalarFieldEnum[] | ApprovalSnapshotScalarFieldEnum
+    having?: ApprovalSnapshotScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: ApprovalSnapshotCountAggregateInputType | true
+    _min?: ApprovalSnapshotMinAggregateInputType
+    _max?: ApprovalSnapshotMaxAggregateInputType
+  }
+
+  export type ApprovalSnapshotGroupByOutputType = {
+    id: string
+    workspaceId: string
+    dailyRunId: string
+    runDate: Date
+    capturedAt: Date
+    items: JsonValue
+    counts: JsonValue | null
+    createdAt: Date
+    _count: ApprovalSnapshotCountAggregateOutputType | null
+    _min: ApprovalSnapshotMinAggregateOutputType | null
+    _max: ApprovalSnapshotMaxAggregateOutputType | null
+  }
+
+  type GetApprovalSnapshotGroupByPayload<T extends ApprovalSnapshotGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<ApprovalSnapshotGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof ApprovalSnapshotGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], ApprovalSnapshotGroupByOutputType[P]>
+            : GetScalarType<T[P], ApprovalSnapshotGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type ApprovalSnapshotSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    workspaceId?: boolean
+    dailyRunId?: boolean
+    runDate?: boolean
+    capturedAt?: boolean
+    items?: boolean
+    counts?: boolean
+    createdAt?: boolean
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    dailyRun?: boolean | DailyRunDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["approvalSnapshot"]>
+
+  export type ApprovalSnapshotSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    workspaceId?: boolean
+    dailyRunId?: boolean
+    runDate?: boolean
+    capturedAt?: boolean
+    items?: boolean
+    counts?: boolean
+    createdAt?: boolean
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    dailyRun?: boolean | DailyRunDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["approvalSnapshot"]>
+
+  export type ApprovalSnapshotSelectScalar = {
+    id?: boolean
+    workspaceId?: boolean
+    dailyRunId?: boolean
+    runDate?: boolean
+    capturedAt?: boolean
+    items?: boolean
+    counts?: boolean
+    createdAt?: boolean
+  }
+
+  export type ApprovalSnapshotInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    dailyRun?: boolean | DailyRunDefaultArgs<ExtArgs>
+  }
+  export type ApprovalSnapshotIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
+    dailyRun?: boolean | DailyRunDefaultArgs<ExtArgs>
+  }
+
+  export type $ApprovalSnapshotPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "ApprovalSnapshot"
+    objects: {
+      workspace: Prisma.$WorkspacePayload<ExtArgs>
+      dailyRun: Prisma.$DailyRunPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      workspaceId: string
+      dailyRunId: string
+      runDate: Date
+      capturedAt: Date
+      items: Prisma.JsonValue
+      counts: Prisma.JsonValue | null
+      createdAt: Date
+    }, ExtArgs["result"]["approvalSnapshot"]>
+    composites: {}
+  }
+
+  type ApprovalSnapshotGetPayload<S extends boolean | null | undefined | ApprovalSnapshotDefaultArgs> = $Result.GetResult<Prisma.$ApprovalSnapshotPayload, S>
+
+  type ApprovalSnapshotCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = 
+    Omit<ApprovalSnapshotFindManyArgs, 'select' | 'include' | 'distinct'> & {
+      select?: ApprovalSnapshotCountAggregateInputType | true
+    }
+
+  export interface ApprovalSnapshotDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['ApprovalSnapshot'], meta: { name: 'ApprovalSnapshot' } }
+    /**
+     * Find zero or one ApprovalSnapshot that matches the filter.
+     * @param {ApprovalSnapshotFindUniqueArgs} args - Arguments to find a ApprovalSnapshot
+     * @example
+     * // Get one ApprovalSnapshot
+     * const approvalSnapshot = await prisma.approvalSnapshot.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends ApprovalSnapshotFindUniqueArgs>(args: SelectSubset<T, ApprovalSnapshotFindUniqueArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findUnique"> | null, null, ExtArgs>
+
+    /**
+     * Find one ApprovalSnapshot that matches the filter or throw an error with `error.code='P2025'` 
+     * if no matches were found.
+     * @param {ApprovalSnapshotFindUniqueOrThrowArgs} args - Arguments to find a ApprovalSnapshot
+     * @example
+     * // Get one ApprovalSnapshot
+     * const approvalSnapshot = await prisma.approvalSnapshot.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends ApprovalSnapshotFindUniqueOrThrowArgs>(args: SelectSubset<T, ApprovalSnapshotFindUniqueOrThrowArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow">, never, ExtArgs>
+
+    /**
+     * Find the first ApprovalSnapshot that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotFindFirstArgs} args - Arguments to find a ApprovalSnapshot
+     * @example
+     * // Get one ApprovalSnapshot
+     * const approvalSnapshot = await prisma.approvalSnapshot.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends ApprovalSnapshotFindFirstArgs>(args?: SelectSubset<T, ApprovalSnapshotFindFirstArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findFirst"> | null, null, ExtArgs>
+
+    /**
+     * Find the first ApprovalSnapshot that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotFindFirstOrThrowArgs} args - Arguments to find a ApprovalSnapshot
+     * @example
+     * // Get one ApprovalSnapshot
+     * const approvalSnapshot = await prisma.approvalSnapshot.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends ApprovalSnapshotFindFirstOrThrowArgs>(args?: SelectSubset<T, ApprovalSnapshotFindFirstOrThrowArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findFirstOrThrow">, never, ExtArgs>
+
+    /**
+     * Find zero or more ApprovalSnapshots that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all ApprovalSnapshots
+     * const approvalSnapshots = await prisma.approvalSnapshot.findMany()
+     * 
+     * // Get first 10 ApprovalSnapshots
+     * const approvalSnapshots = await prisma.approvalSnapshot.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const approvalSnapshotWithIdOnly = await prisma.approvalSnapshot.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends ApprovalSnapshotFindManyArgs>(args?: SelectSubset<T, ApprovalSnapshotFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findMany">>
+
+    /**
+     * Create a ApprovalSnapshot.
+     * @param {ApprovalSnapshotCreateArgs} args - Arguments to create a ApprovalSnapshot.
+     * @example
+     * // Create one ApprovalSnapshot
+     * const ApprovalSnapshot = await prisma.approvalSnapshot.create({
+     *   data: {
+     *     // ... data to create a ApprovalSnapshot
+     *   }
+     * })
+     * 
+     */
+    create<T extends ApprovalSnapshotCreateArgs>(args: SelectSubset<T, ApprovalSnapshotCreateArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "create">, never, ExtArgs>
+
+    /**
+     * Create many ApprovalSnapshots.
+     * @param {ApprovalSnapshotCreateManyArgs} args - Arguments to create many ApprovalSnapshots.
+     * @example
+     * // Create many ApprovalSnapshots
+     * const approvalSnapshot = await prisma.approvalSnapshot.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends ApprovalSnapshotCreateManyArgs>(args?: SelectSubset<T, ApprovalSnapshotCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many ApprovalSnapshots and returns the data saved in the database.
+     * @param {ApprovalSnapshotCreateManyAndReturnArgs} args - Arguments to create many ApprovalSnapshots.
+     * @example
+     * // Create many ApprovalSnapshots
+     * const approvalSnapshot = await prisma.approvalSnapshot.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many ApprovalSnapshots and only return the `id`
+     * const approvalSnapshotWithIdOnly = await prisma.approvalSnapshot.createManyAndReturn({ 
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends ApprovalSnapshotCreateManyAndReturnArgs>(args?: SelectSubset<T, ApprovalSnapshotCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "createManyAndReturn">>
+
+    /**
+     * Delete a ApprovalSnapshot.
+     * @param {ApprovalSnapshotDeleteArgs} args - Arguments to delete one ApprovalSnapshot.
+     * @example
+     * // Delete one ApprovalSnapshot
+     * const ApprovalSnapshot = await prisma.approvalSnapshot.delete({
+     *   where: {
+     *     // ... filter to delete one ApprovalSnapshot
+     *   }
+     * })
+     * 
+     */
+    delete<T extends ApprovalSnapshotDeleteArgs>(args: SelectSubset<T, ApprovalSnapshotDeleteArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "delete">, never, ExtArgs>
+
+    /**
+     * Update one ApprovalSnapshot.
+     * @param {ApprovalSnapshotUpdateArgs} args - Arguments to update one ApprovalSnapshot.
+     * @example
+     * // Update one ApprovalSnapshot
+     * const approvalSnapshot = await prisma.approvalSnapshot.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends ApprovalSnapshotUpdateArgs>(args: SelectSubset<T, ApprovalSnapshotUpdateArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "update">, never, ExtArgs>
+
+    /**
+     * Delete zero or more ApprovalSnapshots.
+     * @param {ApprovalSnapshotDeleteManyArgs} args - Arguments to filter ApprovalSnapshots to delete.
+     * @example
+     * // Delete a few ApprovalSnapshots
+     * const { count } = await prisma.approvalSnapshot.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends ApprovalSnapshotDeleteManyArgs>(args?: SelectSubset<T, ApprovalSnapshotDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more ApprovalSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many ApprovalSnapshots
+     * const approvalSnapshot = await prisma.approvalSnapshot.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends ApprovalSnapshotUpdateManyArgs>(args: SelectSubset<T, ApprovalSnapshotUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create or update one ApprovalSnapshot.
+     * @param {ApprovalSnapshotUpsertArgs} args - Arguments to update or create a ApprovalSnapshot.
+     * @example
+     * // Update or create a ApprovalSnapshot
+     * const approvalSnapshot = await prisma.approvalSnapshot.upsert({
+     *   create: {
+     *     // ... data to create a ApprovalSnapshot
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the ApprovalSnapshot we want to update
+     *   }
+     * })
+     */
+    upsert<T extends ApprovalSnapshotUpsertArgs>(args: SelectSubset<T, ApprovalSnapshotUpsertArgs<ExtArgs>>): Prisma__ApprovalSnapshotClient<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "upsert">, never, ExtArgs>
+
+
+    /**
+     * Count the number of ApprovalSnapshots.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotCountArgs} args - Arguments to filter ApprovalSnapshots to count.
+     * @example
+     * // Count the number of ApprovalSnapshots
+     * const count = await prisma.approvalSnapshot.count({
+     *   where: {
+     *     // ... the filter for the ApprovalSnapshots we want to count
+     *   }
+     * })
+    **/
+    count<T extends ApprovalSnapshotCountArgs>(
+      args?: Subset<T, ApprovalSnapshotCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], ApprovalSnapshotCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a ApprovalSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends ApprovalSnapshotAggregateArgs>(args: Subset<T, ApprovalSnapshotAggregateArgs>): Prisma.PrismaPromise<GetApprovalSnapshotAggregateType<T>>
+
+    /**
+     * Group by ApprovalSnapshot.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {ApprovalSnapshotGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends ApprovalSnapshotGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: ApprovalSnapshotGroupByArgs['orderBy'] }
+        : { orderBy?: ApprovalSnapshotGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, ApprovalSnapshotGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetApprovalSnapshotGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the ApprovalSnapshot model
+   */
+  readonly fields: ApprovalSnapshotFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for ApprovalSnapshot.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__ApprovalSnapshotClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    workspace<T extends WorkspaceDefaultArgs<ExtArgs> = {}>(args?: Subset<T, WorkspaceDefaultArgs<ExtArgs>>): Prisma__WorkspaceClient<$Result.GetResult<Prisma.$WorkspacePayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    dailyRun<T extends DailyRunDefaultArgs<ExtArgs> = {}>(args?: Subset<T, DailyRunDefaultArgs<ExtArgs>>): Prisma__DailyRunClient<$Result.GetResult<Prisma.$DailyRunPayload<ExtArgs>, T, "findUniqueOrThrow"> | Null, Null, ExtArgs>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the ApprovalSnapshot model
+   */ 
+  interface ApprovalSnapshotFieldRefs {
+    readonly id: FieldRef<"ApprovalSnapshot", 'String'>
+    readonly workspaceId: FieldRef<"ApprovalSnapshot", 'String'>
+    readonly dailyRunId: FieldRef<"ApprovalSnapshot", 'String'>
+    readonly runDate: FieldRef<"ApprovalSnapshot", 'DateTime'>
+    readonly capturedAt: FieldRef<"ApprovalSnapshot", 'DateTime'>
+    readonly items: FieldRef<"ApprovalSnapshot", 'Json'>
+    readonly counts: FieldRef<"ApprovalSnapshot", 'Json'>
+    readonly createdAt: FieldRef<"ApprovalSnapshot", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * ApprovalSnapshot findUnique
+   */
+  export type ApprovalSnapshotFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which ApprovalSnapshot to fetch.
+     */
+    where: ApprovalSnapshotWhereUniqueInput
+  }
+
+  /**
+   * ApprovalSnapshot findUniqueOrThrow
+   */
+  export type ApprovalSnapshotFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which ApprovalSnapshot to fetch.
+     */
+    where: ApprovalSnapshotWhereUniqueInput
+  }
+
+  /**
+   * ApprovalSnapshot findFirst
+   */
+  export type ApprovalSnapshotFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which ApprovalSnapshot to fetch.
+     */
+    where?: ApprovalSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApprovalSnapshots to fetch.
+     */
+    orderBy?: ApprovalSnapshotOrderByWithRelationInput | ApprovalSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ApprovalSnapshots.
+     */
+    cursor?: ApprovalSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApprovalSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApprovalSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ApprovalSnapshots.
+     */
+    distinct?: ApprovalSnapshotScalarFieldEnum | ApprovalSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * ApprovalSnapshot findFirstOrThrow
+   */
+  export type ApprovalSnapshotFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which ApprovalSnapshot to fetch.
+     */
+    where?: ApprovalSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApprovalSnapshots to fetch.
+     */
+    orderBy?: ApprovalSnapshotOrderByWithRelationInput | ApprovalSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for ApprovalSnapshots.
+     */
+    cursor?: ApprovalSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApprovalSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApprovalSnapshots.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of ApprovalSnapshots.
+     */
+    distinct?: ApprovalSnapshotScalarFieldEnum | ApprovalSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * ApprovalSnapshot findMany
+   */
+  export type ApprovalSnapshotFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter, which ApprovalSnapshots to fetch.
+     */
+    where?: ApprovalSnapshotWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of ApprovalSnapshots to fetch.
+     */
+    orderBy?: ApprovalSnapshotOrderByWithRelationInput | ApprovalSnapshotOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing ApprovalSnapshots.
+     */
+    cursor?: ApprovalSnapshotWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` ApprovalSnapshots from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` ApprovalSnapshots.
+     */
+    skip?: number
+    distinct?: ApprovalSnapshotScalarFieldEnum | ApprovalSnapshotScalarFieldEnum[]
+  }
+
+  /**
+   * ApprovalSnapshot create
+   */
+  export type ApprovalSnapshotCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to create a ApprovalSnapshot.
+     */
+    data: XOR<ApprovalSnapshotCreateInput, ApprovalSnapshotUncheckedCreateInput>
+  }
+
+  /**
+   * ApprovalSnapshot createMany
+   */
+  export type ApprovalSnapshotCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many ApprovalSnapshots.
+     */
+    data: ApprovalSnapshotCreateManyInput | ApprovalSnapshotCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * ApprovalSnapshot createManyAndReturn
+   */
+  export type ApprovalSnapshotCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * The data used to create many ApprovalSnapshots.
+     */
+    data: ApprovalSnapshotCreateManyInput | ApprovalSnapshotCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * ApprovalSnapshot update
+   */
+  export type ApprovalSnapshotUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * The data needed to update a ApprovalSnapshot.
+     */
+    data: XOR<ApprovalSnapshotUpdateInput, ApprovalSnapshotUncheckedUpdateInput>
+    /**
+     * Choose, which ApprovalSnapshot to update.
+     */
+    where: ApprovalSnapshotWhereUniqueInput
+  }
+
+  /**
+   * ApprovalSnapshot updateMany
+   */
+  export type ApprovalSnapshotUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update ApprovalSnapshots.
+     */
+    data: XOR<ApprovalSnapshotUpdateManyMutationInput, ApprovalSnapshotUncheckedUpdateManyInput>
+    /**
+     * Filter which ApprovalSnapshots to update
+     */
+    where?: ApprovalSnapshotWhereInput
+  }
+
+  /**
+   * ApprovalSnapshot upsert
+   */
+  export type ApprovalSnapshotUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * The filter to search for the ApprovalSnapshot to update in case it exists.
+     */
+    where: ApprovalSnapshotWhereUniqueInput
+    /**
+     * In case the ApprovalSnapshot found by the `where` argument doesn't exist, create a new ApprovalSnapshot with this data.
+     */
+    create: XOR<ApprovalSnapshotCreateInput, ApprovalSnapshotUncheckedCreateInput>
+    /**
+     * In case the ApprovalSnapshot was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<ApprovalSnapshotUpdateInput, ApprovalSnapshotUncheckedUpdateInput>
+  }
+
+  /**
+   * ApprovalSnapshot delete
+   */
+  export type ApprovalSnapshotDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    /**
+     * Filter which ApprovalSnapshot to delete.
+     */
+    where: ApprovalSnapshotWhereUniqueInput
+  }
+
+  /**
+   * ApprovalSnapshot deleteMany
+   */
+  export type ApprovalSnapshotDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which ApprovalSnapshots to delete
+     */
+    where?: ApprovalSnapshotWhereInput
+  }
+
+  /**
+   * ApprovalSnapshot without action
+   */
+  export type ApprovalSnapshotDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
   }
 
 
@@ -32023,6 +33118,7 @@ export namespace Prisma {
     attributionLinks?: boolean | Workspace$attributionLinksArgs<ExtArgs>
     preparationLogs?: boolean | Workspace$preparationLogsArgs<ExtArgs>
     commentSalesSignals?: boolean | Workspace$commentSalesSignalsArgs<ExtArgs>
+    approvalSnapshots?: boolean | Workspace$approvalSnapshotsArgs<ExtArgs>
     _count?: boolean | WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["workspace"]>
 
@@ -32113,6 +33209,7 @@ export namespace Prisma {
     attributionLinks?: boolean | Workspace$attributionLinksArgs<ExtArgs>
     preparationLogs?: boolean | Workspace$preparationLogsArgs<ExtArgs>
     commentSalesSignals?: boolean | Workspace$commentSalesSignalsArgs<ExtArgs>
+    approvalSnapshots?: boolean | Workspace$approvalSnapshotsArgs<ExtArgs>
     _count?: boolean | WorkspaceCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type WorkspaceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -32186,6 +33283,7 @@ export namespace Prisma {
       attributionLinks: Prisma.$AttributionLinkPayload<ExtArgs>[]
       preparationLogs: Prisma.$PreparationLogPayload<ExtArgs>[]
       commentSalesSignals: Prisma.$CommentSalesSignalPayload<ExtArgs>[]
+      approvalSnapshots: Prisma.$ApprovalSnapshotPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -32625,6 +33723,7 @@ export namespace Prisma {
     attributionLinks<T extends Workspace$attributionLinksArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$attributionLinksArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$AttributionLinkPayload<ExtArgs>, T, "findMany"> | Null>
     preparationLogs<T extends Workspace$preparationLogsArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$preparationLogsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PreparationLogPayload<ExtArgs>, T, "findMany"> | Null>
     commentSalesSignals<T extends Workspace$commentSalesSignalsArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$commentSalesSignalsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CommentSalesSignalPayload<ExtArgs>, T, "findMany"> | Null>
+    approvalSnapshots<T extends Workspace$approvalSnapshotsArgs<ExtArgs> = {}>(args?: Subset<T, Workspace$approvalSnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$ApprovalSnapshotPayload<ExtArgs>, T, "findMany"> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -34262,6 +35361,26 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: CommentSalesSignalScalarFieldEnum | CommentSalesSignalScalarFieldEnum[]
+  }
+
+  /**
+   * Workspace.approvalSnapshots
+   */
+  export type Workspace$approvalSnapshotsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the ApprovalSnapshot
+     */
+    select?: ApprovalSnapshotSelect<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: ApprovalSnapshotInclude<ExtArgs> | null
+    where?: ApprovalSnapshotWhereInput
+    orderBy?: ApprovalSnapshotOrderByWithRelationInput | ApprovalSnapshotOrderByWithRelationInput[]
+    cursor?: ApprovalSnapshotWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: ApprovalSnapshotScalarFieldEnum | ApprovalSnapshotScalarFieldEnum[]
   }
 
   /**
@@ -53743,6 +54862,8 @@ export namespace Prisma {
     status: $Enums.OpportunityStatus | null
     reasoning: string | null
     evidenceSummary: string | null
+    originKind: string | null
+    originId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -53762,6 +54883,8 @@ export namespace Prisma {
     status: $Enums.OpportunityStatus | null
     reasoning: string | null
     evidenceSummary: string | null
+    originKind: string | null
+    originId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -53784,6 +54907,8 @@ export namespace Prisma {
     trendSignalIds: number
     reasoning: number
     evidenceSummary: number
+    originKind: number
+    originId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -53813,6 +54938,8 @@ export namespace Prisma {
     status?: true
     reasoning?: true
     evidenceSummary?: true
+    originKind?: true
+    originId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -53832,6 +54959,8 @@ export namespace Prisma {
     status?: true
     reasoning?: true
     evidenceSummary?: true
+    originKind?: true
+    originId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -53854,6 +54983,8 @@ export namespace Prisma {
     trendSignalIds?: true
     reasoning?: true
     evidenceSummary?: true
+    originKind?: true
+    originId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -53963,6 +55094,8 @@ export namespace Prisma {
     trendSignalIds: JsonValue
     reasoning: string
     evidenceSummary: string
+    originKind: string | null
+    originId: string | null
     createdAt: Date
     updatedAt: Date
     _count: ContentOpportunityCountAggregateOutputType | null
@@ -54004,6 +55137,8 @@ export namespace Prisma {
     trendSignalIds?: boolean
     reasoning?: boolean
     evidenceSummary?: boolean
+    originKind?: boolean
+    originId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
@@ -54028,6 +55163,8 @@ export namespace Prisma {
     trendSignalIds?: boolean
     reasoning?: boolean
     evidenceSummary?: boolean
+    originKind?: boolean
+    originId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     workspace?: boolean | WorkspaceDefaultArgs<ExtArgs>
@@ -54052,6 +55189,8 @@ export namespace Prisma {
     trendSignalIds?: boolean
     reasoning?: boolean
     evidenceSummary?: boolean
+    originKind?: boolean
+    originId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
@@ -54089,6 +55228,8 @@ export namespace Prisma {
       trendSignalIds: Prisma.JsonValue
       reasoning: string
       evidenceSummary: string
+      originKind: string | null
+      originId: string | null
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["contentOpportunity"]>
@@ -54503,6 +55644,8 @@ export namespace Prisma {
     readonly trendSignalIds: FieldRef<"ContentOpportunity", 'Json'>
     readonly reasoning: FieldRef<"ContentOpportunity", 'String'>
     readonly evidenceSummary: FieldRef<"ContentOpportunity", 'String'>
+    readonly originKind: FieldRef<"ContentOpportunity", 'String'>
+    readonly originId: FieldRef<"ContentOpportunity", 'String'>
     readonly createdAt: FieldRef<"ContentOpportunity", 'DateTime'>
     readonly updatedAt: FieldRef<"ContentOpportunity", 'DateTime'>
   }
@@ -83817,6 +84960,20 @@ export namespace Prisma {
   export type RunStageScalarFieldEnum = (typeof RunStageScalarFieldEnum)[keyof typeof RunStageScalarFieldEnum]
 
 
+  export const ApprovalSnapshotScalarFieldEnum: {
+    id: 'id',
+    workspaceId: 'workspaceId',
+    dailyRunId: 'dailyRunId',
+    runDate: 'runDate',
+    capturedAt: 'capturedAt',
+    items: 'items',
+    counts: 'counts',
+    createdAt: 'createdAt'
+  };
+
+  export type ApprovalSnapshotScalarFieldEnum = (typeof ApprovalSnapshotScalarFieldEnum)[keyof typeof ApprovalSnapshotScalarFieldEnum]
+
+
   export const OnboardingStateScalarFieldEnum: {
     id: 'id',
     workspaceId: 'workspaceId',
@@ -84197,6 +85354,8 @@ export namespace Prisma {
     trendSignalIds: 'trendSignalIds',
     reasoning: 'reasoning',
     evidenceSummary: 'evidenceSummary',
+    originKind: 'originKind',
+    originId: 'originId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -87397,6 +88556,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"DailyRun"> | Date | string
     workspace?: XOR<WorkspaceRelationFilter, WorkspaceWhereInput>
     stages?: RunStageListRelationFilter
+    snapshots?: ApprovalSnapshotListRelationFilter
   }
 
   export type DailyRunOrderByWithRelationInput = {
@@ -87412,6 +88572,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     workspace?: WorkspaceOrderByWithRelationInput
     stages?: RunStageOrderByRelationAggregateInput
+    snapshots?: ApprovalSnapshotOrderByRelationAggregateInput
   }
 
   export type DailyRunWhereUniqueInput = Prisma.AtLeast<{
@@ -87431,6 +88592,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"DailyRun"> | Date | string
     workspace?: XOR<WorkspaceRelationFilter, WorkspaceWhereInput>
     stages?: RunStageListRelationFilter
+    snapshots?: ApprovalSnapshotListRelationFilter
   }, "id" | "workspaceId_runDate">
 
   export type DailyRunOrderByWithAggregationInput = {
@@ -87564,6 +88726,80 @@ export namespace Prisma {
     attempt?: IntWithAggregatesFilter<"RunStage"> | number
     createdAt?: DateTimeWithAggregatesFilter<"RunStage"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"RunStage"> | Date | string
+  }
+
+  export type ApprovalSnapshotWhereInput = {
+    AND?: ApprovalSnapshotWhereInput | ApprovalSnapshotWhereInput[]
+    OR?: ApprovalSnapshotWhereInput[]
+    NOT?: ApprovalSnapshotWhereInput | ApprovalSnapshotWhereInput[]
+    id?: StringFilter<"ApprovalSnapshot"> | string
+    workspaceId?: StringFilter<"ApprovalSnapshot"> | string
+    dailyRunId?: StringFilter<"ApprovalSnapshot"> | string
+    runDate?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    capturedAt?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    items?: JsonFilter<"ApprovalSnapshot">
+    counts?: JsonNullableFilter<"ApprovalSnapshot">
+    createdAt?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    workspace?: XOR<WorkspaceRelationFilter, WorkspaceWhereInput>
+    dailyRun?: XOR<DailyRunRelationFilter, DailyRunWhereInput>
+  }
+
+  export type ApprovalSnapshotOrderByWithRelationInput = {
+    id?: SortOrder
+    workspaceId?: SortOrder
+    dailyRunId?: SortOrder
+    runDate?: SortOrder
+    capturedAt?: SortOrder
+    items?: SortOrder
+    counts?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    workspace?: WorkspaceOrderByWithRelationInput
+    dailyRun?: DailyRunOrderByWithRelationInput
+  }
+
+  export type ApprovalSnapshotWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    workspaceId_dailyRunId?: ApprovalSnapshotWorkspaceIdDailyRunIdCompoundUniqueInput
+    AND?: ApprovalSnapshotWhereInput | ApprovalSnapshotWhereInput[]
+    OR?: ApprovalSnapshotWhereInput[]
+    NOT?: ApprovalSnapshotWhereInput | ApprovalSnapshotWhereInput[]
+    workspaceId?: StringFilter<"ApprovalSnapshot"> | string
+    dailyRunId?: StringFilter<"ApprovalSnapshot"> | string
+    runDate?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    capturedAt?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    items?: JsonFilter<"ApprovalSnapshot">
+    counts?: JsonNullableFilter<"ApprovalSnapshot">
+    createdAt?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    workspace?: XOR<WorkspaceRelationFilter, WorkspaceWhereInput>
+    dailyRun?: XOR<DailyRunRelationFilter, DailyRunWhereInput>
+  }, "id" | "workspaceId_dailyRunId">
+
+  export type ApprovalSnapshotOrderByWithAggregationInput = {
+    id?: SortOrder
+    workspaceId?: SortOrder
+    dailyRunId?: SortOrder
+    runDate?: SortOrder
+    capturedAt?: SortOrder
+    items?: SortOrder
+    counts?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    _count?: ApprovalSnapshotCountOrderByAggregateInput
+    _max?: ApprovalSnapshotMaxOrderByAggregateInput
+    _min?: ApprovalSnapshotMinOrderByAggregateInput
+  }
+
+  export type ApprovalSnapshotScalarWhereWithAggregatesInput = {
+    AND?: ApprovalSnapshotScalarWhereWithAggregatesInput | ApprovalSnapshotScalarWhereWithAggregatesInput[]
+    OR?: ApprovalSnapshotScalarWhereWithAggregatesInput[]
+    NOT?: ApprovalSnapshotScalarWhereWithAggregatesInput | ApprovalSnapshotScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"ApprovalSnapshot"> | string
+    workspaceId?: StringWithAggregatesFilter<"ApprovalSnapshot"> | string
+    dailyRunId?: StringWithAggregatesFilter<"ApprovalSnapshot"> | string
+    runDate?: DateTimeWithAggregatesFilter<"ApprovalSnapshot"> | Date | string
+    capturedAt?: DateTimeWithAggregatesFilter<"ApprovalSnapshot"> | Date | string
+    items?: JsonWithAggregatesFilter<"ApprovalSnapshot">
+    counts?: JsonNullableWithAggregatesFilter<"ApprovalSnapshot">
+    createdAt?: DateTimeWithAggregatesFilter<"ApprovalSnapshot"> | Date | string
   }
 
   export type OnboardingStateWhereInput = {
@@ -87836,6 +89072,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkListRelationFilter
     preparationLogs?: PreparationLogListRelationFilter
     commentSalesSignals?: CommentSalesSignalListRelationFilter
+    approvalSnapshots?: ApprovalSnapshotListRelationFilter
   }
 
   export type WorkspaceOrderByWithRelationInput = {
@@ -87912,6 +89149,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkOrderByRelationAggregateInput
     preparationLogs?: PreparationLogOrderByRelationAggregateInput
     commentSalesSignals?: CommentSalesSignalOrderByRelationAggregateInput
+    approvalSnapshots?: ApprovalSnapshotOrderByRelationAggregateInput
   }
 
   export type WorkspaceWhereUniqueInput = Prisma.AtLeast<{
@@ -87991,6 +89229,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkListRelationFilter
     preparationLogs?: PreparationLogListRelationFilter
     commentSalesSignals?: CommentSalesSignalListRelationFilter
+    approvalSnapshots?: ApprovalSnapshotListRelationFilter
   }, "id" | "slug">
 
   export type WorkspaceOrderByWithAggregationInput = {
@@ -89794,6 +91033,8 @@ export namespace Prisma {
     trendSignalIds?: JsonFilter<"ContentOpportunity">
     reasoning?: StringFilter<"ContentOpportunity"> | string
     evidenceSummary?: StringFilter<"ContentOpportunity"> | string
+    originKind?: StringNullableFilter<"ContentOpportunity"> | string | null
+    originId?: StringNullableFilter<"ContentOpportunity"> | string | null
     createdAt?: DateTimeFilter<"ContentOpportunity"> | Date | string
     updatedAt?: DateTimeFilter<"ContentOpportunity"> | Date | string
     workspace?: XOR<WorkspaceRelationFilter, WorkspaceWhereInput>
@@ -89818,6 +91059,8 @@ export namespace Prisma {
     trendSignalIds?: SortOrder
     reasoning?: SortOrder
     evidenceSummary?: SortOrder
+    originKind?: SortOrderInput | SortOrder
+    originId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     workspace?: WorkspaceOrderByWithRelationInput
@@ -89826,6 +91069,7 @@ export namespace Prisma {
 
   export type ContentOpportunityWhereUniqueInput = Prisma.AtLeast<{
     id?: string
+    workspaceId_originKind_originId?: ContentOpportunityWorkspaceIdOriginKindOriginIdCompoundUniqueInput
     AND?: ContentOpportunityWhereInput | ContentOpportunityWhereInput[]
     OR?: ContentOpportunityWhereInput[]
     NOT?: ContentOpportunityWhereInput | ContentOpportunityWhereInput[]
@@ -89845,11 +91089,13 @@ export namespace Prisma {
     trendSignalIds?: JsonFilter<"ContentOpportunity">
     reasoning?: StringFilter<"ContentOpportunity"> | string
     evidenceSummary?: StringFilter<"ContentOpportunity"> | string
+    originKind?: StringNullableFilter<"ContentOpportunity"> | string | null
+    originId?: StringNullableFilter<"ContentOpportunity"> | string | null
     createdAt?: DateTimeFilter<"ContentOpportunity"> | Date | string
     updatedAt?: DateTimeFilter<"ContentOpportunity"> | Date | string
     workspace?: XOR<WorkspaceRelationFilter, WorkspaceWhereInput>
     topic?: XOR<TopicRelationFilter, TopicWhereInput>
-  }, "id">
+  }, "id" | "workspaceId_originKind_originId">
 
   export type ContentOpportunityOrderByWithAggregationInput = {
     id?: SortOrder
@@ -89869,6 +91115,8 @@ export namespace Prisma {
     trendSignalIds?: SortOrder
     reasoning?: SortOrder
     evidenceSummary?: SortOrder
+    originKind?: SortOrderInput | SortOrder
+    originId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: ContentOpportunityCountOrderByAggregateInput
@@ -89899,6 +91147,8 @@ export namespace Prisma {
     trendSignalIds?: JsonWithAggregatesFilter<"ContentOpportunity">
     reasoning?: StringWithAggregatesFilter<"ContentOpportunity"> | string
     evidenceSummary?: StringWithAggregatesFilter<"ContentOpportunity"> | string
+    originKind?: StringNullableWithAggregatesFilter<"ContentOpportunity"> | string | null
+    originId?: StringNullableWithAggregatesFilter<"ContentOpportunity"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"ContentOpportunity"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"ContentOpportunity"> | Date | string
   }
@@ -94713,6 +95963,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     workspace: WorkspaceCreateNestedOneWithoutDailyRunsInput
     stages?: RunStageCreateNestedManyWithoutDailyRunInput
+    snapshots?: ApprovalSnapshotCreateNestedManyWithoutDailyRunInput
   }
 
   export type DailyRunUncheckedCreateInput = {
@@ -94727,6 +95978,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stages?: RunStageUncheckedCreateNestedManyWithoutDailyRunInput
+    snapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutDailyRunInput
   }
 
   export type DailyRunUpdateInput = {
@@ -94741,6 +95993,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspace?: WorkspaceUpdateOneRequiredWithoutDailyRunsNestedInput
     stages?: RunStageUpdateManyWithoutDailyRunNestedInput
+    snapshots?: ApprovalSnapshotUpdateManyWithoutDailyRunNestedInput
   }
 
   export type DailyRunUncheckedUpdateInput = {
@@ -94755,6 +96008,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stages?: RunStageUncheckedUpdateManyWithoutDailyRunNestedInput
+    snapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutDailyRunNestedInput
   }
 
   export type DailyRunCreateManyInput = {
@@ -94903,6 +96157,81 @@ export namespace Prisma {
     attempt?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotCreateInput = {
+    id?: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    workspace: WorkspaceCreateNestedOneWithoutApprovalSnapshotsInput
+    dailyRun: DailyRunCreateNestedOneWithoutSnapshotsInput
+  }
+
+  export type ApprovalSnapshotUncheckedCreateInput = {
+    id?: string
+    workspaceId: string
+    dailyRunId: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type ApprovalSnapshotUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workspace?: WorkspaceUpdateOneRequiredWithoutApprovalSnapshotsNestedInput
+    dailyRun?: DailyRunUpdateOneRequiredWithoutSnapshotsNestedInput
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workspaceId?: StringFieldUpdateOperationsInput | string
+    dailyRunId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotCreateManyInput = {
+    id?: string
+    workspaceId: string
+    dailyRunId: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type ApprovalSnapshotUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workspaceId?: StringFieldUpdateOperationsInput | string
+    dailyRunId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type OnboardingStateCreateInput = {
@@ -95201,6 +96530,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateInput = {
@@ -95277,6 +96607,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUpdateInput = {
@@ -95353,6 +96684,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateInput = {
@@ -95429,6 +96761,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateManyInput = {
@@ -97375,6 +98708,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     workspace: WorkspaceCreateNestedOneWithoutContentOpportunitiesInput
@@ -97399,6 +98734,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -97419,6 +98756,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspace?: WorkspaceUpdateOneRequiredWithoutContentOpportunitiesNestedInput
@@ -97443,6 +98782,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -97465,6 +98806,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -97485,6 +98828,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -97507,6 +98852,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -102057,7 +103404,17 @@ export namespace Prisma {
     none?: RunStageWhereInput
   }
 
+  export type ApprovalSnapshotListRelationFilter = {
+    every?: ApprovalSnapshotWhereInput
+    some?: ApprovalSnapshotWhereInput
+    none?: ApprovalSnapshotWhereInput
+  }
+
   export type RunStageOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type ApprovalSnapshotOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -102213,6 +103570,87 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumRunStageStatusFilter<$PrismaModel>
     _max?: NestedEnumRunStageStatusFilter<$PrismaModel>
+  }
+  export type JsonFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+
+  export type ApprovalSnapshotWorkspaceIdDailyRunIdCompoundUniqueInput = {
+    workspaceId: string
+    dailyRunId: string
+  }
+
+  export type ApprovalSnapshotCountOrderByAggregateInput = {
+    id?: SortOrder
+    workspaceId?: SortOrder
+    dailyRunId?: SortOrder
+    runDate?: SortOrder
+    capturedAt?: SortOrder
+    items?: SortOrder
+    counts?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ApprovalSnapshotMaxOrderByAggregateInput = {
+    id?: SortOrder
+    workspaceId?: SortOrder
+    dailyRunId?: SortOrder
+    runDate?: SortOrder
+    capturedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+
+  export type ApprovalSnapshotMinOrderByAggregateInput = {
+    id?: SortOrder
+    workspaceId?: SortOrder
+    dailyRunId?: SortOrder
+    runDate?: SortOrder
+    capturedAt?: SortOrder
+    createdAt?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type OnboardingStateCountOrderByAggregateInput = {
@@ -103994,27 +105432,11 @@ export namespace Prisma {
     notIn?: $Enums.OpportunityStatus[] | ListEnumOpportunityStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumOpportunityStatusFilter<$PrismaModel> | $Enums.OpportunityStatus
   }
-  export type JsonFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  export type ContentOpportunityWorkspaceIdOriginKindOriginIdCompoundUniqueInput = {
+    workspaceId: string
+    originKind: string
+    originId: string
   }
 
   export type ContentOpportunityCountOrderByAggregateInput = {
@@ -104035,6 +105457,8 @@ export namespace Prisma {
     trendSignalIds?: SortOrder
     reasoning?: SortOrder
     evidenceSummary?: SortOrder
+    originKind?: SortOrder
+    originId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -104058,6 +105482,8 @@ export namespace Prisma {
     status?: SortOrder
     reasoning?: SortOrder
     evidenceSummary?: SortOrder
+    originKind?: SortOrder
+    originId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -104077,6 +105503,8 @@ export namespace Prisma {
     status?: SortOrder
     reasoning?: SortOrder
     evidenceSummary?: SortOrder
+    originKind?: SortOrder
+    originId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -104093,31 +105521,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumOpportunityStatusFilter<$PrismaModel>
     _max?: NestedEnumOpportunityStatusFilter<$PrismaModel>
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
   }
 
   export type EnumGapTypeFilter<$PrismaModel = never> = {
@@ -107177,11 +108580,25 @@ export namespace Prisma {
     connect?: RunStageWhereUniqueInput | RunStageWhereUniqueInput[]
   }
 
+  export type ApprovalSnapshotCreateNestedManyWithoutDailyRunInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutDailyRunInput, ApprovalSnapshotUncheckedCreateWithoutDailyRunInput> | ApprovalSnapshotCreateWithoutDailyRunInput[] | ApprovalSnapshotUncheckedCreateWithoutDailyRunInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutDailyRunInput | ApprovalSnapshotCreateOrConnectWithoutDailyRunInput[]
+    createMany?: ApprovalSnapshotCreateManyDailyRunInputEnvelope
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+  }
+
   export type RunStageUncheckedCreateNestedManyWithoutDailyRunInput = {
     create?: XOR<RunStageCreateWithoutDailyRunInput, RunStageUncheckedCreateWithoutDailyRunInput> | RunStageCreateWithoutDailyRunInput[] | RunStageUncheckedCreateWithoutDailyRunInput[]
     connectOrCreate?: RunStageCreateOrConnectWithoutDailyRunInput | RunStageCreateOrConnectWithoutDailyRunInput[]
     createMany?: RunStageCreateManyDailyRunInputEnvelope
     connect?: RunStageWhereUniqueInput | RunStageWhereUniqueInput[]
+  }
+
+  export type ApprovalSnapshotUncheckedCreateNestedManyWithoutDailyRunInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutDailyRunInput, ApprovalSnapshotUncheckedCreateWithoutDailyRunInput> | ApprovalSnapshotCreateWithoutDailyRunInput[] | ApprovalSnapshotUncheckedCreateWithoutDailyRunInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutDailyRunInput | ApprovalSnapshotCreateOrConnectWithoutDailyRunInput[]
+    createMany?: ApprovalSnapshotCreateManyDailyRunInputEnvelope
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
   }
 
   export type EnumDailyRunStatusFieldUpdateOperationsInput = {
@@ -107210,6 +108627,20 @@ export namespace Prisma {
     deleteMany?: RunStageScalarWhereInput | RunStageScalarWhereInput[]
   }
 
+  export type ApprovalSnapshotUpdateManyWithoutDailyRunNestedInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutDailyRunInput, ApprovalSnapshotUncheckedCreateWithoutDailyRunInput> | ApprovalSnapshotCreateWithoutDailyRunInput[] | ApprovalSnapshotUncheckedCreateWithoutDailyRunInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutDailyRunInput | ApprovalSnapshotCreateOrConnectWithoutDailyRunInput[]
+    upsert?: ApprovalSnapshotUpsertWithWhereUniqueWithoutDailyRunInput | ApprovalSnapshotUpsertWithWhereUniqueWithoutDailyRunInput[]
+    createMany?: ApprovalSnapshotCreateManyDailyRunInputEnvelope
+    set?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    disconnect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    delete?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    update?: ApprovalSnapshotUpdateWithWhereUniqueWithoutDailyRunInput | ApprovalSnapshotUpdateWithWhereUniqueWithoutDailyRunInput[]
+    updateMany?: ApprovalSnapshotUpdateManyWithWhereWithoutDailyRunInput | ApprovalSnapshotUpdateManyWithWhereWithoutDailyRunInput[]
+    deleteMany?: ApprovalSnapshotScalarWhereInput | ApprovalSnapshotScalarWhereInput[]
+  }
+
   export type RunStageUncheckedUpdateManyWithoutDailyRunNestedInput = {
     create?: XOR<RunStageCreateWithoutDailyRunInput, RunStageUncheckedCreateWithoutDailyRunInput> | RunStageCreateWithoutDailyRunInput[] | RunStageUncheckedCreateWithoutDailyRunInput[]
     connectOrCreate?: RunStageCreateOrConnectWithoutDailyRunInput | RunStageCreateOrConnectWithoutDailyRunInput[]
@@ -107222,6 +108653,20 @@ export namespace Prisma {
     update?: RunStageUpdateWithWhereUniqueWithoutDailyRunInput | RunStageUpdateWithWhereUniqueWithoutDailyRunInput[]
     updateMany?: RunStageUpdateManyWithWhereWithoutDailyRunInput | RunStageUpdateManyWithWhereWithoutDailyRunInput[]
     deleteMany?: RunStageScalarWhereInput | RunStageScalarWhereInput[]
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateManyWithoutDailyRunNestedInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutDailyRunInput, ApprovalSnapshotUncheckedCreateWithoutDailyRunInput> | ApprovalSnapshotCreateWithoutDailyRunInput[] | ApprovalSnapshotUncheckedCreateWithoutDailyRunInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutDailyRunInput | ApprovalSnapshotCreateOrConnectWithoutDailyRunInput[]
+    upsert?: ApprovalSnapshotUpsertWithWhereUniqueWithoutDailyRunInput | ApprovalSnapshotUpsertWithWhereUniqueWithoutDailyRunInput[]
+    createMany?: ApprovalSnapshotCreateManyDailyRunInputEnvelope
+    set?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    disconnect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    delete?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    update?: ApprovalSnapshotUpdateWithWhereUniqueWithoutDailyRunInput | ApprovalSnapshotUpdateWithWhereUniqueWithoutDailyRunInput[]
+    updateMany?: ApprovalSnapshotUpdateManyWithWhereWithoutDailyRunInput | ApprovalSnapshotUpdateManyWithWhereWithoutDailyRunInput[]
+    deleteMany?: ApprovalSnapshotScalarWhereInput | ApprovalSnapshotScalarWhereInput[]
   }
 
   export type WorkspaceCreateNestedOneWithoutRunStagesInput = {
@@ -107258,6 +108703,34 @@ export namespace Prisma {
     upsert?: DailyRunUpsertWithoutStagesInput
     connect?: DailyRunWhereUniqueInput
     update?: XOR<XOR<DailyRunUpdateToOneWithWhereWithoutStagesInput, DailyRunUpdateWithoutStagesInput>, DailyRunUncheckedUpdateWithoutStagesInput>
+  }
+
+  export type WorkspaceCreateNestedOneWithoutApprovalSnapshotsInput = {
+    create?: XOR<WorkspaceCreateWithoutApprovalSnapshotsInput, WorkspaceUncheckedCreateWithoutApprovalSnapshotsInput>
+    connectOrCreate?: WorkspaceCreateOrConnectWithoutApprovalSnapshotsInput
+    connect?: WorkspaceWhereUniqueInput
+  }
+
+  export type DailyRunCreateNestedOneWithoutSnapshotsInput = {
+    create?: XOR<DailyRunCreateWithoutSnapshotsInput, DailyRunUncheckedCreateWithoutSnapshotsInput>
+    connectOrCreate?: DailyRunCreateOrConnectWithoutSnapshotsInput
+    connect?: DailyRunWhereUniqueInput
+  }
+
+  export type WorkspaceUpdateOneRequiredWithoutApprovalSnapshotsNestedInput = {
+    create?: XOR<WorkspaceCreateWithoutApprovalSnapshotsInput, WorkspaceUncheckedCreateWithoutApprovalSnapshotsInput>
+    connectOrCreate?: WorkspaceCreateOrConnectWithoutApprovalSnapshotsInput
+    upsert?: WorkspaceUpsertWithoutApprovalSnapshotsInput
+    connect?: WorkspaceWhereUniqueInput
+    update?: XOR<XOR<WorkspaceUpdateToOneWithWhereWithoutApprovalSnapshotsInput, WorkspaceUpdateWithoutApprovalSnapshotsInput>, WorkspaceUncheckedUpdateWithoutApprovalSnapshotsInput>
+  }
+
+  export type DailyRunUpdateOneRequiredWithoutSnapshotsNestedInput = {
+    create?: XOR<DailyRunCreateWithoutSnapshotsInput, DailyRunUncheckedCreateWithoutSnapshotsInput>
+    connectOrCreate?: DailyRunCreateOrConnectWithoutSnapshotsInput
+    upsert?: DailyRunUpsertWithoutSnapshotsInput
+    connect?: DailyRunWhereUniqueInput
+    update?: XOR<XOR<DailyRunUpdateToOneWithWhereWithoutSnapshotsInput, DailyRunUpdateWithoutSnapshotsInput>, DailyRunUncheckedUpdateWithoutSnapshotsInput>
   }
 
   export type OnboardingStateCreatecompletedStepsInput = {
@@ -107757,6 +109230,13 @@ export namespace Prisma {
     connect?: CommentSalesSignalWhereUniqueInput | CommentSalesSignalWhereUniqueInput[]
   }
 
+  export type ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutWorkspaceInput, ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput> | ApprovalSnapshotCreateWithoutWorkspaceInput[] | ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput | ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput[]
+    createMany?: ApprovalSnapshotCreateManyWorkspaceInputEnvelope
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+  }
+
   export type WorkspaceMembershipUncheckedCreateNestedManyWithoutWorkspaceInput = {
     create?: XOR<WorkspaceMembershipCreateWithoutWorkspaceInput, WorkspaceMembershipUncheckedCreateWithoutWorkspaceInput> | WorkspaceMembershipCreateWithoutWorkspaceInput[] | WorkspaceMembershipUncheckedCreateWithoutWorkspaceInput[]
     connectOrCreate?: WorkspaceMembershipCreateOrConnectWithoutWorkspaceInput | WorkspaceMembershipCreateOrConnectWithoutWorkspaceInput[]
@@ -108211,6 +109691,13 @@ export namespace Prisma {
     connectOrCreate?: CommentSalesSignalCreateOrConnectWithoutWorkspaceInput | CommentSalesSignalCreateOrConnectWithoutWorkspaceInput[]
     createMany?: CommentSalesSignalCreateManyWorkspaceInputEnvelope
     connect?: CommentSalesSignalWhereUniqueInput | CommentSalesSignalWhereUniqueInput[]
+  }
+
+  export type ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutWorkspaceInput, ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput> | ApprovalSnapshotCreateWithoutWorkspaceInput[] | ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput | ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput[]
+    createMany?: ApprovalSnapshotCreateManyWorkspaceInputEnvelope
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
   }
 
   export type WorkspaceMembershipUpdateManyWithoutWorkspaceNestedInput = {
@@ -109113,6 +110600,20 @@ export namespace Prisma {
     deleteMany?: CommentSalesSignalScalarWhereInput | CommentSalesSignalScalarWhereInput[]
   }
 
+  export type ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutWorkspaceInput, ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput> | ApprovalSnapshotCreateWithoutWorkspaceInput[] | ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput | ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput[]
+    upsert?: ApprovalSnapshotUpsertWithWhereUniqueWithoutWorkspaceInput | ApprovalSnapshotUpsertWithWhereUniqueWithoutWorkspaceInput[]
+    createMany?: ApprovalSnapshotCreateManyWorkspaceInputEnvelope
+    set?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    disconnect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    delete?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    update?: ApprovalSnapshotUpdateWithWhereUniqueWithoutWorkspaceInput | ApprovalSnapshotUpdateWithWhereUniqueWithoutWorkspaceInput[]
+    updateMany?: ApprovalSnapshotUpdateManyWithWhereWithoutWorkspaceInput | ApprovalSnapshotUpdateManyWithWhereWithoutWorkspaceInput[]
+    deleteMany?: ApprovalSnapshotScalarWhereInput | ApprovalSnapshotScalarWhereInput[]
+  }
+
   export type WorkspaceMembershipUncheckedUpdateManyWithoutWorkspaceNestedInput = {
     create?: XOR<WorkspaceMembershipCreateWithoutWorkspaceInput, WorkspaceMembershipUncheckedCreateWithoutWorkspaceInput> | WorkspaceMembershipCreateWithoutWorkspaceInput[] | WorkspaceMembershipUncheckedCreateWithoutWorkspaceInput[]
     connectOrCreate?: WorkspaceMembershipCreateOrConnectWithoutWorkspaceInput | WorkspaceMembershipCreateOrConnectWithoutWorkspaceInput[]
@@ -110011,6 +111512,20 @@ export namespace Prisma {
     update?: CommentSalesSignalUpdateWithWhereUniqueWithoutWorkspaceInput | CommentSalesSignalUpdateWithWhereUniqueWithoutWorkspaceInput[]
     updateMany?: CommentSalesSignalUpdateManyWithWhereWithoutWorkspaceInput | CommentSalesSignalUpdateManyWithWhereWithoutWorkspaceInput[]
     deleteMany?: CommentSalesSignalScalarWhereInput | CommentSalesSignalScalarWhereInput[]
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput = {
+    create?: XOR<ApprovalSnapshotCreateWithoutWorkspaceInput, ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput> | ApprovalSnapshotCreateWithoutWorkspaceInput[] | ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput[]
+    connectOrCreate?: ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput | ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput[]
+    upsert?: ApprovalSnapshotUpsertWithWhereUniqueWithoutWorkspaceInput | ApprovalSnapshotUpsertWithWhereUniqueWithoutWorkspaceInput[]
+    createMany?: ApprovalSnapshotCreateManyWorkspaceInputEnvelope
+    set?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    disconnect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    delete?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    connect?: ApprovalSnapshotWhereUniqueInput | ApprovalSnapshotWhereUniqueInput[]
+    update?: ApprovalSnapshotUpdateWithWhereUniqueWithoutWorkspaceInput | ApprovalSnapshotUpdateWithWhereUniqueWithoutWorkspaceInput[]
+    updateMany?: ApprovalSnapshotUpdateManyWithWhereWithoutWorkspaceInput | ApprovalSnapshotUpdateManyWithWhereWithoutWorkspaceInput[]
+    deleteMany?: ApprovalSnapshotScalarWhereInput | ApprovalSnapshotScalarWhereInput[]
   }
 
   export type UserCreateNestedOneWithoutMembershipsInput = {
@@ -114109,6 +115624,28 @@ export namespace Prisma {
     _min?: NestedEnumRunStageStatusFilter<$PrismaModel>
     _max?: NestedEnumRunStageStatusFilter<$PrismaModel>
   }
+  export type NestedJsonFilter<$PrismaModel = never> = 
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedEnumLeadImportStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.LeadImportStatus | EnumLeadImportStatusFieldRefInput<$PrismaModel>
@@ -114414,28 +115951,6 @@ export namespace Prisma {
     _count?: NestedIntFilter<$PrismaModel>
     _min?: NestedEnumOpportunityStatusFilter<$PrismaModel>
     _max?: NestedEnumOpportunityStatusFilter<$PrismaModel>
-  }
-  export type NestedJsonFilter<$PrismaModel = never> = 
-    | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedEnumGapTypeFilter<$PrismaModel = never> = {
@@ -115693,6 +117208,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutBusinessProfileInput = {
@@ -115768,6 +117284,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutBusinessProfileInput = {
@@ -115859,6 +117376,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutBusinessProfileInput = {
@@ -115934,6 +117452,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutBrandProfileInput = {
@@ -116009,6 +117528,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutBrandProfileInput = {
@@ -116084,6 +117604,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutBrandProfileInput = {
@@ -116175,6 +117696,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutBrandProfileInput = {
@@ -116250,6 +117772,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutStrategyProfileInput = {
@@ -116325,6 +117848,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutStrategyProfileInput = {
@@ -116400,6 +117924,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutStrategyProfileInput = {
@@ -116491,6 +118016,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutStrategyProfileInput = {
@@ -116566,6 +118092,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutAudienceSegmentsInput = {
@@ -116641,6 +118168,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutAudienceSegmentsInput = {
@@ -116716,6 +118244,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutAudienceSegmentsInput = {
@@ -116977,6 +118506,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutAudienceSegmentsInput = {
@@ -117052,6 +118582,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ProblemUpsertWithWhereUniqueWithoutAudienceSegmentInput = {
@@ -117253,6 +118784,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutProblemsInput = {
@@ -117328,6 +118860,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutProblemsInput = {
@@ -117506,6 +119039,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutProblemsInput = {
@@ -117581,6 +119115,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type AudienceSegmentUpsertWithoutLinkedProblemsInput = {
@@ -117744,6 +119279,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutProductsInput = {
@@ -117819,6 +119355,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutProductsInput = {
@@ -117943,6 +119480,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutProductsInput = {
@@ -118018,6 +119556,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ProblemUpsertWithoutProductsInput = {
@@ -118132,6 +119671,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentDNAsInput = {
@@ -118207,6 +119747,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentDNAsInput = {
@@ -118622,6 +120163,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentDNAsInput = {
@@ -118697,6 +120239,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentIdeaUpsertWithoutContentDNAInput = {
@@ -119066,6 +120609,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentStageHistoriesInput = {
@@ -119141,6 +120685,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentStageHistoriesInput = {
@@ -119327,6 +120872,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentStageHistoriesInput = {
@@ -119402,6 +120948,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentDNAUpsertWithoutStageHistoriesInput = {
@@ -119578,6 +121125,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutCommentsInput = {
@@ -119653,6 +121201,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutCommentsInput = {
@@ -119817,6 +121366,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutCommentsInput = {
@@ -119892,6 +121442,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentVersionUpsertWithoutCommentsInput = {
@@ -120042,6 +121593,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutAudienceSignalsInput = {
@@ -120117,6 +121669,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutAudienceSignalsInput = {
@@ -120255,6 +121808,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutAudienceSignalsInput = {
@@ -120330,6 +121884,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type AudienceSegmentUpsertWithoutAudienceSignalsInput = {
@@ -120458,6 +122013,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutExperimentsInput = {
@@ -120533,6 +122089,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutExperimentsInput = {
@@ -120814,6 +122371,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutExperimentsInput = {
@@ -120889,6 +122447,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentDNAUpsertWithoutExperimentsAsControlInput = {
@@ -121166,6 +122725,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutIntelligenceReportsInput = {
@@ -121241,6 +122801,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutIntelligenceReportsInput = {
@@ -121332,6 +122893,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutIntelligenceReportsInput = {
@@ -121407,6 +122969,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutContentDiversitySnapshotsInput = {
@@ -121482,6 +123045,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentDiversitySnapshotsInput = {
@@ -121557,6 +123121,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentDiversitySnapshotsInput = {
@@ -121648,6 +123213,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentDiversitySnapshotsInput = {
@@ -121723,6 +123289,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutWorkspaceSettingsInput = {
@@ -121798,6 +123365,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutWorkspaceSettingsInput = {
@@ -121873,6 +123441,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutWorkspaceSettingsInput = {
@@ -121964,6 +123533,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutWorkspaceSettingsInput = {
@@ -122039,6 +123609,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutAutonomyPolicyInput = {
@@ -122114,6 +123685,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutAutonomyPolicyInput = {
@@ -122189,6 +123761,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutAutonomyPolicyInput = {
@@ -122280,6 +123853,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutAutonomyPolicyInput = {
@@ -122355,6 +123929,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutFeedSourcesInput = {
@@ -122430,6 +124005,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutFeedSourcesInput = {
@@ -122505,6 +124081,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutFeedSourcesInput = {
@@ -122596,6 +124173,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutFeedSourcesInput = {
@@ -122671,6 +124249,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutDailyRunsInput = {
@@ -122746,6 +124325,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutDailyRunsInput = {
@@ -122821,6 +124401,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutDailyRunsInput = {
@@ -122865,6 +124446,36 @@ export namespace Prisma {
 
   export type RunStageCreateManyDailyRunInputEnvelope = {
     data: RunStageCreateManyDailyRunInput | RunStageCreateManyDailyRunInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ApprovalSnapshotCreateWithoutDailyRunInput = {
+    id?: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    workspace: WorkspaceCreateNestedOneWithoutApprovalSnapshotsInput
+  }
+
+  export type ApprovalSnapshotUncheckedCreateWithoutDailyRunInput = {
+    id?: string
+    workspaceId: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type ApprovalSnapshotCreateOrConnectWithoutDailyRunInput = {
+    where: ApprovalSnapshotWhereUniqueInput
+    create: XOR<ApprovalSnapshotCreateWithoutDailyRunInput, ApprovalSnapshotUncheckedCreateWithoutDailyRunInput>
+  }
+
+  export type ApprovalSnapshotCreateManyDailyRunInputEnvelope = {
+    data: ApprovalSnapshotCreateManyDailyRunInput | ApprovalSnapshotCreateManyDailyRunInput[]
     skipDuplicates?: boolean
   }
 
@@ -122952,6 +124563,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutDailyRunsInput = {
@@ -123027,6 +124639,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type RunStageUpsertWithWhereUniqueWithoutDailyRunInput = {
@@ -123062,6 +124675,36 @@ export namespace Prisma {
     attempt?: IntFilter<"RunStage"> | number
     createdAt?: DateTimeFilter<"RunStage"> | Date | string
     updatedAt?: DateTimeFilter<"RunStage"> | Date | string
+  }
+
+  export type ApprovalSnapshotUpsertWithWhereUniqueWithoutDailyRunInput = {
+    where: ApprovalSnapshotWhereUniqueInput
+    update: XOR<ApprovalSnapshotUpdateWithoutDailyRunInput, ApprovalSnapshotUncheckedUpdateWithoutDailyRunInput>
+    create: XOR<ApprovalSnapshotCreateWithoutDailyRunInput, ApprovalSnapshotUncheckedCreateWithoutDailyRunInput>
+  }
+
+  export type ApprovalSnapshotUpdateWithWhereUniqueWithoutDailyRunInput = {
+    where: ApprovalSnapshotWhereUniqueInput
+    data: XOR<ApprovalSnapshotUpdateWithoutDailyRunInput, ApprovalSnapshotUncheckedUpdateWithoutDailyRunInput>
+  }
+
+  export type ApprovalSnapshotUpdateManyWithWhereWithoutDailyRunInput = {
+    where: ApprovalSnapshotScalarWhereInput
+    data: XOR<ApprovalSnapshotUpdateManyMutationInput, ApprovalSnapshotUncheckedUpdateManyWithoutDailyRunInput>
+  }
+
+  export type ApprovalSnapshotScalarWhereInput = {
+    AND?: ApprovalSnapshotScalarWhereInput | ApprovalSnapshotScalarWhereInput[]
+    OR?: ApprovalSnapshotScalarWhereInput[]
+    NOT?: ApprovalSnapshotScalarWhereInput | ApprovalSnapshotScalarWhereInput[]
+    id?: StringFilter<"ApprovalSnapshot"> | string
+    workspaceId?: StringFilter<"ApprovalSnapshot"> | string
+    dailyRunId?: StringFilter<"ApprovalSnapshot"> | string
+    runDate?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    capturedAt?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
+    items?: JsonFilter<"ApprovalSnapshot">
+    counts?: JsonNullableFilter<"ApprovalSnapshot">
+    createdAt?: DateTimeFilter<"ApprovalSnapshot"> | Date | string
   }
 
   export type WorkspaceCreateWithoutRunStagesInput = {
@@ -123137,6 +124780,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutRunStagesInput = {
@@ -123212,6 +124856,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutRunStagesInput = {
@@ -123230,6 +124875,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     workspace: WorkspaceCreateNestedOneWithoutDailyRunsInput
+    snapshots?: ApprovalSnapshotCreateNestedManyWithoutDailyRunInput
   }
 
   export type DailyRunUncheckedCreateWithoutStagesInput = {
@@ -123243,6 +124889,7 @@ export namespace Prisma {
     error?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    snapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutDailyRunInput
   }
 
   export type DailyRunCreateOrConnectWithoutStagesInput = {
@@ -123334,6 +124981,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutRunStagesInput = {
@@ -123409,6 +125057,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type DailyRunUpsertWithoutStagesInput = {
@@ -123433,6 +125082,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspace?: WorkspaceUpdateOneRequiredWithoutDailyRunsNestedInput
+    snapshots?: ApprovalSnapshotUpdateManyWithoutDailyRunNestedInput
   }
 
   export type DailyRunUncheckedUpdateWithoutStagesInput = {
@@ -123446,6 +125096,399 @@ export namespace Prisma {
     error?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    snapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutDailyRunNestedInput
+  }
+
+  export type WorkspaceCreateWithoutApprovalSnapshotsInput = {
+    id?: string
+    name: string
+    slug: string
+    description?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    memberships?: WorkspaceMembershipCreateNestedManyWithoutWorkspaceInput
+    profiles?: ProfileCreateNestedManyWithoutWorkspaceInput
+    icps?: ICPCreateNestedManyWithoutWorkspaceInput
+    contentIdeas?: ContentIdeaCreateNestedManyWithoutWorkspaceInput
+    contentDrafts?: ContentDraftCreateNestedManyWithoutWorkspaceInput
+    contentVersions?: ContentVersionCreateNestedManyWithoutWorkspaceInput
+    leads?: LeadCreateNestedManyWithoutWorkspaceInput
+    conversations?: ConversationCreateNestedManyWithoutWorkspaceInput
+    messages?: MessageCreateNestedManyWithoutWorkspaceInput
+    opportunities?: PipelineOpportunityCreateNestedManyWithoutWorkspaceInput
+    analyticsEvents?: AnalyticsEventCreateNestedManyWithoutWorkspaceInput
+    learningSignals?: LearningSignalCreateNestedManyWithoutWorkspaceInput
+    intelligenceSources?: IntelligenceSourceCreateNestedManyWithoutWorkspaceInput
+    sourceDocuments?: SourceDocumentCreateNestedManyWithoutWorkspaceInput
+    sourceClaims?: SourceClaimCreateNestedManyWithoutWorkspaceInput
+    topics?: TopicCreateNestedManyWithoutWorkspaceInput
+    topicMentions?: TopicMentionCreateNestedManyWithoutWorkspaceInput
+    trendSignals?: TrendSignalCreateNestedManyWithoutWorkspaceInput
+    contentOpportunities?: ContentOpportunityCreateNestedManyWithoutWorkspaceInput
+    contentGaps?: ContentGapCreateNestedManyWithoutWorkspaceInput
+    opportunityFeedbacks?: OpportunityFeedbackCreateNestedManyWithoutWorkspaceInput
+    prospectResearch?: ProspectResearchCreateNestedManyWithoutWorkspaceInput
+    prospectSignals?: ProspectSignalCreateNestedManyWithoutWorkspaceInput
+    qualificationResults?: QualificationResultCreateNestedManyWithoutWorkspaceInput
+    prospectBriefs?: ProspectBriefCreateNestedManyWithoutWorkspaceInput
+    outreachStrategies?: OutreachStrategyCreateNestedManyWithoutWorkspaceInput
+    outreachDrafts?: OutreachDraftCreateNestedManyWithoutWorkspaceInput
+    outreachReviews?: OutreachReviewCreateNestedManyWithoutWorkspaceInput
+    preparedActions?: PreparedActionCreateNestedManyWithoutWorkspaceInput
+    conversationClassifications?: ConversationClassificationResultCreateNestedManyWithoutWorkspaceInput
+    followUpRecommendations?: FollowUpRecommendationCreateNestedManyWithoutWorkspaceInput
+    salesContentSignals?: SalesContentSignalCreateNestedManyWithoutWorkspaceInput
+    publishRecords?: PublishRecordCreateNestedManyWithoutWorkspaceInput
+    outcomeMetrics?: OutcomeMetricCreateNestedManyWithoutWorkspaceInput
+    learningProposals?: LearningProposalCreateNestedManyWithoutWorkspaceInput
+    operatorActions?: OperatorActionCreateNestedManyWithoutWorkspaceInput
+    contentPlans?: ContentPlanCreateNestedManyWithoutWorkspaceInput
+    draftClaimBindings?: DraftClaimBindingCreateNestedManyWithoutWorkspaceInput
+    contentGateResults?: ContentQualityGateResultCreateNestedManyWithoutWorkspaceInput
+    contentReviews?: ContentReviewCreateNestedManyWithoutWorkspaceInput
+    voiceProfiles?: VoiceProfileCreateNestedManyWithoutWorkspaceInput
+    voiceReceipts?: VoiceReceiptCreateNestedManyWithoutWorkspaceInput
+    writingSamples?: WritingSampleCreateNestedManyWithoutWorkspaceInput
+    businessProfile?: BusinessProfileCreateNestedOneWithoutWorkspaceInput
+    brandProfile?: BrandProfileCreateNestedOneWithoutWorkspaceInput
+    strategyProfile?: StrategyProfileCreateNestedOneWithoutWorkspaceInput
+    audienceSegments?: AudienceSegmentCreateNestedManyWithoutWorkspaceInput
+    problems?: ProblemCreateNestedManyWithoutWorkspaceInput
+    products?: ProductCreateNestedManyWithoutWorkspaceInput
+    contentDNAs?: ContentDNACreateNestedManyWithoutWorkspaceInput
+    contentStageHistories?: ContentStageHistoryCreateNestedManyWithoutWorkspaceInput
+    comments?: CommentCreateNestedManyWithoutWorkspaceInput
+    audienceSignals?: AudienceSignalCreateNestedManyWithoutWorkspaceInput
+    experiments?: ExperimentCreateNestedManyWithoutWorkspaceInput
+    intelligenceReports?: IntelligenceReportCreateNestedManyWithoutWorkspaceInput
+    contentDiversitySnapshots?: ContentDiversitySnapshotCreateNestedManyWithoutWorkspaceInput
+    workspaceSettings?: WorkspaceSettingsCreateNestedOneWithoutWorkspaceInput
+    autonomyPolicy?: AutonomyPolicyCreateNestedOneWithoutWorkspaceInput
+    feedSources?: FeedSourceCreateNestedManyWithoutWorkspaceInput
+    dailyRuns?: DailyRunCreateNestedManyWithoutWorkspaceInput
+    runStages?: RunStageCreateNestedManyWithoutWorkspaceInput
+    onboardingState?: OnboardingStateCreateNestedOneWithoutWorkspaceInput
+    leadImportBatches?: LeadImportBatchCreateNestedManyWithoutWorkspaceInput
+    attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
+    preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
+    commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+  }
+
+  export type WorkspaceUncheckedCreateWithoutApprovalSnapshotsInput = {
+    id?: string
+    name: string
+    slug: string
+    description?: string | null
+    isActive?: boolean
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    memberships?: WorkspaceMembershipUncheckedCreateNestedManyWithoutWorkspaceInput
+    profiles?: ProfileUncheckedCreateNestedManyWithoutWorkspaceInput
+    icps?: ICPUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentIdeas?: ContentIdeaUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentDrafts?: ContentDraftUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentVersions?: ContentVersionUncheckedCreateNestedManyWithoutWorkspaceInput
+    leads?: LeadUncheckedCreateNestedManyWithoutWorkspaceInput
+    conversations?: ConversationUncheckedCreateNestedManyWithoutWorkspaceInput
+    messages?: MessageUncheckedCreateNestedManyWithoutWorkspaceInput
+    opportunities?: PipelineOpportunityUncheckedCreateNestedManyWithoutWorkspaceInput
+    analyticsEvents?: AnalyticsEventUncheckedCreateNestedManyWithoutWorkspaceInput
+    learningSignals?: LearningSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    intelligenceSources?: IntelligenceSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+    sourceDocuments?: SourceDocumentUncheckedCreateNestedManyWithoutWorkspaceInput
+    sourceClaims?: SourceClaimUncheckedCreateNestedManyWithoutWorkspaceInput
+    topics?: TopicUncheckedCreateNestedManyWithoutWorkspaceInput
+    topicMentions?: TopicMentionUncheckedCreateNestedManyWithoutWorkspaceInput
+    trendSignals?: TrendSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentOpportunities?: ContentOpportunityUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentGaps?: ContentGapUncheckedCreateNestedManyWithoutWorkspaceInput
+    opportunityFeedbacks?: OpportunityFeedbackUncheckedCreateNestedManyWithoutWorkspaceInput
+    prospectResearch?: ProspectResearchUncheckedCreateNestedManyWithoutWorkspaceInput
+    prospectSignals?: ProspectSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    qualificationResults?: QualificationResultUncheckedCreateNestedManyWithoutWorkspaceInput
+    prospectBriefs?: ProspectBriefUncheckedCreateNestedManyWithoutWorkspaceInput
+    outreachStrategies?: OutreachStrategyUncheckedCreateNestedManyWithoutWorkspaceInput
+    outreachDrafts?: OutreachDraftUncheckedCreateNestedManyWithoutWorkspaceInput
+    outreachReviews?: OutreachReviewUncheckedCreateNestedManyWithoutWorkspaceInput
+    preparedActions?: PreparedActionUncheckedCreateNestedManyWithoutWorkspaceInput
+    conversationClassifications?: ConversationClassificationResultUncheckedCreateNestedManyWithoutWorkspaceInput
+    followUpRecommendations?: FollowUpRecommendationUncheckedCreateNestedManyWithoutWorkspaceInput
+    salesContentSignals?: SalesContentSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    publishRecords?: PublishRecordUncheckedCreateNestedManyWithoutWorkspaceInput
+    outcomeMetrics?: OutcomeMetricUncheckedCreateNestedManyWithoutWorkspaceInput
+    learningProposals?: LearningProposalUncheckedCreateNestedManyWithoutWorkspaceInput
+    operatorActions?: OperatorActionUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentPlans?: ContentPlanUncheckedCreateNestedManyWithoutWorkspaceInput
+    draftClaimBindings?: DraftClaimBindingUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentGateResults?: ContentQualityGateResultUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentReviews?: ContentReviewUncheckedCreateNestedManyWithoutWorkspaceInput
+    voiceProfiles?: VoiceProfileUncheckedCreateNestedManyWithoutWorkspaceInput
+    voiceReceipts?: VoiceReceiptUncheckedCreateNestedManyWithoutWorkspaceInput
+    writingSamples?: WritingSampleUncheckedCreateNestedManyWithoutWorkspaceInput
+    businessProfile?: BusinessProfileUncheckedCreateNestedOneWithoutWorkspaceInput
+    brandProfile?: BrandProfileUncheckedCreateNestedOneWithoutWorkspaceInput
+    strategyProfile?: StrategyProfileUncheckedCreateNestedOneWithoutWorkspaceInput
+    audienceSegments?: AudienceSegmentUncheckedCreateNestedManyWithoutWorkspaceInput
+    problems?: ProblemUncheckedCreateNestedManyWithoutWorkspaceInput
+    products?: ProductUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentDNAs?: ContentDNAUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentStageHistories?: ContentStageHistoryUncheckedCreateNestedManyWithoutWorkspaceInput
+    comments?: CommentUncheckedCreateNestedManyWithoutWorkspaceInput
+    audienceSignals?: AudienceSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    experiments?: ExperimentUncheckedCreateNestedManyWithoutWorkspaceInput
+    intelligenceReports?: IntelligenceReportUncheckedCreateNestedManyWithoutWorkspaceInput
+    contentDiversitySnapshots?: ContentDiversitySnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
+    workspaceSettings?: WorkspaceSettingsUncheckedCreateNestedOneWithoutWorkspaceInput
+    autonomyPolicy?: AutonomyPolicyUncheckedCreateNestedOneWithoutWorkspaceInput
+    feedSources?: FeedSourceUncheckedCreateNestedManyWithoutWorkspaceInput
+    dailyRuns?: DailyRunUncheckedCreateNestedManyWithoutWorkspaceInput
+    runStages?: RunStageUncheckedCreateNestedManyWithoutWorkspaceInput
+    onboardingState?: OnboardingStateUncheckedCreateNestedOneWithoutWorkspaceInput
+    leadImportBatches?: LeadImportBatchUncheckedCreateNestedManyWithoutWorkspaceInput
+    attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
+    preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
+    commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+  }
+
+  export type WorkspaceCreateOrConnectWithoutApprovalSnapshotsInput = {
+    where: WorkspaceWhereUniqueInput
+    create: XOR<WorkspaceCreateWithoutApprovalSnapshotsInput, WorkspaceUncheckedCreateWithoutApprovalSnapshotsInput>
+  }
+
+  export type DailyRunCreateWithoutSnapshotsInput = {
+    id?: string
+    runDate: Date | string
+    status?: $Enums.DailyRunStatus
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    summary?: NullableJsonNullValueInput | InputJsonValue
+    error?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    workspace: WorkspaceCreateNestedOneWithoutDailyRunsInput
+    stages?: RunStageCreateNestedManyWithoutDailyRunInput
+  }
+
+  export type DailyRunUncheckedCreateWithoutSnapshotsInput = {
+    id?: string
+    workspaceId: string
+    runDate: Date | string
+    status?: $Enums.DailyRunStatus
+    startedAt?: Date | string
+    finishedAt?: Date | string | null
+    summary?: NullableJsonNullValueInput | InputJsonValue
+    error?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stages?: RunStageUncheckedCreateNestedManyWithoutDailyRunInput
+  }
+
+  export type DailyRunCreateOrConnectWithoutSnapshotsInput = {
+    where: DailyRunWhereUniqueInput
+    create: XOR<DailyRunCreateWithoutSnapshotsInput, DailyRunUncheckedCreateWithoutSnapshotsInput>
+  }
+
+  export type WorkspaceUpsertWithoutApprovalSnapshotsInput = {
+    update: XOR<WorkspaceUpdateWithoutApprovalSnapshotsInput, WorkspaceUncheckedUpdateWithoutApprovalSnapshotsInput>
+    create: XOR<WorkspaceCreateWithoutApprovalSnapshotsInput, WorkspaceUncheckedCreateWithoutApprovalSnapshotsInput>
+    where?: WorkspaceWhereInput
+  }
+
+  export type WorkspaceUpdateToOneWithWhereWithoutApprovalSnapshotsInput = {
+    where?: WorkspaceWhereInput
+    data: XOR<WorkspaceUpdateWithoutApprovalSnapshotsInput, WorkspaceUncheckedUpdateWithoutApprovalSnapshotsInput>
+  }
+
+  export type WorkspaceUpdateWithoutApprovalSnapshotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    memberships?: WorkspaceMembershipUpdateManyWithoutWorkspaceNestedInput
+    profiles?: ProfileUpdateManyWithoutWorkspaceNestedInput
+    icps?: ICPUpdateManyWithoutWorkspaceNestedInput
+    contentIdeas?: ContentIdeaUpdateManyWithoutWorkspaceNestedInput
+    contentDrafts?: ContentDraftUpdateManyWithoutWorkspaceNestedInput
+    contentVersions?: ContentVersionUpdateManyWithoutWorkspaceNestedInput
+    leads?: LeadUpdateManyWithoutWorkspaceNestedInput
+    conversations?: ConversationUpdateManyWithoutWorkspaceNestedInput
+    messages?: MessageUpdateManyWithoutWorkspaceNestedInput
+    opportunities?: PipelineOpportunityUpdateManyWithoutWorkspaceNestedInput
+    analyticsEvents?: AnalyticsEventUpdateManyWithoutWorkspaceNestedInput
+    learningSignals?: LearningSignalUpdateManyWithoutWorkspaceNestedInput
+    intelligenceSources?: IntelligenceSourceUpdateManyWithoutWorkspaceNestedInput
+    sourceDocuments?: SourceDocumentUpdateManyWithoutWorkspaceNestedInput
+    sourceClaims?: SourceClaimUpdateManyWithoutWorkspaceNestedInput
+    topics?: TopicUpdateManyWithoutWorkspaceNestedInput
+    topicMentions?: TopicMentionUpdateManyWithoutWorkspaceNestedInput
+    trendSignals?: TrendSignalUpdateManyWithoutWorkspaceNestedInput
+    contentOpportunities?: ContentOpportunityUpdateManyWithoutWorkspaceNestedInput
+    contentGaps?: ContentGapUpdateManyWithoutWorkspaceNestedInput
+    opportunityFeedbacks?: OpportunityFeedbackUpdateManyWithoutWorkspaceNestedInput
+    prospectResearch?: ProspectResearchUpdateManyWithoutWorkspaceNestedInput
+    prospectSignals?: ProspectSignalUpdateManyWithoutWorkspaceNestedInput
+    qualificationResults?: QualificationResultUpdateManyWithoutWorkspaceNestedInput
+    prospectBriefs?: ProspectBriefUpdateManyWithoutWorkspaceNestedInput
+    outreachStrategies?: OutreachStrategyUpdateManyWithoutWorkspaceNestedInput
+    outreachDrafts?: OutreachDraftUpdateManyWithoutWorkspaceNestedInput
+    outreachReviews?: OutreachReviewUpdateManyWithoutWorkspaceNestedInput
+    preparedActions?: PreparedActionUpdateManyWithoutWorkspaceNestedInput
+    conversationClassifications?: ConversationClassificationResultUpdateManyWithoutWorkspaceNestedInput
+    followUpRecommendations?: FollowUpRecommendationUpdateManyWithoutWorkspaceNestedInput
+    salesContentSignals?: SalesContentSignalUpdateManyWithoutWorkspaceNestedInput
+    publishRecords?: PublishRecordUpdateManyWithoutWorkspaceNestedInput
+    outcomeMetrics?: OutcomeMetricUpdateManyWithoutWorkspaceNestedInput
+    learningProposals?: LearningProposalUpdateManyWithoutWorkspaceNestedInput
+    operatorActions?: OperatorActionUpdateManyWithoutWorkspaceNestedInput
+    contentPlans?: ContentPlanUpdateManyWithoutWorkspaceNestedInput
+    draftClaimBindings?: DraftClaimBindingUpdateManyWithoutWorkspaceNestedInput
+    contentGateResults?: ContentQualityGateResultUpdateManyWithoutWorkspaceNestedInput
+    contentReviews?: ContentReviewUpdateManyWithoutWorkspaceNestedInput
+    voiceProfiles?: VoiceProfileUpdateManyWithoutWorkspaceNestedInput
+    voiceReceipts?: VoiceReceiptUpdateManyWithoutWorkspaceNestedInput
+    writingSamples?: WritingSampleUpdateManyWithoutWorkspaceNestedInput
+    businessProfile?: BusinessProfileUpdateOneWithoutWorkspaceNestedInput
+    brandProfile?: BrandProfileUpdateOneWithoutWorkspaceNestedInput
+    strategyProfile?: StrategyProfileUpdateOneWithoutWorkspaceNestedInput
+    audienceSegments?: AudienceSegmentUpdateManyWithoutWorkspaceNestedInput
+    problems?: ProblemUpdateManyWithoutWorkspaceNestedInput
+    products?: ProductUpdateManyWithoutWorkspaceNestedInput
+    contentDNAs?: ContentDNAUpdateManyWithoutWorkspaceNestedInput
+    contentStageHistories?: ContentStageHistoryUpdateManyWithoutWorkspaceNestedInput
+    comments?: CommentUpdateManyWithoutWorkspaceNestedInput
+    audienceSignals?: AudienceSignalUpdateManyWithoutWorkspaceNestedInput
+    experiments?: ExperimentUpdateManyWithoutWorkspaceNestedInput
+    intelligenceReports?: IntelligenceReportUpdateManyWithoutWorkspaceNestedInput
+    contentDiversitySnapshots?: ContentDiversitySnapshotUpdateManyWithoutWorkspaceNestedInput
+    workspaceSettings?: WorkspaceSettingsUpdateOneWithoutWorkspaceNestedInput
+    autonomyPolicy?: AutonomyPolicyUpdateOneWithoutWorkspaceNestedInput
+    feedSources?: FeedSourceUpdateManyWithoutWorkspaceNestedInput
+    dailyRuns?: DailyRunUpdateManyWithoutWorkspaceNestedInput
+    runStages?: RunStageUpdateManyWithoutWorkspaceNestedInput
+    onboardingState?: OnboardingStateUpdateOneWithoutWorkspaceNestedInput
+    leadImportBatches?: LeadImportBatchUpdateManyWithoutWorkspaceNestedInput
+    attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
+    preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
+    commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+  }
+
+  export type WorkspaceUncheckedUpdateWithoutApprovalSnapshotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    slug?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    memberships?: WorkspaceMembershipUncheckedUpdateManyWithoutWorkspaceNestedInput
+    profiles?: ProfileUncheckedUpdateManyWithoutWorkspaceNestedInput
+    icps?: ICPUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentIdeas?: ContentIdeaUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentDrafts?: ContentDraftUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentVersions?: ContentVersionUncheckedUpdateManyWithoutWorkspaceNestedInput
+    leads?: LeadUncheckedUpdateManyWithoutWorkspaceNestedInput
+    conversations?: ConversationUncheckedUpdateManyWithoutWorkspaceNestedInput
+    messages?: MessageUncheckedUpdateManyWithoutWorkspaceNestedInput
+    opportunities?: PipelineOpportunityUncheckedUpdateManyWithoutWorkspaceNestedInput
+    analyticsEvents?: AnalyticsEventUncheckedUpdateManyWithoutWorkspaceNestedInput
+    learningSignals?: LearningSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    intelligenceSources?: IntelligenceSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+    sourceDocuments?: SourceDocumentUncheckedUpdateManyWithoutWorkspaceNestedInput
+    sourceClaims?: SourceClaimUncheckedUpdateManyWithoutWorkspaceNestedInput
+    topics?: TopicUncheckedUpdateManyWithoutWorkspaceNestedInput
+    topicMentions?: TopicMentionUncheckedUpdateManyWithoutWorkspaceNestedInput
+    trendSignals?: TrendSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentOpportunities?: ContentOpportunityUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentGaps?: ContentGapUncheckedUpdateManyWithoutWorkspaceNestedInput
+    opportunityFeedbacks?: OpportunityFeedbackUncheckedUpdateManyWithoutWorkspaceNestedInput
+    prospectResearch?: ProspectResearchUncheckedUpdateManyWithoutWorkspaceNestedInput
+    prospectSignals?: ProspectSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    qualificationResults?: QualificationResultUncheckedUpdateManyWithoutWorkspaceNestedInput
+    prospectBriefs?: ProspectBriefUncheckedUpdateManyWithoutWorkspaceNestedInput
+    outreachStrategies?: OutreachStrategyUncheckedUpdateManyWithoutWorkspaceNestedInput
+    outreachDrafts?: OutreachDraftUncheckedUpdateManyWithoutWorkspaceNestedInput
+    outreachReviews?: OutreachReviewUncheckedUpdateManyWithoutWorkspaceNestedInput
+    preparedActions?: PreparedActionUncheckedUpdateManyWithoutWorkspaceNestedInput
+    conversationClassifications?: ConversationClassificationResultUncheckedUpdateManyWithoutWorkspaceNestedInput
+    followUpRecommendations?: FollowUpRecommendationUncheckedUpdateManyWithoutWorkspaceNestedInput
+    salesContentSignals?: SalesContentSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    publishRecords?: PublishRecordUncheckedUpdateManyWithoutWorkspaceNestedInput
+    outcomeMetrics?: OutcomeMetricUncheckedUpdateManyWithoutWorkspaceNestedInput
+    learningProposals?: LearningProposalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    operatorActions?: OperatorActionUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentPlans?: ContentPlanUncheckedUpdateManyWithoutWorkspaceNestedInput
+    draftClaimBindings?: DraftClaimBindingUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentGateResults?: ContentQualityGateResultUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentReviews?: ContentReviewUncheckedUpdateManyWithoutWorkspaceNestedInput
+    voiceProfiles?: VoiceProfileUncheckedUpdateManyWithoutWorkspaceNestedInput
+    voiceReceipts?: VoiceReceiptUncheckedUpdateManyWithoutWorkspaceNestedInput
+    writingSamples?: WritingSampleUncheckedUpdateManyWithoutWorkspaceNestedInput
+    businessProfile?: BusinessProfileUncheckedUpdateOneWithoutWorkspaceNestedInput
+    brandProfile?: BrandProfileUncheckedUpdateOneWithoutWorkspaceNestedInput
+    strategyProfile?: StrategyProfileUncheckedUpdateOneWithoutWorkspaceNestedInput
+    audienceSegments?: AudienceSegmentUncheckedUpdateManyWithoutWorkspaceNestedInput
+    problems?: ProblemUncheckedUpdateManyWithoutWorkspaceNestedInput
+    products?: ProductUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentDNAs?: ContentDNAUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentStageHistories?: ContentStageHistoryUncheckedUpdateManyWithoutWorkspaceNestedInput
+    comments?: CommentUncheckedUpdateManyWithoutWorkspaceNestedInput
+    audienceSignals?: AudienceSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    experiments?: ExperimentUncheckedUpdateManyWithoutWorkspaceNestedInput
+    intelligenceReports?: IntelligenceReportUncheckedUpdateManyWithoutWorkspaceNestedInput
+    contentDiversitySnapshots?: ContentDiversitySnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
+    workspaceSettings?: WorkspaceSettingsUncheckedUpdateOneWithoutWorkspaceNestedInput
+    autonomyPolicy?: AutonomyPolicyUncheckedUpdateOneWithoutWorkspaceNestedInput
+    feedSources?: FeedSourceUncheckedUpdateManyWithoutWorkspaceNestedInput
+    dailyRuns?: DailyRunUncheckedUpdateManyWithoutWorkspaceNestedInput
+    runStages?: RunStageUncheckedUpdateManyWithoutWorkspaceNestedInput
+    onboardingState?: OnboardingStateUncheckedUpdateOneWithoutWorkspaceNestedInput
+    leadImportBatches?: LeadImportBatchUncheckedUpdateManyWithoutWorkspaceNestedInput
+    attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
+    preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+    commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+  }
+
+  export type DailyRunUpsertWithoutSnapshotsInput = {
+    update: XOR<DailyRunUpdateWithoutSnapshotsInput, DailyRunUncheckedUpdateWithoutSnapshotsInput>
+    create: XOR<DailyRunCreateWithoutSnapshotsInput, DailyRunUncheckedCreateWithoutSnapshotsInput>
+    where?: DailyRunWhereInput
+  }
+
+  export type DailyRunUpdateToOneWithWhereWithoutSnapshotsInput = {
+    where?: DailyRunWhereInput
+    data: XOR<DailyRunUpdateWithoutSnapshotsInput, DailyRunUncheckedUpdateWithoutSnapshotsInput>
+  }
+
+  export type DailyRunUpdateWithoutSnapshotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumDailyRunStatusFieldUpdateOperationsInput | $Enums.DailyRunStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    summary?: NullableJsonNullValueInput | InputJsonValue
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workspace?: WorkspaceUpdateOneRequiredWithoutDailyRunsNestedInput
+    stages?: RunStageUpdateManyWithoutDailyRunNestedInput
+  }
+
+  export type DailyRunUncheckedUpdateWithoutSnapshotsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workspaceId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumDailyRunStatusFieldUpdateOperationsInput | $Enums.DailyRunStatus
+    startedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    finishedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    summary?: NullableJsonNullValueInput | InputJsonValue
+    error?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stages?: RunStageUncheckedUpdateManyWithoutDailyRunNestedInput
   }
 
   export type WorkspaceCreateWithoutOnboardingStateInput = {
@@ -123521,6 +125564,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOnboardingStateInput = {
@@ -123596,6 +125640,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOnboardingStateInput = {
@@ -123687,6 +125732,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOnboardingStateInput = {
@@ -123762,6 +125808,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutLeadImportBatchesInput = {
@@ -123837,6 +125884,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutLeadImportBatchesInput = {
@@ -123912,6 +125960,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutLeadImportBatchesInput = {
@@ -124003,6 +126052,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutLeadImportBatchesInput = {
@@ -124078,6 +126128,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceMembershipCreateWithoutWorkspaceInput = {
@@ -124824,6 +126875,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     topic: TopicCreateNestedOneWithoutOpportunitiesInput
@@ -124846,6 +126899,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -126520,6 +128575,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stages?: RunStageCreateNestedManyWithoutDailyRunInput
+    snapshots?: ApprovalSnapshotCreateNestedManyWithoutDailyRunInput
   }
 
   export type DailyRunUncheckedCreateWithoutWorkspaceInput = {
@@ -126533,6 +128589,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     stages?: RunStageUncheckedCreateNestedManyWithoutDailyRunInput
+    snapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutDailyRunInput
   }
 
   export type DailyRunCreateOrConnectWithoutWorkspaceInput = {
@@ -126773,6 +128830,36 @@ export namespace Prisma {
 
   export type CommentSalesSignalCreateManyWorkspaceInputEnvelope = {
     data: CommentSalesSignalCreateManyWorkspaceInput | CommentSalesSignalCreateManyWorkspaceInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type ApprovalSnapshotCreateWithoutWorkspaceInput = {
+    id?: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    dailyRun: DailyRunCreateNestedOneWithoutSnapshotsInput
+  }
+
+  export type ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput = {
+    id?: string
+    dailyRunId: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
+  export type ApprovalSnapshotCreateOrConnectWithoutWorkspaceInput = {
+    where: ApprovalSnapshotWhereUniqueInput
+    create: XOR<ApprovalSnapshotCreateWithoutWorkspaceInput, ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput>
+  }
+
+  export type ApprovalSnapshotCreateManyWorkspaceInputEnvelope = {
+    data: ApprovalSnapshotCreateManyWorkspaceInput | ApprovalSnapshotCreateManyWorkspaceInput[]
     skipDuplicates?: boolean
   }
 
@@ -127228,6 +129315,8 @@ export namespace Prisma {
     trendSignalIds?: JsonFilter<"ContentOpportunity">
     reasoning?: StringFilter<"ContentOpportunity"> | string
     evidenceSummary?: StringFilter<"ContentOpportunity"> | string
+    originKind?: StringNullableFilter<"ContentOpportunity"> | string | null
+    originId?: StringNullableFilter<"ContentOpportunity"> | string | null
     createdAt?: DateTimeFilter<"ContentOpportunity"> | Date | string
     updatedAt?: DateTimeFilter<"ContentOpportunity"> | Date | string
   }
@@ -128736,6 +130825,22 @@ export namespace Prisma {
     data: XOR<CommentSalesSignalUpdateManyMutationInput, CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceInput>
   }
 
+  export type ApprovalSnapshotUpsertWithWhereUniqueWithoutWorkspaceInput = {
+    where: ApprovalSnapshotWhereUniqueInput
+    update: XOR<ApprovalSnapshotUpdateWithoutWorkspaceInput, ApprovalSnapshotUncheckedUpdateWithoutWorkspaceInput>
+    create: XOR<ApprovalSnapshotCreateWithoutWorkspaceInput, ApprovalSnapshotUncheckedCreateWithoutWorkspaceInput>
+  }
+
+  export type ApprovalSnapshotUpdateWithWhereUniqueWithoutWorkspaceInput = {
+    where: ApprovalSnapshotWhereUniqueInput
+    data: XOR<ApprovalSnapshotUpdateWithoutWorkspaceInput, ApprovalSnapshotUncheckedUpdateWithoutWorkspaceInput>
+  }
+
+  export type ApprovalSnapshotUpdateManyWithWhereWithoutWorkspaceInput = {
+    where: ApprovalSnapshotScalarWhereInput
+    data: XOR<ApprovalSnapshotUpdateManyMutationInput, ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceInput>
+  }
+
   export type UserCreateWithoutMembershipsInput = {
     id?: string
     email: string
@@ -128862,6 +130967,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutMembershipsInput = {
@@ -128937,6 +131043,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutMembershipsInput = {
@@ -129087,6 +131194,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutMembershipsInput = {
@@ -129162,6 +131270,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserCreateWithoutProfilesInput = {
@@ -129290,6 +131399,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutProfilesInput = {
@@ -129365,6 +131475,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutProfilesInput = {
@@ -129515,6 +131626,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutProfilesInput = {
@@ -129590,6 +131702,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutIcpsInput = {
@@ -129665,6 +131778,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutIcpsInput = {
@@ -129740,6 +131854,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutIcpsInput = {
@@ -129831,6 +131946,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutIcpsInput = {
@@ -129906,6 +132022,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutContentIdeasInput = {
@@ -129981,6 +132098,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentIdeasInput = {
@@ -130056,6 +132174,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentIdeasInput = {
@@ -130415,6 +132534,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentIdeasInput = {
@@ -130490,6 +132610,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserUpsertWithoutContentIdeasInput = {
@@ -130757,6 +132878,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentDraftsInput = {
@@ -130832,6 +132954,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentDraftsInput = {
@@ -131341,6 +133464,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentDraftsInput = {
@@ -131416,6 +133540,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentIdeaUpsertWithoutDraftsInput = {
@@ -131857,6 +133982,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentVersionsInput = {
@@ -131932,6 +134058,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentVersionsInput = {
@@ -132342,6 +134469,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentVersionsInput = {
@@ -132417,6 +134545,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentDraftUpsertWithoutVersionsInput = {
@@ -132745,6 +134874,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutLeadsInput = {
@@ -132820,6 +134950,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutLeadsInput = {
@@ -133344,6 +135475,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutLeadsInput = {
@@ -133419,6 +135551,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserUpsertWithoutLeadsInput = {
@@ -133697,6 +135830,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutConversationsInput = {
@@ -133772,6 +135906,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutConversationsInput = {
@@ -134067,6 +136202,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutConversationsInput = {
@@ -134142,6 +136278,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutConversationsInput = {
@@ -134385,6 +136522,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutMessagesInput = {
@@ -134460,6 +136598,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutMessagesInput = {
@@ -134635,6 +136774,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutMessagesInput = {
@@ -134710,6 +136850,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ConversationUpsertWithoutMessagesInput = {
@@ -134881,6 +137022,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOpportunitiesInput = {
@@ -134956,6 +137098,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOpportunitiesInput = {
@@ -135235,6 +137378,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOpportunitiesInput = {
@@ -135310,6 +137454,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutOpportunitiesInput = {
@@ -135537,6 +137682,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutAnalyticsEventsInput = {
@@ -135612,6 +137758,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutAnalyticsEventsInput = {
@@ -135756,6 +137903,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutAnalyticsEventsInput = {
@@ -135831,6 +137979,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserUpsertWithoutAnalyticsEventsInput = {
@@ -135965,6 +138114,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutLearningSignalsInput = {
@@ -136040,6 +138190,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutLearningSignalsInput = {
@@ -136184,6 +138335,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutLearningSignalsInput = {
@@ -136259,6 +138411,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserUpsertWithoutLearningSignalsInput = {
@@ -136393,6 +138546,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutIntelligenceSourcesInput = {
@@ -136468,6 +138622,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutIntelligenceSourcesInput = {
@@ -136675,6 +138830,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutIntelligenceSourcesInput = {
@@ -136750,6 +138906,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type SourceDocumentUpsertWithWhereUniqueWithoutSourceInput = {
@@ -136873,6 +139030,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutSourceDocumentsInput = {
@@ -136948,6 +139106,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutSourceDocumentsInput = {
@@ -137130,6 +139289,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutSourceDocumentsInput = {
@@ -137205,6 +139365,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type IntelligenceSourceUpsertWithoutDocumentsInput = {
@@ -137351,6 +139512,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutSourceClaimsInput = {
@@ -137426,6 +139588,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutSourceClaimsInput = {
@@ -137637,6 +139800,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutSourceClaimsInput = {
@@ -137712,6 +139876,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type IntelligenceSourceUpsertWithoutClaimsInput = {
@@ -137903,6 +140068,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutTopicsInput = {
@@ -137978,6 +140144,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutTopicsInput = {
@@ -138071,6 +140238,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     workspace: WorkspaceCreateNestedOneWithoutContentOpportunitiesInput
@@ -138093,6 +140262,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -138223,6 +140394,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutTopicsInput = {
@@ -138298,6 +140470,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type TopicMentionUpsertWithWhereUniqueWithoutTopicInput = {
@@ -138437,6 +140610,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutTopicMentionsInput = {
@@ -138512,6 +140686,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutTopicMentionsInput = {
@@ -138685,6 +140860,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutTopicMentionsInput = {
@@ -138760,6 +140936,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type TopicUpsertWithoutMentionsInput = {
@@ -138929,6 +141106,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutTrendSignalsInput = {
@@ -139004,6 +141182,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutTrendSignalsInput = {
@@ -139128,6 +141307,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutTrendSignalsInput = {
@@ -139203,6 +141383,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type TopicUpsertWithoutTrendSignalsInput = {
@@ -139317,6 +141498,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentOpportunitiesInput = {
@@ -139392,6 +141574,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentOpportunitiesInput = {
@@ -139516,6 +141699,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentOpportunitiesInput = {
@@ -139591,6 +141775,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type TopicUpsertWithoutOpportunitiesInput = {
@@ -139705,6 +141890,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentGapsInput = {
@@ -139780,6 +141966,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentGapsInput = {
@@ -139904,6 +142091,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentGapsInput = {
@@ -139979,6 +142167,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type TopicUpsertWithoutGapsInput = {
@@ -140093,6 +142282,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOpportunityFeedbacksInput = {
@@ -140168,6 +142358,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOpportunityFeedbacksInput = {
@@ -140312,6 +142503,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOpportunityFeedbacksInput = {
@@ -140387,6 +142579,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type UserUpsertWithoutOpportunityFeedbacksInput = {
@@ -140521,6 +142714,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentPlansInput = {
@@ -140596,6 +142790,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentPlansInput = {
@@ -140824,6 +143019,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentPlansInput = {
@@ -140899,6 +143095,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentIdeaUpsertWithoutPlansInput = {
@@ -141071,6 +143268,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutDraftClaimBindingsInput = {
@@ -141146,6 +143344,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutDraftClaimBindingsInput = {
@@ -141313,6 +143512,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutDraftClaimBindingsInput = {
@@ -141388,6 +143588,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentDraftUpsertWithoutClaimBindingsInput = {
@@ -141551,6 +143752,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentGateResultsInput = {
@@ -141626,6 +143828,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentGateResultsInput = {
@@ -141827,6 +144030,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentGateResultsInput = {
@@ -141902,6 +144106,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentDraftUpsertWithoutGateResultsInput = {
@@ -142099,6 +144304,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutContentReviewsInput = {
@@ -142174,6 +144380,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutContentReviewsInput = {
@@ -142304,6 +144511,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutContentReviewsInput = {
@@ -142379,6 +144587,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentDraftUpsertWithoutReviewsInput = {
@@ -142499,6 +144708,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutVoiceProfilesInput = {
@@ -142574,6 +144784,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutVoiceProfilesInput = {
@@ -142665,6 +144876,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutVoiceProfilesInput = {
@@ -142740,6 +144952,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutVoiceReceiptsInput = {
@@ -142815,6 +145028,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutVoiceReceiptsInput = {
@@ -142890,6 +145104,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutVoiceReceiptsInput = {
@@ -142981,6 +145196,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutVoiceReceiptsInput = {
@@ -143056,6 +145272,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutWritingSamplesInput = {
@@ -143131,6 +145348,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutWritingSamplesInput = {
@@ -143206,6 +145424,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutWritingSamplesInput = {
@@ -143297,6 +145516,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutWritingSamplesInput = {
@@ -143372,6 +145592,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutProspectResearchInput = {
@@ -143447,6 +145668,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutProspectResearchInput = {
@@ -143522,6 +145744,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutProspectResearchInput = {
@@ -143668,6 +145891,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutProspectResearchInput = {
@@ -143743,6 +145967,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutResearchInput = {
@@ -143879,6 +146104,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutProspectSignalsInput = {
@@ -143954,6 +146180,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutProspectSignalsInput = {
@@ -144100,6 +146327,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutProspectSignalsInput = {
@@ -144175,6 +146403,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutSignalsInput = {
@@ -144311,6 +146540,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutQualificationResultsInput = {
@@ -144386,6 +146616,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutQualificationResultsInput = {
@@ -144532,6 +146763,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutQualificationResultsInput = {
@@ -144607,6 +146839,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutQualificationsInput = {
@@ -144743,6 +146976,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutProspectBriefsInput = {
@@ -144818,6 +147052,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutProspectBriefsInput = {
@@ -145020,6 +147255,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutProspectBriefsInput = {
@@ -145095,6 +147331,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutBriefsInput = {
@@ -145247,6 +147484,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOutreachStrategiesInput = {
@@ -145322,6 +147560,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOutreachStrategiesInput = {
@@ -145563,6 +147802,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOutreachStrategiesInput = {
@@ -145638,6 +147878,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type LeadUpsertWithoutStrategiesInput = {
@@ -145837,6 +148078,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOutreachDraftsInput = {
@@ -145912,6 +148154,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOutreachDraftsInput = {
@@ -146261,6 +148504,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOutreachDraftsInput = {
@@ -146336,6 +148580,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type OutreachStrategyUpsertWithoutDraftsInput = {
@@ -146593,6 +148838,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOutreachReviewsInput = {
@@ -146668,6 +148914,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOutreachReviewsInput = {
@@ -146808,6 +149055,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOutreachReviewsInput = {
@@ -146883,6 +149131,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type OutreachDraftUpsertWithoutReviewsInput = {
@@ -147013,6 +149262,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutPreparedActionsInput = {
@@ -147088,6 +149338,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutPreparedActionsInput = {
@@ -147228,6 +149479,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutPreparedActionsInput = {
@@ -147303,6 +149555,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type OutreachDraftUpsertWithoutPreparedActionsInput = {
@@ -147433,6 +149686,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutConversationClassificationsInput = {
@@ -147508,6 +149762,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutConversationClassificationsInput = {
@@ -147630,6 +149885,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutConversationClassificationsInput = {
@@ -147705,6 +149961,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ConversationUpsertWithoutClassificationsInput = {
@@ -147817,6 +150074,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutFollowUpRecommendationsInput = {
@@ -147892,6 +150150,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutFollowUpRecommendationsInput = {
@@ -148069,6 +150328,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutFollowUpRecommendationsInput = {
@@ -148144,6 +150404,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ConversationUpsertWithoutFollowUpsInput = {
@@ -148317,6 +150578,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutSalesContentSignalsInput = {
@@ -148392,6 +150654,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutSalesContentSignalsInput = {
@@ -148483,6 +150746,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutSalesContentSignalsInput = {
@@ -148558,6 +150822,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutPublishRecordsInput = {
@@ -148633,6 +150898,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutPublishRecordsInput = {
@@ -148708,6 +150974,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutPublishRecordsInput = {
@@ -148962,6 +151229,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutPublishRecordsInput = {
@@ -149037,6 +151305,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type ContentVersionUpsertWithoutPublishRecordsInput = {
@@ -149267,6 +151536,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOutcomeMetricsInput = {
@@ -149342,6 +151612,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOutcomeMetricsInput = {
@@ -149587,6 +151858,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOutcomeMetricsInput = {
@@ -149662,6 +151934,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type PublishRecordUpsertWithoutOutcomeMetricsInput = {
@@ -149915,6 +152188,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutOperatorActionsInput = {
@@ -149990,6 +152264,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutOperatorActionsInput = {
@@ -150081,6 +152356,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutOperatorActionsInput = {
@@ -150156,6 +152432,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutLearningProposalsInput = {
@@ -150231,6 +152508,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutLearningProposalsInput = {
@@ -150306,6 +152584,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutLearningProposalsInput = {
@@ -150397,6 +152676,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutLearningProposalsInput = {
@@ -150472,6 +152752,7 @@ export namespace Prisma {
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutAttributionLinksInput = {
@@ -150547,6 +152828,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutAttributionLinksInput = {
@@ -150622,6 +152904,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutAttributionLinksInput = {
@@ -150713,6 +152996,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutAttributionLinksInput = {
@@ -150788,6 +153072,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutPreparationLogsInput = {
@@ -150863,6 +153148,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchCreateNestedManyWithoutWorkspaceInput
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutPreparationLogsInput = {
@@ -150938,6 +153224,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUncheckedCreateNestedManyWithoutWorkspaceInput
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     commentSalesSignals?: CommentSalesSignalUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutPreparationLogsInput = {
@@ -151029,6 +153316,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUpdateManyWithoutWorkspaceNestedInput
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutPreparationLogsInput = {
@@ -151104,6 +153392,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUncheckedUpdateManyWithoutWorkspaceNestedInput
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     commentSalesSignals?: CommentSalesSignalUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceCreateWithoutCommentSalesSignalsInput = {
@@ -151179,6 +153468,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchCreateNestedManyWithoutWorkspaceInput
     attributionLinks?: AttributionLinkCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceUncheckedCreateWithoutCommentSalesSignalsInput = {
@@ -151254,6 +153544,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUncheckedCreateNestedManyWithoutWorkspaceInput
     attributionLinks?: AttributionLinkUncheckedCreateNestedManyWithoutWorkspaceInput
     preparationLogs?: PreparationLogUncheckedCreateNestedManyWithoutWorkspaceInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedCreateNestedManyWithoutWorkspaceInput
   }
 
   export type WorkspaceCreateOrConnectWithoutCommentSalesSignalsInput = {
@@ -151392,6 +153683,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUpdateManyWithoutWorkspaceNestedInput
     attributionLinks?: AttributionLinkUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type WorkspaceUncheckedUpdateWithoutCommentSalesSignalsInput = {
@@ -151467,6 +153759,7 @@ export namespace Prisma {
     leadImportBatches?: LeadImportBatchUncheckedUpdateManyWithoutWorkspaceNestedInput
     attributionLinks?: AttributionLinkUncheckedUpdateManyWithoutWorkspaceNestedInput
     preparationLogs?: PreparationLogUncheckedUpdateManyWithoutWorkspaceNestedInput
+    approvalSnapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceNestedInput
   }
 
   export type CommentUpsertWithoutSalesSignalsInput = {
@@ -152801,6 +155094,16 @@ export namespace Prisma {
     updatedAt?: Date | string
   }
 
+  export type ApprovalSnapshotCreateManyDailyRunInput = {
+    id?: string
+    workspaceId: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+  }
+
   export type RunStageUpdateWithoutDailyRunInput = {
     id?: StringFieldUpdateOperationsInput | string
     stage?: EnumRunStageNameFieldUpdateOperationsInput | $Enums.RunStageName
@@ -152844,6 +155147,36 @@ export namespace Prisma {
     attempt?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotUpdateWithoutDailyRunInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    workspace?: WorkspaceUpdateOneRequiredWithoutApprovalSnapshotsNestedInput
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateWithoutDailyRunInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workspaceId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateManyWithoutDailyRunInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    workspaceId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type WorkspaceMembershipCreateManyWorkspaceInput = {
@@ -153102,6 +155435,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -153737,6 +156072,16 @@ export namespace Prisma {
     reviewedAt?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+  }
+
+  export type ApprovalSnapshotCreateManyWorkspaceInput = {
+    id?: string
+    dailyRunId: string
+    runDate: Date | string
+    capturedAt?: Date | string
+    items: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
   }
 
   export type WorkspaceMembershipUpdateWithoutWorkspaceInput = {
@@ -154542,6 +156887,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     topic?: TopicUpdateOneRequiredWithoutOpportunitiesNestedInput
@@ -154564,6 +156911,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -154585,6 +156934,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -156284,6 +158635,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stages?: RunStageUpdateManyWithoutDailyRunNestedInput
+    snapshots?: ApprovalSnapshotUpdateManyWithoutDailyRunNestedInput
   }
 
   export type DailyRunUncheckedUpdateWithoutWorkspaceInput = {
@@ -156297,6 +158649,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stages?: RunStageUncheckedUpdateManyWithoutDailyRunNestedInput
+    snapshots?: ApprovalSnapshotUncheckedUpdateManyWithoutDailyRunNestedInput
   }
 
   export type DailyRunUncheckedUpdateManyWithoutWorkspaceInput = {
@@ -156522,6 +158875,36 @@ export namespace Prisma {
     reviewedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotUpdateWithoutWorkspaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    dailyRun?: DailyRunUpdateOneRequiredWithoutSnapshotsNestedInput
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateWithoutWorkspaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    dailyRunId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type ApprovalSnapshotUncheckedUpdateManyWithoutWorkspaceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    dailyRunId?: StringFieldUpdateOperationsInput | string
+    runDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    capturedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    items?: JsonNullValueInput | InputJsonValue
+    counts?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type ContentDraftCreateManyContentIdeaInput = {
@@ -158226,6 +160609,8 @@ export namespace Prisma {
     trendSignalIds: JsonNullValueInput | InputJsonValue
     reasoning: string
     evidenceSummary: string
+    originKind?: string | null
+    originId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -158332,6 +160717,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     workspace?: WorkspaceUpdateOneRequiredWithoutContentOpportunitiesNestedInput
@@ -158354,6 +160741,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -158375,6 +160764,8 @@ export namespace Prisma {
     trendSignalIds?: JsonNullValueInput | InputJsonValue
     reasoning?: StringFieldUpdateOperationsInput | string
     evidenceSummary?: StringFieldUpdateOperationsInput | string
+    originKind?: NullableStringFieldUpdateOperationsInput | string | null
+    originId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -159143,6 +161534,10 @@ export namespace Prisma {
      * @deprecated Use RunStageDefaultArgs instead
      */
     export type RunStageArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = RunStageDefaultArgs<ExtArgs>
+    /**
+     * @deprecated Use ApprovalSnapshotDefaultArgs instead
+     */
+    export type ApprovalSnapshotArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = ApprovalSnapshotDefaultArgs<ExtArgs>
     /**
      * @deprecated Use OnboardingStateDefaultArgs instead
      */

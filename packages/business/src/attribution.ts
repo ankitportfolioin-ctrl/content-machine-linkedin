@@ -61,19 +61,6 @@ interface AttributionRow {
   recordedAt: Date;
 }
 
-interface AttributionStore {
-  attributionLink: {
-    findFirst(args: unknown): Promise<AttributionRow | null>;
-    findMany(args: unknown): Promise<AttributionRow[]>;
-    create(args: unknown): Promise<AttributionRow>;
-    update(args: unknown): Promise<AttributionRow>;
-  };
-}
-
-function store(prisma: PrismaClient): AttributionStore {
-  return prisma as unknown as AttributionStore;
-}
-
 function assertType(value: string, role: string): void {
   if (!KNOWN_ENDPOINTS.has(value)) {
     throw new AttributionError(
@@ -94,11 +81,13 @@ function assertAttributionType(value: string): asserts value is AttributionType 
 
 export class AttributionService {
   private prisma: PrismaClient;
-  private links: AttributionStore['attributionLink'];
 
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
-    this.links = store(prisma).attributionLink;
+  }
+
+  private get links() {
+    return this.prisma.attributionLink;
   }
 
   private async assertEndpointInWorkspace(
@@ -108,6 +97,8 @@ export class AttributionService {
     role: string
   ): Promise<void> {
     assertType(type, role);
+    // Dynamic dispatch over the known endpoint set (validated above): the
+    // generated client carries every delegate; the index is the only cast.
     const db = this.prisma as unknown as Record<string, { findFirst(a: unknown): Promise<unknown> }>;
     const delegate = db[type];
     if (!delegate) {

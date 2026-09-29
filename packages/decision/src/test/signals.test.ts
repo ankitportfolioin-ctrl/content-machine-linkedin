@@ -65,6 +65,9 @@ function relevancePrisma(opts: { topics?: unknown[]; leads?: unknown[]; icp?: un
       findFirst: vi.fn().mockImplementation(async (args: { where: { id: string } }) => byId.get(args.where.id) ?? null),
     },
     prospectResearch: { findMany: vi.fn().mockResolvedValue(opts.research ?? []) },
+    followUpRecommendation: { findFirst: vi.fn().mockResolvedValue(null) },
+    outreachStrategy: { findFirst: vi.fn().mockResolvedValue(null) },
+    outreachReview: { findFirst: vi.fn().mockResolvedValue(null) },
   } as unknown as PrismaClient;
 }
 

@@ -5,6 +5,7 @@ import { ProspectResearchService, SalesBridgeService, SalesError } from '@growth
 import { DecisionError } from './errors';
 import { ActionStatus, ScoredAction } from './types';
 import { collectCandidates } from './collectors';
+import { enrichCandidates } from './contextEnrich';
 import { checkEligibility } from './eligibility';
 import { rankScored, scoreCandidate } from './scoring';
 import { explainAction } from './explain';
@@ -33,7 +34,11 @@ export class OperatorActionService {
    */
   async refreshWorkspace(workspaceId: string, limit = 20): Promise<ScoredAction[]> {
     const now = Date.now();
-    const candidates = await collectCandidates(this.prisma, workspaceId, now);
+    // collect → enrich (objectives, attribution, lead state, learning tags)
+    // → eligibility → score: every later step reasons from the same
+    // workspace state the explanation layer reconstructs.
+    const collected = await collectCandidates(this.prisma, workspaceId, now);
+    const { candidates } = await enrichCandidates(this.prisma, workspaceId, collected, now);
 
     const existing = await this.prisma.operatorAction.findMany({ where: { workspaceId } });
     const suppressed = new Map(
@@ -471,7 +476,8 @@ export class OperatorActionService {
     if (!row) {
       throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
     }
-    const candidates = await collectCandidates(this.prisma, workspaceId, Date.now());
+    const collected = await collectCandidates(this.prisma, workspaceId, Date.now());
+    const { candidates } = await enrichCandidates(this.prisma, workspaceId, collected, Date.now());
     const candidate = candidates.find((c) => c.identityKey === row.identityKey);
     const confirmed = await this.learning.confirmedInfluences(workspaceId);
     if (!candidate) {

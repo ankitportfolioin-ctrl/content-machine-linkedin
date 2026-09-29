@@ -49,6 +49,12 @@ export async function resolveDueRuns(
   async function processWorkspace(workspaceId: string): Promise<boolean> {
     let enqueued = false;
     const settings = await getWorkspaceSettings(workspaceId);
+    // A workspace is not scheduled until its owner configures it (PUT
+    // /onboarding/schedule sets scheduleConfigured). The tick keeps polling,
+    // but unconfigured workspaces never enqueue a daily loop.
+    if (!settings.scheduleConfigured) {
+      return false;
+    }
     const local = workspaceLocalDate(settings.timezone, now);
 
     const todayRun = await prisma.dailyRun.findUnique({

@@ -28,9 +28,7 @@ router.get('/log', async (req, res, next) => {
   try {
     const authReq = req as unknown as AuthenticatedRequest;
     const take = Math.min(100, Math.max(1, Number(req.query.take ?? 50)));
-    const logs = await (prisma as unknown as {
-      preparationLog: { findMany(a: unknown): Promise<unknown[]> };
-    }).preparationLog.findMany({
+    const logs = await prisma.preparationLog.findMany({
       where: { workspaceId: authReq.workspaceId },
       orderBy: { createdAt: 'desc' },
       take,

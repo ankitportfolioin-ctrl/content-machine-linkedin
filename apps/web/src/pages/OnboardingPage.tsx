@@ -352,9 +352,46 @@ function SourcesStep({ onChanged }: { onChanged: () => void }) {
 function LeadsStep({ onChanged }: { onChanged: () => void }) {
   const [csv, setCsv] = useState('');
   const [filename, setFilename] = useState('');
+  const [fileInfo, setFileInfo] = useState<string | null>(null);
   const [result, setResult] = useState<{ imported: number; deduped: boolean; skipped: Array<{ rowNumber: number; reason: string }>; status: string } | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
+
+  function readFileText(file: File): Promise<string> {
+    // FileReader works in every browser (and jsdom); File.text() does not.
+    return new Promise((resolve, reject) => {
+      try {
+        const reader = new FileReader();
+        reader.onload = () => resolve(String(reader.result ?? ''));
+        reader.onerror = () => reject(reader.error ?? new Error('read failed'));
+        reader.readAsText(file);
+      } catch (err) {
+        reject(err instanceof Error ? err : new Error('read failed'));
+      }
+    });
+  }
+
+  async function handleFile(file: File | undefined) {
+    if (!file) return;
+    setMsg(null);
+    setResult(null);
+    // Client-side read only: the file never leaves the browser except as
+    // text inside the existing JSON import request — no third-party upload.
+    if (file.size > 500000) {
+      setMsg('File is larger than 500 KB; the import API caps payloads at 500,000 characters.');
+      return;
+    }
+    try {
+      const text = await readFileText(file);
+      setCsv(text);
+      setFilename(file.name);
+      const firstLine = (text.split(/\r?\n/)[0] ?? '').toLowerCase();
+      const hasName = /(^|,)name(,|$)/.test(firstLine);
+      setFileInfo(`${file.name} · ${(file.size / 1024).toFixed(1)} KB · ${hasName ? 'header looks valid (has name)' : 'warning: header row should include name'}`);
+    } catch {
+      setMsg('Could not read that file in this browser. Paste the CSV text instead.');
+    }
+  }
 
   async function handleImport(e: React.FormEvent) {
     e.preventDefault();
@@ -366,6 +403,7 @@ function LeadsStep({ onChanged }: { onChanged: () => void }) {
       const res = await importLeads(csv, filename.trim() || undefined);
       setResult({ imported: res.imported, deduped: res.deduped, skipped: res.skipped ?? [], status: String((res.batch as { status?: string }).status ?? 'unknown') });
       setCsv('');
+      setFileInfo(null);
       onChanged();
     } catch (err) {
       setMsg(friendlyErrorMessage(err));
@@ -378,6 +416,17 @@ function LeadsStep({ onChanged }: { onChanged: () => void }) {
     <div className="stack-sm">
       <p className="muted">Header row required: <span className="badge badge-neutral">name, linkedinUrl, headline, company, location</span> — only your own data.</p>
       <form onSubmit={(e) => void handleImport(e)} className="stack-sm">
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.875rem' }}>
+          Choose a CSV file (read locally, never uploaded anywhere)
+          <input
+            type="file"
+            accept=".csv,text/csv,text/plain"
+            aria-label="Choose a CSV file"
+            onChange={(e) => void handleFile(e.target.files?.[0])}
+            style={{ fontSize: '0.875rem' }}
+          />
+        </label>
+        {fileInfo ? <p className="muted">{fileInfo}</p> : null}
         <input value={filename} onChange={(e) => setFilename(e.target.value)} placeholder="Filename label (optional)" className="field" />
         <textarea value={csv} onChange={(e) => setCsv(e.target.value)} placeholder={'name,linkedinUrl,headline,company\nJane Doe,https://linkedin.com/in/jane,CTO at Acme,Acme'} rows={5} className="field" />
         <div><button type="submit" className="btn btn-primary" disabled={working || !csv.trim()}>{working ? 'Importing...' : 'Import leads'}</button></div>

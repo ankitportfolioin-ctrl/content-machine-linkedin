@@ -1,5 +1,5 @@
 import { prisma } from '@growth-operator/db';
-import { OperatorActionService } from '@growth-operator/decision';
+import { OperatorActionService, proposeSignalOpportunities } from '@growth-operator/decision';
 import {
   ClaimLedgerService,
   ContentGapService,
@@ -8,6 +8,8 @@ import {
   SourceUnderstandingService,
   TopicClusteringService,
   TrendSignalService,
+  expandHackerNewsFeed,
+  resolveReleaseFeedUrl,
 } from '@growth-operator/intelligence';
 import { ContentPlanService, DraftComposer } from '@growth-operator/content';
 import {
@@ -141,9 +143,55 @@ const intelligence: StageFn = async (ctx) => {
       break;
     }
     counts.sourcesAttempted += 1;
+    const newDocs: Array<{ sourceId: string; documentId: string }> = [];
+
+    // Dedicated platform adapters (Batch 3 #13). GitHub repo URLs resolve
+    // to their official releases Atom feed and take the generic path; HN
+    // frontpage URLs expand via the official HN API into story URLs that
+    // are ingested individually (each SSRF-checked). Adapter failure marks
+    // only this feed (failure isolation) — never the run.
+    if (feed.type === 'HACKERNEWS') {
+      let adapterItems: Array<{ url: string }> | null = null;
+      try {
+        adapterItems = await expandHackerNewsFeed(feed.url);
+      } catch (error) {
+        counts.failed += 1;
+        await prisma.feedSource.update({
+          where: { id: feed.id },
+          data: { lastFetchedAt: new Date(), lastError: error instanceof Error ? error.message.slice(0, 500) : 'Hacker News adapter failure' },
+        });
+        continue;
+      }
+      if (adapterItems) {
+        for (const item of adapterItems.slice(0, MAX_ITEMS_PER_FEED)) {
+          if (!ctx.budget.spendFetch()) {
+            notes.push('Fetch budget exhausted; remaining items deferred.');
+            break;
+          }
+          try {
+            const itemResult = await ingestion.ingest(workspaceId, item.url, {});
+            if (itemResult.status !== 'FAILED' && itemResult.documentId) {
+              newDocs.push({ sourceId: itemResult.sourceId, documentId: itemResult.documentId });
+            }
+          } catch {
+            counts.failed += 1;
+          }
+        }
+        await prisma.feedSource.update({
+          where: { id: feed.id },
+          data: { lastFetchedAt: new Date(), lastError: null, lastCursor: adapterItems[0]?.url ?? null },
+        });
+        counts.fetched += 1;
+        if (!aiAvailable) continue;
+        await processNewDocs();
+        continue;
+      }
+    }
+
+    const feedUrl = feed.type === 'GITHUB_RELEASES' ? resolveReleaseFeedUrl(feed.url) : feed.url;
     let result;
     try {
-      result = await ingestion.ingest(workspaceId, feed.url, { sourceType: mapFeedType(feed.type) });
+      result = await ingestion.ingest(workspaceId, feedUrl, { sourceType: mapFeedType(feed.type) });
     } catch (error) {
       counts.failed += 1;
       await prisma.feedSource.update({
@@ -180,7 +228,6 @@ const intelligence: StageFn = async (ctx) => {
         candidateUrls.push(url);
       }
     }
-    const newDocs: Array<{ sourceId: string; documentId: string }> = [];
     if (candidateUrls.length === 0) {
       newDocs.push({ sourceId: result.sourceId, documentId: result.documentId });
     } else {
@@ -201,6 +248,9 @@ const intelligence: StageFn = async (ctx) => {
     }
 
     if (!aiAvailable) continue;
+    await processNewDocs();
+
+    async function processNewDocs(): Promise<void> {
 
     for (const doc of newDocs) {
       if (docsProcessed >= MAX_NEW_DOCS_PER_RUN) {
@@ -363,6 +413,7 @@ const intelligence: StageFn = async (ctx) => {
         counts.opportunitiesCreated += 1;
       }
     }
+    }
   }
 
   // Per-source fetch failures are data, not stage failure: they are counted
@@ -381,11 +432,20 @@ const intelligence: StageFn = async (ctx) => {
 const decision: StageFn = async (ctx) => {
   const blocked = await gate(ctx);
   if (blocked) return blocked;
+  // Signal opportunities first: sales-side signals become NEW opportunities
+  // for human triage, then the same-run refresh ranks them like any other
+  // NEW opportunity. Deterministic, capped, never auto-converted.
+  const signalOpps = await proposeSignalOpportunities(prisma, ctx.workspaceId);
   const service = new OperatorActionService(prisma);
   const ranked = await service.refreshWorkspace(ctx.workspaceId, 50);
   return {
     status: 'SUCCEEDED',
-    counts: { rankedActions: ranked.length },
+    counts: {
+      rankedActions: ranked.length,
+      signalOpportunitiesCreated: signalOpps.created,
+      signalOpportunitiesSkipped: signalOpps.skippedExisting + signalOpps.skippedBelowFloor,
+    },
+    ...(signalOpps.notes.length > 0 ? { note: signalOpps.notes.join(' ') } : {}),
   };
 };
 
@@ -642,16 +702,41 @@ const sales: StageFn = async (ctx) => {
       notes.push('Preparation budget exhausted; remaining briefs deferred.');
       break;
     }
+    let brief: { id: string } | null = null;
     try {
-      await briefs.createBrief({ workspaceId, leadId: lead.id, researchId: researchRow.id, createdBy: ownerId ?? undefined });
+      brief = await briefs.createBrief({ workspaceId, leadId: lead.id, researchId: researchRow.id, createdBy: ownerId ?? undefined });
       counts.briefsCreated += 1;
     } catch (error) {
       notes.push(`Brief skipped for lead ${lead.id.slice(0, 8)}: ${error instanceof Error ? error.message.slice(0, 140) : 'unknown'}.`);
       continue;
     }
     try {
+      // Relevant content flows into the sales preparation path through the
+      // brief's relevance slot (previously computed then discarded): the
+      // strategy-creation UI reads the same deterministic suggestions live,
+      // and the brief now preserves what the run computed, with provenance.
+      // Empty stays null — never invented.
       const suggestions = await suggestRelevantContent(prisma, workspaceId, { leadId: lead.id });
       counts.suggestionsComputed += suggestions.length;
+      if (brief && suggestions.length > 0) {
+        await prisma.prospectBrief.update({
+          where: { id: brief.id },
+          data: {
+            relevance: {
+              suggestions: suggestions.map((s) => ({
+                ideaId: s.ideaId,
+                title: s.title,
+                topicId: s.topicId,
+                topicName: s.topicName,
+                relevance: s.relevance,
+                reason: s.reason,
+              })),
+              computedAt: new Date().toISOString(),
+              provenance: 'daily-loop SALES stage (deterministic suggestRelevantContent; strategy UI reads the same live)',
+            } as object,
+          },
+        });
+      }
     } catch {
       // Suggestions are advisory; never fail the lead over them.
     }
@@ -728,14 +813,101 @@ const approvalSnapshot: StageFn = async (ctx) => {
   const blocked = await gate(ctx);
   if (blocked) return blocked;
   const { workspaceId } = ctx;
+  const run = await prisma.dailyRun.findFirst({
+    where: { workspaceId, runDate: new Date(`${ctx.runDate}T00:00:00.000Z`) },
+    select: { id: true },
+  });
+  if (!run) {
+    return { status: 'FAILED', error: 'DailyRun row missing; cannot anchor an approval snapshot.' };
+  }
+  // Frozen capture: plain copied values (ids, scores, reasons, versions),
+  // never live references — later human decisions cannot rewrite what this
+  // run observed. "What exactly was waiting at snapshot time" is answered
+  // from this row alone.
+  const now = new Date();
+  const daysSince = (d: Date) => Math.max(0, Math.floor((now.getTime() - d.getTime()) / 86400000));
   const [pendingActions, submittedContentReviews, submittedOutreachReviews] = await Promise.all([
-    prisma.operatorAction.count({ where: { workspaceId, status: 'PENDING' } }),
-    prisma.contentReview.count({ where: { workspaceId, status: 'SUBMITTED' } }),
-    prisma.outreachReview.count({ where: { workspaceId, status: 'SUBMITTED' } }),
+    prisma.operatorAction.findMany({
+      where: { workspaceId, status: 'PENDING' },
+      orderBy: [{ score: 'desc' }, { createdAt: 'asc' }],
+      take: 100,
+    }),
+    prisma.contentReview.findMany({
+      where: { workspaceId, status: 'SUBMITTED' },
+      include: {
+        draft: {
+          select: {
+            id: true, version: true,
+            contentIdea: { select: { id: true, title: true } },
+          },
+        },
+      },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    }),
+    prisma.outreachReview.findMany({
+      where: { workspaceId, status: 'SUBMITTED' },
+      include: { draft: { select: { id: true, version: true, leadId: true } } },
+      orderBy: { createdAt: 'asc' },
+      take: 100,
+    }),
   ]);
+  const items = {
+    runId: run.id,
+    workspaceId,
+    runDate: ctx.runDate,
+    capturedAt: now.toISOString(),
+    actions: pendingActions.map((a) => ({
+      actionId: a.id,
+      identityKey: a.identityKey,
+      kind: a.kind,
+      title: a.title,
+      score: a.score,
+      status: a.status,
+      reasons: a.reasons,
+      evidenceLinks: a.evidenceLinks,
+    })),
+    contentReviews: submittedContentReviews.map((r) => ({
+      reviewId: r.id,
+      draftId: r.draftId,
+      draftVersion: (r.draft as { version?: unknown } | null)?.version ?? null,
+      contentIdeaId: (r.draft as { contentIdea?: { id?: unknown } | null } | null)?.contentIdea?.id ?? null,
+      title: (r.draft as { contentIdea?: { title?: unknown } | null } | null)?.contentIdea?.title ?? null,
+      waitingDays: daysSince(r.createdAt),
+      requestedAt: r.createdAt.toISOString(),
+    })),
+    outreachReviews: submittedOutreachReviews.map((r) => ({
+      reviewId: r.id,
+      draftId: r.draftId,
+      draftVersion: (r.draft as { version?: unknown } | null)?.version ?? null,
+      leadId: (r.draft as { leadId?: unknown } | null)?.leadId ?? null,
+      waitingDays: daysSince(r.createdAt),
+      requestedAt: r.createdAt.toISOString(),
+    })),
+  };
+  const counts = {
+    pendingActions: pendingActions.length,
+    submittedContentReviews: submittedContentReviews.length,
+    submittedOutreachReviews: submittedOutreachReviews.length,
+  };
+  // Idempotent per run: unique (workspaceId, dailyRunId). Resume skips
+  // SUCCEEDED stages, so a snapshot is normally written once; a forced
+  // re-run rewrites the same key rather than duplicating history.
+  await prisma.approvalSnapshot.upsert({
+    where: { workspaceId_dailyRunId: { workspaceId, dailyRunId: run.id } },
+    create: {
+      workspaceId,
+      dailyRunId: run.id,
+      runDate: new Date(`${ctx.runDate}T00:00:00.000Z`),
+      capturedAt: now,
+      items: items as object,
+      counts: counts as object,
+    },
+    update: { capturedAt: now, items: items as object, counts: counts as object },
+  });
   return {
     status: 'SUCCEEDED',
-    counts: { pendingActions, submittedContentReviews, submittedOutreachReviews },
+    counts: { ...counts, snapshotItems: items.actions.length + items.contentReviews.length + items.outreachReviews.length },
   };
 };
 
