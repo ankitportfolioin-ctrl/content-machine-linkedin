@@ -110,6 +110,33 @@ export function getStoredWorkspaceId(): string | null {
   }
 }
 
+/**
+ * Event dispatched on `window` when the API rejects our session with 401.
+ * AuthContext listens for it and returns the UI to the signed-out state so
+ * the app stops firing authenticated requests instead of 401-storming.
+ */
+export const AUTH_EXPIRED_EVENT = 'go:auth-expired';
+
+export function clearStoredAuth(): void {
+  try {
+    localStorage.removeItem(TOKEN_STORAGE_KEY);
+    localStorage.removeItem(WORKSPACE_STORAGE_KEY);
+  } catch {
+    // ignore storage failures
+  }
+}
+
+function notifyAuthExpired(): void {
+  clearStoredAuth();
+  try {
+    if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+      window.dispatchEvent(new CustomEvent(AUTH_EXPIRED_EVENT));
+    }
+  } catch {
+    // non-browser environments (tests) have no event bus; storage is cleared above
+  }
+}
+
 export class ApiRequestError extends Error {
   status: number;
   code: string;
@@ -186,7 +213,17 @@ async function authedFetch(path: string, options: AuthedOptions = {}): Promise<R
     headers['X-Workspace-ID'] = workspaceId;
   }
 
-  return fetch(`${API_BASE}${path}`, { ...init, headers });
+  const response = await fetch(`${API_BASE}${path}`, { ...init, headers });
+
+  // The stored session is dead (expired/invalid/revoked): drop it and tell
+  // the auth state to sign out, so gated pages stop re-firing requests that
+  // can only 401. Auth routes are excluded — a failed login must not wipe
+  // (or pretend to wipe) session state, it just returns an honest error.
+  if (response.status === 401 && !path.startsWith('/auth/')) {
+    notifyAuthExpired();
+  }
+
+  return response;
 }
 
 async function authedRequest<T>(path: string, options: AuthedOptions = {}): Promise<T> {
@@ -219,6 +256,38 @@ export async function login(email: string, password: string): Promise<LoginRespo
     body: JSON.stringify({ email, password }),
   });
   return handleResponse<LoginResponse>(response);
+}
+
+export interface RegisterInput {
+  name: string;
+  email: string;
+  password: string;
+}
+
+export async function register(input: RegisterInput): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(input),
+  });
+  return handleResponse<LoginResponse>(response);
+}
+
+/**
+ * Validates the stored session against the API. Used on app bootstrap to
+ * prove a stored token is still live BEFORE treating the user as signed in.
+ * Throws ApiRequestError(401) for a dead session (which also clears storage
+ * via the shared 401 handling above).
+ */
+export async function fetchCurrentUser(): Promise<{ user: import('../types').User }> {
+  return authedRequest<{ user: import('../types').User }>('/auth/me');
+}
+
+export async function createWorkspace(input: { name: string; slug?: string; description?: string }): Promise<{ workspace: import('../types').Workspace }> {
+  return authedRequest<{ workspace: import('../types').Workspace }>('/workspaces', {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
 }
 
 export async function listWorkspaces(): Promise<WorkspacesResponse> {

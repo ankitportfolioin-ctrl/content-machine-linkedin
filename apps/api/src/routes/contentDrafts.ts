@@ -18,7 +18,7 @@ import { forwardContentError } from '../utils/contentErrors';
 import { getEnv } from '../config/env';
 
 const env = getEnv();
-const aiRegistry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY);
+const aiRegistry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
 const composer = new DraftComposer(prisma, aiRegistry);
 const evidenceService = new EvidenceService(prisma);
 const reviewService = new ReviewService(prisma);

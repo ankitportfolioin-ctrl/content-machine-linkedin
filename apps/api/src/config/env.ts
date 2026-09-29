@@ -31,6 +31,8 @@ const envSchema = z.object({
 
   OPENAI_API_KEY: z.string().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
+  OPENROUTER_API_KEY: z.string().optional(),
+  OPENROUTER_MODEL: z.string().optional(),
 
   CORS_ORIGIN: z.string().url().default('http://localhost:5173'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),
@@ -65,6 +67,8 @@ export function getEnv(): Env {
       BCRYPT_ROUNDS: 12,
       OPENAI_API_KEY: process.env.OPENAI_API_KEY,
       ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
+      OPENROUTER_API_KEY: process.env.OPENROUTER_API_KEY,
+      OPENROUTER_MODEL: process.env.OPENROUTER_MODEL,
       CORS_ORIGIN: 'http://localhost:5173',
       RATE_LIMIT_WINDOW_MS: 900000,
       RATE_LIMIT_MAX_REQUESTS: 100,

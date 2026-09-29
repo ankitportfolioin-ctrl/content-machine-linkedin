@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 
 export function LoginForm() {
-  const { login, loading } = useAuth();
+  const { login, register, loading, error: authError } = useAuth();
+  const [mode, setMode] = useState<'signin' | 'register'>('signin');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -13,7 +15,15 @@ export function LoginForm() {
     setError(null);
     setSubmitting(true);
     try {
-      await login(email.trim(), password);
+      if (mode === 'register') {
+        if (!name.trim()) {
+          setError('Please enter your name to create an account.');
+          return;
+        }
+        await register(name.trim(), email.trim(), password);
+      } else {
+        await login(email.trim(), password);
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign in failed. Please try again.');
     } finally {
@@ -32,15 +42,32 @@ export function LoginForm() {
     );
   }
 
+  const isRegister = mode === 'register';
+
   return (
     <div className="card" style={{ maxWidth: '420px' }}>
       <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
-        Sign in
+        {isRegister ? 'Create account' : 'Sign in'}
       </h2>
       <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
-        Sign in to access your workspace content.
+        {isRegister
+          ? 'Create a local account, then create a workspace to begin.'
+          : 'Sign in to access your workspace content.'}
       </p>
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {isRegister ? (
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.875rem' }}>
+            Name
+            <input
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Your name"
+              style={inputStyle}
+            />
+          </label>
+        ) : null}
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.875rem' }}>
           Email
           <input
@@ -63,13 +90,29 @@ export function LoginForm() {
             style={inputStyle}
           />
         </label>
+        {authError && !error ? (
+          <p role="alert" style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+            {authError}
+          </p>
+        ) : null}
         {error ? (
           <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>
             {error}
           </p>
         ) : null}
         <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? 'Signing in...' : 'Sign in'}
+          {submitting ? (isRegister ? 'Creating...' : 'Signing in...') : isRegister ? 'Create account' : 'Sign in'}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          disabled={submitting}
+          onClick={() => {
+            setError(null);
+            setMode(isRegister ? 'signin' : 'register');
+          }}
+        >
+          {isRegister ? 'Have an account? Sign in' : 'New here? Create an account'}
         </button>
       </form>
     </div>

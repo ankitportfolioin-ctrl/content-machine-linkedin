@@ -1,7 +1,12 @@
+import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { createWorkspace, friendlyErrorMessage } from '../services/api';
 
 export function WorkspaceSelector() {
-  const { workspaces, workspaceId, selectWorkspace, isAuthenticated, loading } = useAuth();
+  const { workspaces, workspaceId, selectWorkspace, isAuthenticated, loading, refreshWorkspaces } = useAuth();
+  const [name, setName] = useState('');
+  const [creating, setCreating] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isAuthenticated) {
     return null;
@@ -11,11 +16,57 @@ export function WorkspaceSelector() {
     return <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Loading workspaces...</p>;
   }
 
+  async function handleCreate(event: React.FormEvent) {
+    event.preventDefault();
+    if (!name.trim()) {
+      setError('Please enter a workspace name.');
+      return;
+    }
+    setCreating(true);
+    setError(null);
+    try {
+      const result = await createWorkspace({ name: name.trim() });
+      setName('');
+      await refreshWorkspaces();
+      selectWorkspace(result.workspace.id);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setCreating(false);
+    }
+  }
+
   if (workspaces.length === 0) {
     return (
-      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-        No workspaces available yet.
-      </p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+          No workspaces yet. Create one to begin — all data stays scoped to it.
+        </p>
+        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Workspace name"
+            aria-label="Workspace name"
+            style={{
+              backgroundColor: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--color-text)',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.875rem',
+            }}
+          />
+          <button type="submit" className="btn btn-secondary" disabled={creating}>
+            {creating ? 'Creating...' : 'Create workspace'}
+          </button>
+        </form>
+        {error ? (
+          <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem', margin: 0 }}>
+            {error}
+          </p>
+        ) : null}
+      </div>
     );
   }
 

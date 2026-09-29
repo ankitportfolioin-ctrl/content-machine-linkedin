@@ -71,8 +71,9 @@ app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 app.use(requestIdMiddleware);
 app.use(requestLogger);
-app.use(rateLimiter);
 
+// Health probes are registered BEFORE the rate limiter: the UI polls them
+// and orchestrators depend on them, so they must never 429.
 app.get('/api/v1/health', (_req, res) => {
   res.json({
     status: 'healthy',
@@ -102,6 +103,8 @@ app.get('/api/v1/ready', async (_req, res) => {
     });
   }
 });
+
+app.use(rateLimiter);
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/workspaces', workspaceRoutes);

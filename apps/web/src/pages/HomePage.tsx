@@ -3,6 +3,7 @@ import { useHealth } from '../hooks/useHealth';
 import { HealthResponse, OperatorAction } from '../types';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { LoginForm } from '../components/LoginForm';
 import {
   ApiRequestError,
   acceptAction,
@@ -747,12 +748,19 @@ function RecommendedSteps() {
 
 export function HomePage() {
   const { health, ready, loading, error, refetch } = useHealth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [readiness, setReadiness] = useState<ReadinessState | null>(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
   const [readinessError, setReadinessError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || authLoading) return;
+    // No session yet: skip the authenticated readiness call instead of
+    // firing a request that can only 401.
+    if (!isAuthenticated) {
+      setReadinessLoading(false);
+      return;
+    }
     async function fetchReadiness() {
       setReadinessLoading(true);
       setReadinessError(null);
@@ -766,7 +774,7 @@ export function HomePage() {
       }
     }
     void fetchReadiness();
-  }, [loading]);
+  }, [loading, authLoading, isAuthenticated]);
 
   if (loading) {
     return (
@@ -804,8 +812,19 @@ export function HomePage() {
     );
   }
 
+  const showSignIn = !loading && !authLoading && !isAuthenticated;
+
   return (
     <div>
+      {showSignIn ? (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Sign in to start</h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
+            Register a local account, create a workspace, then work the onboarding checklist.
+          </p>
+          <LoginForm />
+        </div>
+      ) : null}
       <div className="health-grid">
         <div className="health-card">
           <div className="health-card-header">

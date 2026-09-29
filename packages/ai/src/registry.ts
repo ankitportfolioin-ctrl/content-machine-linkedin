@@ -1,6 +1,7 @@
 import { AIProvider, AIProviderType, AIProviderUnavailableError, ChatCompletionRequest, ChatCompletionResponse, EmbeddingRequest, EmbeddingResponse } from './types';
 import { OpenAIProvider } from './openai';
 import { AnthropicProvider } from './anthropic';
+import { OpenRouterProvider } from './openrouter';
 
 export class AIProviderRegistry {
   private providers: Map<AIProviderType, AIProvider> = new Map();
@@ -66,9 +67,15 @@ export class AIProviderRegistry {
   }
 }
 
-export function createDefaultRegistry(openaiKey?: string, anthropicKey?: string): AIProviderRegistry {
+export function createDefaultRegistry(
+  openaiKey?: string,
+  anthropicKey?: string,
+  openrouterKey?: string,
+  openrouterModel?: string
+): AIProviderRegistry {
   const registry = new AIProviderRegistry();
   registry.register(new OpenAIProvider(openaiKey));
   registry.register(new AnthropicProvider(anthropicKey));
+  registry.register(new OpenRouterProvider(openrouterKey, openrouterModel));
   return registry;
 }

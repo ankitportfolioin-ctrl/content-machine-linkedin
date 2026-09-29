@@ -29,7 +29,7 @@ router.use(workspaceMiddleware);
 router.use(workspaceMembershipMiddleware);
 
 const env = getEnv();
-const aiRegistry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY);
+const aiRegistry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
 const researchService = new ProspectResearchService(prisma, aiRegistry);
 const qualificationService = new QualificationService(prisma);
 const signalService = new SignalService(prisma);

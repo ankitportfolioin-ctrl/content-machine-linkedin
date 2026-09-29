@@ -1,4 +1,4 @@
-import { AIProviderRegistry, ChatCompletionRequest } from '@growth-operator/ai';
+import { AIProviderRegistry, AIProviderType, ChatCompletionRequest } from '@growth-operator/ai';
 import { z } from 'zod';
 
 export const SourceUnderstandingSchema = z.object({
@@ -31,7 +31,7 @@ export type SourceUnderstanding = z.infer<typeof SourceUnderstandingSchema>;
 export interface UnderstandingOptions {
   workspaceProfile?: string;
   icp?: string;
-  preferredProvider?: 'openai' | 'anthropic';
+  preferredProvider?: AIProviderType;
   model?: string;
 }
 

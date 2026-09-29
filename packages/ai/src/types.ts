@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const AIProviderType = z.enum(['openai', 'anthropic']);
+export const AIProviderType = z.enum(['openai', 'anthropic', 'openrouter']);
 export type AIProviderType = z.infer<typeof AIProviderType>;
 
 export const ChatMessageSchema = z.object({

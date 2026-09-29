@@ -74,7 +74,7 @@ const MAX_METRICS_ANALYZED = 3;
 
 function aiRegistry() {
   const env = getEnv();
-  return createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY);
+  return createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
 }
 
 async function gate(ctx: StageContext): Promise<StageResult | null> {
