@@ -404,6 +404,10 @@ function PolicyStep({ policy, onSaved }: { policy: AutonomyPolicy | null; onSave
   const [cap, setCap] = useState('1');
   const [approvedOnly, setApprovedOnly] = useState(true);
   const [ack, setAck] = useState(false);
+  // Batch 2 (B): explicit, workspace-scoped auto-preparation policy.
+  const [autoApproved, setAutoApproved] = useState(true);
+  const [autoCold, setAutoCold] = useState(false);
+  const [autoQuota, setAutoQuota] = useState('10');
   const [msg, setMsg] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
@@ -413,6 +417,9 @@ function PolicyStep({ policy, onSaved }: { policy: AutonomyPolicy | null; onSave
       setCap(String(policy.tier1PostingDailyCap ?? 1));
       setApprovedOnly(policy.tier1RequireApprovedPost !== false);
       setAck(!!policy.tier2HumanApprovalAck);
+      if (typeof policy.autoPrepareApprovedWork === 'boolean') setAutoApproved(policy.autoPrepareApprovedWork);
+      if (typeof policy.autoPrepareColdWork === 'boolean') setAutoCold(policy.autoPrepareColdWork);
+      if (typeof policy.dailyAutoPreparationQuota === 'number') setAutoQuota(String(policy.dailyAutoPreparationQuota));
     }
   }, [policy]);
 
@@ -426,6 +433,9 @@ function PolicyStep({ policy, onSaved }: { policy: AutonomyPolicy | null; onSave
         tier1PostingDailyCap: Number.parseInt(cap, 10) || 0,
         tier1RequireApprovedPost: approvedOnly,
         tier2HumanApprovalAck: ack,
+        autoPrepareApprovedWork: autoApproved,
+        autoPrepareColdWork: autoCold,
+        dailyAutoPreparationQuota: Math.max(0, Number.parseInt(autoQuota, 10) || 0),
       });
       onSaved(res.policy);
       setMsg(`${res.effectiveTier1Reason}`);
@@ -450,6 +460,15 @@ function PolicyStep({ policy, onSaved }: { policy: AutonomyPolicy | null; onSave
         <label className="muted"><input type="checkbox" checked={approvedOnly} onChange={(e) => setApprovedOnly(e.target.checked)} /> Only approved posts</label>
       </div>
       <label className="muted"><input type="checkbox" checked={ack} onChange={(e) => setAck(e.target.checked)} /> I understand Tier 2 always needs my approval (required to finish setup)</label>
+      <div style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.75rem', marginTop: '0.25rem' }}>
+        <p className="muted" style={{ fontWeight: 600 }}>Auto-preparation (internal drafts only — never sends or publishes)</p>
+        <label className="muted"><input type="checkbox" checked={autoApproved} onChange={(e) => setAutoApproved(e.target.checked)} /> Auto-prepare work justified by prior human judgment (imported leads, triaged opportunities, approved strategies/plans)</label>
+        <label className="muted"><input type="checkbox" checked={autoCold} onChange={(e) => setAutoCold(e.target.checked)} /> Also auto-prepare untouched opportunities/prospects (cold — off by default)</label>
+        <div className="actions">
+          <input value={autoQuota} onChange={(e) => setAutoQuota(e.target.value)} inputMode="numeric" aria-label="Daily auto-preparation quota" className="field" style={{ flex: '0 1 120px' }} />
+          <span className="muted">max automatic preparations per day (quota exhaustion preserves backlog)</span>
+        </div>
+      </div>
       <div><button type="submit" className="btn btn-primary" disabled={working}>{working ? 'Saving...' : 'Save policy'}</button></div>
       {msg ? <p className="muted">{msg}</p> : null}
     </form>

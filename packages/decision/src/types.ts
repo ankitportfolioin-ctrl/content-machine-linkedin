@@ -12,7 +12,10 @@ export type ActionKind =
   | 'prospect_relevance'
   | 'sales_content_signal';
 
-export type ActionStatus = 'PENDING' | 'DISMISSED' | 'COMPLETED';
+// Batch 2 (A): ACCEPTED authorizes preparation of internal work from a
+// recommendation. It is NOT execution approval: accepted actions still need
+// the existing human approval gates before any external consequence.
+export type ActionStatus = 'PENDING' | 'ACCEPTED' | 'DISMISSED' | 'COMPLETED';
 
 export interface EvidenceLink {
   label: string;

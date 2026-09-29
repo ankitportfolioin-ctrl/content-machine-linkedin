@@ -111,10 +111,31 @@ export class OperatorActionService {
     });
   }
 
+  /**
+   * Batch 2 (A): acceptance authorizes the system to prepare internal work
+   * from a recommendation. Acceptance is NOT execution approval: it creates
+   * no draft/review/publication, sends nothing, and leaves all existing
+   * approval gates enforced. Only PENDING actions can be accepted.
+   */
+  async accept(
+    workspaceId: string,
+    actionId: string,
+    provenance?: {
+      decidedBy?: string;
+      decisionReason?: string;
+      evidenceRefs?: string[];
+      model?: string;
+      modelVersion?: string;
+      policySnapshot?: Record<string, unknown>;
+    }
+  ) {
+    return this.transition(workspaceId, actionId, 'ACCEPTED', provenance);
+  }
+
   async transition(
     workspaceId: string,
     actionId: string,
-    to: 'DISMISSED' | 'COMPLETED',
+    to: 'ACCEPTED' | 'DISMISSED' | 'COMPLETED',
     provenance?: {
       decidedBy?: string;
       decisionReason?: string;
@@ -128,10 +149,14 @@ export class OperatorActionService {
     if (!row) {
       throw new DecisionError('NOT_FOUND', 'Operator action not found in this workspace.');
     }
-    if (row.status !== 'PENDING') {
+    const from = row.status;
+    const allowed =
+      (to === 'ACCEPTED' && from === 'PENDING') ||
+      ((to === 'DISMISSED' || to === 'COMPLETED') && (from === 'PENDING' || from === 'ACCEPTED'));
+    if (!allowed) {
       throw new DecisionError(
         'INVALID_TRANSITION',
-        `Only PENDING actions can transition (current: ${row.status}). DISMISSED actions cannot become COMPLETED.`
+        `Cannot transition ${from} -> ${to}. Allowed: PENDING -> ACCEPTED, PENDING/ACCEPTED -> DISMISSED/COMPLETED.`
       );
     }
     const now = new Date();
@@ -143,11 +168,19 @@ export class OperatorActionService {
       dailyPreparationCap: settings?.dailyPreparationCap ?? 0,
     };
 
+    // acceptedAt/acceptedBy ride on the Batch 2 migration; spread (not a
+    // fresh literal) so they pass assignability against stale generated
+    // input types.
+    const batch2 = (
+      to === 'ACCEPTED' ? { acceptedAt: now, acceptedBy: provenance?.decidedBy ?? 'system' } : {}
+    ) as Record<string, unknown>;
     return this.prisma.operatorAction.update({
       where: { id: row.id },
       data: {
         status: to,
-        ...(to === 'DISMISSED' ? { dismissedAt: now } : { completedAt: now }),
+        ...(to === 'DISMISSED' ? { dismissedAt: now } : {}),
+        ...(to === 'COMPLETED' ? { completedAt: now } : {}),
+        ...batch2,
         decidedBy: provenance?.decidedBy ?? 'system',
         decidedAt: now,
         decisionReason: provenance?.decisionReason ?? null,
@@ -175,8 +208,8 @@ export class OperatorActionService {
     if (row.kind !== 'objection_pattern' && row.kind !== 'prospect_relevance' && row.kind !== 'sales_content_signal') {
       throw new DecisionError('CONFLICT', `Only objection_pattern, prospect_relevance, and sales_content_signal actions can start ideas (kind: ${row.kind}).`);
     }
-    if (row.status !== 'PENDING') {
-      throw new DecisionError('CONFLICT', `Only PENDING actions can start ideas (current: ${row.status}).`);
+    if (row.status !== 'PENDING' && row.status !== 'ACCEPTED') {
+      throw new DecisionError('CONFLICT', `Only PENDING or ACCEPTED actions can start ideas (current: ${row.status}).`);
     }
     const meta = (row.subjectMeta ?? {}) as Record<string, unknown>;
     if (typeof meta['resultIdeaId'] === 'string') {
@@ -335,8 +368,8 @@ export class OperatorActionService {
     if (row.kind !== 'prospect_relevance') {
       throw new DecisionError('CONFLICT', `Only prospect_relevance actions can start sales research (kind: ${row.kind}).`);
     }
-    if (row.status !== 'PENDING') {
-      throw new DecisionError('CONFLICT', `Only PENDING actions can start sales research (current: ${row.status}).`);
+    if (row.status !== 'PENDING' && row.status !== 'ACCEPTED') {
+      throw new DecisionError('CONFLICT', `Only PENDING or ACCEPTED actions can start sales research (current: ${row.status}).`);
     }
     const meta = (row.subjectMeta ?? {}) as Record<string, unknown>;
     if (typeof meta['resultResearchId'] === 'string') {

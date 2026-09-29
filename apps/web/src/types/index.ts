@@ -712,6 +712,8 @@ export interface OperatorAction {
   status: OperatorActionStatus;
   dismissedAt?: string | null;
   completedAt?: string | null;
+  acceptedAt?: string | null;
+  acceptedBy?: string | null;
   decidedBy?: string | null;
   decidedAt?: string | null;
   decisionReason?: string | null;
@@ -865,6 +867,78 @@ export interface LearningProposal {
   status: LearningProposalStatus;
   confirmedBy?: string | null;
   confirmedAt?: string | null;
+  maturity?: string | null;
+  evidenceCount?: number | null;
+  [key: string]: unknown;
+}
+
+// ---------------------------------------------------------------------------
+// Batch 2: controlled preparation, maturity, attribution, comment signals
+// ---------------------------------------------------------------------------
+
+export type AuthorizationSource =
+  | 'IMPORT_ACCEPTANCE'
+  | 'PRIOR_TRIAGE'
+  | 'PRIOR_APPROVAL'
+  | 'EXISTING_STRATEGY'
+  | 'EXPLICIT_ACCEPTANCE'
+  | 'POLICY_AUTO_PREP';
+
+export interface AutoPrepPolicyState {
+  autoPrepareApprovedWork: boolean;
+  autoPrepareColdWork: boolean;
+  dailyAutoPreparationQuota: number;
+}
+
+export interface AutoPrepStatus {
+  policy: AutoPrepPolicyState;
+  usedToday: number;
+  remaining: number;
+  quotaReached: boolean;
+}
+
+export interface PreparationLogItem {
+  id: string;
+  kind: string;
+  subjectType: string;
+  subjectId?: string | null;
+  resultType?: string | null;
+  resultId?: string | null;
+  authorizationSource: AuthorizationSource | string;
+  authorizationReason: string;
+  status: 'PREPARED' | 'SKIPPED' | string;
+  skipReason?: string | null;
+  createdAt?: string;
+  [key: string]: unknown;
+}
+
+export type AttributionType = 'DIRECT' | 'INFERRED' | 'UNKNOWN';
+
+export interface AttributionLinkItem {
+  id: string;
+  sourceType: string;
+  sourceId: string;
+  targetType: string;
+  targetId: string;
+  attributionType: AttributionType | string;
+  evidenceRefs: string[];
+  reason?: string | null;
+  recordedBy?: string | null;
+  recordedAt?: string;
+  [key: string]: unknown;
+}
+
+export interface CommentSalesSignalItem {
+  id: string;
+  commentId: string;
+  audienceSignalId?: string | null;
+  signalType: string;
+  evidence: string;
+  reason: string;
+  status: string;
+  reviewedBy?: string | null;
+  reviewedAt?: string | null;
+  createdAt?: string;
   [key: string]: unknown;
 }
 
@@ -902,8 +976,8 @@ export interface AudienceSegment {
 }
 
 export interface LearningDashboard {
-  whatWeKnow: Array<{ id: string; dimension: string; pattern: string; sample: number; confidence?: number | null }>;
-  whatWeThink: Array<{ id: string; dimension: string; pattern: string; confidence?: number | null }>;
+  whatWeKnow: Array<{ id: string; dimension: string; pattern: string; sample: number; confidence?: number | null; maturity?: string | null; evidenceCount?: number | null }>;
+  whatWeThink: Array<{ id: string; dimension: string; pattern: string; confidence?: number | null; maturity?: string | null; evidenceCount?: number | null }>;
   whatWeAreTesting: Array<{ id: string; hypothesis: string; variable: string; metric: string }>;
   whatWeDontKnow: string[];
 }
@@ -954,6 +1028,9 @@ export interface AutonomyPolicy {
   tier1PostingDailyCap: number;
   tier1RequireApprovedPost: boolean;
   tier2HumanApprovalAck: boolean;
+  autoPrepareApprovedWork?: boolean;
+  autoPrepareColdWork?: boolean;
+  dailyAutoPreparationQuota?: number;
   [key: string]: unknown;
 }
 

@@ -7,3 +7,4 @@ export * from './explain';
 export * from './actions';
 export * from './initiation';
 export * from './signals';
+export * from './autoPreparation';

@@ -1,9 +1,9 @@
 import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, requireRole, AuthenticatedRequest } from '../middleware/auth';
-import { learningSignalCreateSchema, learningDeriveSchema, learningConfirmSchema, contentOutcomeDeriveSchema } from '@growth-operator/schemas';
+import { learningSignalCreateSchema, learningDeriveSchema, learningConfirmSchema, contentOutcomeDeriveSchema, maturityPromoteSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
-import { LearningDerivationService, deriveProposal, ContentOutcomeService } from '@growth-operator/learning';
+import { LearningDerivationService, deriveProposal, ContentOutcomeService, recordObservation, promoteMaturity, EVIDENCE_MATURITY_ORDER } from '@growth-operator/learning';
 import { forwardLearningError } from '../utils/learningErrors';
 const router: ExpressRouter = Router();
 
@@ -251,6 +251,38 @@ router.post('/derived/:proposalId/reject', async (req, res, next) => {
       authReq.workspaceId, proposalId, 'reject', { userId: authReq.user.id, role: authReq.workspaceRole }
     );
     res.json({ proposal });
+  } catch (error) {
+    forwardLearningError(error, next);
+  }
+});
+
+// Batch 2 (C): record one occurrence of evidence. Advances UNKNOWN ->
+// OBSERVED -> REPEATED_SIGNAL only; later stages need explicit promotion.
+router.post('/derived/:proposalId/observe', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { proposalId } = req.params;
+    if (!proposalId) throw new NotFoundError('Learning Proposal');
+    const result = await recordObservation(prisma, authReq.workspaceId, proposalId);
+    res.json({ proposal: result, ladder: EVIDENCE_MATURITY_ORDER });
+  } catch (error) {
+    forwardLearningError(error, next);
+  }
+});
+
+// Batch 2 (C): explicit single-step promotion with recorded evidence.
+// CONFIRMED is rejected here — it requires human confirmation.
+router.post('/derived/:proposalId/promote', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { proposalId } = req.params;
+    if (!proposalId) throw new NotFoundError('Learning Proposal');
+    const data = maturityPromoteSchema.parse(req.body);
+    const result = await promoteMaturity(prisma, authReq.workspaceId, proposalId, data.to, {
+      sourceMetricIds: data.sourceMetricIds,
+      reason: data.reason,
+    });
+    res.json({ proposal: result, ladder: EVIDENCE_MATURITY_ORDER });
   } catch (error) {
     forwardLearningError(error, next);
   }

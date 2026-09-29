@@ -72,7 +72,7 @@ export function LearningPage() {
         <h3 className="section-title">What we know <span className="badge badge-success">confirmed</span></h3>
         {!data || data.whatWeKnow.length === 0 ? <p className="muted">Insufficient data: no confirmed patterns yet.</p> : (
           <ul className="bullet-list">
-            {data.whatWeKnow.map((k) => <li key={k.id}><strong>{k.dimension}</strong>: {k.pattern} (n={k.sample})</li>)}
+            {data.whatWeKnow.map((k) => <li key={k.id}><strong>{k.dimension}</strong>: {k.pattern} (n={k.sample}, evidence {String(k.maturity ?? 'CONFIRMED')})</li>)}
           </ul>
         )}
       </div>
@@ -81,7 +81,7 @@ export function LearningPage() {
         <h3 className="section-title">What we think <span className="badge badge-warning">proposed</span></h3>
         {!data || data.whatWeThink.length === 0 ? <p className="muted">No proposed patterns.</p> : (
           <ul className="bullet-list">
-            {data.whatWeThink.map((k) => <li key={k.id}><strong>{k.dimension}</strong>: {k.pattern}</li>)}
+            {data.whatWeThink.map((k) => <li key={k.id}><strong>{k.dimension}</strong>: {k.pattern} (evidence {String(k.maturity ?? 'HYPOTHESIS')}{typeof k.evidenceCount === 'number' ? `, ${k.evidenceCount} occurrence${k.evidenceCount === 1 ? '' : 's'}` : ''})</li>)}
           </ul>
         )}
       </div>

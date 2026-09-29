@@ -56,7 +56,7 @@ router.get('/actions', async (req, res, next) => {
   try {
     const authReq = req as unknown as AuthenticatedRequest;
     const query = operatorActionsQuerySchema.parse(req.query);
-    const status = query.status.toUpperCase() as 'PENDING' | 'DISMISSED' | 'COMPLETED';
+    const status = query.status.toUpperCase() as 'PENDING' | 'ACCEPTED' | 'DISMISSED' | 'COMPLETED';
 
     const actions = await actionService.listWorkspace(
       authReq.workspaceId,
@@ -64,6 +64,29 @@ router.get('/actions', async (req, res, next) => {
       query.limit
     );
     res.json({ actions });
+  } catch (error) {
+    forwardDecisionError(error, next);
+  }
+});
+
+// Batch 2 (A): acceptance authorizes preparation of internal work from a
+// recommendation. It is NOT execution approval: nothing is sent, published,
+// or used to contact anyone, and all approval gates stay enforced.
+router.post('/actions/:actionId/accept', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { actionId } = req.params;
+    if (!actionId) throw new NotFoundError('Operator Action');
+    const provenance = {
+      decidedBy: authReq.user.id,
+      decisionReason: req.body?.reason ?? null,
+      evidenceRefs: req.body?.evidenceRefs ?? [],
+      model: req.body?.model ?? null,
+      modelVersion: req.body?.modelVersion ?? null,
+      policySnapshot: req.body?.policySnapshot ?? null,
+    };
+    const action = await actionService.accept(authReq.workspaceId, actionId, provenance);
+    res.json({ action });
   } catch (error) {
     forwardDecisionError(error, next);
   }

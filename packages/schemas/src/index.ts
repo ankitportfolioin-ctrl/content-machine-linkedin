@@ -492,7 +492,7 @@ export const operatorActionKindSchema = z.enum([
 ]);
 
 export const operatorActionsQuerySchema = z.object({
-  status: z.enum(['pending', 'dismissed', 'completed']).default('pending'),
+  status: z.enum(['pending', 'accepted', 'dismissed', 'completed']).default('pending'),
   kind: z.string().max(100).optional(),
   limit: z.coerce.number().int().positive().max(100).default(20),
 });
@@ -703,6 +703,34 @@ export const policyUpdateSchema = z.object({
   tier1PostingDailyCap: z.number().int().min(0).max(10),
   tier1RequireApprovedPost: z.boolean(),
   tier2HumanApprovalAck: z.boolean(),
+  // Batch 2 (B): explicit workspace auto-preparation policy.
+  autoPrepareApprovedWork: z.boolean().optional(),
+  autoPrepareColdWork: z.boolean().optional(),
+  dailyAutoPreparationQuota: z.number().int().min(0).max(100).optional(),
+});
+
+// Batch 2 (D): provenance-based attribution links.
+export const attributionLinkSchema = z.object({
+  sourceType: z.string().min(1).max(100),
+  sourceId: z.string().min(1).max(100),
+  targetType: z.string().min(1).max(100),
+  targetId: z.string().min(1).max(100),
+  attributionType: z.enum(['DIRECT', 'INFERRED', 'UNKNOWN']),
+  evidenceRefs: z.array(z.string().min(1).max(500)).max(50).default([]),
+  reason: z.string().max(2000).optional(),
+});
+
+export const attributionUpdateSchema = z.object({
+  attributionType: z.enum(['DIRECT', 'INFERRED', 'UNKNOWN']).optional(),
+  evidenceRefs: z.array(z.string().min(1).max(500)).max(50).optional(),
+  reason: z.string().max(2000).optional(),
+});
+
+// Batch 2 (C): evidence maturity promotion (single step, evidence-backed).
+export const maturityPromoteSchema = z.object({
+  to: z.enum(['OBSERVED', 'REPEATED_SIGNAL', 'HYPOTHESIS', 'EXPERIMENT', 'SUPPORTED_PATTERN']),
+  sourceMetricIds: z.array(z.string().uuid()).max(100).default([]),
+  reason: z.string().min(1).max(2000),
 });
 
 export const killUpdateSchema = z.object({

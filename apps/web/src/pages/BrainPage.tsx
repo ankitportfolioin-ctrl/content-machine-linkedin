@@ -957,6 +957,9 @@ function LearningSection() {
                     <span className={`badge ${isConfirmed ? 'badge-success' : 'badge-neutral'}`}>
                       {status === 'PROPOSED' ? 'Proposed (not active)' : status.charAt(0) + status.slice(1).toLowerCase()}
                     </span>
+                    <span className="badge badge-info" title="Evidence maturity: UNKNOWN → OBSERVED → REPEATED_SIGNAL → HYPOTHESIS → EXPERIMENT → SUPPORTED_PATTERN → CONFIRMED. Only human confirmation reaches CONFIRMED.">
+                      Evidence: {String(proposal.maturity ?? (isConfirmed ? 'CONFIRMED' : 'HYPOTHESIS'))}
+                    </span>
                   </div>
                   <p style={{ color: 'var(--color-text-secondary)' }}>
                     Observed pattern: {String(proposal.observedPattern)}

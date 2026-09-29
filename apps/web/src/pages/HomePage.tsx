@@ -5,9 +5,11 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import {
   ApiRequestError,
+  acceptAction,
   completeAction,
   dismissAction,
   friendlyErrorMessage,
+  getAutoPrepStatus,
   getReadiness,
   getRun,
   isAiUnavailable,
@@ -18,7 +20,7 @@ import {
   startIdeaFromAction,
   triggerRun,
 } from '../services/api';
-import { DailyRunSummary, IntelligenceReport, ReadinessState } from '../types';
+import { AutoPrepStatus, DailyRunSummary, IntelligenceReport, ReadinessState } from '../types';
 
 interface StatusBadgeProps {
   status: HealthResponse['status'];
@@ -424,6 +426,7 @@ function RecommendedSteps() {
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
   const [rowError, setRowError] = useState<Record<string, string>>({});
+  const [autoPrep, setAutoPrep] = useState<AutoPrepStatus | null>(null);
   // Hooks must all run before any early return below: adding navigate here fixes
   // a hooks-order crash (first render returned during loading, later renders
   // called one extra hook).
@@ -434,9 +437,13 @@ function RecommendedSteps() {
     setError(null);
     setAiUnavailable(false);
     try {
-      const data = await listNextActions({ status: 'pending' });
+      const [data, prep] = await Promise.all([
+        listNextActions({ status: 'pending' }),
+        getAutoPrepStatus().catch(() => null),
+      ]);
       setActions(data.actions ?? []);
       setTotal(typeof data.total === 'number' ? data.total : (data.actions ?? []).length);
+      if (prep) setAutoPrep(prep.status);
     } catch (err) {
       if (isAiUnavailable(err)) {
         setAiUnavailable(true);
@@ -585,9 +592,38 @@ function RecommendedSteps() {
     }
   }
 
+  // Batch 2 (A): acceptance authorizes preparation of internal work — it is
+  // not execution approval. The action leaves the pending queue; preparation
+  // happens through the auto-preparation pass or the Start-idea/Research
+  // buttons, and every approval gate stays enforced.
+  async function handleAccept(id: string) {
+    setWorkingId(id);
+    setRowError((prev) => {
+      const next = { ...prev };
+      delete next[id];
+      return next;
+    });
+    try {
+      await acceptAction(id, { reason: 'Accepted for preparation from Home.' });
+      await fetchData();
+    } catch (err) {
+      setRowError((prev) => ({ ...prev, [id]: friendlyErrorMessage(err) }));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+        {autoPrep ? (
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+            Auto-preparation: {autoPrep.usedToday}/{autoPrep.policy.dailyAutoPreparationQuota} used today
+            {autoPrep.quotaReached ? ' · quota reached (backlog preserved for tomorrow)' : ''}
+            {!autoPrep.policy.autoPrepareApprovedWork ? ' · approved-work auto-prep off' : ''}
+            {autoPrep.policy.autoPrepareColdWork ? ' · cold auto-prep on' : ''}
+          </p>
+        ) : <span />}
         <button className="btn btn-secondary" onClick={() => void fetchData()}>
           Refresh
         </button>
@@ -609,6 +645,7 @@ function RecommendedSteps() {
                 </p>
                 <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
                   {kindLabel(String(action.kind))} · Score: {String(action.score)}
+                  {String(action.status ?? 'PENDING').toUpperCase() === 'ACCEPTED' ? ' · Accepted for preparation' : ''}
                 </p>
                 {topReason ? (
                   <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{topReason}</p>
@@ -666,6 +703,16 @@ function RecommendedSteps() {
                         onClick={() => void handleResearchProspect(String(action.id), action.subjectId)}
                       >
                         {workingId === String(action.id) ? 'Saving...' : 'Research prospect'}
+                      </button>
+                    ) : null}
+                    {String(action.status ?? 'PENDING').toUpperCase() === 'PENDING' ? (
+                      <button
+                        className="btn btn-secondary"
+                        disabled={workingId === String(action.id)}
+                        onClick={() => void handleAccept(String(action.id))}
+                        title="Accept for preparation: authorizes internal prep work only. Nothing is sent or published."
+                      >
+                        {workingId === String(action.id) ? 'Saving...' : 'Accept for preparation'}
                       </button>
                     ) : null}
                     <button

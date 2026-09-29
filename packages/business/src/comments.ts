@@ -60,10 +60,42 @@ export function suggestResponse(type: CommentKind, text: string): string {
   }
 }
 
+/**
+ * Batch 2 (F): COMMENT -> classification -> audience signal -> sales
+ * intelligence bridge. Every step preserves provenance back to the exact
+ * comment. A LEAD_SIGNAL comment may produce a sales intelligence signal
+ * for HUMAN REVIEW — never an automatic prospect, outreach, conversation,
+ * or revenue record.
+ */
+const COMMENT_AUDIENCE_SIGNALS: Record<string, { signalType: string; insight: string; strength: number }> = {
+  QUESTION: { signalType: 'COMMENT_QUESTION', insight: 'Audience is asking questions — topic needs clearer explanation.', strength: 0.7 },
+  REQUEST: { signalType: 'COMMENT_REQUEST', insight: 'Audience wants implementation, not just explanation.', strength: 1.0 },
+  TECHNICAL_QUESTION: { signalType: 'COMMENT_REQUEST', insight: 'Audience wants implementation, not just explanation.', strength: 1.0 },
+  PRAISE: { signalType: 'COMMENT_PRAISE', insight: 'Audience resonates with this angle — consider doubling down.', strength: 0.6 },
+  CRITICISM: { signalType: 'COMMENT_CRITICISM', insight: 'Audience pushes back — address the objection explicitly.', strength: 0.8 },
+  DISAGREEMENT: { signalType: 'COMMENT_CRITICISM', insight: 'Audience pushes back — address the objection explicitly.', strength: 0.8 },
+  LEAD_SIGNAL: { signalType: 'COMMENT_LEAD_SIGNAL', insight: 'A reader shows buying intent — flagged for human sales review.', strength: 0.9 },
+};
+
+interface CommentSalesSignalStore {
+  commentSalesSignal: {
+    findFirst(args: unknown): Promise<{ id: string } | null>;
+    findMany(args: unknown): Promise<unknown[]>;
+    create(args: unknown): Promise<{ id: string }>;
+    update(args: unknown): Promise<unknown>;
+  };
+}
+
 export class CommentBrainService {
   private prisma: PrismaClient;
   constructor(prisma: PrismaClient) {
     this.prisma = prisma;
+  }
+
+  private signalStore(): CommentSalesSignalStore {
+    // CommentSalesSignal rides on the Batch 2 migration; cast until
+    // generated types refresh.
+    return this.prisma as unknown as CommentSalesSignalStore;
   }
 
   async ingest(workspaceId: string, input: CommentInput) {
@@ -87,22 +119,53 @@ export class CommentBrainService {
       },
     });
 
+    // Step 2: structured audience/business signal with provenance.
     let audienceInsight: string | null = null;
-    if (c.isRequest || c.type === 'TECHNICAL_QUESTION') {
-      audienceInsight = 'Audience wants implementation, not just explanation.';
-      await this.prisma.audienceSignal.create({
+    let audienceSignalId: string | null = null;
+    const mapping = COMMENT_AUDIENCE_SIGNALS[c.type];
+    // SPAM and plain CONVERSATION carry no business signal.
+    if (mapping) {
+      audienceInsight = mapping.insight;
+      const signal = await this.prisma.audienceSignal.create({
         data: {
           workspaceId,
-          signalType: 'COMMENT_REQUEST',
+          signalType: mapping.signalType,
           source: 'comments',
-          description: `Request signal: "${validated.text.slice(0, 200)}"`,
-          evidence: { commentId: created.id, type: c.type },
-          strength: 1.0,
+          description: `${c.type} signal from ${created.authorName ?? 'a reader'}: "${validated.text.slice(0, 200)}"`,
+          evidence: { commentId: created.id, type: c.type, contentVersionId: created.contentVersionId },
+          strength: mapping.strength,
         },
       });
+      audienceSignalId = signal.id;
     }
 
-    return { comment: created, classification: c, suggestedResponse: suggestResponse(c.type, validated.text), audienceInsight };
+    // Step 3-4: LEAD_SIGNAL -> sales intelligence signal (human review).
+    // LEAD_SIGNAL is not a confirmed lead: no prospect, outreach,
+    // conversation, or revenue record is created here.
+    let salesSignalId: string | null = null;
+    if (c.type === 'LEAD_SIGNAL' && audienceSignalId) {
+      const sales = await this.signalStore().commentSalesSignal.create({
+        data: {
+          workspaceId,
+          commentId: created.id,
+          audienceSignalId,
+          signalType: 'COMMENT_LEAD_SIGNAL',
+          evidence: validated.text.slice(0, 2000),
+          reason: `Sales signal created from a comment classified as LEAD_SIGNAL (comment ${created.id}). LEAD_SIGNAL is not a confirmed lead — human review required before any prospect or sales action.`,
+          status: 'PENDING_REVIEW',
+        },
+      });
+      salesSignalId = (sales as { id: string }).id;
+    }
+
+    return {
+      comment: created,
+      classification: c,
+      suggestedResponse: suggestResponse(c.type, validated.text),
+      audienceInsight,
+      audienceSignalId,
+      salesSignalId,
+    };
   }
 
   async list(workspaceId: string, filter: { type?: string; contentVersionId?: string } = {}, take = 50) {
@@ -114,6 +177,51 @@ export class CommentBrainService {
       },
       orderBy: { postedAt: 'desc' },
       take,
+    });
+  }
+
+  /** Which sales intelligence signals came from this comment? */
+  async salesSignalsForComment(workspaceId: string, commentId: string) {
+    const comment = await this.prisma.comment.findFirst({ where: { id: commentId, workspaceId } });
+    if (!comment) return [];
+    return this.signalStore().commentSalesSignal.findMany({
+      where: { workspaceId, commentId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async listSalesSignals(workspaceId: string, status?: string, take = 50) {
+    return this.signalStore().commentSalesSignal.findMany({
+      where: { workspaceId, ...(status ? { status } : {}) },
+      orderBy: { createdAt: 'desc' },
+      take: Math.min(100, Math.max(1, take)),
+    });
+  }
+
+  /**
+   * Human review of a sales signal. REVIEWED keeps the signal as reviewed
+   * intelligence; DISMISSED drops it. Neither creates a prospect — that
+   * stays a separate explicit human action with its own evidence.
+   */
+  async reviewSalesSignal(
+    workspaceId: string,
+    signalId: string,
+    decision: 'REVIEWED' | 'DISMISSED',
+    reviewerId?: string
+  ) {
+    const existing = await this.signalStore().commentSalesSignal.findFirst({
+      where: { id: signalId, workspaceId },
+    });
+    if (!existing) {
+      throw new Error('Sales signal not found in this workspace.');
+    }
+    return this.signalStore().commentSalesSignal.update({
+      where: { id: signalId },
+      data: {
+        status: decision === 'REVIEWED' ? 'REVIEWED' : 'DISMISSED',
+        reviewedBy: reviewerId ?? null,
+        reviewedAt: new Date(),
+      },
     });
   }
 }

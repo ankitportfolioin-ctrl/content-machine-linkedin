@@ -9,14 +9,17 @@ import {
   friendlyErrorMessage,
   isAiUnavailable,
   listClassifications,
+  listCommentSalesSignals,
   listContentSignals,
   listFollowUps,
   listSalesConversations,
   listSalesMessages,
   recommendFollowUp,
   recordSalesMessage,
+  reviewCommentSalesSignal,
 } from '../services/api';
 import {
+  CommentSalesSignalItem,
   ContentSignalItem,
   ConversationClassification,
   FollowUpRecommendation,
@@ -81,6 +84,89 @@ export function InboxPage() {
       </div>
       <ConversationsList onSelect={setSelectedId} />
       <ContentSignalsPanel />
+      <CommentSalesSignalsPanel />
+    </div>
+  );
+}
+
+// Batch 2 (F): sales intelligence signals originating from comments. A
+// LEAD_SIGNAL comment is not a confirmed lead: signals wait for human
+// review here, and reviewing never creates a prospect automatically.
+function CommentSalesSignalsPanel() {
+  const [signals, setSignals] = useState<CommentSalesSignalItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [workingId, setWorkingId] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listCommentSalesSignals();
+      setSignals(data.signals ?? []);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  async function handleReview(id: string, decision: 'REVIEWED' | 'DISMISSED') {
+    setWorkingId(id);
+    try {
+      await reviewCommentSalesSignal(id, decision);
+      await fetchData();
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setWorkingId(null);
+    }
+  }
+
+  const pending = signals.filter((s) => String(s.status) === 'PENDING_REVIEW');
+
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+        Comment sales signals ({pending.length} pending review)
+      </h3>
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+        Buying-intent signals extracted from comment classifications. A signal is not a lead — review first, then create a prospect explicitly if warranted.
+      </p>
+      {loading ? <LoadingText label="Loading comment signals..." /> : null}
+      {!loading && error ? (
+        <p role="alert" style={{ fontSize: '0.875rem', color: 'var(--color-error)' }}>{error}</p>
+      ) : null}
+      {!loading && !error && signals.length === 0 ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>No comment sales signals yet.</p>
+      ) : null}
+      {signals.length > 0 ? (
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', listStyle: 'none', padding: 0, marginTop: '0.5rem' }}>
+          {signals.slice(0, 20).map((s) => (
+            <li key={String(s.id)} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+              <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>
+                {String(s.signalType)} · {String(s.status).replace(/_/g, ' ')}
+              </p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{String(s.reason)}</p>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>From comment {String(s.commentId).slice(0, 8)}…</p>
+              {String(s.status) === 'PENDING_REVIEW' ? (
+                <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                  <button className="btn btn-secondary" disabled={workingId === String(s.id)} onClick={() => void handleReview(String(s.id), 'REVIEWED')}>
+                    Mark reviewed
+                  </button>
+                  <button className="btn btn-secondary" disabled={workingId === String(s.id)} onClick={() => void handleReview(String(s.id), 'DISMISSED')}>
+                    Dismiss
+                  </button>
+                </div>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
     </div>
   );
 }

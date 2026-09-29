@@ -35,4 +35,42 @@ router.get('/signals', async (req, res, next) => {
   } catch (e) { next(e); }
 });
 
+// Batch 2 (F): sales intelligence signals originating from comments.
+// LEAD_SIGNAL is not a confirmed lead: signals wait for human review and
+// never auto-create prospects, outreach, or conversations.
+router.get('/sales-signals', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { status } = req.query as Record<string, string | undefined>;
+    res.json({ signals: await svc.listSalesSignals(authReq.workspaceId, status) });
+  } catch (e) { next(e); }
+});
+
+router.get('/:commentId/sales-signals', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { commentId } = req.params;
+    if (!commentId) {
+      res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'commentId is required.' } });
+      return;
+    }
+    res.json({ signals: await svc.salesSignalsForComment(authReq.workspaceId, commentId) });
+  } catch (e) { next(e); }
+});
+
+router.post('/sales-signals/:signalId/review', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { signalId } = req.params;
+    if (!signalId) {
+      res.status(400).json({ error: { code: 'VALIDATION_ERROR', message: 'signalId is required.' } });
+      return;
+    }
+    const decision = req.body?.decision === 'DISMISSED' ? 'DISMISSED' : 'REVIEWED';
+    res.json({
+      signal: await svc.reviewSalesSignal(authReq.workspaceId, signalId, decision, authReq.user.id),
+    });
+  } catch (e) { next(e); }
+});
+
 export default router;

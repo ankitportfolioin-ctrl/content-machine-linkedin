@@ -1374,6 +1374,113 @@ export async function dismissAction(id: string, provenance?: ProvenanceInput): P
   });
 }
 
+// Batch 2 (A): acceptance authorizes preparation — never execution.
+export async function acceptAction(id: string, provenance?: ProvenanceInput): Promise<ActionDetailResponse> {
+  return authedRequest<ActionDetailResponse>(`/operator/actions/${encodeURIComponent(id)}/accept`, {
+    method: 'POST',
+    body: JSON.stringify(provenance ?? {}),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Batch 2: auto-preparation status / runs / log
+// ---------------------------------------------------------------------------
+
+export async function getAutoPrepStatus(): Promise<{ status: import('../types').AutoPrepStatus }> {
+  return authedRequest<{ status: import('../types').AutoPrepStatus }>(`/auto-preparation/status`);
+}
+
+export async function runAutoPreparation(limit?: number): Promise<{
+  prepared: Array<{ id: string; kind: string; subjectId: string; authorizationReason: string }>;
+  skipped: Array<{ id: string; kind: string; subjectId: string; skipReason: string }>;
+  quotaReached: boolean;
+  usedToday: number;
+}> {
+  return authedRequest(`/auto-preparation/run`, {
+    method: 'POST',
+    body: JSON.stringify({ limit }),
+  });
+}
+
+export async function listPreparationLogs(take?: number): Promise<{ logs: import('../types').PreparationLogItem[] }> {
+  const suffix = typeof take === 'number' ? `?take=${encodeURIComponent(String(take))}` : '';
+  return authedRequest(`/auto-preparation/log${suffix}`);
+}
+
+// ---------------------------------------------------------------------------
+// Batch 2 (D): attribution links (DIRECT / INFERRED / UNKNOWN)
+// ---------------------------------------------------------------------------
+
+export async function createAttributionLink(input: {
+  sourceType: string;
+  sourceId: string;
+  targetType: string;
+  targetId: string;
+  attributionType: string;
+  evidenceRefs?: string[];
+  reason?: string;
+}): Promise<{ link: import('../types').AttributionLinkItem }> {
+  return authedRequest(`/attribution/links`, { method: 'POST', body: JSON.stringify(input) });
+}
+
+export async function updateAttributionLink(
+  id: string,
+  patch: { attributionType?: string; evidenceRefs?: string[]; reason?: string },
+): Promise<{ link: import('../types').AttributionLinkItem }> {
+  return authedRequest(`/attribution/links/${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    body: JSON.stringify(patch),
+  });
+}
+
+export async function getAttributionForTarget(
+  targetType: string,
+  targetId: string,
+): Promise<{ links: import('../types').AttributionLinkItem[]; strongest: string }> {
+  return authedRequest(
+    `/attribution?targetType=${encodeURIComponent(targetType)}&targetId=${encodeURIComponent(targetId)}`,
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Batch 2 (F): comment sales signals (human review, never auto-prospect)
+// ---------------------------------------------------------------------------
+
+export async function listCommentSalesSignals(status?: string): Promise<{ signals: import('../types').CommentSalesSignalItem[] }> {
+  const suffix = status ? `?status=${encodeURIComponent(status)}` : '';
+  return authedRequest(`/comments/sales-signals${suffix}`);
+}
+
+export async function reviewCommentSalesSignal(
+  id: string,
+  decision: 'REVIEWED' | 'DISMISSED',
+): Promise<{ signal: import('../types').CommentSalesSignalItem }> {
+  return authedRequest(`/comments/sales-signals/${encodeURIComponent(id)}/review`, {
+    method: 'POST',
+    body: JSON.stringify({ decision }),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Batch 2 (C): evidence maturity observation + promotion
+// ---------------------------------------------------------------------------
+
+export async function observeProposal(
+  id: string,
+): Promise<{ proposal: import('../types').LearningProposal }> {
+  return authedRequest(`/learning/derived/${encodeURIComponent(id)}/observe`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function promoteProposal(
+  id: string,
+  input: { to: string; sourceMetricIds?: string[]; reason: string },
+): Promise<{ proposal: import('../types').LearningProposal }> {
+  return authedRequest(`/learning/derived/${encodeURIComponent(id)}/promote`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
 export async function completeAction(id: string, provenance?: ProvenanceInput): Promise<ActionDetailResponse> {
   return authedRequest<ActionDetailResponse>(`/operator/actions/${encodeURIComponent(id)}/complete`, {
     method: 'POST',
@@ -1466,7 +1573,7 @@ export async function updateSchedule(input: { timezone: string; dailyRunTime: st
   return authedRequest(`/onboarding/schedule`, { method: 'PUT', body: JSON.stringify(input) });
 }
 
-export async function updatePolicy(input: { tier1PostingEnabled: boolean; tier1PostingDailyCap: number; tier1RequireApprovedPost: boolean; tier2HumanApprovalAck: boolean }): Promise<{ policy: import('../types').AutonomyPolicy; effectiveTier1: string; effectiveTier1Reason: string }> {
+export async function updatePolicy(input: { tier1PostingEnabled: boolean; tier1PostingDailyCap: number; tier1RequireApprovedPost: boolean; tier2HumanApprovalAck: boolean; autoPrepareApprovedWork?: boolean; autoPrepareColdWork?: boolean; dailyAutoPreparationQuota?: number }): Promise<{ policy: import('../types').AutonomyPolicy; effectiveTier1: string; effectiveTier1Reason: string }> {
   return authedRequest(`/onboarding/policy`, { method: 'PUT', body: JSON.stringify(input) });
 }
 

@@ -198,8 +198,11 @@ export class BrainReportService {
     const confirmed = proposals.filter((p: any) => p.status === 'CONFIRMED');
     const running = await this.prisma.experiment.findMany({ where: { workspaceId, status: 'RUNNING' as any }, take: 20 });
     return {
-      whatWeKnow: confirmed.map((p: any) => ({ id: p.id, dimension: p.dimension, pattern: p.observedPattern, sample: p.sampleSize, confidence: p.confidence })),
-      whatWeThink: proposals.filter((p: any) => p.status === 'PROPOSED').map((p: any) => ({ id: p.id, dimension: p.dimension, pattern: p.observedPattern, confidence: p.confidence })),
+      // Batch 2 (C): expose evidence maturity honestly. Maturity rides on
+      // the Batch 2 migration; read through `any` until generated types
+      // refresh. CONFIRMED maturity only ever comes from human confirmation.
+      whatWeKnow: confirmed.map((p: any) => ({ id: p.id, dimension: p.dimension, pattern: p.observedPattern, sample: p.sampleSize, confidence: p.confidence, maturity: p.maturity ?? 'CONFIRMED', evidenceCount: p.evidenceCount ?? p.sampleSize })),
+      whatWeThink: proposals.filter((p: any) => p.status === 'PROPOSED').map((p: any) => ({ id: p.id, dimension: p.dimension, pattern: p.observedPattern, confidence: p.confidence, maturity: p.maturity ?? 'HYPOTHESIS', evidenceCount: p.evidenceCount ?? p.sampleSize })),
       whatWeAreTesting: running.map((e: any) => ({ id: e.id, hypothesis: e.hypothesis, variable: e.variable, metric: e.metricName })),
       whatWeDontKnow: [
         'Whether posting time materially affects reach (no timing experiment yet).',

@@ -96,10 +96,17 @@ export async function runDailyLoop(
   const resumed = existing !== null;
 
   const settings = await getWorkspaceSettings(workspaceId);
+  // Batch 2 (E): execution draws from its own cap (default 0 = unavailable).
+  // dailyExecutionCap rides on the Batch 2 migration; read through a cast.
+  const executionCap =
+    typeof (settings as unknown as { dailyExecutionCap?: unknown }).dailyExecutionCap === 'number'
+      ? ((settings as unknown as { dailyExecutionCap: number }).dailyExecutionCap)
+      : 0;
   const budget = new RunBudget({
     llmCalls: settings.dailyLlmCallCap,
     fetches: settings.dailyFetchCap,
     preparations: settings.dailyPreparationCap,
+    executions: executionCap,
   });
 
   const doneStages = new Set(

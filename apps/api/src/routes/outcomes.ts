@@ -4,6 +4,7 @@ import { outcomeMetricCreateSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
 import { OutcomeService } from '@growth-operator/learning';
+import { AttributionService } from '@growth-operator/business';
 import { forwardLearningError } from '../utils/learningErrors';
 
 const router: ExpressRouter = Router();
@@ -60,7 +61,14 @@ router.get('/:metricId', async (req, res, next) => {
     if (!metricId) throw new NotFoundError('Outcome Metric');
     const metric = await prisma.outcomeMetric.findFirst({ where: { id: metricId, workspaceId: authReq.workspaceId } });
     if (!metric) throw new NotFoundError('Outcome Metric');
-    res.json({ outcomeMetric: metric });
+    // Batch 2 (D): surface the evidence level honestly. UNKNOWN is
+    // reported as UNKNOWN — never a stronger label than evidence supports.
+    const attribution = new AttributionService(prisma);
+    const links = await attribution.listForTarget(authReq.workspaceId, 'outcomeMetric', metricId);
+    res.json({
+      outcomeMetric: metric,
+      attribution: { links, strongest: AttributionService.strongest(links) },
+    });
   } catch (error) {
     next(error);
   }

@@ -136,6 +136,17 @@ export class LearningDerivationService {
         throw new LearningError('EVIDENCE_MISSING', 'One or more source metrics were not found in this workspace.');
       }
     }
+    // Batch 2 (C): a new proposal enters the ladder as a HYPOTHESIS with
+    // its recorded sample size as the occurrence count — never CONFIRMED,
+    // no matter how strong a single observation looks. (maturity /
+    // evidenceCount ride on the Batch 2 migration; cast until generated
+    // types refresh.)
+    // Spread (not a fresh literal) so the Batch 2-only keys pass
+    // assignability against the stale generated input type.
+    const batch2 = {
+      maturity: 'HYPOTHESIS',
+      evidenceCount: Math.max(1, input.sampleSize),
+    } as Record<string, unknown>;
     return this.prisma.learningProposal.create({
       data: {
         workspaceId: input.workspaceId,
@@ -149,6 +160,7 @@ export class LearningDerivationService {
         reason: input.reason,
         confidence: input.confidence ?? null,
         status: 'PROPOSED',
+        ...batch2,
       },
     });
   }
@@ -172,9 +184,17 @@ export class LearningDerivationService {
       if (proposal.status !== 'PROPOSED') {
         throw new LearningError('APPROVAL_NOT_ALLOWED', `Only PROPOSED weights can be confirmed (current: ${proposal.status}).`);
       }
+      // Batch 2 (C): human confirmation is the ONLY path to CONFIRMED
+      // maturity. Automatic promotion paths can never set it.
+      const batch2 = { maturity: 'CONFIRMED' } as Record<string, unknown>;
       return this.prisma.learningProposal.update({
         where: { id: proposal.id },
-        data: { status: 'CONFIRMED', confirmedBy: actor.userId, confirmedAt: new Date() },
+        data: {
+          status: 'CONFIRMED',
+          confirmedBy: actor.userId,
+          confirmedAt: new Date(),
+          ...batch2,
+        },
       });
     }
     if (action === 'reject') {

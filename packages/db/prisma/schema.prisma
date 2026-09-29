@@ -711,6 +711,7 @@ model Comment {
 
   workspace       Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   contentVersion  ContentVersion? @relation(fields: [contentVersionId], references: [id], onDelete: SetNull)
+  salesSignals    CommentSalesSignal[]
 
   @@index([workspaceId])
   @@index([contentVersionId])
@@ -827,6 +828,10 @@ model WorkspaceSettings {
   dailyLlmCallCap     Int      @default(50)
   dailyFetchCap       Int      @default(100)
   dailyPreparationCap Int      @default(20)
+  // Batch 2 (E): execution is a distinct budget category from research
+  // (LLM calls) and preparation (internal artifacts). No LinkedIn execution
+  // integration exists, so the default 0 keeps execution unavailable.
+  dailyExecutionCap   Int      @default(0)
   paused              Boolean  @default(false)
   killSwitch          Boolean  @default(false)
   autonomyTier        Int      @default(0)
@@ -846,6 +851,15 @@ model AutonomyPolicy {
   tier1PostingDailyCap    Int      @default(1)
   tier1RequireApprovedPost Boolean @default(true)
   tier2HumanApprovalAck   Boolean  @default(false)
+  // Batch 2 (B): explicit, persisted, workspace-scoped auto-preparation
+  // policy. autoPrepareApprovedWork covers work justified by prior human
+  // judgment (imported lead, triaged opportunity, approved strategy/plan).
+  // autoPrepareColdWork covers untouched opportunities/prospects and new
+  // recommendations without prior judgment (default OFF). Quota caps daily
+  // automatic preparations; exhaustion is a policy decision, not an error.
+  autoPrepareApprovedWork Boolean  @default(true)
+  autoPrepareColdWork     Boolean  @default(false)
+  dailyAutoPreparationQuota Int    @default(10)
   updatedBy               String?  @db.VarChar(100)
   createdAt               DateTime @default(now())
   updatedAt               DateTime @updatedAt
@@ -1028,6 +1042,9 @@ model Workspace {
   runStages                RunStage[]
   onboardingState          OnboardingState?
   leadImportBatches        LeadImportBatch[]
+  attributionLinks         AttributionLink[]
+  preparationLogs          PreparationLog[]
+  commentSalesSignals      CommentSalesSignal[]
 
   @@index([slug])
   @@index([isActive])
@@ -2011,6 +2028,11 @@ model OperatorAction {
   status        String   @default("PENDING") @db.VarChar(20)
   dismissedAt   DateTime?
   completedAt   DateTime?
+  // Batch 2 (A): acceptance authorizes preparation of internal work from
+  // this recommendation. It is NOT execution approval and implies no
+  // external action (no send, publish, or contact).
+  acceptedAt    DateTime?
+  acceptedBy    String?  @db.VarChar(100)
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
@@ -2046,6 +2068,14 @@ model LearningProposal {
   status               LearningProposalStatus @default(PROPOSED)
   confirmedBy          String?
   confirmedAt          DateTime?
+  // Batch 2 (C): evidence maturity ladder. Decision status (PROPOSED /
+  // CONFIRMED / REJECTED / REVOKED) stays separate from evidence maturity:
+  // UNKNOWN -> OBSERVED -> REPEATED_SIGNAL -> HYPOTHESIS -> EXPERIMENT ->
+  // SUPPORTED_PATTERN -> CONFIRMED. A single strong observation must never
+  // jump straight to CONFIRMED; CONFIRMED requires the existing human
+  // confirm transition. evidenceCount tracks recorded occurrences.
+  maturity             String                 @default("HYPOTHESIS") @db.VarChar(30)
+  evidenceCount        Int                    @default(1)
   createdAt            DateTime               @default(now())
   updatedAt            DateTime               @updatedAt
 
@@ -2054,4 +2084,86 @@ model LearningProposal {
   @@index([workspaceId])
   @@index([workspaceId, status])
   @@index([workspaceId, dimension])
+  @@index([workspaceId, maturity])
+}
+
+// Batch 2 (D): provenance-based attribution. NEVER overclaim causality:
+// DIRECT = authoritative evidence explicitly connects the records;
+// INFERRED = documented logical connection but no direct proof;
+// UNKNOWN = no defensible connection. Upgrades (UNKNOWN -> INFERRED ->
+// DIRECT) require new evidence; reach/impressions alone never qualify.
+model AttributionLink {
+  id              String   @id @default(uuid())
+  workspaceId     String
+  sourceType      String   @db.VarChar(100)
+  sourceId        String   @db.VarChar(100)
+  targetType      String   @db.VarChar(100)
+  targetId        String   @db.VarChar(100)
+  attributionType String   @default("UNKNOWN") @db.VarChar(20)
+  evidenceRefs    String[] @default([])
+  reason          String?  @db.Text
+  recordedBy      String?  @db.VarChar(100)
+  recordedAt      DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceType, sourceId, targetType, targetId])
+  @@index([workspaceId])
+  @@index([workspaceId, attributionType])
+  @@index([workspaceId, targetType, targetId])
+  @@index([workspaceId, sourceType, sourceId])
+}
+
+// Batch 2 (B): every automatic preparation carries a traceable
+// authorization source. Quota enforcement counts PREPARED rows per
+// workspace per day; SKIPPED rows record why preparation did not happen.
+model PreparationLog {
+  id                  String   @id @default(uuid())
+  workspaceId         String
+  kind                String   @db.VarChar(100)
+  subjectType         String   @db.VarChar(100)
+  subjectId           String?  @db.VarChar(100)
+  resultType          String?  @db.VarChar(100)
+  resultId            String?  @db.VarChar(100)
+  authorizationSource String   @db.VarChar(50)
+  authorizationReason String   @db.Text
+  status              String   @default("PREPARED") @db.VarChar(20)
+  skipReason          String?  @db.Text
+  createdAt           DateTime @default(now())
+
+  workspace           Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([workspaceId, createdAt])
+  @@index([workspaceId, subjectType, subjectId])
+}
+
+// Batch 2 (F): explicit COMMENT -> classification -> audience signal ->
+// sales intelligence bridge. A LEAD_SIGNAL comment may produce a sales
+// intelligence signal for HUMAN REVIEW — never an automatic prospect,
+// outreach, conversation, or revenue record.
+model CommentSalesSignal {
+  id               String   @id @default(uuid())
+  workspaceId      String
+  commentId        String
+  audienceSignalId String?
+  signalType       String   @default("COMMENT_LEAD_SIGNAL") @db.VarChar(100)
+  evidence         String   @db.Text
+  reason           String   @db.Text
+  status           String   @default("PENDING_REVIEW") @db.VarChar(30)
+  reviewedBy       String?  @db.VarChar(100)
+  reviewedAt       DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  workspace        Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  comment          Comment   @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, commentId])
+  @@index([workspaceId])
+  @@index([workspaceId, status])
+  @@index([commentId])
 }

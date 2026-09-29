@@ -7,6 +7,7 @@ import {
   createPipelineOpportunity,
   deletePipelineOpportunity,
   friendlyErrorMessage,
+  getAttributionForTarget,
   listFollowUps,
   listOutcomes,
   listPipeline,
@@ -552,6 +553,7 @@ function PipelineOutcomeSection({ opportunityId }: { opportunityId: string }) {
                 {metric.unit ? ` ${String(metric.unit)}` : ''}
               </p>
               <p style={{ color: 'var(--color-text-secondary)' }}>Source: {String(metric.source)}</p>
+              <OutcomeAttribution metricId={String(metric.id)} />
               {metric.recordedAt ? (
                 <p style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
                   Recorded at {String(metric.recordedAt)}
@@ -562,6 +564,34 @@ function PipelineOutcomeSection({ opportunityId }: { opportunityId: string }) {
         </ul>
       ) : null}
     </div>
+  );
+}
+
+// Batch 2 (D): honest attribution display. UNKNOWN is shown as UNKNOWN —
+// never a stronger label than the evidence supports.
+function OutcomeAttribution({ metricId }: { metricId: string }) {
+  const [strongest, setStrongest] = useState<string | null>(null);
+  const [reason, setReason] = useState<string | null>(null);
+  useEffect(() => {
+    let cancelled = false;
+    void getAttributionForTarget('outcomeMetric', metricId)
+      .then((res) => {
+        if (cancelled) return;
+        setStrongest(res.strongest);
+        const withReason = (res.links ?? []).find((l) => l.reason);
+        setReason(withReason?.reason ?? null);
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, [metricId]);
+  if (!strongest) return null;
+  return (
+    <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.75rem' }}>
+      Attribution: {strongest}
+      {reason ? ` — ${reason}` : strongest === 'UNKNOWN' ? ' — no defensible connection recorded' : ''}
+    </p>
   );
 }
 
