@@ -28,6 +28,7 @@ function basePrisma() {
     outreachStrategy: { findMany: vi.fn().mockResolvedValue([]), findFirst: vi.fn() },
     autonomyPolicy: { findUnique: vi.fn().mockResolvedValue(null) },
     workspaceSettings: { findUnique: vi.fn().mockResolvedValue(null) },
+    audienceSignal: { findMany: vi.fn().mockResolvedValue([]) },
     operatorAction: {
       findMany: vi.fn().mockResolvedValue([]),
       findFirst: vi.fn(),

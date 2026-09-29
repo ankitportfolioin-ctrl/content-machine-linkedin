@@ -100,18 +100,18 @@ function learningFor(
   };
 }
 
-function attributionFor(candidate: Candidate): { points: number; reason: string | null } {
+function attributionFor(candidate: Candidate): { points: number; reason: string | null; strongest?: string } {
   const attribution = candidate.facts.subjectMeta?.attribution as
     | { strongest?: string; linkCount?: number; reason?: string | null; target?: string }
     | undefined;
-  if (!attribution || !attribution.strongest) return { points: 0, reason: null };
+  if (!attribution || !attribution.strongest) return { points: 0, reason: null, strongest: undefined };
   if (attribution.strongest === 'DIRECT') {
-    return { points: 5, reason: `DIRECT attribution on ${attribution.target} (${attribution.linkCount} link(s)).` };
+    return { points: 5, reason: `DIRECT attribution on ${attribution.target} (${attribution.linkCount} link(s)).`, strongest: 'DIRECT' };
   }
   if (attribution.strongest === 'INFERRED') {
-    return { points: 2, reason: `INFERRED attribution on ${attribution.target} (${attribution.linkCount} link(s)).` };
+    return { points: 2, reason: `INFERRED attribution on ${attribution.target} (${attribution.linkCount} link(s)).`, strongest: 'INFERRED' };
   }
-  return { points: 0, reason: null };
+  return { points: 0, reason: null, strongest: undefined };
 }
 
 function computeSignalConfidence(candidate: Candidate, dimensions: ScoreDimension[], now: number): ConfidenceLevel {
@@ -172,7 +172,11 @@ export function scoreCandidate({ candidate, confirmedLearning, now = Date.now() 
   const learning = learningFor(candidate, confirmedLearning);
   push('learning_boost', MAX_POINTS.learning_boost, { points: learning.points, reason: learning.reason });
   const attribution = attributionFor(candidate);
-  push('attribution', MAX_POINTS.attribution, { points: attribution.points, reason: attribution.reason });
+  // Only include attribution dimension when there's actual attribution data
+  // (per design: dimensions with no source data are omitted, not manufactured)
+  if (attribution.strongest) {
+    push('attribution', MAX_POINTS.attribution, { points: attribution.points, reason: attribution.reason });
+  }
 
   const score = dimensions.reduce((a, d) => a + d.points, 0);
   const reasons = [...candidate.reasons, ...dimensions.map((d) => d.reason).filter((r): r is string => r !== null)];
