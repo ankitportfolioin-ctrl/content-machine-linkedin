@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AIProviderRegistry } from '@growth-operator/ai';
+import { AIProviderRegistry, AIProviderError } from '@growth-operator/ai';
 import { z } from 'zod';
 import { SalesError } from './errors';
 
@@ -95,16 +95,24 @@ export class ProspectResearchService {
       throw new SalesError('AI_UNAVAILABLE', 'Cannot synthesize research without an AI provider.');
     }
     const provider = available[0]!;
-    const response = await provider.chatCompletion({
-      messages: [
-        { role: 'system', content: 'You synthesize prospect research. Rules: 1. Use ONLY the supplied material. 2. Never infer private information or invent personal details. 3. Every fact needs a sourceRef from the material. 4. List everything unverifiable under unknowns. 5. Return only valid JSON matching the schema.' },
-        { role: 'user', content: `Material:\n${input.material.map((m) => `- ${m.slice(0, 800)}`).join('\n')}\n\nReturn JSON: { personSummary, companySummary, facts[{statement, sourceRef, confidence}], unknowns[], confidence }.` },
-      ],
-      model: 'gpt-4o-mini',
-      temperature: 0.1,
-      maxTokens: 2500,
-      responseFormat: { type: 'json_object' },
-    });
+    let response;
+    try {
+      response = await provider.chatCompletion({
+        messages: [
+          { role: 'system', content: 'You synthesize prospect research. Rules: 1. Use ONLY the supplied material. 2. Never infer private information or invent personal details. 3. Every fact needs a sourceRef from the material. 4. List everything unverifiable under unknowns. 5. Return only valid JSON matching the schema.' },
+          { role: 'user', content: `Material:\n${input.material.map((m) => `- ${m.slice(0, 800)}`).join('\n')}\n\nReturn JSON: { personSummary, companySummary, facts[{statement, sourceRef, confidence}], unknowns[], confidence }.` },
+        ],
+        model: 'gpt-4o-mini',
+        temperature: 0.1,
+        maxTokens: 2500,
+        responseFormat: { type: 'json_object' },
+      });
+    } catch (error) {
+      if (error instanceof AIProviderError) {
+        throw new SalesError('AI_UNAVAILABLE', 'Cannot synthesize research without an AI provider.');
+      }
+      throw error;
+    }
     const content = response.choices[0]?.message?.content;
     if (!content) {
       throw new SalesError('AI_UNAVAILABLE', 'AI returned an empty research response.');

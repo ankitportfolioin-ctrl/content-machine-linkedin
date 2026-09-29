@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AIProviderRegistry } from '@growth-operator/ai';
+import { AIProviderRegistry, AIProviderError } from '@growth-operator/ai';
 import { z } from 'zod';
 import { ContentError } from './errors';
 import { resolveAudience } from './audience';
@@ -91,18 +91,26 @@ export class ContentPlanService {
     const contradictionLines = (input.contradictions ?? []).map((c) => `- "${c.claim1.slice(0, 200)}" vs "${c.claim2.slice(0, 200)}" (severity ${c.severity})`).join('\n');
 
     const provider = available[0]!;
-    const response = await provider.chatCompletion({
-      messages: [
-        { role: 'system', content: 'You are a content strategist. Build a structured content plan from the supplied thesis, audience, evidence, and gaps. Use ONLY the supplied material. Never invent statistics, experiences, or evidence. Return only valid JSON matching the schema.' },
-        { role: 'user', content: `Thesis: ${thesis}\nAudience: ${audience.primaryAudience}\nObjective: ${objective}\nAngle: ${angle}\nFormat: ${format}\nNarrative: ${narrative}\n\nClaims:\n${claimLines || '(none)'}\n\nGaps:\n${gapLines || '(none)'}\n\nContradictions:\n${contradictionLines || '(none)'}\n\nHook guidance: ${influence.hookGuidance}\nCTA guidance: ${influence.ctaGuidance}\n\nReturn JSON: { coreQuestion, keyPoints[3-8], hookDirection, ctaStrategy, reasoning, mustNotClaim[], evidenceMap[{claimRef, note}], contradictionNotes }` },
-      ],
-      model: 'gpt-4o-mini',
-      temperature: 0.3,
+    let response;
+    try {
+      response = await provider.chatCompletion({
+        messages: [
+          { role: 'system', content: 'You are a content strategist. Build a structured content plan from the supplied thesis, audience, evidence, and gaps. Use ONLY the supplied material. Never invent statistics, experiences, or evidence. Return only valid JSON matching the schema.' },
+          { role: 'user', content: `Thesis: ${thesis}\nAudience: ${audience.primaryAudience}\nObjective: ${objective}\nAngle: ${angle}\nFormat: ${format}\nNarrative: ${narrative}\n\nClaims:\n${claimLines || '(none)'}\n\nGaps:\n${gapLines || '(none)'}\n\nContradictions:\n${contradictionLines || '(none)'}\n\nHook guidance: ${influence.hookGuidance}\nCTA guidance: ${influence.ctaGuidance}\n\nReturn JSON: { coreQuestion, keyPoints[3-8], hookDirection, ctaStrategy, reasoning, mustNotClaim[], evidenceMap[{claimRef, note}], contradictionNotes }` },
+        ],
+        model: 'gpt-4o-mini',
+        temperature: 0.3,
       maxTokens: 2500,
       responseFormat: { type: 'json_object' },
     });
+  } catch (error) {
+    if (error instanceof AIProviderError) {
+      throw new ContentError('AI_UNAVAILABLE', 'Cannot generate a content plan without an AI provider.');
+    }
+    throw error;
+  }
 
-    const content = response.choices[0]?.message?.content;
+  const content = response.choices[0]?.message?.content;
     if (!content) {
       throw new ContentError('AI_UNAVAILABLE', 'AI returned an empty plan response.');
     }

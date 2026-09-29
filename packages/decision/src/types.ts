@@ -70,7 +70,7 @@ export interface Candidate {
 }
 
 export interface ScoreDimension {
-  name: 'urgency' | 'relevance' | 'evidence_strength' | 'readiness' | 'freshness' | 'learning_boost';
+  name: 'urgency' | 'relevance' | 'evidence_strength' | 'readiness' | 'freshness' | 'learning_boost' | 'attribution';
   points: number;
   maxPoints: number;
   reason: string | null;

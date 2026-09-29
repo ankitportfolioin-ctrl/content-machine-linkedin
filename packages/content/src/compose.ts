@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AIProviderRegistry } from '@growth-operator/ai';
+import { AIProviderRegistry, AIProviderError } from '@growth-operator/ai';
 import { z } from 'zod';
 import { ContentError } from './errors';
 import { validateFormatStructure } from './strategy';
@@ -67,16 +67,24 @@ export class DraftComposer {
     const evidenceMap = (plan.evidenceMap as Array<{ claimRef: string; note?: string }>).map((e) => `- ${e.claimRef}`).join('\n');
 
     const provider = available[0]!;
-    const response = await provider.chatCompletion({
-      messages: [
-        { role: 'system', content: `You compose content from an approved plan. Rules: 1. Use ONLY the plan thesis, key points, and evidence below. 2. Do not invent statistics, experiences, or evidence. 3. Do not emit markup like [SLIDE], [HOOK], [CTA], JSON fences, or generation instructions. 4. Return only valid JSON: { body, structure }.` },
-        { role: 'user', content: `Thesis: ${plan.thesis}\nAudience: ${plan.audience}\nObjective: ${plan.objective}\nAngle: ${plan.angle}\nFormat: ${format}\n\nKey points:\n${keyPoints}\n\nEvidence:\n${evidenceMap || '(none)'}\n${plan.contradictionNotes ? `\nKnown contradictions (do not take sides silently):\n${plan.contradictionNotes}` : ''}\n${(plan.mustNotClaim as string[]).length > 0 ? `\nMUST NOT CLAIM:\n${(plan.mustNotClaim as string[]).map((m: string) => `- ${m}`).join('\n')}` : ''}\n${plan.voiceInstructions ? `\nVoice: ${plan.voiceInstructions}` : ''}\n\n${formatPrompt}` },
-      ],
-      model: 'gpt-4o-mini',
-      temperature: 0.5,
-      maxTokens: 4000,
-      responseFormat: { type: 'json_object' },
-    });
+    let response;
+    try {
+      response = await provider.chatCompletion({
+        messages: [
+          { role: 'system', content: `You compose content from an approved plan. Rules: 1. Use ONLY the plan thesis, key points, and evidence below. 2. Do not invent statistics, experiences, or evidence. 3. Do not emit markup like [SLIDE], [HOOK], [CTA], JSON fences, or generation instructions. 4. Return only valid JSON: { body, structure }.` },
+          { role: 'user', content: `Thesis: ${plan.thesis}\nAudience: ${plan.audience}\nObjective: ${plan.objective}\nAngle: ${plan.angle}\nFormat: ${format}\n\nKey points:\n${keyPoints}\n\nEvidence:\n${evidenceMap || '(none)'}\n${plan.contradictionNotes ? `\nKnown contradictions (do not take sides silently):\n${plan.contradictionNotes}` : ''}\n${(plan.mustNotClaim as string[]).length > 0 ? `\nMUST NOT CLAIM:\n${(plan.mustNotClaim as string[]).map((m: string) => `- ${m}`).join('\n')}` : ''}\n${plan.voiceInstructions ? `\nVoice: ${plan.voiceInstructions}` : ''}\n\n${formatPrompt}` },
+        ],
+        model: 'gpt-4o-mini',
+        temperature: 0.5,
+        maxTokens: 4000,
+        responseFormat: { type: 'json_object' },
+      });
+    } catch (error) {
+      if (error instanceof AIProviderError) {
+        throw new ContentError('AI_UNAVAILABLE', 'Cannot compose a draft without an AI provider.');
+      }
+      throw error;
+    }
 
     const content = response.choices[0]?.message?.content;
     if (!content) {

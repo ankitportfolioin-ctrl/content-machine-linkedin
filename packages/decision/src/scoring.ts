@@ -2,7 +2,7 @@ import { Candidate, ScoredAction, ScoreDimension } from './types';
 import { LearningInfluence } from '@growth-operator/learning';
 import { calculateFreshness, FreshnessResult } from '@growth-operator/shared';
 
-const MAX_POINTS = { urgency: 30, relevance: 25, evidence_strength: 20, readiness: 15, freshness: 10, learning_boost: 10 } as const;
+const MAX_POINTS = { urgency: 30, relevance: 25, evidence_strength: 20, readiness: 15, freshness: 10, learning_boost: 10, attribution: 5 } as const;
 
 type ConfidenceLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
 
@@ -100,6 +100,20 @@ function learningFor(
   };
 }
 
+function attributionFor(candidate: Candidate): { points: number; reason: string | null } {
+  const attribution = candidate.facts.subjectMeta?.attribution as
+    | { strongest?: string; linkCount?: number; reason?: string | null; target?: string }
+    | undefined;
+  if (!attribution || !attribution.strongest) return { points: 0, reason: null };
+  if (attribution.strongest === 'DIRECT') {
+    return { points: 5, reason: `DIRECT attribution on ${attribution.target} (${attribution.linkCount} link(s)).` };
+  }
+  if (attribution.strongest === 'INFERRED') {
+    return { points: 2, reason: `INFERRED attribution on ${attribution.target} (${attribution.linkCount} link(s)).` };
+  }
+  return { points: 0, reason: null };
+}
+
 function computeSignalConfidence(candidate: Candidate, dimensions: ScoreDimension[], now: number): ConfidenceLevel {
   const evidenceDim = dimensions.find(d => d.name === 'evidence_strength');
   const freshnessDim = dimensions.find(d => d.name === 'freshness');
@@ -157,6 +171,8 @@ export function scoreCandidate({ candidate, confirmedLearning, now = Date.now() 
   push('freshness', MAX_POINTS.freshness, { points: freshnessResult.points, reason: freshnessResult.reason });
   const learning = learningFor(candidate, confirmedLearning);
   push('learning_boost', MAX_POINTS.learning_boost, { points: learning.points, reason: learning.reason });
+  const attribution = attributionFor(candidate);
+  push('attribution', MAX_POINTS.attribution, { points: attribution.points, reason: attribution.reason });
 
   const score = dimensions.reduce((a, d) => a + d.points, 0);
   const reasons = [...candidate.reasons, ...dimensions.map((d) => d.reason).filter((r): r is string => r !== null)];

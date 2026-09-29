@@ -5,6 +5,7 @@ import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import { NavLink } from 'react-router-dom';
 import {
   createFeed,
+  createProfile,
   deleteFeed,
   friendlyErrorMessage,
   getBusinessProfile,
@@ -97,7 +98,7 @@ export function OnboardingPage() {
 
       {STEP_META.map((meta) => (
         <StepCard key={meta.id} meta={meta} done={!!progress.steps[meta.id]} current={progress.currentStep === meta.id}>
-          {meta.id === 'profile' ? <ProfileStep counts={progress.counts} /> : null}
+          {meta.id === 'profile' ? <ProfileStep counts={progress.counts} onSaved={() => void refresh()} /> : null}
           {meta.id === 'audience' ? <AudienceStep counts={progress.counts} /> : null}
           {meta.id === 'pillars' ? <PillarsStep onSaved={() => void refresh()} /> : null}
           {meta.id === 'offers' ? <OffersStep onSaved={() => void refresh()} /> : null}
@@ -128,11 +129,40 @@ function StepCard({ meta, done, current, children }: { meta: { id: string; title
   );
 }
 
-function ProfileStep({ counts }: { counts: OnboardingProgress['counts'] }) {
+function ProfileStep({ counts, onSaved }: { counts: OnboardingProgress['counts']; onSaved: () => void }) {
+  const [creating, setCreating] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleCreateProfile() {
+    setCreating(true);
+    setMessage(null);
+    try {
+      await createProfile({
+        headline: undefined,
+        role: undefined,
+        summary: undefined,
+        professionalContext: undefined,
+        industry: undefined,
+        location: undefined,
+        linkedinUrl: undefined,
+      });
+      setMessage('Profile created. Complete the fields in Settings to continue.');
+      onSaved();
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setCreating(false);
+    }
+  }
+
   return (
     <div className="actions">
       <span className="badge badge-neutral">writing samples: {counts.writingSamples}</span>
+      <button className="btn btn-primary" onClick={handleCreateProfile} disabled={creating}>
+        {creating ? 'Creating...' : 'Create profile'}
+      </button>
       <NavLink to="/settings" className="btn btn-secondary">Open Settings</NavLink>
+      {message ? <p className="muted">{message}</p> : null}
     </div>
   );
 }

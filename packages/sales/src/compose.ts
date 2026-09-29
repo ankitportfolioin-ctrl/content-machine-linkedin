@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import { AIProviderRegistry } from '@growth-operator/ai';
+import { AIProviderRegistry, AIProviderError } from '@growth-operator/ai';
 import { z } from 'zod';
 import { SalesError } from './errors';
 import { OutreachDraftType } from './types';
@@ -70,16 +70,24 @@ export class OutreachComposer {
     const levelNote = strategy.personalizationLevel === 'NONE'
       ? 'Keep personalization minimal and generic; do not reference prospect specifics.'
       : `Personalization level ${strategy.personalizationLevel}. Every personalized statement must come from the evidence below.`;
-    const response = await provider.chatCompletion({
-      messages: [
-        { role: 'system', content: `You draft B2B outreach. Rules: 1. Use ONLY the strategy, reason for contact, and evidence below. 2. Never invent funding, hiring, pain, intent, achievements, social activity, revenue, size, or personal details. 3. No spam templates, no fake social proof, no invented statistics, no guaranteed outcomes, no manipulative urgency. 4. No markup like [HOOK] or [CTA]; plain prose. 5. Return only valid JSON: { opening, relevance, evidence?, value, cta?, body }.` },
-        { role: 'user', content: `Type: ${draftType}. ${TYPE_GUIDANCE[draftType]}\n\nObjective: ${strategy.objective}\nAudience: ${strategy.audience}\nRelationship stage: ${strategy.relationshipStage}\nAngle: ${strategy.angle}\nReason for contact: ${strategy.reasonForContact}\n${levelNote}\n\nEvidence:\n${evidence.map((e) => `- ${e.statement}${e.sourceRef ? ` (ref: ${e.sourceRef})` : ''}`).join('\n') || '(none — stay generic)'}\n\nMust NOT claim:\n${(strategy.mustNotClaim as string[]).map((m: string) => `- ${m}`).join('\n') || '(none)'}\n${(strategy.riskFlags as string[]).length > 0 ? `\nRisk flags:\n${(strategy.riskFlags as string[]).map((r: string) => `- ${r}`).join('\n')}` : ''}\n${strategy.ctaType ? `\nCTA type: ${strategy.ctaType}` : ''}` },
-      ],
-      model: 'gpt-4o-mini',
-      temperature: 0.4,
-      maxTokens: 1500,
-      responseFormat: { type: 'json_object' },
-    });
+    let response;
+    try {
+      response = await provider.chatCompletion({
+        messages: [
+          { role: 'system', content: `You draft B2B outreach. Rules: 1. Use ONLY the strategy, reason for contact, and evidence below. 2. Never invent funding, hiring, pain, intent, achievements, social activity, revenue, size, or personal details. 3. No spam templates, no fake social proof, no invented statistics, no guaranteed outcomes, no manipulative urgency. 4. No markup like [HOOK] or [CTA]; plain prose. 5. Return only valid JSON: { opening, relevance, evidence?, value, cta?, body }.` },
+          { role: 'user', content: `Type: ${draftType}. ${TYPE_GUIDANCE[draftType]}\n\nObjective: ${strategy.objective}\nAudience: ${strategy.audience}\nRelationship stage: ${strategy.relationshipStage}\nAngle: ${strategy.angle}\nReason for contact: ${strategy.reasonForContact}\n${levelNote}\n\nEvidence:\n${evidence.map((e) => `- ${e.statement}${e.sourceRef ? ` (ref: ${e.sourceRef})` : ''}`).join('\n') || '(none — stay generic)'}\n\nMust NOT claim:\n${(strategy.mustNotClaim as string[]).map((m: string) => `- ${m}`).join('\n') || '(none)'}\n${(strategy.riskFlags as string[]).length > 0 ? `\nRisk flags:\n${(strategy.riskFlags as string[]).map((r: string) => `- ${r}`).join('\n')}` : ''}\n${strategy.ctaType ? `\nCTA type: ${strategy.ctaType}` : ''}` },
+        ],
+        model: 'gpt-4o-mini',
+        temperature: 0.4,
+        maxTokens: 1500,
+        responseFormat: { type: 'json_object' },
+      });
+    } catch (error) {
+      if (error instanceof AIProviderError) {
+        throw new SalesError('AI_UNAVAILABLE', 'Cannot compose an outreach draft without an AI provider.');
+      }
+      throw error;
+    }
     const content = response.choices[0]?.message?.content;
     if (!content) {
       throw new SalesError('AI_UNAVAILABLE', 'AI returned an empty draft response.');

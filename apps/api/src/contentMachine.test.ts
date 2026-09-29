@@ -235,7 +235,11 @@ describe('Plan → Draft → Validate → Review → Approve → Finalize', () =
   });
 
   it('returns AI_UNAVAILABLE for generate and compose without providers', async () => {
-    await request(app).post('/api/v1/content-plans/generate').set(authOwner()).send({ contentIdeaId: ideaId }).expect(503);
+    await request(app)
+      .post('/api/v1/content-plans/generate')
+      .set(authOwner())
+      .send({ contentIdeaId: ideaId, thesisOverride: 'Test thesis for AI unavailable test', audienceOverride: 'Test audience' })
+      .expect(503);
     await request(app).post('/api/v1/content-drafts/compose').set(authOwner()).send({ planId }).expect(503);
   });
 

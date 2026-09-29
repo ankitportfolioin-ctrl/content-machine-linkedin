@@ -15,6 +15,7 @@ import {
   getReadiness,
   getRun,
   isAiUnavailable,
+  listLearningProposals,
   listNextActions,
   listReports,
   listRuns,
@@ -767,6 +768,7 @@ export function HomePage() {
   const [readinessError, setReadinessError] = useState<string | null>(null);
   const [onboardingNext, setOnboardingNext] = useState<string | null>(null);
   const [onboardingDone, setOnboardingDone] = useState(true);
+  const [learningProposalsCount, setLearningProposalsCount] = useState(0);
 
   useEffect(() => {
     if (loading || authLoading) return;
@@ -800,8 +802,18 @@ export function HomePage() {
         setOnboardingNext(null);
       }
     }
+    // Learning proposals count (only PROPOSED status = awaiting confirmation)
+    async function fetchLearningProposalsCount() {
+      try {
+        const res = await listLearningProposals({ status: 'PROPOSED' });
+        setLearningProposalsCount(res.proposals?.length ?? 0);
+      } catch {
+        setLearningProposalsCount(0);
+      }
+    }
     void fetchReadiness();
     void fetchOnboardingState();
+    void fetchLearningProposalsCount();
   }, [loading, authLoading, isAuthenticated]);
 
   if (loading) {
@@ -911,12 +923,29 @@ export function HomePage() {
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Loading readiness...</p>
         </div>
       )}
-      {readinessError && (
+{readinessError && (
         <div className="card" style={{ marginTop: '1rem' }}>
           <p style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>Failed to load readiness: {readinessError}</p>
         </div>
       )}
-
+      {learningProposalsCount > 0 && (
+        <div className="card" style={{ marginTop: '1rem', borderLeft: '3px solid var(--color-warning)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', padding: '0.75rem' }}>
+            <span style={{ fontSize: '1.25rem', color: 'var(--color-warning)', flexShrink: 0 }}>🔔</span>
+            <div style={{ flex: 1 }}>
+              <strong style={{ fontSize: '0.875rem' }}>
+                Learning proposals waiting for confirmation: {learningProposalsCount}
+              </strong>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', marginBottom: 0 }}>
+                Review and confirm proposed learnings to improve future recommendations.
+              </p>
+            </div>
+            <NavLink to="/learning" className="btn btn-primary" style={{ flexShrink: 0 }}>
+              Open Learning
+            </NavLink>
+          </div>
+        </div>
+      )}
       <div className="card" style={{ marginTop: '1.5rem' }}>
         <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Today</h2>
         <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>

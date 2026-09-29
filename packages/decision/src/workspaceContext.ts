@@ -25,6 +25,16 @@ export interface AttributionView {
   evidenceRefs: string[];
 }
 
+export interface AudienceSignalView {
+  id: string;
+  signalType: string;
+  source: string;
+  description: string;
+  strength: number;
+  createdAt: Date;
+  audienceSegmentId: string | null;
+}
+
 /** Follow-up recommendations that suppress new outreach initiation. */
 const OUTREACH_BLOCKING_FOLLOW_UPS = new Set([
   'NO_OUTREACH',
@@ -54,6 +64,7 @@ export interface WorkspaceContext {
   attributions: Map<string, AttributionView>;
   leadStates: Map<string, LeadStateView>;
   topics: Map<string, string>;
+  audienceSignals: Map<string, AudienceSignalView[]>;
 }
 
 function attributionKey(targetType: string, targetId: string): string {
@@ -112,7 +123,7 @@ export async function readWorkspaceContext(
   prisma: PrismaClient,
   workspaceId: string
 ): Promise<WorkspaceContext> {
-  const [strategy, links, leads, qualifications, approvedStrategies, submittedReviews, readyActions, followUps, topics] =
+  const [strategy, links, leads, qualifications, approvedStrategies, submittedReviews, readyActions, followUps, topics, audienceSignals] =
     await Promise.all([
       prisma.strategyProfile.findUnique({ where: { workspaceId } }),
       prisma.attributionLink.findMany({
@@ -156,6 +167,11 @@ export async function readWorkspaceContext(
       prisma.topic.findMany({
         where: { workspaceId },
         select: { id: true, name: true },
+        take: 200,
+      }),
+      prisma.audienceSignal.findMany({
+        where: { workspaceId },
+        orderBy: { createdAt: 'desc' },
         take: 200,
       }),
     ]);
@@ -243,7 +259,31 @@ export async function readWorkspaceContext(
   const topicNames = new Map<string, string>();
   for (const t of topics as Array<{ id: string; name: string }>) topicNames.set(t.id, t.name);
 
-  return { objectives, attributions, leadStates, topics: topicNames };
+  const audienceSignalsBySegment = new Map<string, AudienceSignalView[]>();
+  for (const signal of audienceSignals as Array<{
+    id: string;
+    audienceSegmentId: string | null;
+    signalType: string;
+    source: string;
+    description: string;
+    strength: number;
+    createdAt: Date;
+  }>) {
+    const segmentKey = signal.audienceSegmentId ?? 'unassigned';
+    const existing = audienceSignalsBySegment.get(segmentKey) ?? [];
+    existing.push({
+      id: signal.id,
+      signalType: signal.signalType,
+      source: signal.source,
+      description: signal.description,
+      strength: signal.strength,
+      createdAt: signal.createdAt,
+      audienceSegmentId: signal.audienceSegmentId,
+    });
+    audienceSignalsBySegment.set(segmentKey, existing);
+  }
+
+  return { objectives, attributions, leadStates, topics: topicNames, audienceSignals: audienceSignalsBySegment };
 }
 
 export function attributionLookup(ctx: WorkspaceContext, targetType: string, targetId: string): AttributionView | null {

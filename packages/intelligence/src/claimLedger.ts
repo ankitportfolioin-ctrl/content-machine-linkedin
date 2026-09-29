@@ -27,6 +27,27 @@ export function normalizeClaimText(text: string): string {
     .trim();
 }
 
+/**
+ * Computes Jaccard similarity between two normalized claim texts.
+ * Used for conservative near-duplicate detection: only merges claims
+ * with very high similarity (> 0.95) to avoid false positives.
+ */
+export function claimTextSimilarity(a: string, b: string): number {
+  if (a === b) return 1;
+  if (!a || !b) return 0;
+  const wordsA = new Set(a.split(/\s+/).filter((w) => w.length > 0));
+  const wordsB = new Set(b.split(/\s+/).filter((w) => w.length > 0));
+  const intersection = new Set([...wordsA].filter((w) => wordsB.has(w)));
+  const union = new Set([...wordsA, ...wordsB]);
+  return union.size === 0 ? 0 : intersection.size / union.size;
+}
+
+/**
+ * Threshold for considering two claims as near-duplicates.
+ * Conservative: only merges when extremely similar (> 95%).
+ */
+export const NEAR_DUPLICATE_THRESHOLD = 0.95;
+
 export class ClaimLedgerService {
   private prisma: PrismaClient;
 
@@ -48,9 +69,8 @@ export class ClaimLedgerService {
       where: { workspaceId, sourceId },
       select: { claimText: true },
     });
-    const seen = new Set(
-      (prior as Array<{ claimText: string }>).map((r) => normalizeClaimText(r.claimText))
-    );
+    const priorNormalized = (prior as Array<{ claimText: string }>).map((r) => normalizeClaimText(r.claimText));
+    const seen = new Set(priorNormalized);
 
     // Real provenance (was sourceUrl: ''): the source row this ledger
     // entry belongs to. Missing row degrades to UNKNOWN, never invented.
@@ -64,10 +84,23 @@ export class ClaimLedgerService {
     for (const claim of understanding.claims) {
       const normalized = normalizeClaimText(claim.text ?? '');
       if (!normalized) continue;
-      // Same normalized claim from the SAME source: duplicate output, skip.
+      // Exact duplicate from the SAME source: duplicate output, skip.
+      // Near-duplicate from the SAME source: conservative merge (punctuation/whitespace only).
       // Same text from a DIFFERENT source is independent corroboration and
       // is intentionally kept (this query is source-scoped).
-      if (seen.has(normalized)) continue;
+      let isDuplicate = false;
+      if (seen.has(normalized)) {
+        isDuplicate = true;
+      } else {
+        // Check for near-duplicates (conservative: > 95% similarity)
+        for (const existing of seen) {
+          if (claimTextSimilarity(normalized, existing) >= NEAR_DUPLICATE_THRESHOLD) {
+            isDuplicate = true;
+            break;
+          }
+        }
+      }
+      if (isDuplicate) continue;
       seen.add(normalized);
 
       // A claim is never marked SUPPORTED on confidence alone: without

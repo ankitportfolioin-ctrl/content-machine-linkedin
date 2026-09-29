@@ -51,12 +51,29 @@ import feedsRoutes from './routes/feeds';
 import readinessRoutes from './routes/readiness';
 
 const env = getEnv();
+const isProd = env.NODE_ENV === 'production';
 
 const app: Application = express();
 
 app.use(helmet({
-  contentSecurityPolicy: false,
+  contentSecurityPolicy: isProd ? {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      fontSrc: ["'self'", "https:", "data:"],
+      connectSrc: ["'self'"],
+      frameAncestors: ["'none'"],
+    },
+  } : false,
   crossOriginEmbedderPolicy: false,
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true,
+  },
+  referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
 }));
 
 app.use(cors({

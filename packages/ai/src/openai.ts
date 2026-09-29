@@ -1,4 +1,4 @@
-import { AIProvider, AIProviderType, AIProviderUnavailableError, ChatCompletionRequest, ChatCompletionResponse, EmbeddingRequest, EmbeddingResponse } from './types';
+import { AIProvider, AIProviderType, AIProviderUnavailableError, AIProviderRateLimitError, AIProviderAuthError, AIProviderError, ChatCompletionRequest, ChatCompletionResponse, EmbeddingRequest, EmbeddingResponse } from './types';
 
 export class OpenAIProvider implements AIProvider {
   readonly type: AIProviderType = 'openai';
@@ -35,7 +35,13 @@ export class OpenAIProvider implements AIProvider {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(`OpenAI API error: ${response.status} ${JSON.stringify(error)}`);
+      if (response.status === 429) {
+        throw new AIProviderRateLimitError(this.type);
+      }
+      if (response.status === 401) {
+        throw new AIProviderAuthError(this.type);
+      }
+      throw new AIProviderError(`OpenAI API error: ${response.status} ${JSON.stringify(error)}`, this.type, 'API_ERROR', response.status);
     }
 
     return response.json();
@@ -57,7 +63,13 @@ export class OpenAIProvider implements AIProvider {
 
     if (!response.ok) {
       const error = await response.json().catch(() => ({}));
-      throw new Error(`OpenAI API error: ${response.status} ${JSON.stringify(error)}`);
+      if (response.status === 429) {
+        throw new AIProviderRateLimitError(this.type);
+      }
+      if (response.status === 401) {
+        throw new AIProviderAuthError(this.type);
+      }
+      throw new AIProviderError(`OpenAI API error: ${response.status} ${JSON.stringify(error)}`, this.type, 'API_ERROR', response.status);
     }
 
     return response.json();
