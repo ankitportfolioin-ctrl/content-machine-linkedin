@@ -8,6 +8,8 @@ import {
   opportunityConvertSchema,
   opportunityTriageSchema,
   opportunityScoreSchema,
+  researchTriggerSchema,
+  factCheckSchema,
 } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { AppError, NotFoundError, ValidationError } from '../utils/errors';
@@ -16,6 +18,9 @@ import { SourceUnderstandingService } from '@growth-operator/intelligence';
 import { ClaimLedgerService } from '@growth-operator/intelligence';
 import { TopicClusteringService } from '@growth-operator/intelligence';
 import { TrendSignalService } from '@growth-operator/intelligence';
+import { AudienceProblemService } from '@growth-operator/intelligence';
+import { connectorRegistry } from '@growth-operator/intelligence';
+import { buildFactCheckList, getSourceReliability, listSourceReliabilities } from '@growth-operator/intelligence';
 import { ContentOpportunityService, toOpportunityLearningView,
   ContentOpportunityInput, validateOpportunityTriage } from '@growth-operator/intelligence';
 import { fetchFeedbackSummary, applyFeedbackDemotion } from '@growth-operator/intelligence';
@@ -736,6 +741,358 @@ router.get('/overview', async (req, res, next) => {
         gaps: gapCount,
       },
       recentSources,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+interface ContentIdeaWithLineage {
+  id: string;
+  title: string;
+  status: string;
+  createdAt: Date;
+  sourceIds: string[] | null;
+  claimIds: string[] | null;
+  trendSignalIds: string[] | null;
+  evidenceSnapshot: unknown;
+  opportunity: {
+    id: string;
+    title: string;
+    thesis: string;
+    problem: string;
+    audience: string;
+    angle: string;
+    objective: string;
+    contentFormat: string | null;
+    opportunityScore: number;
+    status: string;
+    reasoning: string;
+    evidenceSummary: string;
+    originKind: string | null;
+    originId: string | null;
+    topic: { id: string; name: string; canonicalName: string } | null;
+  } | null;
+  topic: {
+    id: string;
+    name: string;
+    canonicalName: string;
+    description: string | null;
+  } | null;
+}
+
+router.get('/lineage/:contentIdeaId', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { contentIdeaId } = req.params;
+
+    const contentIdea = await prisma.contentIdea.findFirst({
+      where: { id: contentIdeaId, workspaceId: authReq.workspaceId },
+      include: {
+        opportunity: {
+          include: {
+            topic: true,
+          },
+        },
+        topic: true,
+      } as any,
+    }) as ContentIdeaWithLineage | null;
+
+    if (!contentIdea) {
+      throw new NotFoundError('Content Idea');
+    }
+
+    const sourceIds = (contentIdea.sourceIds as string[] | null) ?? [];
+    const claimIds = (contentIdea.claimIds as string[] | null) ?? [];
+    const trendSignalIds = (contentIdea.trendSignalIds as string[] | null) ?? [];
+
+    const [sources, claims, trendSignals] = await Promise.all([
+      sourceIds.length > 0
+        ? prisma.intelligenceSource.findMany({
+            where: { id: { in: sourceIds }, workspaceId: authReq.workspaceId },
+            include: { documents: { take: 1, orderBy: { fetchedAt: 'desc' } } },
+          })
+        : Promise.resolve([]),
+      claimIds.length > 0
+        ? prisma.sourceClaim.findMany({
+            where: { id: { in: claimIds }, workspaceId: authReq.workspaceId },
+            include: { source: true },
+          })
+        : Promise.resolve([]),
+      trendSignalIds.length > 0
+        ? prisma.trendSignal.findMany({
+            where: { id: { in: trendSignalIds }, workspaceId: authReq.workspaceId },
+            include: { topic: true },
+          })
+        : Promise.resolve([]),
+    ]);
+
+    const lineage = {
+      contentIdea: {
+        id: contentIdea.id,
+        title: contentIdea.title,
+        status: contentIdea.status,
+        createdAt: contentIdea.createdAt,
+      },
+      opportunity: contentIdea.opportunity
+        ? {
+            id: contentIdea.opportunity.id,
+            title: contentIdea.opportunity.title,
+            thesis: contentIdea.opportunity.thesis,
+            problem: contentIdea.opportunity.problem,
+            audience: contentIdea.opportunity.audience,
+            angle: contentIdea.opportunity.angle,
+            objective: contentIdea.opportunity.objective,
+            contentFormat: contentIdea.opportunity.contentFormat,
+            opportunityScore: contentIdea.opportunity.opportunityScore,
+            status: contentIdea.opportunity.status,
+            reasoning: contentIdea.opportunity.reasoning,
+            evidenceSummary: contentIdea.opportunity.evidenceSummary,
+            originKind: contentIdea.opportunity.originKind,
+            originId: contentIdea.opportunity.originId,
+            topic: contentIdea.opportunity.topic
+              ? {
+                  id: contentIdea.opportunity.topic.id,
+                  name: contentIdea.opportunity.topic.name,
+                  canonicalName: contentIdea.opportunity.topic.canonicalName,
+                }
+              : null,
+          }
+        : null,
+      topic: contentIdea.topic
+        ? {
+            id: contentIdea.topic.id,
+            name: contentIdea.topic.name,
+            canonicalName: contentIdea.topic.canonicalName,
+            description: contentIdea.topic.description,
+          }
+        : null,
+      sources: sources.map((s) => ({
+        id: s.id,
+        title: s.title,
+        url: s.url,
+        canonicalUrl: s.canonicalUrl,
+        sourceType: s.sourceType,
+        publisher: s.publisher,
+        author: s.author,
+        publishedAt: s.publishedAt,
+        description: s.description,
+        status: s.status,
+        document: s.documents[0]
+          ? {
+              id: s.documents[0].id,
+              wordCount: s.documents[0].wordCount,
+              language: s.documents[0].language,
+              extractionStatus: s.documents[0].extractionStatus,
+            }
+          : null,
+      })),
+      claims: claims.map((c) => ({
+        id: c.id,
+        claimText: c.claimText,
+        claimType: c.claimType,
+        evidenceText: c.evidenceText,
+        evidenceLocation: c.evidenceLocation,
+        confidence: c.confidence,
+        status: c.status,
+        source: c.source
+          ? {
+              id: c.source.id,
+              title: c.source.title,
+              url: c.source.url,
+              sourceType: c.source.sourceType,
+            }
+          : null,
+        provenance: c.provenance,
+      })),
+      trendSignals: trendSignals.map((t) => ({
+        id: t.id,
+        status: t.status,
+        mentionCount: t.mentionCount,
+        sourceCount: t.sourceCount,
+        firstSeenAt: t.firstSeenAt,
+        lastSeenAt: t.lastSeenAt,
+        recencyScore: t.recencyScore,
+        sourceDiversityScore: t.sourceDiversityScore,
+        frequencyScore: t.frequencyScore,
+        evidenceSummary: t.evidenceSummary,
+        topic: t.topic
+          ? {
+              id: t.topic.id,
+              name: t.topic.name,
+              canonicalName: t.topic.canonicalName,
+            }
+          : null,
+      })),
+      evidenceSnapshot: contentIdea.evidenceSnapshot,
+    };
+
+    res.json({ lineage });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/audience-problems', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const service = new AudienceProblemService(prisma, aiRegistry);
+    const result = await service.discoverProblems({ workspaceId: authReq.workspaceId });
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/opportunities/score-yfp', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const data = opportunityScoreSchema.parse(req.body);
+    const topic = await prisma.topic.findFirst({ where: { id: data.topicId, workspaceId: authReq.workspaceId } });
+    if (!topic) {
+      throw new NotFoundError('Topic');
+    }
+    const scoring = await opportunityService.scoreOpportunityYFP({
+      workspaceId: authReq.workspaceId,
+      topicId: data.topicId,
+      sourceIds: data.sourceIds,
+      claimIds: data.claimIds,
+      trendSignalIds: data.trendSignalIds,
+      workspaceProfile: data.workspaceProfile,
+      icp: data.icp,
+      contentGaps: data.contentGaps,
+    });
+    res.json(scoring);
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/source-reliability', async (req, res, next) => {
+  try {
+    const { sourceType } = req.query;
+    if (typeof sourceType === 'string' && sourceType.trim()) {
+      res.json({ reliability: getSourceReliability(sourceType) });
+      return;
+    }
+    res.json({ reliabilities: listSourceReliabilities() });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/fact-check', async (req, res, next) => {
+  try {
+    const data = factCheckSchema.parse(req.body);
+    res.json(buildFactCheckList(data.claims));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/research/status', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const connectors = connectorRegistry.getAllConnectors().map((c) => ({
+      sourceType: c.sourceType,
+      displayName: c.displayName,
+      tier: c.capabilities.tier,
+      requiresAuth: c.capabilities.requiresAuth,
+      provides: c.capabilities.provides,
+      limitations: c.capabilities.limitations,
+    }));
+    const [feedSources, recentRuns] = await Promise.all([
+      prisma.feedSource.findMany({
+        where: { workspaceId: authReq.workspaceId },
+        select: { id: true, url: true, type: true, name: true, active: true, lastFetchedAt: true, lastError: true },
+        orderBy: { createdAt: 'asc' },
+        take: 50,
+      }),
+      prisma.dailyRun.findMany({
+        where: { workspaceId: authReq.workspaceId },
+        orderBy: { runDate: 'desc' },
+        take: 5,
+        select: { id: true, runDate: true, status: true, summary: true },
+      }),
+    ]);
+    const latestSource = await prisma.intelligenceSource.findFirst({
+      where: { workspaceId: authReq.workspaceId },
+      orderBy: { createdAt: 'desc' },
+      select: { createdAt: true },
+    });
+    res.json({ connectors, feedSources, recentRuns, latestSourceAt: latestSource?.createdAt ?? null });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/research/trigger', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const data = researchTriggerSchema.parse(req.body ?? {});
+    const requested = (data.sources ?? {}) as Record<string, { enabled?: boolean; config?: Record<string, unknown> }>;
+
+    const defaultConfigs: Record<string, { enabled: boolean; config: Record<string, unknown> }> = {
+      REDDIT: { enabled: true, config: { subreddits: ['learnprogramming', 'webdev', 'artificial', 'freelance', 'Entrepreneur'], timeFilter: 'day', sortBy: 'hot' } },
+      YOUTUBE: { enabled: false, config: {} },
+      GOOGLE_TRENDS: { enabled: true, config: { topics: ['vibe coding', 'AI agents', 'Claude Code', 'AI website builder', 'AI automation'], geo: 'US', timeRange: 'now 7-d', category: 0 } },
+      LINKEDIN: { enabled: false, config: {} },
+      X: { enabled: false, config: {} },
+      INSTAGRAM: { enabled: false, config: {} },
+      TIKTOK: { enabled: false, config: {} },
+    };
+    const merged: Record<string, { enabled: boolean; config: Record<string, unknown> }> = {};
+    for (const [key, def] of Object.entries(defaultConfigs)) {
+      const override = requested[key];
+      merged[key] = {
+        enabled: typeof override?.enabled === 'boolean' ? override.enabled : def.enabled,
+        config: { ...def.config, ...(override?.config ?? {}) },
+      };
+    }
+
+    const credentials = connectorRegistry.getCredentials('YOUTUBE');
+    void credentials;
+    const fetchConfigs: Record<string, Record<string, unknown>> = {};
+    for (const [key, value] of Object.entries(merged)) {
+      fetchConfigs[key] = { enabled: value.enabled, config: value.config };
+    }
+    const { signals, errors } = await connectorRegistry.fetchFromAllSources(
+      authReq.workspaceId,
+      data.limit,
+      fetchConfigs
+    );
+
+    const ingestion = new SourceIngestionService(prisma);
+    let stored = 0;
+    let skipped = 0;
+    const storeErrors: string[] = [];
+    for (const signal of signals.slice(0, data.limit)) {
+      try {
+        const result = await ingestion.ingest(authReq.workspaceId, signal.url, {
+          sourceType: signal.sourceType as never,
+        });
+        if (result.status === 'FAILED') {
+          skipped += 1;
+          if (result.error) storeErrors.push(`${signal.sourceType}: ${result.error.slice(0, 160)}`);
+        } else {
+          stored += 1;
+        }
+      } catch (error) {
+        skipped += 1;
+        storeErrors.push(error instanceof Error ? error.message.slice(0, 160) : 'Unknown ingest error');
+      }
+    }
+
+    res.status(201).json({
+      trigger: {
+        requested: data.limit,
+        discovered: signals.length,
+        stored,
+        skipped,
+        connectorErrors: errors,
+        storeErrors: storeErrors.slice(0, 10),
+        collectedAt: new Date().toISOString(),
+      },
     });
   } catch (error) {
     next(error);

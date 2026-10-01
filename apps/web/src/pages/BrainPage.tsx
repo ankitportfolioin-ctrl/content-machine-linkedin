@@ -4,28 +4,42 @@ import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
   confirmLearningProposal,
+  connectSocial,
   convertOpportunity,
   createSource,
   deriveLearningProposalAuto,
+  detailedErrorMessage,
+  disconnectSocial,
   friendlyErrorMessage,
   getExplanation,
   getIntelligenceOverview,
   getOpportunity,
   getOpportunityScoring,
   isAiUnavailable,
+  listAudienceProblems,
   listGaps,
   listLearningProposals,
   listNextActions,
   listOpportunities,
+  listSocialConnections,
+  listSocialPosts,
   listSources,
   listTrends,
+  pauseSocial,
+  refreshSocial,
   rejectLearningProposal,
+  resumeSocial,
   revokeLearningProposal,
+  runPerformanceReview,
+  runYFPQualityGates,
+  saveSocialIdea,
+  scoreOpportunityYFP,
   submitOpportunityFeedback,
   triageOpportunity,
 } from '../services/api';
 import {
   ActionExplanation,
+  AudienceProblemsResponse,
   ContentGap,
   IntelligenceOverview,
   LearningProposal,
@@ -35,11 +49,19 @@ import {
   OpportunityFeedbackSummary,
   OpportunityScoring,
   OpportunityTriageStatus,
+  PerformanceRecommendation,
+  PerformanceReviewResult,
+  SocialConnection,
+  SocialPost,
   Source,
   TrendSignal,
+  YFPQualityGateInput,
+  YFPQualityGateResult,
+  YFPScoreDimension,
+  YFPScoreResult,
 } from '../types';
 
-type BrainTab = 'overview' | 'opportunities' | 'trends' | 'gaps' | 'sources' | 'learning';
+type BrainTab = 'overview' | 'opportunities' | 'trends' | 'gaps' | 'sources' | 'audience-problems' | 'yfp-scoring' | 'content-studio' | 'performance' | 'learning';
 
 const TABS: { id: BrainTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
@@ -47,6 +69,10 @@ const TABS: { id: BrainTab; label: string }[] = [
   { id: 'trends', label: 'Trends' },
   { id: 'gaps', label: 'Gaps' },
   { id: 'sources', label: 'Sources' },
+  { id: 'audience-problems', label: 'Audience Problems' },
+  { id: 'yfp-scoring', label: 'YFP Scoring' },
+  { id: 'content-studio', label: 'Content Studio' },
+  { id: 'performance', label: 'Performance' },
   { id: 'learning', label: 'Learning' },
 ];
 
@@ -120,7 +146,17 @@ export function BrainPage() {
       {tab === 'opportunities' ? <OpportunitiesSection /> : null}
       {tab === 'trends' ? <TrendsSection /> : null}
       {tab === 'gaps' ? <GapsSection /> : null}
-      {tab === 'sources' ? <SourcesSection /> : null}
+      {tab === 'sources' ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <SocialCallbackBanner />
+          <ConnectorsSection />
+          <SourcesSection />
+        </div>
+      ) : null}
+      {tab === 'audience-problems' ? <AudienceProblemsSection /> : null}
+      {tab === 'yfp-scoring' ? <YFPScoringSection /> : null}
+      {tab === 'content-studio' ? <ContentStudioSection /> : null}
+      {tab === 'performance' ? <PerformanceSection /> : null}
       {tab === 'learning' ? <LearningSection /> : null}
     </div>
   );
@@ -700,6 +736,271 @@ function GapsSection() {
   );
 }
 
+function SocialCallbackBanner() {
+  const [params] = useState(() => new URLSearchParams(window.location.search));
+  if (params.get('social') !== 'connected' && params.get('social') !== 'error') return null;
+  const ok = params.get('social') === 'connected';
+  return (
+    <div className="card" style={{ borderLeft: `3px solid ${ok ? 'var(--color-success)' : 'var(--color-error)'}` }}>
+      <p style={{ fontSize: '0.875rem', margin: 0 }}>
+        {ok
+          ? `Connected to ${params.get('platform') ?? 'the platform'}. Pulls are manual — use Refresh below.`
+          : `Connection failed: ${params.get('message') ?? 'unknown error'}`}
+      </p>
+    </div>
+  );
+}
+
+function statusBadgeClass(status: string): string {
+  if (status === 'CONNECTED') return 'badge badge-success';
+  if (status === 'PAUSED') return 'badge badge-warning';
+  if (status === 'ERROR' || status === 'EXPIRED') return 'badge badge-error';
+  return 'badge badge-neutral';
+}
+
+function statusLabel(status: string): string {
+  if (status === 'NOT_CONFIGURED') return 'Not configured';
+  if (status === 'NOT_CONNECTED') return 'Not connected';
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
+
+function ConnectorsSection() {
+  const [connections, setConnections] = useState<SocialConnection[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [working, setWorking] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+  const [posts, setPosts] = useState<SocialPost[]>([]);
+  const [postsFor, setPostsFor] = useState<string | null>(null);
+  const [savingIdea, setSavingIdea] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listSocialConnections();
+      setConnections(data.connections ?? []);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  async function runAction(key: string, fn: () => Promise<string | void>) {
+    setWorking(key);
+    setMessage(null);
+    try {
+      const result = await fn();
+      if (result) setMessage(result);
+      await fetchData();
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setWorking(null);
+    }
+  }
+
+  function handleConnect(platform: string) {
+    void runAction(`connect:${platform}`, async () => {
+      const res = await connectSocial(platform);
+      window.location.href = res.authorizationUrl;
+    });
+  }
+
+  function handleRefresh(platform: string) {
+    void runAction(`refresh:${platform}`, async () => {
+      const res = await refreshSocial(platform, 10);
+      if (postsFor === platform) {
+        const data = await listSocialPosts(platform, 20);
+        setPosts(data.posts ?? []);
+      }
+      return `Pulled ${res.fetched} item(s) from ${platform}, stored ${res.stored}.`;
+    });
+  }
+
+  function handlePause(platform: string, active: boolean) {
+    void runAction(`pause:${platform}`, async () => {
+      if (active) await pauseSocial(platform);
+      else await resumeSocial(platform);
+      return active ? `${platform} paused. Pulls are stopped.` : `${platform} resumed.`;
+    });
+  }
+
+  function handleDisconnect(platform: string) {
+    if (!window.confirm(`Disconnect ${platform}? Stored access is removed. Previously pulled items stay as attributed inspiration.`)) return;
+    void runAction(`disconnect:${platform}`, async () => {
+      const res = await disconnectSocial(platform);
+      if (postsFor === platform) {
+        const data = await listSocialPosts(platform, 20);
+        setPosts(data.posts ?? []);
+      }
+      return res.note;
+    });
+  }
+
+  async function handleShowPosts(platform: string) {
+    if (postsFor === platform) {
+      setPostsFor(null);
+      setPosts([]);
+      return;
+    }
+    setWorking(`posts:${platform}`);
+    setMessage(null);
+    try {
+      const data = await listSocialPosts(platform, 20);
+      setPosts(data.posts ?? []);
+      setPostsFor(platform);
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setWorking(null);
+    }
+  }
+
+  async function handleSaveIdea(post: SocialPost) {
+    setSavingIdea(String(post.id));
+    setMessage(null);
+    try {
+      const res = await saveSocialIdea(String(post.id));
+      setMessage(`Saved “${String(res.contentIdea.title).slice(0, 80)}” as a DRAFT idea. Open Content to work it — nothing was approved or published.`);
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setSavingIdea(null);
+    }
+  }
+
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Connected platforms (optional)</h3>
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+        Optional inspiration for the Content Brain — read-only, per workspace. Everything works with zero
+        connectors. Pulled items become content ideas only when you save them, always as DRAFT.
+      </p>
+      {loading ? <p style={{ fontSize: '0.875rem' }}>Loading platforms...</p> : null}
+      {!loading && error ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>{error}</p>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>Retry</button>
+        </div>
+      ) : null}
+      {!loading && !error ? (
+        <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0, margin: 0 }}>
+          {connections.map((conn) => (
+            <li key={conn.platform} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <p style={{ fontWeight: 600, margin: 0 }}>{conn.displayName}</p>
+                <span className={statusBadgeClass(conn.status)}>{statusLabel(conn.status)}</span>
+                {conn.accountLabel ? (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{conn.accountLabel}</span>
+                ) : null}
+                {conn.postCount > 0 ? (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>{conn.postCount} pulled item(s)</span>
+                ) : null}
+              </div>
+              {conn.lastError ? (
+                <p role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-error)', margin: '0.25rem 0 0' }}>{conn.lastError}</p>
+              ) : null}
+              <details style={{ marginTop: '0.5rem' }}>
+                <summary style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+                  What this connector can and cannot read
+                </summary>
+                <ul style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', paddingLeft: '1.25rem', margin: '0.25rem 0' }}>
+                  {conn.provides.map((p, i) => (
+                    <li key={`p-${i}`}>Reads: {p}</li>
+                  ))}
+                  {conn.limitations.map((l, i) => (
+                    <li key={`l-${i}`}>Cannot: {l}</li>
+                  ))}
+                </ul>
+              </details>
+              <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+                {conn.status === 'NOT_CONFIGURED' ? (
+                  <button className="btn btn-secondary" disabled title="Server has no developer credentials for this platform">
+                    Connect
+                  </button>
+                ) : null}
+                {conn.status === 'NOT_CONFIGURED' ? (
+                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', alignSelf: 'center' }}>
+                    Not configured on this server — ask the operator to add {conn.platform.toUpperCase()}_CLIENT_ID / _CLIENT_SECRET.
+                  </span>
+                ) : null}
+                {(conn.status === 'NOT_CONNECTED' || conn.status === 'EXPIRED' || conn.status === 'ERROR') ? (
+                  <button className="btn btn-primary" disabled={working === `connect:${conn.platform}`} onClick={() => handleConnect(conn.platform)}>
+                    {conn.status === 'NOT_CONNECTED' ? 'Connect' : 'Reconnect'}
+                  </button>
+                ) : null}
+                {(conn.status === 'CONNECTED' || conn.status === 'PAUSED') ? (
+                  <button className="btn btn-secondary" disabled={working === `refresh:${conn.platform}`} onClick={() => handleRefresh(conn.platform)}>
+                    Refresh
+                  </button>
+                ) : null}
+                {(conn.status === 'CONNECTED' || conn.status === 'PAUSED') ? (
+                  <button className="btn btn-secondary" disabled={working === `pause:${conn.platform}`} onClick={() => handlePause(conn.platform, conn.active)}>
+                    {conn.active ? 'Pause' : 'Resume'}
+                  </button>
+                ) : null}
+                {conn.connected ? (
+                  <button className="btn btn-secondary" disabled={working === `disconnect:${conn.platform}`} onClick={() => handleDisconnect(conn.platform)}>
+                    Disconnect
+                  </button>
+                ) : null}
+                {conn.postCount > 0 || postsFor === conn.platform ? (
+                  <button className="btn btn-secondary" disabled={working === `posts:${conn.platform}`} onClick={() => void handleShowPosts(conn.platform)}>
+                    {postsFor === conn.platform ? 'Hide items' : `Show pulled items (${conn.postCount})`}
+                  </button>
+                ) : null}
+              </div>
+              {postsFor === conn.platform ? (
+                <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {posts.length === 0 ? (
+                    <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                      No pulled items yet. Use Refresh to pull from {conn.displayName}.
+                    </p>
+                  ) : null}
+                  {posts.map((post) => (
+                    <div key={String(post.id)} style={{ borderTop: '1px solid var(--color-border)', paddingTop: '0.5rem' }}>
+                      <p style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>
+                        {String(post.title ?? post.text?.split('\n')[0] ?? '(untitled)').slice(0, 120)}
+                      </p>
+                      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: '0.125rem 0' }}>
+                        {conn.displayName}
+                        {post.author ? ` · ${String(post.author)}` : ''}
+                        {post.publishedAt ? ` · ${String(post.publishedAt).slice(0, 10)}` : ''}
+                        {post.url ? (
+                          <>
+                            {' · '}<a href={String(post.url)} target="_blank" rel="noreferrer">source</a>
+                          </>
+                        ) : null}
+                        {!post.connectionId ? ' · from a disconnected connection (kept as inspiration)' : ''}
+                      </p>
+                      <button
+                        className="btn btn-secondary"
+                        disabled={savingIdea === String(post.id)}
+                        onClick={() => void handleSaveIdea(post)}
+                      >
+                        {savingIdea === String(post.id) ? 'Saving...' : 'Save as content idea'}
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </li>
+          ))}
+        </ul>
+      ) : null}
+      {message ? (
+        <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{message}</p>
+      ) : null}
+    </div>
+  );
+}
+
 function SourcesSection() {
   const [sources, setSources] = useState<Source[]>([]);
   const [loading, setLoading] = useState(true);
@@ -842,7 +1143,7 @@ function LearningSection() {
       setMetricName('');
       await fetchProposals();
     } catch (err) {
-      setFormMessage(friendlyErrorMessage(err));
+      setFormMessage(detailedErrorMessage(err));
     } finally {
       setDeriving(false);
     }
@@ -890,7 +1191,7 @@ function LearningSection() {
           <input
             value={minSample}
             onChange={(e) => setMinSample(e.target.value)}
-            placeholder="Min sample size"
+            placeholder="Min sample size (≥ 2)"
             inputMode="numeric"
             style={{ ...fieldStyle, flex: '1 1 140px' }}
           />
@@ -1279,3 +1580,276 @@ const fieldStyle: React.CSSProperties = {
   padding: '0.625rem 0.75rem',
   width: '100%',
 };
+
+function AudienceProblemsSection() {
+  const [data, setData] = useState<AudienceProblemsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await listAudienceProblems();
+      setData(result);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  if (loading) return <LoadingBlock label="Discovering audience problems..." />;
+  if (error) return <ErrorBlock message={error} onRetry={() => void fetchData()} />;
+  if (!data || data.groups.length === 0) {
+    return (
+      <EmptyBlock
+        title="No audience problems yet"
+        description={data?.errors?.join('; ') || 'Run research to discover recurring beginner problems. Problems are grouped only when 2+ sources mention them.'}
+      />
+    );
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+          Audience Problems ({data.groups.length} groups from {data.totalSignalsAnalyzed} signals)
+        </h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
+          Grouped: {data.groupedCount} · Ungrouped: {data.ungroupedCount}. Only recurring problems are shown — one-off posts are not treated as widespread.
+        </p>
+      </div>
+      {data.groups.map((g) => (
+        <div key={g.id} className="card">
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.5rem' }}>
+            <span className="badge badge-neutral">{g.yfpRelevance} relevance</span>
+            <span className="badge badge-neutral">×{g.frequency} sources</span>
+            <span className="badge badge-neutral">Confidence {(g.confidence * 100).toFixed(0)}%</span>
+          </div>
+          <h3 className="health-card-title" style={{ marginBottom: '0.25rem' }}>{g.problem}</h3>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>Audience: {g.audience}</p>
+          <p style={{ fontSize: '0.875rem', marginTop: '0.5rem' }}><strong>YFP angle:</strong> {g.suggestedContent.angle}</p>
+          <p style={{ fontSize: '0.875rem' }}><strong>Hook:</strong> {g.suggestedContent.hook}</p>
+          <p style={{ fontSize: '0.875rem' }}>
+            <strong>Format:</strong> {g.suggestedContent.format} · <strong>Educational value:</strong> {g.suggestedContent.educationalValue}
+          </p>
+          <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>Business: {g.businessAlignment}</p>
+          <details style={{ marginTop: '0.5rem' }}>
+            <summary style={{ fontSize: '0.875rem', cursor: 'pointer' }}>Supporting evidence ({g.evidence.length})</summary>
+            <ul style={{ paddingLeft: '1.25rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+              {g.evidence.map((e) => (
+                <li key={e.sourceId}>
+                  [{e.sourceType}] {e.sourceTitle || '(untitled)'}{' '}
+                  {e.sourceUrl ? <a href={e.sourceUrl} target="_blank" rel="noreferrer">source</a> : null}
+                  <br />“{e.quote.slice(0, 200)}”
+                </li>
+              ))}
+            </ul>
+          </details>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function YFPScoringSection() {
+  const [topicId, setTopicId] = useState('');
+  const [result, setResult] = useState<YFPScoreResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleScore(event: React.FormEvent) {
+    event.preventDefault();
+    if (!topicId.trim()) return;
+    setLoading(true);
+    setMessage(null);
+    try {
+      const r = await scoreOpportunityYFP({
+        topicId: topicId.trim(),
+        sourceIds: [],
+        claimIds: [],
+        trendSignalIds: [],
+        workspaceProfile: '',
+        icp: '',
+        contentGaps: [],
+      });
+      setResult(r);
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>YFP Opportunity Score (0–100)</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+          Audience relevance 0–25 · Trend momentum 0–25 · Educational value 0–20 · Timeliness 0–15 · Differentiation 0–15.
+          Scores are explainable; missing signals lower the score transparently instead of inventing data.
+        </p>
+        <form onSubmit={(e) => void handleScore(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <input value={topicId} onChange={(e) => setTopicId(e.target.value)} placeholder="Topic ID to score" style={{ ...fieldStyle, flex: '1 1 220px' }} />
+          <button type="submit" className="btn btn-primary" disabled={loading || !topicId.trim()}>
+            {loading ? 'Scoring...' : 'Score topic'}
+          </button>
+        </form>
+        {message ? <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{message}</p> : null}
+      </div>
+      {result ? (
+        <div className="card">
+          <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Score: {result.overallScore.toFixed(1)}/100</h3>
+          {result.criticalFailure ? (
+            <p style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>Blocked: {result.failureReason}</p>
+          ) : null}
+          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {result.dimensions.map((d: YFPScoreDimension) => (
+              <li key={d.name} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}>
+                <p style={{ fontWeight: 600 }}>{d.name}: {d.score.toFixed(1)}/{d.maxScore}</p>
+                <p style={{ color: 'var(--color-text-secondary)' }}>{d.explanation}</p>
+                <ul style={{ paddingLeft: '1.25rem', color: 'var(--color-text-secondary)' }}>
+                  {d.evidence.map((e: string, i: number) => <li key={i}>{e}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function ContentStudioSection() {
+  const [body, setBody] = useState('');
+  const [result, setResult] = useState<YFPQualityGateResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
+
+  async function handleCheck() {
+    if (body.trim().length < 50) {
+      setMessage('Paste at least 50 characters of draft content to check.');
+      return;
+    }
+    setLoading(true);
+    setMessage(null);
+    try {
+      const input: YFPQualityGateInput = { draftBody: body.trim() };
+      const r = await runYFPQualityGates(input);
+      setResult(r);
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Content Studio — YFP Quality Check</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+          Checks relevance, educational value, originality, accuracy, structure, and business alignment.
+          YFP style: beginner-friendly, practical, evidence-first. No fake statistics or income promises.
+        </p>
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={8} placeholder="Paste draft content here..." style={fieldStyle} />
+        <button className="btn btn-primary" disabled={loading} onClick={() => void handleCheck()} style={{ marginTop: '0.5rem' }}>
+          {loading ? 'Checking...' : 'Run quality check'}
+        </button>
+        {message ? <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{message}</p> : null}
+      </div>
+      {result ? (
+        <div className="card">
+          <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
+            YFP score: {result.yfpOverallScore}/100 · Status: {result.finalStatus}
+          </h3>
+          <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+            {result.yfpDimensions.map((d) => (
+              <li key={d.name} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}>
+                <p style={{ fontWeight: 600 }}>{d.name}: {d.score}/{d.maxScore} — {d.status}</p>
+                <ul style={{ paddingLeft: '1.25rem', color: 'var(--color-text-secondary)' }}>
+                  {d.evidence.map((e: string, i: number) => <li key={i}>{e}</li>)}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+function PerformanceSection() {
+  const [result, setResult] = useState<PerformanceReviewResult | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleRun() {
+    setLoading(true);
+    setError(null);
+    try {
+      const r = await runPerformanceReview();
+      setResult(r);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Performance Insights — 10-post review</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+          Reviews trigger after every {10} published posts. Patterns need 2+ posts per group; one success is never a formula.
+          Actual metrics are distinguished from AI interpretations.
+        </p>
+        <button className="btn btn-primary" disabled={loading} onClick={() => void handleRun()}>
+          {loading ? 'Analyzing...' : 'Run performance review'}
+        </button>
+        {error ? <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-error)' }}>{error}</p> : null}
+      </div>
+      {result ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div className="card">
+            <h3 className="health-card-title">Review: {result.postsAnalyzed} posts — {result.reviewTriggered ? 'triggered' : 'not yet'}</h3>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{result.reason} · Confidence: {result.confidence}</p>
+          </div>
+          {result.patterns.length > 0 ? (
+            <div className="card">
+              <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Observed patterns ({result.patterns.length})</h3>
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {result.patterns.map((p, i: number) => (
+                  <li key={i} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}>
+                    <p style={{ fontWeight: 600 }}>[{p.type}] {p.pattern}</p>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>{p.evidence} · Confidence: {p.confidence}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+          {result.recommendations.length > 0 ? (
+            <div className="card">
+              <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Recommendations</h3>
+              <ul style={{ listStyle: 'none', padding: 0, display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                {result.recommendations.map((r: PerformanceRecommendation, i: number) => (
+                  <li key={i} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem', fontSize: '0.875rem' }}>
+                    <p style={{ fontWeight: 600 }}>[{r.type}] {r.description}</p>
+                    <p style={{ color: 'var(--color-text-secondary)' }}>{r.reasoning}</p>
+                    <p>Suggested: {r.suggestedAction} · Confidence: {r.confidence}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+    </div>
+  );
+}

@@ -6,3 +6,4 @@ export * from './derivation';
 export * from './maturity';
 export * from './influence';
 export * from './contentOutcome';
+export * from './performanceReview';

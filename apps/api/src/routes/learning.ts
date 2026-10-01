@@ -1,9 +1,11 @@
 import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, requireRole, AuthenticatedRequest } from '../middleware/auth';
-import { learningSignalCreateSchema, learningDeriveSchema, learningConfirmSchema, contentOutcomeDeriveSchema, maturityPromoteSchema } from '@growth-operator/schemas';
+import { learningSignalCreateSchema, learningDeriveSchema, learningConfirmSchema, contentOutcomeDeriveSchema, maturityPromoteSchema, performanceReviewSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
-import { LearningDerivationService, deriveProposal, ContentOutcomeService, recordObservation, promoteMaturity, EVIDENCE_MATURITY_ORDER } from '@growth-operator/learning';
+import { LearningDerivationService, deriveProposal, ContentOutcomeService, PerformanceReviewService, recordObservation, promoteMaturity, EVIDENCE_MATURITY_ORDER } from '@growth-operator/learning';
+import { createDefaultRegistry } from '@growth-operator/ai';
+import { getEnv } from '../config/env';
 import { forwardLearningError } from '../utils/learningErrors';
 const router: ExpressRouter = Router();
 
@@ -283,6 +285,47 @@ router.post('/derived/:proposalId/promote', async (req, res, next) => {
       reason: data.reason,
     });
     res.json({ proposal: result, ladder: EVIDENCE_MATURITY_ORDER });
+  } catch (error) {
+    forwardLearningError(error, next);
+  }
+});
+
+router.post('/performance-review', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const data = performanceReviewSchema.parse(req.body ?? {});
+    const env = getEnv();
+    const registry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
+    const service = new PerformanceReviewService(prisma, registry, data);
+    const result = await service.checkAndRunReview(authReq.workspaceId);
+    res.json(result);
+  } catch (error) {
+    forwardLearningError(error, next);
+  }
+});
+
+router.get('/performance-review/latest', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const env = getEnv();
+    const registry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
+    const service = new PerformanceReviewService(prisma, registry);
+    const review = await service.getLatestReview(authReq.workspaceId);
+    res.json({ review });
+  } catch (error) {
+    forwardLearningError(error, next);
+  }
+});
+
+router.get('/performance-review/history', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const env = getEnv();
+    const registry = createDefaultRegistry(env.OPENAI_API_KEY, env.ANTHROPIC_API_KEY, env.OPENROUTER_API_KEY, env.OPENROUTER_MODEL);
+    const service = new PerformanceReviewService(prisma, registry);
+    const take = Math.min(20, Math.max(1, parseInt(req.query.limit as string) || 10));
+    const reviews = await service.getReviewHistory(authReq.workspaceId, take);
+    res.json({ reviews });
   } catch (error) {
     forwardLearningError(error, next);
   }

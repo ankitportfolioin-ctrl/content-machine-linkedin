@@ -10,6 +10,7 @@ import {
   TrendSignalService,
   expandHackerNewsFeed,
   resolveReleaseFeedUrl,
+  connectorRegistry,
 } from '@growth-operator/intelligence';
 import { ContentPlanService, DraftComposer } from '@growth-operator/content';
 import {
@@ -240,6 +241,56 @@ const intelligence: StageFn = async (ctx) => {
           const itemResult = await ingestion.ingest(workspaceId, url, {});
           if (itemResult.status !== 'FAILED' && itemResult.documentId) {
             newDocs.push({ sourceId: itemResult.sourceId, documentId: itemResult.documentId });
+          }
+        } catch {
+          counts.failed += 1;
+        }
+      }
+    }
+
+    // NEW: Connector-based research (Reddit, YouTube, Google Trends, LinkedIn, X, etc.)
+    // These connectors run independently of feed sources and provide additional research signals
+    if (aiAvailable) {
+      const env = getEnv();
+      const connectorConfigs = {
+        REDDIT: { enabled: true, config: { subreddits: ['programming', 'MachineLearning', 'artificial', 'OpenAI', 'ClaudeAI', 'LocalLLaMA', 'singularity', 'Futurology', 'technology', 'startups', 'Entrepreneur', 'SaaS', 'webdev', 'learnprogramming', 'coding', 'devops', 'sysadmin', 'kubernetes', 'aws', 'googlecloud', 'azure'], timeFilter: 'day', sortBy: 'hot' } },
+        YOUTUBE: { enabled: !!env.YOUTUBE_API_KEY, config: { queries: ['AI automation', 'AI coding', 'vibe coding', 'Claude Code', 'Cursor AI', 'AI agents', 'web development', 'freelancing with AI'], apiKey: env.YOUTUBE_API_KEY } },
+        GOOGLE_TRENDS: { enabled: true, config: { topics: ['AI', 'AI coding', 'AI agents', 'Claude Code', 'vibe coding', 'automation', 'developer tools'], geo: 'US', timeRange: 'now 7-d', category: 0 } },
+        LINKEDIN: { enabled: false, config: { organizationIds: [] } }, // Requires OAuth
+        X: { enabled: false, config: {} }, // Requires OAuth
+        INSTAGRAM: { enabled: false, config: {} }, // Requires OAuth, Tier 2
+        TIKTOK: { enabled: false, config: {} }, // Requires OAuth, Tier 2
+      };
+
+      const credentials: Record<string, any> = {
+        YOUTUBE: { accessToken: env.YOUTUBE_ACCESS_TOKEN, apiKey: env.YOUTUBE_API_KEY },
+        // OAuth-based credentials would be loaded from database in production
+      };
+
+      const { signals: connectorSignals, errors: connectorErrors } = await connectorRegistry.fetchFromAllSources(
+        workspaceId,
+        Math.min(50, MAX_NEW_DOCS_PER_RUN - docsProcessed),
+        connectorConfigs
+      );
+
+      if (connectorErrors.length > 0) {
+        notes.push(`Connector errors: ${connectorErrors.join('; ')}`);
+      }
+
+      // Ingest connector signals
+      for (const signal of connectorSignals) {
+        if (docsProcessed >= MAX_NEW_DOCS_PER_RUN) {
+          notes.push(`New-document cap (${MAX_NEW_DOCS_PER_RUN}) reached; remainder deferred.`);
+          break;
+        }
+        if (!ctx.budget.spendFetch()) {
+          notes.push('Fetch budget exhausted; remaining connector signals deferred.');
+          break;
+        }
+        try {
+          const result = await ingestion.ingest(workspaceId, signal.url, { sourceType: signal.sourceType as 'REDDIT' | 'YOUTUBE' | 'GOOGLE_TRENDS' | 'LINKEDIN' | 'X' | 'INSTAGRAM' | 'TIKTOK' });
+          if (result.status !== 'FAILED' && result.documentId) {
+            newDocs.push({ sourceId: result.sourceId, documentId: result.documentId });
           }
         } catch {
           counts.failed += 1;

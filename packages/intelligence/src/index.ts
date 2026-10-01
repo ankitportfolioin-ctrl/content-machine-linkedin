@@ -8,4 +8,7 @@ export * from './contentOpportunity';
 export * from './contentGap';
 export * from './opportunityFeedback';
 export * from './opportunityLearning';
+export * from './audienceProblems';
+export * from './sourceReliability';
 export * from './ssrfProtection';
+export * from './connectors';

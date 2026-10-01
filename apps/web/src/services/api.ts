@@ -137,15 +137,22 @@ function notifyAuthExpired(): void {
   }
 }
 
+export interface ApiFieldError {
+  field: string;
+  message: string;
+}
+
 export class ApiRequestError extends Error {
   status: number;
   code: string;
+  details: ApiFieldError[];
 
-  constructor(status: number, code: string, message: string) {
+  constructor(status: number, code: string, message: string, details: ApiFieldError[] = []) {
     super(message);
     this.name = 'ApiRequestError';
     this.status = status;
     this.code = code;
+    this.details = details;
   }
 }
 
@@ -169,6 +176,22 @@ export function friendlyErrorMessage(error: unknown): string {
   return error instanceof Error ? error.message : 'Something went wrong. Please try again.';
 }
 
+/**
+ * Same as friendlyErrorMessage but appends server-provided field details
+ * (e.g. enum validation failures) so forms can tell the user *which* field
+ * rejected their input instead of a bare "Validation failed".
+ */
+export function detailedErrorMessage(error: unknown): string {
+  const base = friendlyErrorMessage(error);
+  if (error instanceof ApiRequestError && error.details.length > 0) {
+    const fields = error.details
+      .map((d) => `${d.field}: ${d.message}`)
+      .join('; ');
+    return `${base} — ${fields}`;
+  }
+  return base;
+}
+
 async function handleResponse<T>(response: Response): Promise<T> {
   let data: unknown = null;
   try {
@@ -182,7 +205,19 @@ async function handleResponse<T>(response: Response): Promise<T> {
     const maybeError = data as ApiError | null;
     const code = maybeError?.error?.code ?? `HTTP_${response.status}`;
     const message = maybeError?.error?.message ?? `Request failed with status ${response.status}`;
-    throw new ApiRequestError(response.status, code, message);
+    const rawDetails = (maybeError?.error as { details?: unknown } | undefined)?.details;
+    const details: ApiFieldError[] = Array.isArray(rawDetails)
+      ? rawDetails
+          .filter(
+            (d): d is { field?: unknown; message?: unknown } =>
+              typeof d === 'object' && d !== null,
+          )
+          .map((d) => ({
+            field: typeof d.field === 'string' ? d.field : 'value',
+            message: typeof d.message === 'string' ? d.message : 'Invalid value',
+          }))
+      : [];
+    throw new ApiRequestError(response.status, code, message, details);
   }
 
   return data as T;
@@ -1704,4 +1739,110 @@ export async function getRun(id: string): Promise<{ run: import('../types').Dail
 
 export async function triggerRun(runDate?: string): Promise<{ result: { runId: string; status: string; stages: Array<{ stage: string; status: string }>; resumed: boolean } }> {
   return authedRequest(`/runs/trigger`, { method: 'POST', body: JSON.stringify(runDate ? { runDate } : {}) });
+}
+
+// ---------------------------------------------------------------------------
+// Optional social connectors (Content Brain inspiration, read-only OAuth)
+// ---------------------------------------------------------------------------
+
+export async function listSocialConnections(): Promise<{ connections: import('../types').SocialConnection[] }> {
+  return authedRequest(`/social/connections`);
+}
+
+export async function connectSocial(platform: string): Promise<{ authorizationUrl: string; state: string }> {
+  return authedRequest(`/social/${encodeURIComponent(platform)}/connect`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function pauseSocial(platform: string): Promise<{ connection: { platform: string; active: boolean; status: string } }> {
+  return authedRequest(`/social/${encodeURIComponent(platform)}/pause`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function resumeSocial(platform: string): Promise<{ connection: { platform: string; active: boolean; status: string } }> {
+  return authedRequest(`/social/${encodeURIComponent(platform)}/resume`, { method: 'POST', body: JSON.stringify({}) });
+}
+
+export async function disconnectSocial(platform: string): Promise<{ disconnected: boolean; platform: string; note: string }> {
+  return authedRequest(`/social/${encodeURIComponent(platform)}`, { method: 'DELETE' });
+}
+
+export async function refreshSocial(platform: string, limit = 10): Promise<{ platform: string; fetched: number; stored: number }> {
+  return authedRequest(`/social/${encodeURIComponent(platform)}/refresh`, { method: 'POST', body: JSON.stringify({ limit }) });
+}
+
+export async function listSocialPosts(platform?: string, limit = 20): Promise<{ posts: import('../types').SocialPost[] }> {
+  const query = new URLSearchParams();
+  if (platform) query.set('platform', platform);
+  query.set('limit', String(limit));
+  return authedRequest(`/social/posts?${query.toString()}`);
+}
+
+export async function saveSocialIdea(postId: string, title?: string): Promise<{ contentIdea: import('../types').ContentIdea }> {
+  return authedRequest(`/social/posts/${encodeURIComponent(postId)}/save-idea`, { method: 'POST', body: JSON.stringify({ title }) });
+}
+
+// ---------------------------------------------------------------------------
+// YFP Content Brain: Audience Problems
+// ---------------------------------------------------------------------------
+
+export async function listAudienceProblems(): Promise<import('../types').AudienceProblemsResponse> {
+  return authedRequest<import('../types').AudienceProblemsResponse>(`/intelligence/audience-problems`);
+}
+
+// ---------------------------------------------------------------------------
+// YFP Content Brain: YFP Scoring
+// ---------------------------------------------------------------------------
+
+export interface ScoreOpportunityYFPInput {
+  topicId: string;
+  sourceIds: string[];
+  claimIds: string[];
+  trendSignalIds: string[];
+  workspaceProfile: string;
+  icp: string;
+  contentGaps: Array<{ type: string; description: string; evidence: string }>;
+}
+
+export async function scoreOpportunityYFP(input: ScoreOpportunityYFPInput): Promise<import('../types').YFPScoreResult> {
+  return authedRequest<import('../types').YFPScoreResult>(`/intelligence/opportunities/score-yfp`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// YFP Content Brain: YFP Quality Gates
+// ---------------------------------------------------------------------------
+
+export async function runYFPQualityGates(input: import('../types').YFPQualityGateInput): Promise<import('../types').YFPQualityGateResult> {
+  return authedRequest<import('../types').YFPQualityGateResult>(`/content-drafts/yfp-quality-gates`, {
+    method: 'POST',
+    body: JSON.stringify(input),
+  });
+}
+
+// ---------------------------------------------------------------------------
+// YFP Content Brain: Performance Review
+// ---------------------------------------------------------------------------
+
+export interface PerformanceReviewConfig {
+  enabled?: boolean;
+  minPostsForReview?: number;
+  metricsToAnalyze?: string[];
+  attributesToCompare?: Array<'format' | 'angle' | 'objective' | 'topic'>;
+  minSamplePerGroup?: number;
+}
+
+export async function runPerformanceReview(config?: PerformanceReviewConfig): Promise<import('../types').PerformanceReviewResult> {
+  return authedRequest<import('../types').PerformanceReviewResult>(`/learning/performance-review`, {
+    method: 'POST',
+    body: JSON.stringify(config || {}),
+  });
+}
+
+export async function getPerformanceReviewHistory(limit = 10): Promise<{ reviews: import('../types').IntelligenceReport[] }> {
+  return authedRequest<{ reviews: import('../types').IntelligenceReport[] }>(`/learning/performance-review/history?limit=${limit}`);
+}
+
+export async function getLatestPerformanceReview(): Promise<import('../types').IntelligenceReport | null> {
+  return authedRequest<import('../types').IntelligenceReport | null>(`/learning/performance-review/latest`);
 }

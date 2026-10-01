@@ -172,7 +172,7 @@ export const learningSignalCreateSchema = z.object({
 
 export const intelligenceSourceCreateSchema = z.object({
   url: urlSchema,
-  sourceType: z.enum(['article', 'rss', 'atom', 'sitemap', 'website', 'user_url']).optional(),
+  sourceType: z.enum(['article', 'rss', 'atom', 'sitemap', 'website', 'user_url', 'reddit', 'youtube', 'google_trends', 'linkedin', 'x', 'instagram', 'tiktok']).optional(),
 });
 
 export const intelligenceSourceUpdateSchema = z.object({
@@ -479,6 +479,57 @@ export const opportunityScoreSchema = z.object({
   })).max(50).default([]),
 });
 
+export const yfpOpportunityScoreSchema = opportunityScoreSchema;
+
+export const yfpQualityGateSchema = z.object({
+  draftBody: z.string().min(50).max(50000),
+  structure: z.record(z.unknown()).optional(),
+  format: z.string().max(50).optional().nullable(),
+  planThesis: z.string().max(5000).optional().nullable(),
+  draftThesis: z.string().max(5000).optional().nullable(),
+  bannedWords: z.array(z.string().max(200)).max(100).default([]),
+  receiptFacts: z.array(z.string().max(2000)).max(100).default([]),
+  boundEvidenceTexts: z.array(z.string().max(5000)).max(100).default([]),
+  evidenceFindings: z.array(z.object({
+    kind: z.string().max(100),
+    severity: z.string().max(50),
+    span: z.string().max(2000),
+  })).max(100).default([]),
+  evidenceCoverage: z.number().min(0).max(1).default(0),
+  contradictionPresent: z.boolean().default(false),
+  contradictionSeverity: z.string().max(50).optional().nullable(),
+  existingTitles: z.array(z.string().max(300)).max(200).default([]),
+  cta: z.string().max(1000).optional().nullable(),
+  workspaceProfile: z.string().max(5000).default(''),
+  icp: z.string().max(5000).default(''),
+  audienceProblems: z.array(z.object({
+    problem: z.string().max(500),
+    audience: z.string().max(200),
+  })).max(50).default([]),
+  sourceTypes: z.array(z.string().max(50)).max(50).default([]),
+  topicCategory: z.string().max(200).optional(),
+});
+
+export const performanceReviewSchema = z.object({
+  enabled: z.boolean().default(true),
+  minPostsForReview: z.number().int().min(2).max(50).default(10),
+  metricsToAnalyze: z.array(z.string().max(100)).max(30).default(['impressions', 'reactions', 'comments', 'reposts', 'saves', 'linkClicks', 'profileViews']),
+  attributesToCompare: z.array(z.enum(['format', 'angle', 'objective', 'topic'])).max(4).default(['format', 'angle', 'objective', 'topic']),
+  minSamplePerGroup: z.number().int().min(2).max(10).default(2),
+});
+
+export const researchTriggerSchema = z.object({
+  limit: z.number().int().min(1).max(50).default(10),
+  sources: z.record(z.object({
+    enabled: z.boolean(),
+    config: z.record(z.unknown()).default({}),
+  })).optional(),
+});
+
+export const factCheckSchema = z.object({
+  claims: z.array(z.string().min(1).max(2000)).min(1).max(50),
+});
+
 export const operatorActionKindSchema = z.enum([
   'content_opportunity',
   'content_gap',
@@ -552,6 +603,11 @@ export type OutcomeMetricCreate = z.infer<typeof outcomeMetricCreateSchema>;
 export type LearningDerive = z.infer<typeof learningDeriveSchema>;
 export type ContentOutcomeDerive = z.infer<typeof contentOutcomeDeriveSchema>;
 export type OpportunityScore = z.infer<typeof opportunityScoreSchema>;
+export type YfpOpportunityScore = z.infer<typeof yfpOpportunityScoreSchema>;
+export type YfpQualityGate = z.infer<typeof yfpQualityGateSchema>;
+export type PerformanceReview = z.infer<typeof performanceReviewSchema>;
+export type ResearchTrigger = z.infer<typeof researchTriggerSchema>;
+export type FactCheck = z.infer<typeof factCheckSchema>;
 export type OperatorActionKind = z.infer<typeof operatorActionKindSchema>;
 
 export const businessProfileSchema = z.object({
@@ -749,15 +805,25 @@ export const killUpdateSchema = z.object({
 
 export const feedSourceCreateSchema = z.object({
   url: urlSchema,
-  type: z.enum(['rss', 'atom', 'hackernews', 'github_releases', 'blog', 'site']).default('rss'),
+  type: z.enum(['rss', 'atom', 'hackernews', 'github_releases', 'blog', 'site', 'reddit', 'youtube', 'google_trends', 'linkedin', 'x', 'instagram', 'tiktok']).default('rss'),
   name: z.string().max(200).optional(),
   active: z.boolean().default(true),
 });
 
 export const feedSourceUpdateSchema = z.object({
   name: z.string().max(200).optional(),
-  type: z.enum(['rss', 'atom', 'hackernews', 'github_releases', 'blog', 'site']).optional(),
+  type: z.enum(['rss', 'atom', 'hackernews', 'github_releases', 'blog', 'site', 'reddit', 'youtube', 'google_trends', 'linkedin', 'x', 'instagram', 'tiktok']).optional(),
   active: z.boolean().optional(),
+});
+
+export const socialPlatformSchema = z.enum(['instagram', 'facebook', 'linkedin', 'youtube', 'x']);
+
+export const socialRefreshSchema = z.object({
+  limit: z.coerce.number().int().min(1).max(25).default(10),
+});
+
+export const socialSaveIdeaSchema = z.object({
+  title: z.string().min(1).max(200).optional(),
 });
 
 export const leadImportSchema = z.object({

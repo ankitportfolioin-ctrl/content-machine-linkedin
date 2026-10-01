@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Router, Router as ExpressRouter } from 'express';
 import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, AuthenticatedRequest } from '../middleware/auth';
-import { contentDraftCreateSchema, contentDraftUpdateSchema, draftComposeSchema, claimBindingCreateSchema } from '@growth-operator/schemas';
+import { contentDraftCreateSchema, contentDraftUpdateSchema, draftComposeSchema, claimBindingCreateSchema, yfpQualityGateSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { ValidationError, NotFoundError } from '../utils/errors';
 import { createDefaultRegistry } from '@growth-operator/ai';
@@ -10,6 +10,7 @@ import {
   EvidenceService,
   ReviewService,
   runQualityGates,
+  runYFPQualityGates,
   renderPreview,
   assertNoInternalMarkup,
 } from '@growth-operator/content';
@@ -363,6 +364,36 @@ router.get('/:contentDraftId/preview', async (req, res, next) => {
     });
     const forbidden = assertNoInternalMarkup(rendered);
     res.json({ preview: rendered, internalMarkupFound: forbidden });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.post('/yfp-quality-gates', async (req, res, next) => {
+  try {
+    const data = yfpQualityGateSchema.parse(req.body);
+    const result = runYFPQualityGates({
+      draftBody: data.draftBody,
+      structure: data.structure,
+      format: data.format as never,
+      planThesis: data.planThesis,
+      draftThesis: data.draftThesis,
+      bannedWords: data.bannedWords,
+      receiptFacts: data.receiptFacts,
+      boundEvidenceTexts: data.boundEvidenceTexts,
+      evidenceFindings: data.evidenceFindings as never,
+      evidenceCoverage: data.evidenceCoverage,
+      contradictionPresent: data.contradictionPresent,
+      contradictionSeverity: data.contradictionSeverity,
+      existingTitles: data.existingTitles,
+      cta: data.cta,
+      workspaceProfile: data.workspaceProfile,
+      icp: data.icp,
+      audienceProblems: data.audienceProblems,
+      sourceTypes: data.sourceTypes,
+      topicCategory: data.topicCategory,
+    });
+    res.json(result);
   } catch (error) {
     next(error);
   }

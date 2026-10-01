@@ -17,6 +17,13 @@ const TYPE_MAP = {
   github_releases: 'GITHUB_RELEASES',
   blog: 'BLOG',
   site: 'SITE',
+  reddit: 'REDDIT',
+  youtube: 'YOUTUBE',
+  google_trends: 'GOOGLE_TRENDS',
+  linkedin: 'LINKEDIN',
+  x: 'X',
+  instagram: 'INSTAGRAM',
+  tiktok: 'TIKTOK',
 } as const;
 
 router.get('/', async (req, res, next) => {

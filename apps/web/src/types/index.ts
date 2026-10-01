@@ -1131,3 +1131,173 @@ export interface BrainComment {
   isLeadSignal: boolean;
   [key: string]: unknown;
 }
+
+export type SocialConnectionStatus =
+  | 'NOT_CONFIGURED'
+  | 'NOT_CONNECTED'
+  | 'CONNECTED'
+  | 'PAUSED'
+  | 'ERROR'
+  | 'EXPIRED';
+
+export interface SocialConnection {
+  platform: string;
+  displayName: string;
+  configured: boolean;
+  connected: boolean;
+  status: SocialConnectionStatus;
+  accountLabel?: string | null;
+  active: boolean;
+  lastPulledAt?: string | null;
+  lastError?: string | null;
+  postCount: number;
+  provides: string[];
+  limitations: string[];
+  scopes: string[];
+  [key: string]: unknown;
+}
+
+export interface SocialPost {
+  id: string;
+  platform: string;
+  externalId: string;
+  url?: string | null;
+  title?: string | null;
+  text?: string | null;
+  author?: string | null;
+  publishedAt?: string | null;
+  mediaKind?: string | null;
+  hashtags: string[];
+  fetchedAt: string;
+  connectionId?: string | null;
+  [key: string]: unknown;
+}
+
+export interface AudienceProblemGroup {
+  id: string;
+  problem: string;
+  audience: string;
+  evidence: Array<{
+    sourceId: string;
+    sourceTitle: string | null;
+    sourceUrl: string;
+    sourceType: string;
+    quote: string;
+    publishedAt: string | null;
+  }>;
+  frequency: number;
+  suggestedContent: {
+    angle: string;
+    format: 'TUTORIAL' | 'EXPLAINER' | 'CAROUSEL' | 'FRAMEWORK' | 'CASE_STUDY' | 'TOOL_BREAKDOWN' | 'PROJECT_WALKTHROUGH' | 'MYTH_VS_FACT';
+    hook: string;
+    educationalValue: 'HIGH' | 'MEDIUM' | 'LOW';
+  };
+  yfpRelevance: 'HIGH' | 'MEDIUM' | 'LOW';
+  businessAlignment: string;
+  confidence: number;
+}
+
+export interface AudienceProblemsResponse {
+  groups: AudienceProblemGroup[];
+  totalSignalsAnalyzed: number;
+  groupedCount: number;
+  ungroupedCount: number;
+  errors: string[];
+}
+
+export interface YFPScoreDimension {
+  name: 'audience_relevance' | 'trend_momentum' | 'educational_value' | 'timeliness' | 'content_differentiation';
+  score: number;
+  maxScore: number;
+  explanation: string;
+  evidence: string[];
+}
+
+export interface YFPScoreResult {
+  overallScore: number;
+  dimensions: YFPScoreDimension[];
+  criticalFailure: boolean;
+  failureReason?: string;
+}
+
+export interface YFPQualityGateInput {
+  draftBody: string;
+  structure?: unknown;
+  format?: string | null;
+  planThesis?: string | null;
+  draftThesis?: string | null;
+  bannedWords?: string[];
+  receiptFacts?: string[];
+  boundEvidenceTexts?: string[];
+  evidenceFindings?: Array<{ kind: string; severity: string; span: string }>;
+  evidenceCoverage?: number;
+  contradictionPresent?: boolean;
+  contradictionSeverity?: string | null;
+  existingTitles?: string[];
+  cta?: string | null;
+  workspaceProfile?: string;
+  icp?: string;
+  audienceProblems?: Array<{ problem: string; audience: string }>;
+  sourceTypes?: string[];
+  topicCategory?: string;
+}
+
+export interface YFPQualityGateDimension {
+  name: 'relevance' | 'educational_value' | 'originality' | 'accuracy' | 'structure' | 'business_alignment';
+  score: number;
+  maxScore: number;
+  status: string;
+  evidence: string[];
+}
+
+export interface YFPQualityGateResult {
+  results: Array<{
+    gate: string;
+    status: string;
+    severity: string;
+    message: string;
+    evidence: string[];
+  }>;
+  finalStatus: string;
+  overallScore: number;
+  dimensions: Array<{ name: string; score: number }>;
+  yfpDimensions: YFPQualityGateDimension[];
+  yfpOverallScore: number;
+}
+
+export interface PerformancePattern {
+  pattern: string;
+  type: 'TOPIC' | 'FORMAT' | 'ANGLE' | 'HOOK' | 'OBJECTIVE' | 'CATEGORY';
+  supportingPosts: string[];
+  metricName: string;
+  avgPerformance: number;
+  vsBaseline: number;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  evidence: string;
+}
+
+export interface PerformanceRecommendation {
+  type: 'TEST_MORE' | 'CONTINUE' | 'AVOID' | 'EXPERIMENT';
+  description: string;
+  reasoning: string;
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  suggestedAction: string;
+}
+
+export interface PerformanceReviewResult {
+  postsAnalyzed: number;
+  reviewTriggered: boolean;
+  reason: string;
+  patterns: PerformancePattern[];
+  recommendations: PerformanceRecommendation[];
+  confidence: 'LOW' | 'MEDIUM' | 'HIGH';
+  nextReviewAt: number;
+}
+
+export interface TenPostReviewConfig {
+  enabled: boolean;
+  minPostsForReview: number;
+  metricsToAnalyze: string[];
+  attributesToCompare: Array<'format' | 'angle' | 'objective' | 'topic'>;
+  minSamplePerGroup: number;
+}

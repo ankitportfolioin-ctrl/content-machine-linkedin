@@ -4,6 +4,25 @@ import { validateFormatStructure } from './strategy';
 import { DraftValidationFinding } from './evidence';
 import { ContentFormatKind, GateResult, GateStatus } from './types';
 
+export interface YFPQualityGateInput extends GateInput {
+  workspaceProfile?: string;
+  icp?: string;
+  audienceProblems?: Array<{ problem: string; audience: string }>;
+  sourceTypes?: string[];
+  topicCategory?: string;
+}
+
+export interface YFPQualityGateResult extends GateRunResult {
+  yfpDimensions: Array<{
+    name: 'relevance' | 'educational_value' | 'originality' | 'accuracy' | 'structure' | 'business_alignment';
+    score: number;
+    maxScore: number;
+    status: GateStatus;
+    evidence: string[];
+  }>;
+  yfpOverallScore: number;
+}
+
 const INTERNAL_MARKUP = [
   '[SLIDE',
   '[HOOK]',
@@ -220,3 +239,230 @@ export function runQualityGates(input: GateInput): GateRunResult {
 
   return { results, finalStatus, overallScore, dimensions };
 }
+
+const YFP_CATEGORIES = [
+  'AI news and new AI tools',
+  'Latest technology updates',
+  'Vibe coding and AI-assisted development',
+  'Beginner-friendly coding tutorials',
+  'Practical AI use cases',
+  'Free tools and platforms',
+  'Web development and rapid prototyping',
+  'AI workflow automation',
+  'Freelancing and client acquisition',
+  'Real-world project building',
+  'Common beginner problems and solutions',
+  'Startup and developer productivity tips',
+];
+
+const BEGINNER_INDICATORS = [
+  'beginner', 'start', 'first', 'basic', 'intro', 'fundamental',
+  'step-by-step', 'tutorial', 'guide', 'how to', 'learn',
+  'simple', 'easy', 'from scratch', 'zero to', 'complete guide',
+];
+
+const HYPE_INDICATORS = [
+  'guaranteed', 'overnight', 'instant', '10x', '100x',
+  'get rich', 'passive income', 'effortless', 'secret',
+  'hack', 'trick', 'magic', 'revolutionary', 'game-changer',
+];
+
+const UNSUPPORTED_CLAIM_PATTERNS = [
+  /studies show/i,
+  /research proves/i,
+  /experts agree/i,
+  /data shows/i,
+  /statistics indicate/i,
+  /\d+% (of|more|less)/,
+  /survey (found|revealed|shows)/i,
+];
+
+function runYFPQualityGates(input: YFPQualityGateInput): YFPQualityGateResult {
+  const baseResult = runQualityGates(input);
+  const yfpDimensions: YFPQualityGateResult['yfpDimensions'] = [];
+  const pushYFP = (
+    name: YFPQualityGateResult['yfpDimensions'][0]['name'],
+    score: number,
+    maxScore: number,
+    status: GateStatus,
+    evidence: string[]
+  ) => {
+    yfpDimensions.push({ name, score, maxScore, status, evidence });
+  };
+
+  // 1. Relevance (0-25)
+  let relevanceScore = 0;
+  const relevanceEvidence: string[] = [];
+
+  if (input.topicCategory && YFP_CATEGORIES.some(c => c.toLowerCase().includes(input.topicCategory!.toLowerCase()))) {
+    relevanceScore += 10;
+    relevanceEvidence.push(`Topic matches YFP category: ${input.topicCategory}`);
+  }
+
+  if (input.audienceProblems && input.audienceProblems.length > 0) {
+    relevanceScore += 8;
+    relevanceEvidence.push(`${input.audienceProblems.length} audience problem(s) addressed`);
+  }
+
+  if (input.workspaceProfile && input.workspaceProfile.length > 20) {
+    relevanceScore += 4;
+    relevanceEvidence.push('Workspace profile defined');
+  }
+
+  if (input.icp && input.icp.length > 20) {
+    relevanceScore += 3;
+    relevanceEvidence.push('ICP defined');
+  }
+
+  pushYFP('relevance', Math.min(25, relevanceScore), 25,
+    relevanceScore >= 15 ? 'PASS' : relevanceScore >= 8 ? 'REVIEW_REQUIRED' : 'BLOCKED',
+    relevanceEvidence);
+
+  // 2. Educational Value (0-20)
+  let eduScore = 0;
+  const eduEvidence: string[] = [];
+
+  const bodyLower = input.draftBody.toLowerCase();
+  const beginnerMatches = BEGINNER_INDICATORS.filter(kw => bodyLower.includes(kw)).length;
+  if (beginnerMatches >= 3) {
+    eduScore += 8;
+    eduEvidence.push(`${beginnerMatches} beginner-friendly indicators`);
+  } else if (beginnerMatches >= 1) {
+    eduScore += 4;
+    eduEvidence.push(`${beginnerMatches} beginner indicator(s)`);
+  }
+
+  const hasActionableSteps = /step \d|first,|second,|third,|next,|finally,/i.test(input.draftBody);
+  if (hasActionableSteps) {
+    eduScore += 6;
+    eduEvidence.push('Actionable step-by-step structure detected');
+  }
+
+  const hasPracticalExample = /example|demo|walkthrough|case study|real world|practical/i.test(input.draftBody);
+  if (hasPracticalExample) {
+    eduScore += 6;
+    eduEvidence.push('Practical example or case study included');
+  }
+
+  pushYFP('educational_value', Math.min(20, eduScore), 20,
+    eduScore >= 12 ? 'PASS' : eduScore >= 6 ? 'REVIEW_REQUIRED' : 'BLOCKED',
+    eduEvidence);
+
+  // 3. Originality (0-15)
+  let origScore = 0;
+  const origEvidence: string[] = [];
+
+  const hasPersonalVoice = /i (think|believe|found|discovered|learned|tried)/i.test(input.draftBody);
+  if (hasPersonalVoice) {
+    origScore += 5;
+    origEvidence.push('Personal perspective/voice detected');
+  }
+
+  const hasUniqueAngle = input.draftBody.length > 500 && !/(introduction|conclusion|summary)/i.test(input.draftBody.slice(0, 200));
+  if (hasUniqueAngle) {
+    origScore += 5;
+    origEvidence.push('Non-generic structure detected');
+  }
+
+  const hasSpecificDetails = /specifically|in particular|for example|such as|namely/i.test(input.draftBody);
+  if (hasSpecificDetails) {
+    origScore += 5;
+    origEvidence.push('Specific details vs generic advice');
+  }
+
+  pushYFP('originality', Math.min(15, origScore), 15,
+    origScore >= 8 ? 'PASS' : origScore >= 4 ? 'REVIEW_REQUIRED' : 'WARN',
+    origEvidence);
+
+  // 4. Accuracy (0-20)
+  let accScore = 0;
+  const accEvidence: string[] = [];
+
+  const unsupportedClaims = UNSUPPORTED_CLAIM_PATTERNS.filter(pattern => pattern.test(input.draftBody)).length;
+  if (unsupportedClaims === 0) {
+    accScore += 10;
+    accEvidence.push('No unsupported statistical claims detected');
+  } else {
+    accEvidence.push(`${unsupportedClaims} potential unsupported claim pattern(s) found`);
+  }
+
+  const hasSourceReferences = /source:|according to|reference:|\[source\]|\(source\)/i.test(input.draftBody);
+  if (hasSourceReferences) {
+    accScore += 5;
+    accEvidence.push('Source references present');
+  }
+
+  const hasHedgeLanguage = /may|could|might|potentially|possibly|appears to|suggests/i.test(input.draftBody);
+  if (hasHedgeLanguage) {
+    accScore += 5;
+    accEvidence.push('Appropriate hedge language for uncertain claims');
+  }
+
+  pushYFP('accuracy', Math.min(20, accScore), 20,
+    accScore >= 12 ? 'PASS' : accScore >= 6 ? 'REVIEW_REQUIRED' : 'BLOCKED',
+    accEvidence);
+
+  // 5. Structure (0-10)
+  let structScore = 0;
+  const structEvidence: string[] = [];
+
+  const hasHook = /^.{10,200}[.!?]/m.test(input.draftBody);
+  if (hasHook) {
+    structScore += 3;
+    structEvidence.push('Clear opening hook present');
+  }
+
+  const hasClearSections = /^#{1,3}\s/m.test(input.draftBody) || /^\d+\.\s/m.test(input.draftBody);
+  if (hasClearSections) {
+    structScore += 4;
+    structEvidence.push('Clear section structure');
+  }
+
+  const hasTakeaway = /takeaway|key point|remember|bottom line|in summary/i.test(input.draftBody);
+  if (hasTakeaway) {
+    structScore += 3;
+    structEvidence.push('Clear takeaway/conclusion');
+  }
+
+  pushYFP('structure', Math.min(10, structScore), 10,
+    structScore >= 7 ? 'PASS' : structScore >= 4 ? 'REVIEW_REQUIRED' : 'WARN',
+    structEvidence);
+
+  // 6. Business Alignment (0-10)
+  let bizScore = 0;
+  const bizEvidence: string[] = [];
+
+  const yfpKeywords = ['project', 'build', 'freelance', 'client', 'portfolio', 'skill', 'learn', 'practical', 'real world', 'deploy', 'ship'];
+  const yfpMatches = yfpKeywords.filter(kw => bodyLower.includes(kw)).length;
+  if (yfpMatches >= 3) {
+    bizScore += 5;
+    bizEvidence.push(`${yfpMatches} YFP-aligned keywords`);
+  } else if (yfpMatches >= 1) {
+    bizScore += 2;
+    bizEvidence.push(`${yfpMatches} YFP keyword(s)`);
+  }
+
+  const hypeMatches = HYPE_INDICATORS.filter(kw => bodyLower.includes(kw)).length;
+  if (hypeMatches === 0) {
+    bizScore += 5;
+    bizEvidence.push('No hype/misleading language detected');
+  } else {
+    bizEvidence.push(`${hypeMatches} hype indicator(s) - review recommended`);
+  }
+
+  pushYFP('business_alignment', Math.min(10, bizScore), 10,
+    bizScore >= 7 ? 'PASS' : bizScore >= 4 ? 'REVIEW_REQUIRED' : 'WARN',
+    bizEvidence);
+
+  const yfpOverallScore = yfpDimensions.reduce((sum, d) => sum + d.score, 0);
+  const maxYFPScore = yfpDimensions.reduce((sum, d) => sum + d.maxScore, 0);
+  const yfpPercentage = Math.round((yfpOverallScore / maxYFPScore) * 100);
+
+  return {
+    ...baseResult,
+    yfpDimensions,
+    yfpOverallScore: yfpPercentage,
+  };
+}
+
+export { runYFPQualityGates };
