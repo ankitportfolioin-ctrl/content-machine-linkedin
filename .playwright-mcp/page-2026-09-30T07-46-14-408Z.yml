@@ -1,0 +1,120 @@
+- generic [ref=f43e3]:
+  - navigation "Main navigation" [ref=f43e4]:
+    - generic [ref=f43e12]:
+      - text: Growth Operator
+      - generic [ref=f43e13]: Content Brain
+    - navigation [ref=f43e14]:
+      - generic [ref=f43e15]:
+        - generic [ref=f43e16]: Core
+        - link "Home" [ref=f43e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f43e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f43e29]:
+        - generic [ref=f43e30]: Intelligence
+        - link "Learning" [ref=f43e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f43e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f43e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f43e46]:
+        - generic [ref=f43e47]: Sales
+        - link "Leads" [ref=f43e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f43e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f43e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f43e65]:
+        - generic [ref=f43e66]: System
+        - link "Analytics" [ref=f43e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f43e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f43e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f43e89]:
+      - paragraph [ref=f43e90]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f43e91] [cursor=pointer]
+  - main [ref=f43e80]:
+    - generic [ref=f43e81]:
+      - link [ref=f43e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f43e83]
+      - paragraph [ref=f43e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f43e124]:
+      - button "← Back to ideas" [ref=f43e125] [cursor=pointer]
+      - generic [ref=f43e126]:
+        - generic [ref=f43e127]:
+          - 'heading "QA3: Follow-up systems for D2C support" [level=2] [ref=f43e128]'
+          - paragraph [ref=f43e129]: Practical follow-up checklist for demo stores
+        - generic [ref=f43e130]:
+          - generic [ref=f43e131]:
+            - generic [ref=f43e132]: Workspace
+            - combobox "Workspace" [ref=f43e133]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f43e134] [cursor=pointer]
+      - generic [ref=f43e135]:
+        - heading "Generate a content plan" [level=3] [ref=f43e136]
+        - paragraph [ref=f43e137]: Let AI draft a plan from this idea. All fields are optional.
+        - generic [ref=f43e138]:
+          - textbox "Objective" [ref=f43e139]
+          - textbox "Angle" [ref=f43e140]
+          - textbox "Format" [ref=f43e141]
+          - button "Generate" [ref=f43e142] [cursor=pointer]
+      - generic [ref=f43e143]:
+        - heading "Create a content plan manually" [level=3] [ref=f43e144]
+        - generic [ref=f43e145]:
+          - generic [ref=f43e146]:
+            - textbox "Thesis *" [ref=f43e147]
+            - textbox "Audience *" [ref=f43e148]
+            - generic [ref=f43e149]:
+              - text: Objective *
+              - combobox "Objective" [ref=f43e150]:
+                - option "Educate"
+                - option "Explain"
+                - option "Challenge"
+                - option "Build authority" [selected]
+                - option "Share framework"
+                - option "Start discussion"
+                - option "Teach practical"
+                - option "Analyze"
+                - option "Reframe"
+            - generic [ref=f43e151]:
+              - text: Angle *
+              - combobox "Angle" [ref=f43e152]:
+                - option "Educational"
+                - option "Contrarian"
+                - option "Practical" [selected]
+                - option "Framework"
+                - option "Analysis"
+                - option "Observation"
+                - option "Breakdown"
+            - generic [ref=f43e153]:
+              - text: Format *
+              - combobox "Format" [ref=f43e154]:
+                - option "Post"
+                - option "Text post"
+                - option "Article"
+                - option "Carousel"
+                - option "Video"
+                - option "Poll"
+                - option "Checklist" [selected]
+                - option "Framework"
+                - option "Contrarian"
+            - generic [ref=f43e155]:
+              - text: Narrative structure *
+              - combobox "Narrative structure" [ref=f43e156]:
+                - option "Problem → why → solution" [selected]
+                - option "Observation → analysis → implication"
+                - option "Hook → context → framework → takeaway"
+                - option "Mistake → consequence → better approach"
+                - option "Thesis → evidence → tradeoff → conclusion"
+          - textbox "Key points (one per line, at least one required)" [ref=f43e157]
+          - button "Create plan" [ref=f43e158] [cursor=pointer]
+      - generic [ref=f43e159]:
+        - heading "Content plans" [level=3] [ref=f43e160]
+        - paragraph [ref=f43e161]: No content plans yet. Generate one or create one manually above.

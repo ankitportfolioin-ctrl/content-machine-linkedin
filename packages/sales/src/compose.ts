@@ -52,6 +52,9 @@ export class OutreachComposer {
     if (!DRAFT_TYPES.includes(draftType)) {
       throw new SalesError('EVIDENCE_MISSING', `Unknown draft type: ${draftType}.`);
     }
+    // AI availability is determined by the provider registry actually
+    // containing a usable provider — never by NODE_ENV. An empty registry
+    // yields honest AI_UNAVAILABLE with zero output.
     const available = this.aiRegistry.getAvailable();
     if (available.length === 0) {
       throw new SalesError('AI_UNAVAILABLE', 'Cannot compose an outreach draft without an AI provider.');
@@ -71,6 +74,7 @@ export class OutreachComposer {
       ? 'Keep personalization minimal and generic; do not reference prospect specifics.'
       : `Personalization level ${strategy.personalizationLevel}. Every personalized statement must come from the evidence below.`;
     let response;
+    let content: string | undefined;
     try {
       response = await provider.chatCompletion({
         messages: [
@@ -82,24 +86,32 @@ export class OutreachComposer {
         maxTokens: 1500,
         responseFormat: { type: 'json_object' },
       });
+      content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new SalesError('AI_UNAVAILABLE', 'AI returned an empty draft response.');
+      }
     } catch (error) {
       if (error instanceof AIProviderError) {
         throw new SalesError('AI_UNAVAILABLE', 'Cannot compose an outreach draft without an AI provider.');
       }
-      throw error;
+      if (error instanceof SalesError) throw error;
+      // Any other error (network, timeout, JSON parse, etc.) = provider unavailable
+      throw new SalesError('AI_UNAVAILABLE', 'Cannot compose an outreach draft without an AI provider.');
     }
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new SalesError('AI_UNAVAILABLE', 'AI returned an empty draft response.');
+
+    let parsed;
+    try {
+      parsed = z.object({
+        opening: z.string().min(1).max(2000),
+        relevance: z.string().min(1).max(5000),
+        evidence: z.string().max(5000).optional(),
+        value: z.string().min(1).max(5000),
+        cta: z.string().max(1000).optional(),
+        body: z.string().min(10).max(10000),
+      }).safeParse(JSON.parse(content!));
+    } catch {
+      throw new SalesError('AI_UNAVAILABLE', 'AI returned an invalid response format.');
     }
-    const parsed = z.object({
-      opening: z.string().min(1).max(2000),
-      relevance: z.string().min(1).max(5000),
-      evidence: z.string().max(5000).optional(),
-      value: z.string().min(1).max(5000),
-      cta: z.string().max(1000).optional(),
-      body: z.string().min(10).max(10000),
-    }).safeParse(JSON.parse(content));
     if (!parsed.success) {
       throw new SalesError('EVIDENCE_MISSING', `AI draft output validation failed: ${parsed.error.message}`);
     }

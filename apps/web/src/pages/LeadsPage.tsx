@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
@@ -12,6 +12,7 @@ import {
   createProspectBrief,
   createSalesLead,
   decideOutreachReview,
+  detailedErrorMessage,
   discoverProspect,
   friendlyErrorMessage,
   getOutreachDraft,
@@ -55,10 +56,18 @@ import {
 } from '../types';
 
 export function LeadsPage() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, workspaceId } = useAuth();
   const [selectedLead, setSelectedLead] = useState<SalesLead | null>(null);
   const [searchParams] = useSearchParams();
   const [deepLinkAttemptedFor, setDeepLinkAttemptedFor] = useState<string | null>(null);
+
+  // A workspace switch invalidates any selected lead from the previous
+  // workspace; drop back to the list so stale detail can never render under
+  // the new workspace's context.
+  useEffect(() => {
+    setSelectedLead(null);
+    setDeepLinkAttemptedFor(null);
+  }, [workspaceId]);
 
   // Deep-link: /leads?leadId=<id> opens that exact existing lead once
   // authenticated. Unknown ids select nothing (normal list view); the attempt is
@@ -196,12 +205,23 @@ function AiUnavailableBlock() {
   );
 }
 
-function EvidenceView({ value }: { value: unknown }) {
+export function EvidenceView({ value }: { value: unknown }) {
   if (typeof value === 'undefined' || value === null || value === '') {
+    return <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>None noted</span>;
+  }
+  if (Array.isArray(value) && value.length === 0) {
     return <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>None noted</span>;
   }
   if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
     return <span style={{ fontSize: '0.875rem' }}>{String(value)}</span>;
+  }
+  // Prospect research payloads (arrays of findings with facts/unknowns, or
+  // objects carrying a facts array) render as readable lists — never a raw
+  // JSON dump. Anything unrecognized keeps a collapsed raw view for honesty.
+  const structured = renderStructuredEvidence(value);
+  if (structured) return structured;
+  if (!hasEvidenceContent(value)) {
+    return <span style={{ color: 'var(--color-text-muted)', fontSize: '0.875rem' }}>None noted</span>;
   }
   let text = '';
   try {
@@ -224,6 +244,86 @@ function EvidenceView({ value }: { value: unknown }) {
       {text}
     </pre>
   );
+}
+
+function hasEvidenceContent(value: unknown): boolean {
+  if (typeof value === 'string') return value.trim().length > 0;
+  if (typeof value === 'number' || typeof value === 'boolean') return true;
+  if (Array.isArray(value)) return value.some(hasEvidenceContent);
+  if (typeof value === 'object' && value !== null) {
+    const record = value as Record<string, unknown>;
+    for (const key of ['facts', 'unknowns', 'findings', 'evidence']) {
+      const nested = record[key];
+      if (Array.isArray(nested) && nested.some(hasEvidenceContent)) return true;
+    }
+    for (const key of ['statement', 'name', 'title', 'company', 'summary', 'interpretation']) {
+      const nested = record[key];
+      if (typeof nested === 'string' && nested.trim()) return true;
+    }
+  }
+  return false;
+}
+
+function renderStructuredEvidence(value: unknown): ReactNode | null {
+  if (!hasEvidenceContent(value)) return null;
+  const items: unknown[] = Array.isArray(value) ? value : [value];
+  const rendered: ReactNode[] = [];
+  for (let i = 0; i < items.length; i++) {
+    const item: unknown = items[i];
+    if (typeof item !== 'object' || item === null) {
+      if (typeof item === 'string' && item.trim()) {
+        rendered.push(<li key={i}>{item}</li>);
+      }
+      continue;
+    }
+    const record = item as Record<string, unknown>;
+    const facts = Array.isArray(record.facts) ? record.facts : null;
+    const unknowns = Array.isArray(record.unknowns) ? record.unknowns : null;
+    const name = typeof record.name === 'string' && record.name ? record.name : null;
+    const title = typeof record.title === 'string' && record.title ? record.title : null;
+    const company = typeof record.company === 'string' && record.company ? record.company : null;
+    const location = typeof record.location === 'string' && record.location ? record.location : null;
+    const factList: unknown[] = Array.isArray(facts) ? facts : [];
+    const unknownList: unknown[] = Array.isArray(unknowns) ? unknowns : [];
+    if (factList.length === 0 && unknownList.length === 0 && !name && !title && !company) continue;
+    rendered.push(
+      <div key={i} style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', marginBottom: '0.5rem' }}>
+        {name || title || company ? (
+          <p style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>
+            {[name, title].filter(Boolean).join(' — ') || name}
+            {company ? ` · ${company}` : ''}{location ? ` · ${location}` : ''}
+          </p>
+        ) : null}
+        {factList.length > 0 ? (
+          <ul style={{ paddingLeft: '1.25rem', margin: 0, fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>
+            {factList.map((f, j) => (
+              <li key={j}>{factStatement(f)}</li>
+            ))}
+          </ul>
+        ) : null}
+        {unknownList.length > 0 ? (
+          <p style={{ fontSize: '0.75rem', color: 'var(--color-text-muted)', margin: 0 }}>
+            Still unknown: {unknownList.map((u) => String(u)).join('; ')}
+          </p>
+        ) : null}
+      </div>,
+    );
+  }
+  if (rendered.length === 0) return null;
+  return <div style={{ fontSize: '0.875rem' }}>{rendered}</div>;
+}
+
+function factStatement(fact: unknown): string {
+  if (typeof fact === 'string') return fact;
+  if (typeof fact === 'object' && fact !== null) {
+    const record = fact as Record<string, unknown>;
+    if (typeof record.statement === 'string' && record.statement) return record.statement;
+  }
+  try {
+    return JSON.stringify(fact);
+  } catch {
+    return String(fact);
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -339,6 +439,7 @@ function DiscoverSection() {
 }
 
 function LeadsListSection({ onSelect }: { onSelect: (lead: SalesLead) => void }) {
+  const { workspaceId } = useAuth();
   const [leads, setLeads] = useState<SalesLead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -349,6 +450,15 @@ function LeadsListSection({ onSelect }: { onSelect: (lead: SalesLead) => void })
   const [formMessage, setFormMessage] = useState<string | null>(null);
 
   const fetchData = useCallback(async () => {
+    // No workspace selected (fresh user): do not fire the request. The API
+    // would answer 403 and the page would show an error next to the honest
+    // empty state. An empty list with no error is the correct state here.
+    if (!workspaceId) {
+      setLeads([]);
+      setError(null);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
@@ -359,11 +469,11 @@ function LeadsListSection({ onSelect }: { onSelect: (lead: SalesLead) => void })
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [workspaceId]);
 
   useEffect(() => {
     void fetchData();
-  }, [fetchData]);
+  }, [fetchData, workspaceId]);
 
   async function handleCreate(event: React.FormEvent) {
     event.preventDefault();
@@ -428,8 +538,11 @@ function LeadsListSection({ onSelect }: { onSelect: (lead: SalesLead) => void })
       </div>
 
       {loading ? <LoadingBlock label="Loading leads..." /> : null}
-      {!loading && error ? <ErrorBlock message={error} onRetry={() => void fetchData()} /> : null}
-      {!loading && !error && leads.length === 0 ? (
+      {!loading && !workspaceId ? (
+        <EmptyBlock title="No workspaces yet" description="Create one to begin — all data stays scoped to it." />
+      ) : null}
+      {!loading && workspaceId && error ? <ErrorBlock message={error} onRetry={() => void fetchData()} /> : null}
+      {!loading && workspaceId && !error && leads.length === 0 ? (
         <EmptyBlock title="No leads yet" description="Add your first lead above to start researching and preparing outreach." />
       ) : null}
       {!loading && !error && leads.length > 0 ? (
@@ -498,6 +611,25 @@ function LeadDetail({ lead, onBack }: { lead: SalesLead; onBack: () => void }) {
   );
 }
 
+function normalizeResearch(value: unknown): ProspectResearch | null {
+  // GET returns { research: [...] } while POST returns { research: {...} }.
+  // Normalize to a single record so the section never renders an array shape.
+  if (Array.isArray(value)) {
+    const first: unknown = value[0];
+    return typeof first === 'object' && first !== null ? (first as ProspectResearch) : null;
+  }
+  return typeof value === 'object' && value !== null ? (value as ProspectResearch) : null;
+}
+
+function researchHasFacts(research: ProspectResearch): boolean {
+  const findings = (research as Record<string, unknown>).findings;
+  if (Array.isArray(findings) && findings.length > 0) return true;
+  const facts = (research as Record<string, unknown>).facts;
+  if (Array.isArray(facts) && facts.length > 0) return true;
+  if (typeof research.summary === 'string' && research.summary.trim()) return true;
+  return false;
+}
+
 function ResearchSection({ leadId }: { leadId: string }) {
   const [research, setResearch] = useState<ProspectResearch | null>(null);
   const [loading, setLoading] = useState(true);
@@ -514,7 +646,7 @@ function ResearchSection({ leadId }: { leadId: string }) {
     setAiUnavailable(false);
     try {
       const data = await getProspectResearch(leadId);
-      setResearch(data.research ?? null);
+      setResearch(normalizeResearch(data.research));
     } catch (err) {
       if (isAiUnavailable(err)) {
         setAiUnavailable(true);
@@ -545,7 +677,7 @@ function ResearchSection({ leadId }: { leadId: string }) {
         title: title.trim() || undefined,
         company: company.trim() || undefined,
       });
-      setResearch(result.research);
+      setResearch(normalizeResearch(result.research));
     } catch (err) {
       if (isAiUnavailable(err)) {
         setMessage('AI assistance is temporarily unavailable. Please try again later.');
@@ -590,7 +722,13 @@ function ResearchSection({ leadId }: { leadId: string }) {
           {research.summary ? <p style={{ fontSize: '0.875rem' }}>{String(research.summary)}</p> : null}
           <div style={{ marginTop: '0.5rem' }}>
             <p style={{ fontSize: '0.875rem', fontWeight: 600 }}>Evidence</p>
-            <EvidenceView value={research.findings ?? research} />
+            {researchHasFacts(research) ? (
+              <EvidenceView value={research.findings ?? research} />
+            ) : (
+              <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+                No research facts recorded yet. Add a job title or company above and run research again.
+              </p>
+            )}
           </div>
         </div>
       ) : null}
@@ -603,7 +741,7 @@ function SignalsSection({ leadId }: { leadId: string }) {
   const [intentStatus, setIntentStatus] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [signalType, setSignalType] = useState('');
+  const [signalType, setSignalType] = useState('problem_content');
   const [source, setSource] = useState('');
   const [interpretation, setInterpretation] = useState('');
   const [saving, setSaving] = useState(false);
@@ -648,12 +786,12 @@ function SignalsSection({ leadId }: { leadId: string }) {
         interpretation: interpretation.trim() || signalType.trim(),
       });
       setSignals((prev) => [result.signal, ...prev]);
-      setSignalType('');
+      setSignalType('problem_content');
       setSource('');
       setInterpretation('');
       setMessage('Signal recorded.');
     } catch (err) {
-      setMessage(friendlyErrorMessage(err));
+      setMessage(detailedErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -674,7 +812,14 @@ function SignalsSection({ leadId }: { leadId: string }) {
         </p>
       )}
       <form onSubmit={(e) => void handleRecord(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '0.75rem' }}>
-        <input value={signalType} onChange={(e) => setSignalType(e.target.value)} placeholder="Signal type (e.g. job change)" style={{ ...fieldStyle, flex: '1 1 160px' }} />
+        <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)', flex: '1 1 160px' }}>
+          Signal type *
+          <select value={signalType} onChange={(e) => setSignalType(e.target.value)} required style={fieldStyle} aria-label="Signal type">
+            {SIGNAL_TYPE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </label>
         <input value={source} onChange={(e) => setSource(e.target.value)} placeholder="Source note" style={{ ...fieldStyle, flex: '1 1 160px' }} />
         <input value={interpretation} onChange={(e) => setInterpretation(e.target.value)} placeholder="What this means (optional)" style={{ ...fieldStyle, flex: '2 1 220px' }} />
         <button type="submit" className="btn btn-secondary" disabled={saving}>
@@ -1619,3 +1764,16 @@ const fieldStyle: React.CSSProperties = {
   padding: '0.625rem 0.75rem',
   width: '100%',
 };
+
+// Server-enforced prospect signal types (mirrors prospectSignalCreateSchema).
+// Labels are human-readable; values are exact.
+const SIGNAL_TYPE_OPTIONS = [
+  { value: 'hiring', label: 'Hiring' },
+  { value: 'product_launch', label: 'Product launch' },
+  { value: 'tech_migration', label: 'Tech migration' },
+  { value: 'expansion', label: 'Expansion' },
+  { value: 'operational_change', label: 'Operational change' },
+  { value: 'announcement', label: 'Announcement' },
+  { value: 'problem_content', label: 'Problem / content signal' },
+  { value: 'company_initiative', label: 'Company initiative' },
+];

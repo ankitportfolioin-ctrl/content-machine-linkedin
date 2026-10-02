@@ -1,0 +1,60 @@
+- generic [ref=f67e3]:
+  - navigation "Main navigation" [ref=f67e4]:
+    - generic [ref=f67e12]:
+      - text: Growth Operator
+      - generic [ref=f67e13]: Content Brain
+    - navigation [ref=f67e14]:
+      - generic [ref=f67e15]:
+        - generic [ref=f67e16]: Core
+        - link "Home" [ref=f67e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f67e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f67e29]:
+        - generic [ref=f67e30]: Intelligence
+        - link "Learning" [ref=f67e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f67e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f67e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f67e46]:
+        - generic [ref=f67e47]: Sales
+        - link "Leads" [ref=f67e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f67e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f67e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f67e65]:
+        - generic [ref=f67e66]: System
+        - link "Analytics" [ref=f67e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f67e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f67e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f67e80]:
+    - generic [ref=f67e81]:
+      - link [ref=f67e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f67e83]
+      - paragraph [ref=f67e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f67e239]:
+      - generic [ref=f67e240]:
+        - heading "Settings" [level=2] [ref=f67e241]
+        - paragraph [ref=f67e242]: Sign in to manage your profile, audiences, and voice.
+      - generic [ref=f67e243]:
+        - heading "Sign in" [level=2] [ref=f67e244]
+        - paragraph [ref=f67e245]: Sign in to access your workspace content.
+        - generic [ref=f67e246]:
+          - generic [ref=f67e247]:
+            - text: Email
+            - textbox "Email" [ref=f67e248]:
+              - /placeholder: you@example.com
+          - generic [ref=f67e249]:
+            - text: Password
+            - textbox "Password" [ref=f67e250]:
+              - /placeholder: Your password
+          - button "Sign in" [ref=f67e251] [cursor=pointer]
+          - button "New here? Create an account" [ref=f67e252] [cursor=pointer]

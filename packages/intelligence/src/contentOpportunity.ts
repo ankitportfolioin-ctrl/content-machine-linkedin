@@ -4,6 +4,13 @@ import { TrendSignalService } from './trendSignal';
 import { AIProviderRegistry } from '@growth-operator/ai';
 import { AudienceProblemService } from './audienceProblems';
 import { z } from 'zod';
+import {
+  validateAndNormalize,
+  createStrictPrompt,
+  AI_OUTPUT_SCHEMAS,
+  AIValidationContext,
+  ContentOpportunityOutput,
+} from './aiOutputValidation';
 
 export interface OpportunityScoreDimension {
   name: string;
@@ -147,7 +154,7 @@ CRITICAL RULES:
 4. Include specific source references.
 5. Return valid JSON only.`;
 
-    const userPrompt = `Generate a content opportunity:
+    const baseUserPrompt = `Generate a content opportunity:
 
 TOPIC: ${topic?.name || 'Unknown'}
 TOPIC DESCRIPTION: ${topic?.description || 'None'}
@@ -173,15 +180,27 @@ Dimensions:
 ${scoreResult.dimensions.map((d: typeof scoreResult.dimensions[0]) => `- ${d.name}: ${d.score.toFixed(2)}/10 - ${d.explanation}`).join('\n')}
 
 Create an opportunity with:
-- title: Compelling headline for the content
-- thesis: Core argument/angle
-- problem: What problem this solves for the audience
-- audience: Specific target audience
-- angle: Unique perspective/approach
-- objective: What the content should achieve
-- contentFormat: POST|ARTICLE|CAROUSEL|VIDEO|POLL
-- reasoning: Why this opportunity exists based on evidence
-- evidenceSummary: Summary of supporting evidence`;
+- title: Compelling headline for the content (string, max 300 chars)
+- thesis: Core argument/angle (string, max 2000 chars)
+- problem: What problem this solves for the audience (string, max 2000 chars)
+- audience: Specific target audience (SINGLE string, NOT an array - e.g., "Software engineers learning AI", max 2000 chars)
+- angle: Unique perspective/approach (string, max 2000 chars)
+- objective: What the content should achieve (string, max 2000 chars)
+- contentFormat: POST|ARTICLE|CAROUSEL|VIDEO|POLL (enum)
+- reasoning: Why this opportunity exists based on evidence (string, max 3000 chars)
+- evidenceSummary: Summary of supporting evidence (string, max 3000 chars)`;
+
+    const userPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.contentOpportunity, baseUserPrompt, {
+      title: 'Compelling headline for the content',
+      thesis: 'Core argument/angle',
+      problem: 'What problem this solves for the audience',
+      audience: 'Specific target audience (SINGLE string, NOT an array - e.g., "Software engineers learning AI")',
+      angle: 'Unique perspective/approach',
+      objective: 'What the content should achieve',
+      contentFormat: 'POST|ARTICLE|CAROUSEL|VIDEO|POLL',
+      reasoning: 'Why this opportunity exists based on evidence',
+      evidenceSummary: 'Summary of supporting evidence',
+    });
 
     try {
       const response = await provider.chatCompletion({
@@ -198,31 +217,27 @@ Create an opportunity with:
       const content = response.choices[0]?.message?.content;
       if (!content) throw new Error('Empty AI response');
 
-      const parsed = JSON.parse(content);
-      const schema = z.object({
-        title: z.string().max(300),
-        thesis: z.string().max(2000),
-        problem: z.string().max(2000),
-        audience: z.string().max(2000),
-        angle: z.string().max(2000),
-        objective: z.string().max(2000),
-        contentFormat: z.enum(['POST', 'ARTICLE', 'CAROUSEL', 'VIDEO', 'POLL']),
-        reasoning: z.string().max(3000),
-        evidenceSummary: z.string().max(3000),
-      });
+      const validationContext: AIValidationContext = {
+        workspaceId: input.workspaceId,
+        stage: 'contentOpportunity',
+        provider: provider.type,
+        model: 'gpt-4o-mini',
+        schemaName: 'ContentOpportunity',
+      };
 
-      const validated = schema.safeParse(parsed);
-      if (!validated.success) {
+      const validationResult = validateAndNormalize(AI_OUTPUT_SCHEMAS.contentOpportunity, content, validationContext);
+
+      if (!validationResult.ok) {
         return {
           opportunity: null,
           scoreResult,
-          error: `AI output validation failed: ${validated.error.message}`,
+          error: `AI output validation failed: ${validationResult.message}`,
         };
       }
 
       return {
         opportunity: {
-          ...validated.data,
+          ...validationResult.data,
           opportunityScore: scoreResult.overallScore,
         },
         scoreResult,

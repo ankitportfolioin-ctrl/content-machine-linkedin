@@ -77,8 +77,8 @@ const MAX_IMPORT_ROWS = 500;
  * Step D: user-supplied CSV/paste lead import. Only the user's own data
  * (their CSV or LinkedIn's official export of their own data) — no scraping.
  * Idempotent per file hash; every skipped row carries an honest reason.
- * Rows without a linkedinUrl are skipped: Lead requires a unique profile URL
- * and we will not invent placeholder URLs.
+ * Rows without a linkedinUrl are skipped: Lead requires a profile URL unique
+ * within the workspace and we will not invent placeholder URLs.
  */
 router.post('/import', async (req, res, next) => {
   try {
@@ -155,11 +155,12 @@ router.post('/import', async (req, res, next) => {
       candidates.push({ ...lead, linkedinUrl: normalized });
     }
 
-    // Lead.linkedinUrl is globally unique: pre-check instead of catching 500s.
+    // Lead.linkedinUrl is unique per workspace (@@unique([workspaceId,
+    // linkedinUrl])): pre-check within this workspace instead of catching 500s.
     const urls = candidates.map((c) => c.linkedinUrl as string);
     const existing = urls.length > 0
       ? await prisma.lead.findMany({
-        where: { linkedinUrl: { in: urls } },
+        where: { workspaceId: authReq.workspaceId, linkedinUrl: { in: urls } },
         select: { linkedinUrl: true },
       })
       : [];

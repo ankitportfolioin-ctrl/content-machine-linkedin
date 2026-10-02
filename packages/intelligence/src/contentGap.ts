@@ -1,6 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { AIProviderRegistry } from '@growth-operator/ai';
 import { z } from 'zod';
+import {
+  validateAndNormalize,
+  createStrictPrompt,
+  AI_OUTPUT_SCHEMAS,
+  AIValidationContext,
+  ContentGapOutput,
+} from './aiOutputValidation';
 
 export interface ContentGapInput {
   workspaceId: string;
@@ -169,11 +176,11 @@ export class ContentGapService {
 
     const provider = availableProviders[0]!;
 
-    const systemPrompt = `You are a content gap analyst. Identify gaps in the provided source content relative to the workspace profile and ICP.
+    const baseSystemPrompt = `You are a content gap analyst. Identify gaps in the provided source content relative to the workspace profile and ICP.
 
 Return ONLY a JSON array of gaps with: gapType (AUDIENCE|TOPIC|FORMAT|ANGLE|DEPTH|EVIDENCE), description, importanceScore (0-1), evidence.`;
 
-    const userPrompt = `Analyze content gaps:
+    const baseUserPrompt = `Analyze content gaps:
 
 WORKSPACE PROFILE: ${input.workspaceProfile}
 ICP: ${input.icp}
@@ -186,6 +193,20 @@ CLAIMS (${input.claims.length}):
 ${input.claims.map(c => `- [${c.claimType}] ${c.claimText.slice(0, 200)} (conf: ${c.confidence})`).join('\n')}
 
 Identify gaps in: audience coverage, topic coverage, format variety, angle differentiation, content depth, evidence quality.`;
+
+    const systemPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.contentGap, baseSystemPrompt, {
+      gapType: 'AUDIENCE|TOPIC|FORMAT|ANGLE|DEPTH|EVIDENCE',
+      description: 'Gap description',
+      importanceScore: 'Number between 0 and 1',
+      evidence: 'Supporting evidence',
+    });
+
+    const userPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.contentGap, baseUserPrompt, {
+      gapType: 'AUDIENCE|TOPIC|FORMAT|ANGLE|DEPTH|EVIDENCE',
+      description: 'Gap description',
+      importanceScore: 'Number between 0 and 1',
+      evidence: 'Supporting evidence',
+    });
 
     try {
       const response = await provider.chatCompletion({
@@ -202,19 +223,24 @@ Identify gaps in: audience coverage, topic coverage, format variety, angle diffe
       const content = response.choices[0]?.message?.content;
       if (!content) return [];
 
-      const parsed = JSON.parse(content);
-      const schema = z.array(z.object({
-        gapType: z.enum(['AUDIENCE', 'TOPIC', 'FORMAT', 'ANGLE', 'DEPTH', 'EVIDENCE']),
-        description: z.string().max(1000),
-        importanceScore: z.number().min(0).max(1),
-        evidence: z.string().max(1000),
-      }));
+      const validationContext: AIValidationContext = {
+        workspaceId: input.workspaceId,
+        stage: 'contentGap',
+        provider: provider.type,
+        model: 'gpt-4o-mini',
+        schemaName: 'ContentGap',
+      };
 
-      const validated = schema.safeParse(parsed);
-      if (!validated.success) return [];
+      const validationResult = validateAndNormalize(AI_OUTPUT_SCHEMAS.contentGap, content, validationContext);
 
-      return validated.data;
+      if (!validationResult.ok) {
+        console.warn('AI content gap detection validation failed:', validationResult.message);
+        return [];
+      }
+
+      return validationResult.data;
     } catch (error) {
+      console.warn('AI content gap detection failed:', error);
       return [];
     }
   }

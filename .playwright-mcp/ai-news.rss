@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0">
+  <channel>
+    <title>AI News Test Feed</title>
+    <link>http://localhost:8888/</link>
+    <description>Test AI news feed for Growth Operator</description>
+    <language>en</language>
+    <lastBuildDate>Fri, 02 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <item>
+      <title>Claude Code 1.0 Released: AI-Powered Coding Assistant</title>
+      <link>https://example.com/claude-code-1.0-released</link>
+      <description>Anthropic has released Claude Code 1.0, a new AI-powered coding assistant that can write, edit, and debug code across multiple languages. The tool integrates with VS Code and supports 50+ programming languages.</description>
+      <pubDate>Thu, 01 Oct 2026 10:00:00 GMT</pubDate>
+      <guid>https://example.com/claude-code-1.0-released</guid>
+      <category>AI Tools</category>
+      <category>Developer Tools</category>
+    </item>
+    <item>
+      <title>New AI Model Achieves Human-Level Performance on Coding Benchmarks</title>
+      <link>https://example.com/ai-model-coding-benchmarks</link>
+      <description>A new AI model from a leading research lab has achieved human-level performance on standard coding benchmarks including HumanEval and MBPP. The model demonstrates strong reasoning and debugging capabilities.</description>
+      <pubDate>Wed, 30 Sep 2026 14:30:00 GMT</pubDate>
+      <guid>https://example.com/ai-model-coding-benchmarks</guid>
+      <category>AI Research</category>
+      <category>Benchmarks</category>
+    </item>
+    <item>
+      <title>Vibe Coding: The New Paradigm for AI-Assisted Development</title>
+      <link>https://example.com/vibe-coding-paradigm</link>
+      <description>Developers are embracing "vibe coding" - a new approach where AI handles implementation details while humans focus on architecture and intent. Early adopters report 3-5x productivity gains.</description>
+      <pubDate>Tue, 28 Sep 2026 09:15:00 GMT</pubDate>
+      <guid>https://example.com/vibe-coding-paradigm</guid>
+      <category>Developer Culture</category>
+      <category>AI Tools</category>
+    </item>
+    <item>
+      <title>Open Source AI Coding Agent Framework Released</title>
+      <link>https://example.com/open-source-ai-coding-agent</link>
+      <description>A new open-source framework for building AI coding agents has been released. The framework provides tools for code generation, testing, and deployment automation.</description>
+      <pubDate>Mon, 27 Sep 2026 16:45:00 GMT</pubDate>
+      <guid>https://example.com/open-source-ai-coding-agent</guid>
+      <category>Open Source</category>
+      <category>AI Agents</category>
+    </item>
+    <item>
+      <title>AI-Powered Code Review Tools Gain Traction in Enterprise</title>
+      <link>https://example.com/ai-code-review-enterprise</link>
+      <description>Major enterprises are adopting AI-powered code review tools that can detect bugs, suggest improvements, and enforce coding standards automatically.</description>
+      <pubDate>Fri, 25 Sep 2026 11:20:00 GMT</pubDate>
+      <guid>https://example.com/ai-code-review-enterprise</guid>
+      <category>Enterprise</category>
+      <category>Code Review</category>
+    </item>
+  </channel>
+</rss>

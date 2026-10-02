@@ -1,0 +1,72 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e85]:
+      - generic [ref=f9e86]:
+        - generic [ref=f9e89]:
+          - heading "Brain / Intelligence" [level=2] [ref=f9e90]
+          - paragraph [ref=f9e91]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f9e92]:
+          - generic [ref=f9e93]: Workspace
+          - combobox "Workspace" [ref=f9e94]:
+            - option "Select a workspace" [disabled]
+            - option "Dream Pair AI" [selected]
+      - tablist "Intelligence sections" [ref=f9e95]:
+        - tab "Overview" [ref=f9e96] [cursor=pointer]
+        - tab "Opportunities" [ref=f9e97] [cursor=pointer]
+        - tab "Trends" [ref=f9e98] [cursor=pointer]
+        - tab "Gaps" [ref=f9e99] [cursor=pointer]
+        - tab "Sources" [active] [selected] [ref=f9e100] [cursor=pointer]
+        - tab "Learning" [ref=f9e101] [cursor=pointer]
+      - generic [ref=f9e114]:
+        - generic [ref=f9e115]:
+          - heading "Add a source" [level=3] [ref=f9e116]
+          - generic [ref=f9e117]:
+            - textbox "https://example.com/article" [ref=f9e118]
+            - button "Add source" [disabled] [ref=f9e119]
+        - generic [ref=f9e120]:
+          - heading "Sources (1)" [level=3] [ref=f9e121]
+          - list [ref=f9e122]:
+            - listitem [ref=f9e123]:
+              - paragraph [ref=f9e124]: https://hnrss.org/frontpage
+              - paragraph [ref=f9e125]: https://hnrss.org/frontpage
+              - generic [ref=f9e126]: FAILED

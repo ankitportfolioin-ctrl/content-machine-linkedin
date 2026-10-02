@@ -7,6 +7,7 @@ export function WorkspaceSelector() {
   const [name, setName] = useState('');
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showCreate, setShowCreate] = useState(false);
 
   if (!isAuthenticated) {
     return null;
@@ -27,6 +28,7 @@ export function WorkspaceSelector() {
     try {
       const result = await createWorkspace({ name: name.trim() });
       setName('');
+      setShowCreate(false);
       await refreshWorkspaces();
       selectWorkspace(result.workspace.id);
     } catch (err) {
@@ -71,28 +73,63 @@ export function WorkspaceSelector() {
   }
 
   return (
-    <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-      <span style={{ color: 'var(--color-text-secondary)' }}>Workspace</span>
-      <select
-        value={workspaceId ?? ''}
-        onChange={(e) => selectWorkspace(e.target.value)}
-        style={{
-          backgroundColor: 'var(--color-bg)',
-          border: '1px solid var(--color-border)',
-          borderRadius: 'var(--radius)',
-          color: 'var(--color-text)',
-          padding: '0.5rem 0.75rem',
-        }}
-      >
-        <option value="" disabled>
-          Select a workspace
-        </option>
-        {workspaces.map((workspace) => (
-          <option key={workspace.id} value={workspace.id}>
-            {workspace.name}
+    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+      <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
+        <span style={{ color: 'var(--color-text-secondary)' }}>Workspace</span>
+        <select
+          value={workspaceId ?? ''}
+          onChange={(e) => selectWorkspace(e.target.value)}
+          style={{
+            backgroundColor: 'var(--color-bg)',
+            border: '1px solid var(--color-border)',
+            borderRadius: 'var(--radius)',
+            color: 'var(--color-text)',
+            padding: '0.5rem 0.75rem',
+          }}
+        >
+          <option value="" disabled>
+            Select a workspace
           </option>
-        ))}
-      </select>
-    </label>
+          {workspaces.map((workspace) => (
+            <option key={workspace.id} value={workspace.id}>
+              {workspace.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      {showCreate ? (
+        <form onSubmit={handleCreate} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="New workspace name"
+            aria-label="New workspace name"
+            style={{
+              backgroundColor: 'var(--color-bg)',
+              border: '1px solid var(--color-border)',
+              borderRadius: 'var(--radius)',
+              color: 'var(--color-text)',
+              padding: '0.5rem 0.75rem',
+              fontSize: '0.875rem',
+            }}
+          />
+          <button type="submit" className="btn btn-secondary" disabled={creating}>
+            {creating ? 'Creating...' : 'Create'}
+          </button>
+          <button type="button" className="btn btn-ghost" onClick={() => { setShowCreate(false); setError(null); }}>
+            Cancel
+          </button>
+        </form>
+      ) : (
+        <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(true)}>
+          New workspace
+        </button>
+      )}
+      {error ? (
+        <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem', margin: 0, flexBasis: '100%' }}>
+          {error}
+        </p>
+      ) : null}
+    </div>
   );
 }

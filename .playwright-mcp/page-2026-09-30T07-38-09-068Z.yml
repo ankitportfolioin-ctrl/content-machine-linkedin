@@ -1,0 +1,143 @@
+- generic [ref=f35e3]:
+  - navigation "Main navigation" [ref=f35e4]:
+    - generic [ref=f35e12]:
+      - text: Growth Operator
+      - generic [ref=f35e13]: Content Brain
+    - navigation [ref=f35e14]:
+      - generic [ref=f35e15]:
+        - generic [ref=f35e16]: Core
+        - link "Home" [ref=f35e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f35e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f35e29]:
+        - generic [ref=f35e30]: Intelligence
+        - link "Learning" [ref=f35e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f35e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f35e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f35e46]:
+        - generic [ref=f35e47]: Sales
+        - link "Leads" [ref=f35e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f35e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f35e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f35e65]:
+        - generic [ref=f35e66]: System
+        - link "Analytics" [ref=f35e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f35e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f35e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f35e89]:
+      - paragraph [ref=f35e90]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f35e91] [cursor=pointer]
+  - main [ref=f35e80]:
+    - generic [ref=f35e81]:
+      - link [ref=f35e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f35e83]
+      - paragraph [ref=f35e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f35e85]:
+      - generic [ref=f35e86]:
+        - generic [ref=f35e92]:
+          - heading "Settings" [level=2] [ref=f35e93]
+          - paragraph [ref=f35e94]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f35e95]:
+          - generic [ref=f35e96]:
+            - generic [ref=f35e97]: Workspace
+            - combobox "Workspace" [ref=f35e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f35e99] [cursor=pointer]
+      - generic [ref=f35e100]:
+        - heading "Profile" [level=3] [ref=f35e101]
+        - paragraph [ref=f35e102]: Signed in as qa.growthoperator+202609300730@example.com — the fields below are your workspace profile facts.
+        - generic [ref=f35e103]:
+          - textbox "Headline" [ref=f35e105]:
+            - /placeholder: Headline (e.g. Founder at Acme)
+            - text: Founder at Dream Pair AI
+          - textbox "Role" [ref=f35e106]:
+            - /placeholder: Role (e.g. Founder)
+            - text: Founder
+          - textbox "Summary" [ref=f35e107]: Building AI-powered customer engagement for Indian ecommerce
+          - textbox "Professional context" [ref=f35e108]: SaaS founder, D2C ecommerce
+          - textbox "Industry" [ref=f35e109]: SaaS
+          - textbox "Location" [ref=f35e110]: Bengaluru, India
+          - textbox "LinkedIn URL" [ref=f35e111]:
+            - /placeholder: LinkedIn URL (optional)
+          - button "Save profile" [ref=f35e157] [cursor=pointer]
+          - paragraph [ref=f35e158]: Profile created.
+      - generic [ref=f35e113]:
+        - heading "Ideal audiences" [level=3] [ref=f35e114]
+        - paragraph [ref=f35e115]: Define who your content is for.
+        - generic [ref=f35e116]:
+          - generic [ref=f35e117]:
+            - textbox "Name *" [ref=f35e118]
+            - textbox "Target roles (comma-separated)" [ref=f35e119]
+            - textbox "Industries (comma-separated)" [ref=f35e120]
+            - textbox "Company size" [ref=f35e121]
+          - textbox "Description" [ref=f35e122]
+          - textbox "Problems they face" [ref=f35e123]
+          - textbox "Who this is not for" [ref=f35e124]
+          - button "Add audience" [disabled] [ref=f35e125]
+        - paragraph [ref=f35e159]: Audience added.
+        - list [ref=f35e160]:
+          - listitem [ref=f35e161]:
+            - generic [ref=f35e162]:
+              - generic [ref=f35e163]:
+                - paragraph [ref=f35e164]: D2C Founders India
+                - paragraph [ref=f35e165]: Indian D2C founders and ecommerce operators
+                - paragraph [ref=f35e166]: "Roles: Founder, Co-Founder, CEO, Head of Growth"
+                - paragraph [ref=f35e167]: "Industries: D2C, ecommerce, SaaS"
+              - button "Edit" [ref=f35e168] [cursor=pointer]
+      - generic [ref=f35e127]:
+        - heading "Your voice" [level=3] [ref=f35e128]
+        - generic [ref=f35e130]:
+          - generic [ref=f35e131]:
+            - textbox "Role" [ref=f35e132]: Founder
+            - textbox "Headline" [ref=f35e133]: Founder at Dream Pair AI
+            - textbox "Tone (e.g. direct, warm)" [ref=f35e134]: Clear, Practical, Technical, Helpful
+            - textbox "Writing style" [ref=f35e135]: Direct how-to with examples
+          - textbox "Professional context" [ref=f35e136]: AI SaaS for ecommerce
+          - textbox "Words to avoid (comma-separated)" [ref=f35e137]: revolutionary, game-changer, spam
+          - textbox "Preferred words (comma-separated)" [ref=f35e138]: practical, automate, follow-up
+          - textbox "Content pillars (comma-separated)" [ref=f35e139]: AI automation, Customer experience, Ecommerce growth
+          - button "Save voice" [ref=f35e140] [cursor=pointer]
+          - paragraph [ref=f35e169]: Voice saved.
+      - generic [ref=f35e141]:
+        - heading "Proof points" [level=3] [ref=f35e142]
+        - paragraph [ref=f35e143]: Facts and results your content can reference.
+        - generic [ref=f35e144]:
+          - textbox "Fact or result *" [ref=f35e145]
+          - textbox "Context (optional)" [ref=f35e146]
+          - button "Add" [disabled] [ref=f35e147]
+        - paragraph [ref=f35e170]: Proof point added.
+        - list [ref=f35e171]:
+          - listitem [ref=f35e172]:
+            - generic [ref=f35e173]:
+              - generic [ref=f35e174]:
+                - paragraph [ref=f35e175]: "DEMO: Pilot stores reply 40% faster in internal test"
+                - paragraph [ref=f35e176]: Synthetic QA sample, not real customer proof
+              - button "Remove" [ref=f35e177] [cursor=pointer]
+      - generic [ref=f35e149]:
+        - heading "Writing samples" [level=3] [ref=f35e150]
+        - paragraph [ref=f35e151]: Examples that show your style.
+        - generic [ref=f35e152]:
+          - textbox "Title (optional)" [ref=f35e153]
+          - textbox "Paste a writing sample *" [ref=f35e154]
+          - button "Add sample" [disabled] [ref=f35e155]
+        - paragraph [ref=f35e178]: Sample added.
+        - list [ref=f35e179]:
+          - listitem [ref=f35e180]:
+            - generic [ref=f35e181]:
+              - generic [ref=f35e182]:
+                - paragraph [ref=f35e183]: QA sample post
+                - paragraph [ref=f35e184]: Most D2C support queues fail on follow-up. Here is a practical 3-step checklist we use with demo stores.
+              - button "Remove" [ref=f35e185] [cursor=pointer]

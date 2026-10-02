@@ -1,0 +1,191 @@
+- generic [ref=f14e3]:
+  - navigation "Main navigation" [ref=f14e4]:
+    - generic [ref=f14e12]:
+      - text: Growth Operator
+      - generic [ref=f14e13]: Content Brain
+    - navigation [ref=f14e14]:
+      - generic [ref=f14e15]:
+        - generic [ref=f14e16]: Core
+        - link "Home" [ref=f14e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f14e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f14e29]:
+        - generic [ref=f14e30]: Intelligence
+        - link "Learning" [ref=f14e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f14e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f14e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f14e46]:
+        - generic [ref=f14e47]: Sales
+        - link "Leads" [ref=f14e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f14e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f14e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f14e65]:
+        - generic [ref=f14e66]: System
+        - link "Analytics" [ref=f14e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f14e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f14e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f14e89]:
+      - paragraph [ref=f14e90]: qa.growthoperator+202609301605@example.com
+      - button "Sign out" [ref=f14e91] [cursor=pointer]
+  - main [ref=f14e80]:
+    - generic [ref=f14e81]:
+      - link [ref=f14e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f14e83]
+      - paragraph [ref=f14e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f14e136]:
+      - button "← Back to leads" [ref=f14e137] [cursor=pointer]
+      - generic [ref=f14e138]:
+        - generic [ref=f14e139]:
+          - heading "Priya Nair" [level=2] [ref=f14e140]
+          - paragraph [ref=f14e141]: Head of Growth · DemoKart · Mumbai
+        - generic [ref=f14e142]:
+          - generic [ref=f14e143]:
+            - generic [ref=f14e144]: Workspace
+            - combobox "Workspace" [ref=f14e145]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f14e146] [cursor=pointer]
+      - generic [ref=f14e147]:
+        - heading "Background research" [level=3] [ref=f14e148]
+        - generic [ref=f14e149]:
+          - textbox "Job title (optional)" [ref=f14e150]
+          - textbox "Company (optional)" [ref=f14e151]
+          - button "Run research" [ref=f14e152] [cursor=pointer]
+          - button "Refresh" [ref=f14e153] [cursor=pointer]
+        - generic [ref=f14e155]:
+          - paragraph [ref=f14e156]: Evidence
+          - generic [ref=f14e158]:
+            - paragraph [ref=f14e159]: Priya Nair — Head of Growth · DemoKart · Mumbai
+            - list [ref=f14e160]:
+              - listitem [ref=f14e161]: "Headline: Head of Growth"
+              - listitem [ref=f14e162]: "Company: DemoKart"
+              - listitem [ref=f14e163]: "Location: Mumbai"
+            - paragraph [ref=f14e164]: "Still unknown: Public background not yet researched from public sources."
+      - generic [ref=f14e165]:
+        - heading "Interest signals" [level=3] [ref=f14e166]
+        - paragraph [ref=f14e167]:
+          - text: "Current interest:"
+          - generic [ref=f14e168]: NO_SIGNAL
+        - generic [ref=f14e169]:
+          - generic [ref=f14e170]:
+            - text: Signal type *
+            - combobox "Signal type" [ref=f14e171]:
+              - option "Hiring"
+              - option "Product launch"
+              - option "Tech migration"
+              - option "Expansion"
+              - option "Operational change"
+              - option "Announcement"
+              - option "Problem / content signal" [selected]
+              - option "Company initiative"
+          - textbox "Source note" [ref=f14e172]
+          - textbox "What this means (optional)" [ref=f14e173]
+          - button "Record signal" [ref=f14e174] [cursor=pointer]
+        - paragraph [ref=f14e175]: No signals recorded yet.
+      - generic [ref=f14e176]:
+        - heading "Fit assessment" [level=3] [ref=f14e177]
+        - generic [ref=f14e178]:
+          - button "Run fit assessment" [ref=f14e179] [cursor=pointer]
+          - button "Refresh" [ref=f14e180] [cursor=pointer]
+        - generic [ref=f14e181]:
+          - paragraph [ref=f14e182]:
+            - text: "Result:"
+            - generic [ref=f14e183]: POSSIBLE_FIT
+          - paragraph [ref=f14e184]: "Overall score: 0.52"
+          - list [ref=f14e185]:
+            - listitem [ref=f14e186]:
+              - paragraph [ref=f14e187]: icp_fit — 0.2
+              - paragraph [ref=f14e188]: "ICP mismatch: Industry does not match (D2C, Ecommerce, SaaS)."
+              - generic [ref=f14e189]:
+                - paragraph [ref=f14e190]: Evidence
+                - generic [ref=f14e191]:
+                  - listitem [ref=f14e192]: Role matches ICP target roles (Founder, CEO, Co-Founder, Head of Growth).
+                  - listitem [ref=f14e193]: Industry does not match (D2C, Ecommerce, SaaS).
+            - listitem [ref=f14e194]:
+              - paragraph [ref=f14e195]: role_fit — 0.9
+              - paragraph [ref=f14e196]: Role assessed against ICP target roles.
+              - generic [ref=f14e197]:
+                - paragraph [ref=f14e198]: Evidence
+                - listitem [ref=f14e200]: Head of Growth
+            - listitem [ref=f14e201]:
+              - paragraph [ref=f14e202]: industry_fit — 0.25
+              - paragraph [ref=f14e203]: Industry assessed against ICP industries.
+              - generic [ref=f14e204]:
+                - paragraph [ref=f14e205]: Evidence
+                - listitem [ref=f14e207]: DemoKart
+            - listitem [ref=f14e208]:
+              - paragraph [ref=f14e209]: company_fit — 0.6
+              - paragraph [ref=f14e210]: Company known; size/revenue unverified — fit is provisional.
+              - generic [ref=f14e211]:
+                - paragraph [ref=f14e212]: Evidence
+                - listitem [ref=f14e214]: DemoKart
+            - listitem [ref=f14e215]:
+              - paragraph [ref=f14e216]: problem_relevance — 0.3
+              - paragraph [ref=f14e217]: No problem evidence supplied.
+              - generic [ref=f14e218]:
+                - paragraph [ref=f14e219]: Evidence
+                - text: None noted
+              - paragraph [ref=f14e220]: "Missing: true"
+            - listitem [ref=f14e221]:
+              - paragraph [ref=f14e222]: evidence_strength — 0.7000000000000001
+              - paragraph [ref=f14e223]: 3 verified research fact(s).
+              - generic [ref=f14e224]:
+                - paragraph [ref=f14e225]: Evidence
+                - text: None noted
+            - listitem [ref=f14e226]:
+              - paragraph [ref=f14e227]: timing_signal — 0.4
+              - paragraph [ref=f14e228]: No timing signals observed (neutral, not negative).
+              - generic [ref=f14e229]:
+                - paragraph [ref=f14e230]: Evidence
+                - text: None noted
+              - paragraph [ref=f14e231]: "Missing: true"
+            - listitem [ref=f14e232]:
+              - paragraph [ref=f14e233]: research_completeness — 1
+              - paragraph [ref=f14e234]: 100% of core research fields present.
+              - generic [ref=f14e235]:
+                - paragraph [ref=f14e236]: Evidence
+                - text: None noted
+          - paragraph [ref=f14e237]: "Still needed: No problem-relevance evidence."
+          - generic [ref=f14e238]:
+            - paragraph [ref=f14e239]: Why this result
+            - paragraph [ref=f14e240]: "Possible fit (average dimension score 0.54). Missing: No problem-relevance evidence.."
+      - generic [ref=f14e241]:
+        - heading "Briefs" [level=3] [ref=f14e242]
+        - button "Create brief" [ref=f14e243] [cursor=pointer]
+        - list [ref=f14e244]:
+          - listitem [ref=f14e245]:
+            - paragraph [ref=f14e246]: a6154a0f-3483-44ca-adb4-c43c47902092
+            - button "View + combine notes" [ref=f14e247] [cursor=pointer]
+      - generic [ref=f14e248]:
+        - heading "Outreach plans" [level=3] [ref=f14e249]
+        - generic [ref=f14e250]:
+          - generic [ref=f14e251]:
+            - textbox "Goal (e.g. intro call)" [ref=f14e252]
+            - textbox "Audience" [ref=f14e253]
+            - textbox "Angle" [ref=f14e254]
+          - textbox "Why contact now?" [ref=f14e255]
+          - button "Create outreach plan" [ref=f14e256] [cursor=pointer]
+        - generic [ref=f14e257]:
+          - paragraph [ref=f14e258]: Suggested content for this prospect
+          - paragraph [ref=f14e259]: No relevant content recorded for this prospect yet.
+        - paragraph [ref=f14e260]: No outreach plans yet.
+      - generic [ref=f14e261]:
+        - heading "Message drafts" [level=3] [ref=f14e262]
+        - generic [ref=f14e263]:
+          - textbox "Outreach plan ID" [ref=f14e264]
+          - textbox "Message type (e.g. first note)" [ref=f14e265]
+          - button "Compose draft" [ref=f14e266] [cursor=pointer]
+          - button "Refresh" [ref=f14e267] [cursor=pointer]
+        - paragraph [ref=f14e268]: No drafts yet. Approve an outreach plan, then compose a draft from it.

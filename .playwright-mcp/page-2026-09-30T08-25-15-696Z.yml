@@ -1,0 +1,69 @@
+- generic [ref=f73e3]:
+  - navigation "Main navigation" [ref=f73e4]:
+    - generic [ref=f73e12]:
+      - text: Growth Operator
+      - generic [ref=f73e13]: Content Brain
+    - navigation [ref=f73e14]:
+      - generic [ref=f73e15]:
+        - generic [ref=f73e16]: Core
+        - link "Home" [ref=f73e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f73e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f73e29]:
+        - generic [ref=f73e30]: Intelligence
+        - link "Learning" [ref=f73e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f73e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f73e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f73e46]:
+        - generic [ref=f73e47]: Sales
+        - link "Leads" [ref=f73e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f73e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f73e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f73e65]:
+        - generic [ref=f73e66]: System
+        - link "Analytics" [ref=f73e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f73e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f73e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f73e89]:
+      - paragraph [ref=f73e90]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f73e91] [cursor=pointer]
+  - main [ref=f73e80]:
+    - generic [ref=f73e81]:
+      - link [ref=f73e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f73e83]
+      - paragraph [ref=f73e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f73e85]:
+      - generic [ref=f73e86]:
+        - generic [ref=f73e92]:
+          - heading "Pipeline" [level=2] [ref=f73e93]
+          - paragraph [ref=f73e94]: Track open deals by stage. Stages only move forward through valid steps.
+        - generic [ref=f73e95]:
+          - generic [ref=f73e96]:
+            - generic [ref=f73e97]: Workspace
+            - combobox "Workspace" [ref=f73e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f73e99] [cursor=pointer]
+      - generic [ref=f73e100]:
+        - generic [ref=f73e101]:
+          - heading "Add a deal" [level=3] [ref=f73e102]
+          - generic [ref=f73e103]:
+            - textbox "Lead ID" [ref=f73e104]: 71c0213a-9c30-4ea4-8ee5-96e6a13c07ee
+            - textbox "Deal name" [ref=f73e105]: SharedCo pilot QA5
+            - button "Add deal" [ref=f73e106] [cursor=pointer]
+          - paragraph [ref=f73e111]: Validation failed
+        - generic [ref=f73e108]:
+          - heading "No deals yet" [level=2] [ref=f73e109]
+          - paragraph [ref=f73e110]: Add your first deal above to start tracking stages.

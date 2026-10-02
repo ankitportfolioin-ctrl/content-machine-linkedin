@@ -3,12 +3,16 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { HomePage } from './HomePage';
 
+const authState = vi.hoisted(() => ({
+  workspaces: [{ id: 'ws-1', name: 'WS' }] as Array<{ id: string; name: string }>,
+}));
+
 vi.mock('../context/AuthContext', () => ({
   useAuth: () => ({
     user: null,
     token: 'test-token',
-    workspaceId: 'ws-1',
-    workspaces: [],
+    workspaceId: authState.workspaces[0]?.id ?? null,
+    workspaces: authState.workspaces,
     loading: false,
     error: null,
     isAuthenticated: true,
@@ -80,6 +84,7 @@ function renderHome() {
 describe('HomePage onboarding nudge', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    authState.workspaces = [{ id: 'ws-1', name: 'WS' }];
     baseMocks();
   });
 
@@ -107,5 +112,22 @@ describe('HomePage onboarding nudge', () => {
     renderHome();
     await screen.findByText('API Health');
     expect(screen.queryByText('Finish workspace setup')).not.toBeInTheDocument();
+  });
+
+  it('F1 regression: zero workspaces fires no workspace-scoped requests and shows the workspace setup card', async () => {
+    authState.workspaces = [];
+    renderHome();
+    expect(await screen.findByText('Create your first workspace')).toBeInTheDocument();
+    // Zero-workspace guidance renders in the setup card plus the Today /
+    // recommendations sections — every instance must offer the creator.
+    expect(screen.getAllByRole('button', { name: 'Create workspace' }).length).toBeGreaterThanOrEqual(1);
+    // No workspace-scoped fetch may fire for a fresh account (previously a 403 storm)
+    expect(apiMocks.getReadiness).not.toHaveBeenCalled();
+    expect(apiMocks.getOnboarding).not.toHaveBeenCalled();
+    expect(apiMocks.listReports).not.toHaveBeenCalled();
+    expect(apiMocks.listRuns).not.toHaveBeenCalled();
+    expect(apiMocks.listNextActions).not.toHaveBeenCalled();
+    expect(apiMocks.getAutoPrepStatus).not.toHaveBeenCalled();
+    expect(screen.queryByText(/You do not have access/)).not.toBeInTheDocument();
   });
 });

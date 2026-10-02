@@ -401,6 +401,93 @@ describe('ContentOpportunityService', () => {
       expect(trendDim).toBeDefined();
       expect(trendDim!.score).toBeGreaterThan(0.5);
     });
+
+    it('flags zero backing signals as critical failure', async () => {
+      mockPrisma.topic.findUnique.mockResolvedValue({ id: 'topic-1', name: 'Test', description: 'Test', trendSignals: [] });
+      mockPrisma.intelligenceSource.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.trendSignal.findMany.mockResolvedValue([]);
+
+      const result = await service.scoreOpportunity({
+        workspaceId: 'workspace-1',
+        topicId: 'topic-1',
+        sourceIds: [],
+        claimIds: [],
+        trendSignalIds: [],
+        workspaceProfile: 'Test',
+        icp: 'Test',
+        contentGaps: [],
+      });
+
+      expect(result.criticalFailure).toBe(true);
+      expect(result.failureReason).toContain('Cannot create opportunity without at least one backing signal');
+    });
+
+    it('allows opportunity with only trend signals as backing', async () => {
+      mockPrisma.topic.findUnique.mockResolvedValue({ id: 'topic-1', name: 'Test', description: 'Test', trendSignals: [{ status: 'TRENDING', mentionCount: 5, sourceCount: 3, recencyScore: 0.8 }] });
+      mockPrisma.intelligenceSource.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.trendSignal.findMany.mockResolvedValue([
+        { status: 'TRENDING', mentionCount: 5, sourceCount: 3, recencyScore: 0.8 },
+      ]);
+
+      const result = await service.scoreOpportunity({
+        workspaceId: 'workspace-1',
+        topicId: 'topic-1',
+        sourceIds: [],
+        claimIds: [],
+        trendSignalIds: ['trend-1'],
+        workspaceProfile: 'Test',
+        icp: 'Test',
+        contentGaps: [],
+      });
+
+      expect(result.criticalFailure).toBe(false);
+    });
+
+    it('allows opportunity with only sources as backing', async () => {
+      mockPrisma.topic.findUnique.mockResolvedValue({ id: 'topic-1', name: 'Test', description: 'Test', trendSignals: [] });
+      mockPrisma.intelligenceSource.findMany.mockResolvedValue([
+        { id: 'source-1', title: 'Source 1', description: 'Desc', publisher: 'Pub', sourceType: 'ARTICLE' },
+      ]);
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.trendSignal.findMany.mockResolvedValue([]);
+
+      const result = await service.scoreOpportunity({
+        workspaceId: 'workspace-1',
+        topicId: 'topic-1',
+        sourceIds: ['source-1'],
+        claimIds: [],
+        trendSignalIds: [],
+        workspaceProfile: 'Test',
+        icp: 'Test',
+        contentGaps: [],
+      });
+
+      expect(result.criticalFailure).toBe(false);
+    });
+
+    it('allows opportunity with only claims as backing', async () => {
+      mockPrisma.topic.findUnique.mockResolvedValue({ id: 'topic-1', name: 'Test', description: 'Test', trendSignals: [] });
+      mockPrisma.intelligenceSource.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([
+        { id: 'claim-1', claimType: 'FACT', confidence: 0.9, status: 'SUPPORTED', evidenceText: 'Evidence' },
+      ]);
+      mockPrisma.trendSignal.findMany.mockResolvedValue([]);
+
+      const result = await service.scoreOpportunity({
+        workspaceId: 'workspace-1',
+        topicId: 'topic-1',
+        sourceIds: [],
+        claimIds: ['claim-1'],
+        trendSignalIds: [],
+        workspaceProfile: 'Test',
+        icp: 'Test',
+        contentGaps: [],
+      });
+
+      expect(result.criticalFailure).toBe(false);
+    });
   });
 
   describe('generateOpportunity', () => {

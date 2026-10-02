@@ -4,6 +4,7 @@ import { HealthResponse, OperatorAction } from '../types';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
+import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
   ApiRequestError,
   acceptAction,
@@ -23,7 +24,7 @@ import {
   startIdeaFromAction,
   triggerRun,
 } from '../services/api';
-import { AutoPrepStatus, DailyRunSummary, IntelligenceReport, ReadinessState } from '../types';
+import { AutoPrepStatus, DailyRunSummary, IntelligenceReport, ReadinessState, ReadinessDetail } from '../types';
 
 interface StatusBadgeProps {
   status: HealthResponse['status'];
@@ -49,18 +50,17 @@ function ReadinessDisplay({ readiness }: { readiness: ReadinessState }) {
   const getStatusIcon = (ready: boolean) => ready ? '✓' : '✗';
   const getStatusColor = (ready: boolean) => ready ? '#16a34a' : '#dc2626';
   
-  const items = [
-    { key: 'workspaceIntelligenceReady', label: 'Workspace Intelligence Ready' },
+  const readinessKeys = [
+    { key: 'workspaceIntelligenceReady', label: 'Workspace Intelligence' },
     { key: 'humanApprovalReady', label: 'Human Approval Ready' },
-    { key: 'linkedInExecution', label: 'LinkedIn Execution' },
   ] as const;
 
   return (
     <div className="card" style={{ marginTop: '1rem' }}>
       <h3 className="health-card-title" style={{ marginBottom: '0.75rem' }}>System Readiness</h3>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-        {items.map(({ key, label }) => {
-          const item = readiness[key];
+        {readinessKeys.map(({ key, label }) => {
+          const item = readiness[key as keyof ReadinessState] as ReadinessDetail;
           return (
             <div key={key} style={{ 
               display: 'flex', 
@@ -99,6 +99,43 @@ function ReadinessDisplay({ readiness }: { readiness: ReadinessState }) {
             </div>
           );
         })}
+        {(readiness.platformExecution || []).map((platform) => (
+          <div key={platform.platform} style={{ 
+            display: 'flex', 
+            alignItems: 'flex-start', 
+            gap: '0.75rem',
+            padding: '0.5rem',
+            backgroundColor: 'var(--color-bg-secondary)',
+            borderRadius: 'var(--radius)'
+          }}>
+            <span style={{ 
+              fontSize: '1.25rem', 
+              color: getStatusColor(platform.publishingReady),
+              flexShrink: 0,
+              marginTop: '0.125rem'
+            }}>
+              {getStatusIcon(platform.publishingReady)}
+            </span>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <strong style={{ fontSize: '0.875rem' }}>{platform.displayName} Publishing</strong>
+                <span style={{ 
+                  fontSize: '0.75rem', 
+                  padding: '0.125rem 0.375rem', 
+                  borderRadius: '9999px',
+                  backgroundColor: platform.publishingReady ? '#16a34a20' : '#dc262620',
+                  color: getStatusColor(platform.publishingReady),
+                  fontWeight: 600
+                }}>
+                  {platform.publishingReady ? 'Ready' : 'Not Ready'}
+                </span>
+              </div>
+              <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', marginBottom: 0 }}>
+                {platform.reason}
+              </p>
+            </div>
+          </div>
+        ))}
       </div>
       <div style={{ marginTop: '0.75rem', paddingTop: '0.75rem', borderTop: '1px solid var(--color-border)' }}>
         <p style={{ fontSize: '0.875rem', fontWeight: 600, margin: 0 }}>
@@ -254,7 +291,8 @@ function stageDisplayName(stage: string): string {
 }
 
 function TodayBatch() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, workspaceId } = useAuth();
+  const hasWorkspace = workspaceId !== null;
   const [digest, setDigest] = useState<IntelligenceReport | null>(null);
   const [run, setRun] = useState<DailyRunSummary | null>(null);
   const [loading, setLoading] = useState(true);
@@ -295,8 +333,14 @@ function TodayBatch() {
       setLoading(false);
       return;
     }
+    // Fresh accounts have no workspace yet: every batch endpoint is
+    // workspace-scoped and can only 403, so don't fire them at all.
+    if (!hasWorkspace) {
+      setLoading(false);
+      return;
+    }
     void fetchData();
-  }, [authLoading, isAuthenticated, fetchData]);
+  }, [authLoading, isAuthenticated, workspaceId, fetchData]);
 
   async function handleTrigger() {
     setTriggering(true);
@@ -321,6 +365,17 @@ function TodayBatch() {
       <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
         Sign in to see today's batch.
       </p>
+    );
+  }
+
+  if (!hasWorkspace) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+          Create your first workspace to start the daily loop — all data stays scoped to it.
+        </p>
+        <WorkspaceSelector />
+      </div>
     );
   }
 
@@ -421,7 +476,8 @@ function TodayBatch() {
 }
 
 function RecommendedSteps() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, workspaceId } = useAuth();
+  const hasWorkspace = workspaceId !== null;
   const [actions, setActions] = useState<OperatorAction[]>([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -465,8 +521,14 @@ function RecommendedSteps() {
       setLoading(false);
       return;
     }
+    // Same zero-workspace guard as TodayBatch: recommendations are
+    // workspace-scoped and would only 403 before the first workspace exists.
+    if (!hasWorkspace) {
+      setLoading(false);
+      return;
+    }
     void fetchData();
-  }, [authLoading, isAuthenticated, fetchData]);
+  }, [authLoading, isAuthenticated, workspaceId, fetchData]);
 
   if (authLoading || loading) {
     return <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>Loading suggestions...</p>;
@@ -477,6 +539,17 @@ function RecommendedSteps() {
       <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
         Sign in to see your recommended next steps.
       </p>
+    );
+  }
+
+  if (!hasWorkspace) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+          Your recommendations will appear here once your first workspace exists.
+        </p>
+        <WorkspaceSelector />
+      </div>
     );
   }
 
@@ -762,7 +835,8 @@ const ONBOARDING_STEP_LABELS: Record<string, string> = {
 
 export function HomePage() {
   const { health, ready, loading, error, refetch } = useHealth();
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, workspaceId } = useAuth();
+  const hasWorkspace = workspaceId !== null;
   const [readiness, setReadiness] = useState<ReadinessState | null>(null);
   const [readinessLoading, setReadinessLoading] = useState(true);
   const [readinessError, setReadinessError] = useState<string | null>(null);
@@ -776,6 +850,16 @@ export function HomePage() {
     // firing a request that can only 401.
     if (!isAuthenticated) {
       setReadinessLoading(false);
+      return;
+    }
+    // Fresh account, no workspace yet: every readiness/onboarding/learning
+    // endpoint is workspace-scoped and can only 403. Show the workspace
+    // setup card instead of an error storm.
+    if (!hasWorkspace) {
+      setReadinessLoading(false);
+      setOnboardingDone(true);
+      setOnboardingNext(null);
+      setLearningProposalsCount(0);
       return;
     }
     async function fetchReadiness() {
@@ -814,7 +898,7 @@ export function HomePage() {
     void fetchReadiness();
     void fetchOnboardingState();
     void fetchLearningProposalsCount();
-  }, [loading, authLoading, isAuthenticated]);
+  }, [loading, authLoading, isAuthenticated, workspaceId]);
 
   if (loading) {
     return (
@@ -873,6 +957,16 @@ export function HomePage() {
             Recommendations improve as each step lands in the workspace.
           </p>
           <NavLink to="/onboarding" className="btn btn-primary">Continue onboarding</NavLink>
+        </div>
+      ) : null}
+      {!showSignIn && !hasWorkspace ? (
+        <div className="card" style={{ marginBottom: '1.5rem' }}>
+          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Create your first workspace</h2>
+          <p style={{ color: 'var(--color-text-secondary)', marginBottom: '1rem', fontSize: '0.875rem' }}>
+            Workspaces keep every profile, lead, draft, and learning strictly separated.
+            Create one to unlock onboarding, the daily loop, and recommendations.
+          </p>
+          <WorkspaceSelector />
         </div>
       ) : null}
       <div className="health-grid">

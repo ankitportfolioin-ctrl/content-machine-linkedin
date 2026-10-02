@@ -1,0 +1,190 @@
+- generic [ref=f80e3]:
+  - navigation "Main navigation" [ref=f80e4]:
+    - generic [ref=f80e12]:
+      - text: Growth Operator
+      - generic [ref=f80e13]: Content Brain
+    - navigation [ref=f80e14]:
+      - generic [ref=f80e15]:
+        - generic [ref=f80e16]: Core
+        - link "Home" [ref=f80e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f80e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f80e29]:
+        - generic [ref=f80e30]: Intelligence
+        - link "Learning" [ref=f80e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f80e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f80e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f80e46]:
+        - generic [ref=f80e47]: Sales
+        - link "Leads" [ref=f80e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f80e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f80e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f80e65]:
+        - generic [ref=f80e66]: System
+        - link "Analytics" [ref=f80e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f80e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f80e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f80e92]:
+      - paragraph [ref=f80e93]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f80e94] [cursor=pointer]
+  - main [ref=f80e80]:
+    - generic [ref=f80e81]:
+      - link [ref=f80e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f80e83]
+      - paragraph [ref=f80e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f80e85]:
+      - generic [ref=f80e95]:
+        - generic [ref=f80e96]:
+          - generic [ref=f80e97]:
+            - heading "API Health" [level=2] [ref=f80e98]
+            - generic [ref=f80e99]: "Status: healthy"
+          - generic [ref=f80e101]:
+            - generic [ref=f80e102]:
+              - generic [ref=f80e103]: Service
+              - generic [ref=f80e104]: growth-operator-api
+            - generic [ref=f80e105]:
+              - generic [ref=f80e106]: Version
+              - generic [ref=f80e107]: 0.0.0
+            - generic [ref=f80e108]:
+              - generic [ref=f80e109]: Timestamp
+              - generic [ref=f80e110]: 2026-09-30T08:40:13.049Z
+        - generic [ref=f80e111]:
+          - generic [ref=f80e112]:
+            - heading "API Readiness" [level=2] [ref=f80e113]
+            - generic [ref=f80e114]: "Status: ready"
+          - generic [ref=f80e116]:
+            - generic [ref=f80e117]:
+              - generic [ref=f80e118]: Database
+              - generic [ref=f80e119]: connected
+            - generic [ref=f80e120]:
+              - generic [ref=f80e121]: Timestamp
+              - generic [ref=f80e122]: 2026-09-30T08:40:13.075Z
+      - generic [ref=f80e123]:
+        - heading "System Readiness" [level=3] [ref=f80e124]
+        - generic [ref=f80e125]:
+          - generic [ref=f80e126]:
+            - generic [ref=f80e127]: ✓
+            - generic [ref=f80e128]:
+              - generic [ref=f80e129]:
+                - strong [ref=f80e130]: Workspace Intelligence Ready
+                - generic [ref=f80e131]: Ready
+              - paragraph [ref=f80e132]: All intelligence prerequisites satisfied
+          - generic [ref=f80e133]:
+            - generic [ref=f80e134]: ✓
+            - generic [ref=f80e135]:
+              - generic [ref=f80e136]:
+                - strong [ref=f80e137]: Human Approval Ready
+                - generic [ref=f80e138]: Ready
+              - paragraph [ref=f80e139]: Human approval gates configured
+          - generic [ref=f80e140]:
+            - generic [ref=f80e141]: ✗
+            - generic [ref=f80e142]:
+              - generic [ref=f80e143]:
+                - strong [ref=f80e144]: LinkedIn Execution
+                - generic [ref=f80e145]: Not Ready
+              - paragraph [ref=f80e146]: No LinkedIn integration exists. Publishing/execution remains unavailable.
+        - paragraph [ref=f80e148]: Overall:partial
+      - generic [ref=f80e149]:
+        - heading "Today" [level=2] [ref=f80e150]
+        - paragraph [ref=f80e151]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - generic [ref=f80e152]:
+          - generic [ref=f80e153]:
+            - generic [ref=f80e154]:
+              - heading "Daily digest" [level=3] [ref=f80e155]
+              - generic [ref=f80e156]: DAILY
+            - generic [ref=f80e157]:
+              - paragraph [ref=f80e158]: Period 2026-09-30 → 2026-09-30 · confidence INSUFFICIENT DATA
+              - list [ref=f80e159]:
+                - listitem [ref=f80e160]: "Emerging topics: 0"
+                - listitem [ref=f80e161]: "Strong signals: 0 · weak signals: 0"
+                - listitem [ref=f80e162]: "Learned patterns: 0 · experiments: 0"
+                - listitem [ref=f80e163]: "Recommended topics: 0"
+              - generic [ref=f80e164]:
+                - link "Review opportunities" [ref=f80e165] [cursor=pointer]:
+                  - /url: /brain
+                - link "Learning" [ref=f80e166] [cursor=pointer]:
+                  - /url: /learning
+          - generic [ref=f80e167]:
+            - generic [ref=f80e168]:
+              - heading "Latest loop run" [level=3] [ref=f80e169]
+              - generic [ref=f80e170]: COMPLETED
+            - generic [ref=f80e171]:
+              - paragraph [ref=f80e172]: 2026-09-30 · finished 08:07 UTC
+              - generic [ref=f80e173]:
+                - 'generic "INTELLIGENCE (Discovery): SUCCEEDED" [ref=f80e174]': Intelligence (Discovery)
+                - 'generic "DECISION (Recommendation): SUCCEEDED" [ref=f80e175]': Decision (Recommendation)
+                - 'generic "CONTENT (CONTENT): SUCCEEDED" [ref=f80e176]': CONTENT
+                - 'generic "SALES (SALES): SUCCEEDED" [ref=f80e177]': SALES
+                - 'generic "APPROVAL_SNAPSHOT (Human Decision): SUCCEEDED" [ref=f80e178]': Approval Snapshot (Human Decision)
+                - 'generic "EXECUTION (Execution): SKIPPED" [ref=f80e179]': Execution
+                - 'generic "OBSERVE_LEARN (OBSERVE_LEARN): SUCCEEDED" [ref=f80e180]': OBSERVE_LEARN
+                - 'generic "DIGEST (Learning): SUCCEEDED" [ref=f80e181]': Digest (Learning)
+            - generic [ref=f80e182]:
+              - button "Run today’s loop now" [ref=f80e183] [cursor=pointer]
+              - button "Refresh" [ref=f80e184] [cursor=pointer]
+        - heading "Recommended next steps" [level=2] [ref=f80e185]
+        - paragraph [ref=f80e186]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - generic [ref=f80e211]:
+          - generic [ref=f80e212]:
+            - paragraph [ref=f80e213]: "Auto-preparation: 0/10 used today"
+            - button "Refresh" [ref=f80e214] [cursor=pointer]
+          - list [ref=f80e215]:
+            - listitem [ref=f80e216]:
+              - generic [ref=f80e217]:
+                - paragraph [ref=f80e218]: 1. Turn objection signal into content
+                - paragraph [ref=f80e219]: "Sales signal · Score: 35"
+                - paragraph [ref=f80e220]: "Recorded sales signal (objection) across 1 conversation(s): \"Prospects object that 15-minute demos cannot cover their use case\"."
+                - button "Hide details" [active] [ref=f80e223] [cursor=pointer]
+              - generic [ref=f80e224]:
+                - generic [ref=f80e225]:
+                  - paragraph [ref=f80e226]: Why this matters
+                  - list [ref=f80e227]:
+                    - listitem [ref=f80e228]: "Recorded sales signal (objection) across 1 conversation(s): \"Prospects object that 15-minute demos cannot cover their use case\"."
+                    - listitem [ref=f80e229]: "Suggested next step: create a content idea from this signal via Content (manual; nothing is created automatically)."
+                    - listitem [ref=f80e230]: 1 evidence reference(s) attached.
+                    - listitem [ref=f80e231]: Created within the last 7 days.
+                - generic [ref=f80e232]:
+                  - paragraph [ref=f80e233]: Supporting references
+                  - list [ref=f80e234]:
+                    - listitem [ref=f80e235]: "Sales signal: salesContentSignal:db35eb6c-abaa-43ec-a861-9d9de99d7784"
+                    - listitem [ref=f80e236]: "Conversation: conversation:4b209ad0-90e2-4454-9b96-ac975dde92ea"
+                - generic [ref=f80e237]:
+                  - link "Open" [ref=f80e238] [cursor=pointer]:
+                    - /url: /inbox
+                  - button "Start idea" [ref=f80e239] [cursor=pointer]
+                  - button "Accept for preparation" [ref=f80e240] [cursor=pointer]
+                  - button "Dismiss" [ref=f80e241] [cursor=pointer]
+                  - button "Mark done" [ref=f80e242] [cursor=pointer]
+        - heading "Sections" [level=2] [ref=f80e199]
+        - generic [ref=f80e200]:
+          - link "Today's Brain" [ref=f80e201] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f80e202] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f80e203] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f80e204] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f80e205] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f80e206] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f80e207] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f80e208] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f80e209] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f80e210] [cursor=pointer]:
+            - /url: /onboarding

@@ -514,10 +514,13 @@ describe('E. execution budget', () => {
     expect(withExec.remaining().preparations).toBe(5);
   });
 
-  it('readiness still reports LinkedIn execution as not connected', async () => {
+  it('readiness reports no platform has publishing ready', async () => {
     const res = await request(app).get('/api/v1/readiness').set(authOwner(workspaceId)).expect(200);
-    expect(res.body.readiness.linkedInExecution.ready).toBe(false);
-    expect(res.body.readiness.linkedInExecution.reason).toMatch(/No LinkedIn integration exists/);
+    expect(res.body.readiness.platformExecution).toBeDefined();
+    const linkedIn = res.body.readiness.platformExecution.find((p: any) => p.platform === 'LINKEDIN');
+    expect(linkedIn).toBeDefined();
+    expect(linkedIn.publishingReady).toBe(false);
+    expect(linkedIn.reason).toMatch(/Not connected|Not configured/);
   });
 });
 

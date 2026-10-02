@@ -90,12 +90,16 @@ export class ProspectResearchService {
     if (!research) {
       throw new SalesError('INSUFFICIENT_DATA', 'Prospect research not found in this workspace.');
     }
+    // AI availability is determined by the provider registry actually
+    // containing a usable provider — never by NODE_ENV. An empty registry
+    // yields honest AI_UNAVAILABLE with zero output.
     const available = this.aiRegistry.getAvailable();
     if (available.length === 0) {
       throw new SalesError('AI_UNAVAILABLE', 'Cannot synthesize research without an AI provider.');
     }
     const provider = available[0]!;
     let response;
+    let content: string | undefined;
     try {
       response = await provider.chatCompletion({
         messages: [
@@ -107,17 +111,25 @@ export class ProspectResearchService {
         maxTokens: 2500,
         responseFormat: { type: 'json_object' },
       });
+      content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new SalesError('AI_UNAVAILABLE', 'AI returned an empty research response.');
+      }
     } catch (error) {
       if (error instanceof AIProviderError) {
         throw new SalesError('AI_UNAVAILABLE', 'Cannot synthesize research without an AI provider.');
       }
-      throw error;
+      if (error instanceof SalesError) throw error;
+      // Any other error (network, timeout, JSON parse, etc.) = provider unavailable
+      throw new SalesError('AI_UNAVAILABLE', 'Cannot synthesize research without an AI provider.');
     }
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new SalesError('AI_UNAVAILABLE', 'AI returned an empty research response.');
+
+    let parsed;
+    try {
+      parsed = ResearchSynthesisSchema.safeParse(JSON.parse(content!));
+    } catch {
+      throw new SalesError('AI_UNAVAILABLE', 'AI returned an invalid response format.');
     }
-    const parsed = ResearchSynthesisSchema.safeParse(JSON.parse(content));
     if (!parsed.success) {
       throw new SalesError('EVIDENCE_MISSING', `AI research output validation failed: ${parsed.error.message}`);
     }

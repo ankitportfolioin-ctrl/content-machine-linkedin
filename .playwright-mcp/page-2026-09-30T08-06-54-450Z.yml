@@ -1,0 +1,132 @@
+- generic [ref=f64e3]:
+  - navigation "Main navigation" [ref=f64e4]:
+    - generic [ref=f64e12]:
+      - text: Growth Operator
+      - generic [ref=f64e13]: Content Brain
+    - navigation [ref=f64e14]:
+      - generic [ref=f64e15]:
+        - generic [ref=f64e16]: Core
+        - link "Home" [ref=f64e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f64e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f64e29]:
+        - generic [ref=f64e30]: Intelligence
+        - link "Learning" [ref=f64e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f64e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f64e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f64e46]:
+        - generic [ref=f64e47]: Sales
+        - link "Leads" [ref=f64e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f64e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f64e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f64e65]:
+        - generic [ref=f64e66]: System
+        - link "Analytics" [ref=f64e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f64e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f64e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f64e88]:
+      - paragraph [ref=f64e89]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f64e90] [cursor=pointer]
+  - main [ref=f64e80]:
+    - generic [ref=f64e81]:
+      - link [ref=f64e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f64e83]
+      - paragraph [ref=f64e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f64e85]:
+      - generic [ref=f64e86]:
+        - generic [ref=f64e91]:
+          - paragraph [ref=f64e92]: Business Content Intelligence
+          - heading "Today's Brain" [level=2] [ref=f64e93]
+          - paragraph [ref=f64e94]: What to create, why, and what we are learning.
+        - generic [ref=f64e95]:
+          - generic [ref=f64e96]:
+            - generic [ref=f64e97]: Workspace
+            - combobox "Workspace" [ref=f64e98]:
+              - option "Select a workspace" [disabled]
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f64e99] [cursor=pointer]
+      - generic [ref=f64e100]:
+        - generic [ref=f64e101]:
+          - paragraph [ref=f64e102]: New research signals
+          - paragraph [ref=f64e103]: "0"
+        - generic [ref=f64e104]:
+          - paragraph [ref=f64e105]: High-potential opportunities
+          - paragraph [ref=f64e106]: "0"
+        - generic [ref=f64e107]:
+          - paragraph [ref=f64e108]: Content ready for approval
+          - paragraph [ref=f64e109]: "0"
+        - generic [ref=f64e110]:
+          - paragraph [ref=f64e111]: Posts awaiting analytics
+          - paragraph [ref=f64e112]: "0"
+        - generic [ref=f64e113]:
+          - paragraph [ref=f64e114]: New audience signals
+          - paragraph [ref=f64e115]: "0"
+        - generic [ref=f64e116]:
+          - paragraph [ref=f64e117]: Experiments running
+          - paragraph [ref=f64e118]: "0"
+        - generic [ref=f64e119]:
+          - paragraph [ref=f64e120]: New learned patterns
+          - paragraph [ref=f64e121]: "0"
+      - generic [ref=f64e122]:
+        - paragraph [ref=f64e123]: Today's recommendation
+        - paragraph [ref=f64e124]: "Insufficient data: ingest research sources to generate opportunities."
+        - list [ref=f64e125]:
+          - listitem [ref=f64e126]: No NEW opportunities found.
+        - paragraph [ref=f64e127]: "Confidence: INSUFFICIENT DATA"
+        - generic [ref=f64e129]:
+          - link "Review opportunity" [ref=f64e130] [cursor=pointer]:
+            - /url: /brain
+          - link "Open Content Studio" [ref=f64e131] [cursor=pointer]:
+            - /url: /content
+      - generic [ref=f64e132]:
+        - generic [ref=f64e133]:
+          - heading "Audience brain (7)" [level=3] [ref=f64e137]
+          - button "Seed YFP defaults" [active] [ref=f64e135] [cursor=pointer]
+        - paragraph [ref=f64e138]: Seeded 7 YFP audience segments.
+        - list [ref=f64e139]:
+          - listitem [ref=f64e140]:
+            - paragraph [ref=f64e141]:
+              - text: Beginner Developer
+              - generic [ref=f64e142]: (BEGINNER_DEVELOPER)
+            - paragraph [ref=f64e143]: Learning to code, overwhelmed by tools and AI, needs first real projects.
+          - listitem [ref=f64e144]:
+            - paragraph [ref=f64e145]:
+              - text: AI Learner
+              - generic [ref=f64e146]: (AI_LEARNER)
+            - paragraph [ref=f64e147]: Curious about AI capabilities, wants practical understanding not hype.
+          - listitem [ref=f64e148]:
+            - paragraph [ref=f64e149]:
+              - text: AI Builder
+              - generic [ref=f64e150]: (AI_BUILDER)
+            - paragraph [ref=f64e151]: Building with AI APIs, agents and coding assistants.
+          - listitem [ref=f64e152]:
+            - paragraph [ref=f64e153]:
+              - text: Software Developer
+              - generic [ref=f64e154]: (SOFTWARE_DEVELOPER)
+            - paragraph [ref=f64e155]: Working dev who wants better workflows and tools.
+          - listitem [ref=f64e156]:
+            - paragraph [ref=f64e157]:
+              - text: Startup Builder
+              - generic [ref=f64e158]: (STARTUP_BUILDER)
+            - paragraph [ref=f64e159]: Technical founder or early builder validating ideas.
+          - listitem [ref=f64e160]:
+            - paragraph [ref=f64e161]:
+              - text: Tech Student
+              - generic [ref=f64e162]: (TECH_STUDENT)
+            - paragraph [ref=f64e163]: Student learning CS or self-taught path.
+          - listitem [ref=f64e164]:
+            - paragraph [ref=f64e165]:
+              - text: Technology Enthusiast
+              - generic [ref=f64e166]: (TECHNOLOGY_ENTHUSIAST)
+            - paragraph [ref=f64e167]: Follows tech launches and platforms.

@@ -1,0 +1,142 @@
+- generic [ref=f29e3]:
+  - navigation "Main navigation" [ref=f29e4]:
+    - generic [ref=f29e12]:
+      - text: Growth Operator
+      - generic [ref=f29e13]: Content Brain
+    - navigation [ref=f29e14]:
+      - generic [ref=f29e15]:
+        - generic [ref=f29e16]: Core
+        - link "Home" [ref=f29e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f29e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f29e29]:
+        - generic [ref=f29e30]: Intelligence
+        - link "Learning" [ref=f29e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f29e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f29e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f29e46]:
+        - generic [ref=f29e47]: Sales
+        - link "Leads" [ref=f29e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f29e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f29e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f29e65]:
+        - generic [ref=f29e66]: System
+        - link "Analytics" [ref=f29e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f29e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f29e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f29e158]:
+      - paragraph [ref=f29e159]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f29e160] [cursor=pointer]
+  - main [ref=f29e80]:
+    - generic [ref=f29e81]:
+      - link [ref=f29e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f29e83]
+      - paragraph [ref=f29e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f29e183]:
+      - generic [ref=f29e184]:
+        - heading "Finish workspace setup" [level=2] [ref=f29e185]
+        - paragraph [ref=f29e186]: "Onboarding is incomplete — next: Profile & voice. Recommendations improve as each step lands in the workspace."
+        - link "Continue onboarding" [ref=f29e187] [cursor=pointer]:
+          - /url: /onboarding
+      - generic [ref=f29e188]:
+        - generic [ref=f29e189]:
+          - generic [ref=f29e190]:
+            - heading "API Health" [level=2] [ref=f29e191]
+            - generic [ref=f29e192]: "Status: healthy"
+          - generic [ref=f29e194]:
+            - generic [ref=f29e195]:
+              - generic [ref=f29e196]: Service
+              - generic [ref=f29e197]: growth-operator-api
+            - generic [ref=f29e198]:
+              - generic [ref=f29e199]: Version
+              - generic [ref=f29e200]: 0.0.0
+            - generic [ref=f29e201]:
+              - generic [ref=f29e202]: Timestamp
+              - generic [ref=f29e203]: 2026-09-30T07:25:35.618Z
+        - generic [ref=f29e204]:
+          - generic [ref=f29e205]:
+            - heading "API Readiness" [level=2] [ref=f29e206]
+            - generic [ref=f29e207]: "Status: ready"
+          - generic [ref=f29e209]:
+            - generic [ref=f29e210]:
+              - generic [ref=f29e211]: Database
+              - generic [ref=f29e212]: connected
+            - generic [ref=f29e213]:
+              - generic [ref=f29e214]: Timestamp
+              - generic [ref=f29e215]: 2026-09-30T07:25:35.624Z
+      - generic [ref=f29e216]:
+        - heading "System Readiness" [level=3] [ref=f29e217]
+        - generic [ref=f29e218]:
+          - generic [ref=f29e219]:
+            - generic [ref=f29e220]: ✗
+            - generic [ref=f29e221]:
+              - generic [ref=f29e222]:
+                - strong [ref=f29e223]: Workspace Intelligence Ready
+                - generic [ref=f29e224]: Not Ready
+              - paragraph [ref=f29e225]: "Missing: has Profile, has Voice, has Writing Samples, has I C P, has Audience Segments, has Content Pillars, has Offers, has Active Sources, has Leads, has Strategy"
+          - generic [ref=f29e226]:
+            - generic [ref=f29e227]: ✗
+            - generic [ref=f29e228]:
+              - generic [ref=f29e229]:
+                - strong [ref=f29e230]: Human Approval Ready
+                - generic [ref=f29e231]: Not Ready
+              - paragraph [ref=f29e232]: "Missing: policy Acknowledged, schedule Configured, tier1 Enabled"
+          - generic [ref=f29e233]:
+            - generic [ref=f29e234]: ✗
+            - generic [ref=f29e235]:
+              - generic [ref=f29e236]:
+                - strong [ref=f29e237]: LinkedIn Execution
+                - generic [ref=f29e238]: Not Ready
+              - paragraph [ref=f29e239]: No LinkedIn integration exists. Publishing/execution remains unavailable.
+        - paragraph [ref=f29e241]: Overall:not ready
+      - generic [ref=f29e242]:
+        - heading "Today" [level=2] [ref=f29e243]
+        - paragraph [ref=f29e244]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - generic [ref=f29e245]:
+          - generic [ref=f29e246]:
+            - heading "Daily digest" [level=3] [ref=f29e248]
+            - paragraph [ref=f29e249]: No digest yet. Trigger the loop to generate today's batch.
+          - generic [ref=f29e250]:
+            - heading "Latest loop run" [level=3] [ref=f29e252]
+            - paragraph [ref=f29e253]: No runs recorded yet.
+            - generic [ref=f29e254]:
+              - button "Run today’s loop now" [ref=f29e255] [cursor=pointer]
+              - button "Refresh" [ref=f29e256] [cursor=pointer]
+        - heading "Recommended next steps" [level=2] [ref=f29e257]
+        - paragraph [ref=f29e258]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - generic [ref=f29e259]:
+          - paragraph [ref=f29e260]: No pending actions. You are all caught up — new suggestions will appear here when available.
+          - button "Refresh" [ref=f29e262] [cursor=pointer]
+        - heading "Sections" [level=2] [ref=f29e263]
+        - generic [ref=f29e264]:
+          - link "Today's Brain" [ref=f29e265] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f29e266] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f29e267] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f29e268] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f29e269] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f29e270] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f29e271] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f29e272] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f29e273] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f29e274] [cursor=pointer]:
+            - /url: /onboarding

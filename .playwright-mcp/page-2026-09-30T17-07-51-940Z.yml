@@ -1,0 +1,94 @@
+- generic [ref=f27e3]:
+  - navigation "Main navigation" [ref=f27e4]:
+    - generic [ref=f27e12]:
+      - text: Growth Operator
+      - generic [ref=f27e13]: Content Brain
+    - navigation [ref=f27e14]:
+      - generic [ref=f27e15]:
+        - generic [ref=f27e16]: Core
+        - link "Home" [ref=f27e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f27e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f27e29]:
+        - generic [ref=f27e30]: Intelligence
+        - link "Learning" [ref=f27e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f27e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f27e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f27e46]:
+        - generic [ref=f27e47]: Sales
+        - link "Leads" [ref=f27e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f27e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f27e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f27e65]:
+        - generic [ref=f27e66]: System
+        - link "Analytics" [ref=f27e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f27e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f27e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f27e89]:
+      - paragraph [ref=f27e90]: qa.growthoperator+202609301605@example.com
+      - button "Sign out" [ref=f27e91] [cursor=pointer]
+  - main [ref=f27e80]:
+    - generic [ref=f27e81]:
+      - link [ref=f27e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f27e83]
+      - paragraph [ref=f27e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f27e276]:
+      - generic [ref=f27e277]:
+        - generic [ref=f27e278]:
+          - heading "Leads" [level=2] [ref=f27e279]
+          - paragraph [ref=f27e280]: Track people, research them, and prepare reviewed outreach.
+        - generic [ref=f27e281]:
+          - generic [ref=f27e282]:
+            - generic [ref=f27e283]: Workspace
+            - combobox "Workspace" [ref=f27e284]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f27e285] [cursor=pointer]
+      - generic [ref=f27e286]:
+        - heading "Look up a person" [level=3] [ref=f27e287]
+        - paragraph [ref=f27e288]: Enter details you already know. Results are suggestions only — confirm before saving.
+        - generic [ref=f27e289]:
+          - generic [ref=f27e290]:
+            - textbox "Name" [ref=f27e291]
+            - textbox "Job title" [ref=f27e292]
+            - textbox "Company" [ref=f27e293]
+            - textbox "Location" [ref=f27e294]
+          - textbox "Public source URL (optional)" [ref=f27e295]
+          - button "Look up" [ref=f27e296] [cursor=pointer]
+      - generic [ref=f27e297]:
+        - generic [ref=f27e298]:
+          - heading "Add a lead manually" [level=3] [ref=f27e299]
+          - generic [ref=f27e300]:
+            - textbox "Profile URL" [ref=f27e301]
+            - textbox "Full name" [ref=f27e302]
+            - textbox "Company (optional)" [ref=f27e303]
+            - button "Add lead" [ref=f27e304] [cursor=pointer]
+        - generic [ref=f27e305]:
+          - heading "Leads (2)" [level=3] [ref=f27e306]
+          - list [ref=f27e307]:
+            - listitem [ref=f27e308]:
+              - generic [ref=f27e309]:
+                - generic [ref=f27e310]:
+                  - paragraph [ref=f27e311]: Priya Nair
+                  - paragraph [ref=f27e312]: Head of Growth · DemoKart · Mumbai
+                  - generic [ref=f27e313]: NEW
+                - button "View details" [ref=f27e314] [cursor=pointer]
+            - listitem [ref=f27e315]:
+              - generic [ref=f27e316]:
+                - generic [ref=f27e317]:
+                  - paragraph [ref=f27e318]: Rahul Sharma
+                  - paragraph [ref=f27e319]: Founder · DemoCommerce Labs · Bengaluru
+                  - generic [ref=f27e320]: NEW
+                - button "View details" [ref=f27e321] [cursor=pointer]

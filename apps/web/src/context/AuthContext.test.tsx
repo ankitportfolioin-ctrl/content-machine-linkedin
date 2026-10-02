@@ -1,7 +1,7 @@
 import React from 'react';
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, waitFor, act } from '@testing-library/react';
-import { AuthProvider, useAuth } from './AuthContext';
+import { render, screen, waitFor, act, fireEvent } from '@testing-library/react';
+import { AuthProvider, readLastWorkspace, resolveWorkspaceId, useAuth, writeLastWorkspace } from './AuthContext';
 import { AUTH_EXPIRED_EVENT, TOKEN_STORAGE_KEY, WORKSPACE_STORAGE_KEY } from '../services/api';
 
 function installMemoryStorage(initial: Record<string, string> = {}) {
@@ -190,8 +190,7 @@ describe('AuthContext session validation', () => {
     expect(violations).toEqual([]);
   });
 
-  it('converges to signed-out when a protected request reports an expired session', async () => {
-    window.localStorage.setItem(TOKEN_STORAGE_KEY, 'live-token');
+  it('converges to signed-out when a protected request reports an expired session', async () => {    window.localStorage.setItem(TOKEN_STORAGE_KEY, 'live-token');
     const user = { id: 'u-1', email: 'a@example.com', name: 'Ada' };
     fetchMock.mockImplementation(async (url: unknown) => {
       if (url === '/api/v1/auth/me') return jsonResponse({ user });
@@ -216,5 +215,138 @@ describe('AuthContext session validation', () => {
     await waitFor(() => expect(readState().isAuthenticated).toBe(false));
     expect(window.localStorage.getItem(TOKEN_STORAGE_KEY)).toBeNull();
     expect(readState().error).toMatch(/session expired/i);
+  });
+});
+
+describe('AuthContext last-workspace restore (W1 regression)', () => {
+  const fetchMock = vi.fn();
+
+  beforeEach(() => {
+    installMemoryStorage();
+    fetchMock.mockReset();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
+  it('resolveWorkspaceId prefers stored, then last-used, then first', () => {
+    expect(resolveWorkspaceId(['a', 'b'], 'b', 'a')).toBe('b');
+    expect(resolveWorkspaceId(['a', 'b'], 'gone', 'b')).toBe('b');
+    expect(resolveWorkspaceId(['a', 'b'], null, null)).toBe('a');
+    expect(resolveWorkspaceId(['a', 'b'], 'gone', 'gone')).toBe('a');
+    expect(resolveWorkspaceId([], null, 'a')).toBeNull();
+  });
+
+  it('read/writeLastWorkspace is per-user and storage-safe', () => {
+    expect(readLastWorkspace(null)).toBeNull();
+    writeLastWorkspace(null, 'ws-1');
+    writeLastWorkspace('A@Example.com', 'ws-2');
+    expect(readLastWorkspace('a@example.com')).toBe('ws-2');
+    expect(readLastWorkspace('other@example.com')).toBeNull();
+  });
+
+  it('login restores the last-used workspace instead of the first', async () => {
+    const user = { id: 'u-1', email: 'a@example.com', name: 'Ada' };
+    writeLastWorkspace('a@example.com', 'ws-2');
+    fetchMock.mockImplementation(async (url: unknown) => {
+      if (url === '/api/v1/auth/login') return jsonResponse({ user, token: 'fresh-token' });
+      if (url === '/api/v1/workspaces') {
+        return jsonResponse({
+          workspaces: [
+            { id: 'ws-1', name: 'First', slug: 'first' },
+            { id: 'ws-2', name: 'Second', slug: 'second' },
+          ],
+        });
+      }
+      throw new Error(`unexpected request to ${String(url)}`);
+    });
+
+    function Trigger() {
+      const auth = useAuth();
+      const started = React.useRef(false);
+      React.useEffect(() => {
+        if (started.current) return;
+        started.current = true;
+        void auth.login('a@example.com', 'secret123');
+      });
+      return null;
+    }
+
+    render(
+      <AuthProvider>
+        <Probe />
+        <Trigger />
+      </AuthProvider>,
+    );
+    await waitFor(() => expect(readState().isAuthenticated).toBe(true));
+    expect(readState().workspaceId).toBe('ws-2');
+    expect(window.localStorage.getItem(WORKSPACE_STORAGE_KEY)).toBe('ws-2');
+  });
+
+  it('ignores a last-used workspace the user is no longer a member of', async () => {
+    const user = { id: 'u-1', email: 'a@example.com', name: 'Ada' };
+    writeLastWorkspace('a@example.com', 'ws-gone');
+    fetchMock.mockImplementation(async (url: unknown) => {
+      if (url === '/api/v1/auth/login') return jsonResponse({ user, token: 'fresh-token' });
+      if (url === '/api/v1/workspaces') {
+        return jsonResponse({ workspaces: [{ id: 'ws-1', name: 'First', slug: 'first' }] });
+      }
+      throw new Error(`unexpected request to ${String(url)}`);
+    });
+
+    function Trigger() {
+      const auth = useAuth();
+      const started = React.useRef(false);
+      React.useEffect(() => {
+        if (started.current) return;
+        started.current = true;
+        void auth.login('a@example.com', 'secret123');
+      });
+      return null;
+    }
+
+    render(
+      <AuthProvider>
+        <Probe />
+        <Trigger />
+      </AuthProvider>,
+    );
+    await waitFor(() => expect(readState().isAuthenticated).toBe(true));
+    expect(readState().workspaceId).toBe('ws-1');
+  });
+
+  it('selectWorkspace remembers the choice per user', async () => {
+    const user = { id: 'u-1', email: 'a@example.com', name: 'Ada' };
+    fetchMock.mockImplementation(async (url: unknown) => {
+      if (url === '/api/v1/auth/me') return jsonResponse({ user });
+      if (url === '/api/v1/workspaces') {
+        return jsonResponse({
+          workspaces: [
+            { id: 'ws-1', name: 'First', slug: 'first' },
+            { id: 'ws-2', name: 'Second', slug: 'second' },
+          ],
+        });
+      }
+      throw new Error(`unexpected request to ${String(url)}`);
+    });
+    window.localStorage.setItem(TOKEN_STORAGE_KEY, 'live-token');
+
+    function Switcher() {
+      const auth = useAuth();
+      return <button onClick={() => auth.selectWorkspace('ws-2')}>switch</button>;
+    }
+
+    render(
+      <AuthProvider>
+        <Probe />
+        <Switcher />
+      </AuthProvider>,
+    );
+    await waitForSettled();
+    fireEvent.click(screen.getByRole('button', { name: 'switch' }));
+    await waitFor(() => expect(readState().workspaceId).toBe('ws-2'));
+    expect(readLastWorkspace('a@example.com')).toBe('ws-2');
   });
 });

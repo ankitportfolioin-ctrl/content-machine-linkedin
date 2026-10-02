@@ -4,6 +4,7 @@ import {
   authMiddleware,
   workspaceMiddleware,
   workspaceMembershipMiddleware,
+  verifyToken,
   AuthenticatedRequest,
 } from '../middleware/auth';
 import { socialRefreshSchema, socialSaveIdeaSchema } from '@growth-operator/schemas';
@@ -81,8 +82,22 @@ function platformCredentials(platform: SocialPlatform): {
  * structured errors can show the value the administrator must allow-list.
  */
 export function platformRedirectUri(platform: SocialPlatform): string {
+  return platformRedirectUriInfo(platform).uri;
+}
+
+/**
+ * Canonical redirect mechanism: API_URL is the public base URL of this API
+ * across local/staging/production (set per environment); SOCIAL_REDIRECT_URI
+ * optionally overrides it per deployment. The callback path itself is stable.
+ * The `source` tells administrators exactly which variable produced the URI.
+ */
+export function platformRedirectUriInfo(platform: SocialPlatform): {
+  uri: string;
+  source: 'SOCIAL_REDIRECT_URI' | 'API_URL';
+} {
   const env = getEnv();
-  return env.SOCIAL_REDIRECT_URI ?? `${env.API_URL}/api/v1/social/callback/${platform}`;
+  if (env.SOCIAL_REDIRECT_URI) return { uri: env.SOCIAL_REDIRECT_URI, source: 'SOCIAL_REDIRECT_URI' };
+  return { uri: `${env.API_URL}/api/v1/social/callback/${platform}`, source: 'API_URL' };
 }
 
 function vaultGuard(): void {
@@ -108,15 +123,89 @@ function notConfiguredError(platform: SocialPlatform, redirectUri: string): AppE
       provider: platform,
       requiredConfiguration: [...capability.serverSetup.requiredEnvVars, 'SOCIAL_REDIRECT_URI (optional; defaults to the callback URL below)'],
       redirectUri,
+      redirectUriSource: platformRedirectUriInfo(platform).source,
       docsUrl: capability.serverSetup.docsUrl,
     },
   );
 }
 
 // OAuth state store: binds the provider redirect back to the workspace that
-// started Connect. In-memory with a 10-minute TTL (single-process dev shape;
-// a multi-instance deployment must externalize this map).
-const oauthStates = new Map<string, { workspaceId: string; userId: string; platform: SocialPlatform; expiresAt: number }>();
+// started Connect. Database-backed with a 10-minute TTL so server restarts
+// and multi-instance deployments cannot strand or split in-flight attempts.
+// Only SHA-256 hashes persist — the raw state is a bearer credential and is
+// never stored, logged, or returned. States are single-use (deleted when
+// consumed, including on failure paths).
+export const OAUTH_STATE_TTL_MS = 10 * 60 * 1000;
+
+export interface PendingOAuthState {
+  workspaceId: string;
+  userId: string;
+  platform: SocialPlatform;
+}
+
+function hashOAuthState(state: string): string {
+  return crypto.createHash('sha256').update(state, 'utf8').digest('hex');
+}
+
+export async function storeOAuthState(state: PendingOAuthState & { state: string }): Promise<void> {
+  const expiresAt = new Date(Date.now() + OAUTH_STATE_TTL_MS);
+  await prisma.oAuthState.upsert({
+    where: { stateHash: hashOAuthState(state.state) },
+    update: {
+      workspaceId: state.workspaceId,
+      userId: state.userId,
+      platform: state.platform as DbSocialPlatform,
+      expiresAt,
+    },
+    create: {
+      stateHash: hashOAuthState(state.state),
+      workspaceId: state.workspaceId,
+      userId: state.userId,
+      platform: state.platform as DbSocialPlatform,
+      expiresAt,
+    },
+  });
+  // Opportunistic expiry cleanup on every write (cheap indexed delete).
+  await prisma.oAuthState.deleteMany({ where: { expiresAt: { lt: new Date() } } }).catch(() => undefined);
+}
+
+/**
+ * Consume a state exactly once. Returns the binding, or null when unknown,
+ * expired, or already used. Consumption deletes the row first, so a replayed
+ * state can never succeed even under concurrent callbacks.
+ */
+export async function consumeOAuthState(
+  state: string,
+  platform: SocialPlatform,
+): Promise<PendingOAuthState | null> {
+  const stateHash = hashOAuthState(state);
+  const row = await prisma.oAuthState.findUnique({ where: { stateHash } });
+  if (row) await prisma.oAuthState.delete({ where: { stateHash } }).catch(() => undefined);
+  if (!row) return null;
+  if (row.platform !== toDbPlatform(platform)) return null;
+  if (row.expiresAt.getTime() < Date.now()) return null;
+  return { workspaceId: row.workspaceId, userId: row.userId, platform };
+}
+
+export async function pruneOAuthStates(now = Date.now()): Promise<number> {
+  const res = await prisma.oAuthState.deleteMany({ where: { expiresAt: { lt: new Date(now) } } });
+  return res.count;
+}
+
+/**
+ * Best-effort session identity for the unauthenticated callback: returns the
+ * user id when the browser presents a valid JWT, else null (anonymous is the
+ * normal provider-redirect case and stays allowed).
+ */
+function sessionUserIdFrom(req: { headers: { authorization?: string } }): string | null {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) return null;
+  try {
+    return verifyToken(header.slice('Bearer '.length).trim())?.userId ?? null;
+  } catch {
+    return null;
+  }
+}
 
 function connectorFailure(err: unknown): never {
   if (err instanceof ConnectorError) {
@@ -237,6 +326,7 @@ router.get('/connections', async (req, res, next) => {
           server: {
             configured,
             redirectUri: platformRedirectUri(platform),
+            redirectUriSource: platformRedirectUriInfo(platform).source,
             requiredEnvVars: capability.serverSetup.requiredEnvVars,
             docsUrl: capability.serverSetup.docsUrl,
             docsLabel: capability.serverSetup.docsLabel,
@@ -272,11 +362,11 @@ router.post('/:platform/connect', async (req, res, next) => {
     vaultGuard();
     const adapter = getSocialAdapter(platform);
     const state = crypto.randomBytes(16).toString('hex');
-    oauthStates.set(state, {
+    await storeOAuthState({
+      state,
       workspaceId: authReq.workspaceId,
       userId: authReq.user.id,
       platform,
-      expiresAt: Date.now() + 10 * 60 * 1000,
     });
     res.status(201).json({
       authorizationUrl: adapter.authorizationUrl(credentials, state),
@@ -599,13 +689,24 @@ socialCallbackRouter.get('/callback/:platform', async (req, res, next) => {
       fail(`The platform refused the connection: ${error_description ?? error}. Nothing was stored.`);
       return;
     }
-    const pending = state ? oauthStates.get(state) : undefined;
-    if (!pending || pending.platform !== platform || pending.expiresAt < Date.now()) {
-      if (state) oauthStates.delete(state);
+    // Single-use, hashed, expiring state: unknown, expired, replayed, or
+    // wrong-platform states all land here with the same honest message.
+    // The row is deleted on read, so a replayed state can never succeed.
+    const pending = state ? await consumeOAuthState(state, platform) : null;
+    if (!pending) {
       fail('This connection attempt expired or is unknown. Start Connect again from the Brain page.');
       return;
     }
-    if (state) oauthStates.delete(state);
+    // Confused-deputy guard: the callback carries no session by design (the
+    // provider redirects an unauthenticated browser), but when the browser
+    // DOES present a valid session for a different user than the one who
+    // started Connect, completing would attach that user's provider grant
+    // to someone else's workspace — so refuse instead.
+    const sessionUserId = sessionUserIdFrom(req);
+    if (sessionUserId && sessionUserId !== pending.userId) {
+      fail('This authorization belongs to a different signed-in user. Sign in as the user who started Connect, then try again. Nothing was stored.');
+      return;
+    }
     const credentials = platformCredentials(platform);
     if (!credentials) {
       fail(`Developer credentials for ${platform} are not configured on this server.`);
@@ -655,16 +756,5 @@ socialCallbackRouter.get('/callback/:platform', async (req, res, next) => {
     next(error);
   }
 });
-
-export function pruneOAuthStates(now = Date.now()): number {
-  let removed = 0;
-  for (const [state, pending] of oauthStates) {
-    if (pending.expiresAt < now) {
-      oauthStates.delete(state);
-      removed += 1;
-    }
-  }
-  return removed;
-}
 
 export default router;

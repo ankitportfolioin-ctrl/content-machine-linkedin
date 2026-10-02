@@ -1,0 +1,80 @@
+- generic [ref=f11e3]:
+  - navigation "Main navigation" [ref=f11e4]:
+    - generic [ref=f11e12]:
+      - text: Growth Operator
+      - generic [ref=f11e13]: Content Brain
+    - navigation [ref=f11e14]:
+      - generic [ref=f11e15]:
+        - generic [ref=f11e16]: Core
+        - link "Home" [ref=f11e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f11e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f11e29]:
+        - generic [ref=f11e30]: Intelligence
+        - link "Learning" [ref=f11e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f11e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f11e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f11e46]:
+        - generic [ref=f11e47]: Sales
+        - link "Leads" [ref=f11e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f11e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f11e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f11e65]:
+        - generic [ref=f11e66]: System
+        - link "Analytics" [ref=f11e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f11e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f11e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f11e89]:
+      - paragraph [ref=f11e90]: qa.growthoperator+r202610011556@example.com
+      - button "Sign out" [ref=f11e91] [cursor=pointer]
+  - main [ref=f11e80]:
+    - generic [ref=f11e81]:
+      - link [ref=f11e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f11e83]
+      - paragraph [ref=f11e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f11e134]:
+      - generic [ref=f11e135]:
+        - generic [ref=f11e136]:
+          - heading "Leads" [level=2] [ref=f11e137]
+          - paragraph [ref=f11e138]: Track people, research them, and prepare reviewed outreach.
+        - generic [ref=f11e139]:
+          - generic [ref=f11e140]:
+            - generic [ref=f11e141]: Workspace
+            - combobox "Workspace" [ref=f11e142]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace R202610011556" [selected]
+              - option "Ankit Demo Growth R202610011556"
+          - button "New workspace" [ref=f11e143] [cursor=pointer]
+      - generic [ref=f11e144]:
+        - heading "Look up a person" [level=3] [ref=f11e145]
+        - paragraph [ref=f11e146]: Enter details you already know. Results are suggestions only — confirm before saving.
+        - generic [ref=f11e147]:
+          - generic [ref=f11e148]:
+            - textbox "Name" [ref=f11e149]
+            - textbox "Job title" [ref=f11e150]
+            - textbox "Company" [ref=f11e151]
+            - textbox "Location" [ref=f11e152]
+          - textbox "Public source URL (optional)" [ref=f11e153]
+          - button "Look up" [ref=f11e154] [cursor=pointer]
+      - generic [ref=f11e155]:
+        - generic [ref=f11e156]:
+          - heading "Add a lead manually" [level=3] [ref=f11e157]
+          - generic [ref=f11e158]:
+            - textbox "Profile URL" [ref=f11e159]
+            - textbox "Full name" [ref=f11e160]
+            - textbox "Company (optional)" [ref=f11e161]
+            - button "Add lead" [ref=f11e162] [cursor=pointer]
+        - generic [ref=f11e164]:
+          - heading "Loading leads..." [level=2] [ref=f11e165]
+          - paragraph [ref=f11e166]: Please wait while we fetch the latest data

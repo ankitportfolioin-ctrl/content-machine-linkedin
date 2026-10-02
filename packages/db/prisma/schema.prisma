@@ -950,6 +950,24 @@ enum SocialConnectionStatus {
   EXPIRED
 }
 
+// Short-lived OAuth authorization states (CSRF protection for Connect).
+// Only a SHA-256 hash of the state is stored — the raw value is a bearer
+// credential and never persists. Rows are single-use (deleted on consume)
+// and expire after 10 minutes; stale rows are pruned opportunistically.
+// Database-backed (not in-memory) so server restarts and multi-instance
+// deployments cannot strand or split in-flight authorization attempts.
+model OAuthState {
+  stateHash   String         @id @db.VarChar(64)
+  workspaceId String
+  userId      String
+  platform    SocialPlatform
+  expiresAt   DateTime
+  createdAt   DateTime       @default(now())
+
+  @@index([expiresAt])
+  @@index([workspaceId])
+}
+
 // Optional OAuth connections to social platforms (read-only). Tokens are
 // stored AES-256-GCM encrypted and never leave the server. Pulled items live
 // in SocialPost with full source attribution. Disconnecting deletes the

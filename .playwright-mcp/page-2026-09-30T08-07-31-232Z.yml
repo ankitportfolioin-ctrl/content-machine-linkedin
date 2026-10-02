@@ -1,0 +1,45 @@
+- generic [ref=f66e3]:
+  - navigation "Main navigation" [ref=f66e4]:
+    - generic [ref=f66e12]:
+      - text: Growth Operator
+      - generic [ref=f66e13]: Content Brain
+    - navigation [ref=f66e14]:
+      - generic [ref=f66e15]:
+        - generic [ref=f66e16]: Core
+        - link "Home" [ref=f66e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f66e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f66e29]:
+        - generic [ref=f66e30]: Intelligence
+        - link "Learning" [ref=f66e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f66e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f66e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f66e46]:
+        - generic [ref=f66e47]: Sales
+        - link "Leads" [ref=f66e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f66e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f66e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f66e65]:
+        - generic [ref=f66e66]: System
+        - link "Analytics" [ref=f66e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f66e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f66e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f66e80]:
+    - generic [ref=f66e81]:
+      - link [ref=f66e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f66e83]
+      - paragraph [ref=f66e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f66e86]:
+      - heading "Loading..." [level=2] [ref=f66e87]
+      - paragraph [ref=f66e88]: Checking your session

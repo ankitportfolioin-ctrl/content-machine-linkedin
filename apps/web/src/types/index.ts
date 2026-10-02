@@ -1174,6 +1174,7 @@ export interface SocialAccountBlock {
 export interface SocialServerBlock {
   configured: boolean;
   redirectUri: string;
+  redirectUriSource: 'SOCIAL_REDIRECT_URI' | 'API_URL';
   requiredEnvVars: string[];
   docsUrl: string;
   docsLabel: string;

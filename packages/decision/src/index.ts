@@ -12,3 +12,4 @@ export * from './actions';
 export * from './initiation';
 export * from './signals';
 export * from './autoPreparation';
+export * from './opportunityBridge';

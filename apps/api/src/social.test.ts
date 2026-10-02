@@ -3,6 +3,7 @@ import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
 import { encryptToken } from '../src/utils/tokenVault';
+import { pruneOAuthStates } from './routes/social';
 
 const stamp = Date.now();
 const password = 'testpassword123';
@@ -105,6 +106,103 @@ describe('social connectors (honest states + isolation)', () => {
     await request(app).get('/api/v1/social/callback/myspace?code=abc&state=xyz').expect(404);
   });
 
+  it('consumes a valid state once, then rejects its replay', async () => {
+    const { createHash } = await import('crypto');
+    const raw = `valid-${stamp}-a`;
+    const hash = createHash('sha256').update(raw, 'utf8').digest('hex');
+    await prisma.oAuthState.create({
+      data: {
+        stateHash: hash,
+        workspaceId: workspaceA,
+        userId: 'user-a',
+        platform: 'LINKEDIN',
+        expiresAt: new Date(Date.now() + 600000),
+      },
+    });
+    // Valid state passes state validation, then fails honestly at the next
+    // step (no server credentials in test env) — and is consumed either way.
+    const first = await request(app).get(`/api/v1/social/callback/linkedin?code=c&state=${raw}`).expect(302);
+    expect(first.headers.location).toMatch(/social=error/);
+    expect(await prisma.oAuthState.findUnique({ where: { stateHash: hash } })).toBeNull();
+    const replay = await request(app).get(`/api/v1/social/callback/linkedin?code=c&state=${raw}`).expect(302);
+    expect(replay.headers.location).toMatch(/social=error/);
+  });
+
+  it('rejects expired states and prunes them', async () => {
+    const { createHash } = await import('crypto');
+    const raw = `expired-${stamp}-a`;
+    const hash = createHash('sha256').update(raw, 'utf8').digest('hex');
+    await prisma.oAuthState.create({
+      data: {
+        stateHash: hash,
+        workspaceId: workspaceA,
+        userId: 'user-a',
+        platform: 'LINKEDIN',
+        expiresAt: new Date(Date.now() - 1000),
+      },
+    });
+    // The real (expired) state is presented: consumed, rejected, deleted.
+    const res = await request(app).get(`/api/v1/social/callback/linkedin?code=c&state=${raw}`).expect(302);
+    expect(res.headers.location).toMatch(/social=error/);
+    expect(await prisma.oAuthState.findUnique({ where: { stateHash: hash } })).toBeNull();
+    // pruneOAuthStates removes any other stale rows without touching live ones.
+    // Create a fresh live row with a different hash (same length).
+    const liveRaw = `live-${stamp}-b`;
+    const liveHash = createHash('sha256').update(liveRaw, 'utf8').digest('hex');
+    await prisma.oAuthState.create({
+      data: {
+        stateHash: liveHash,
+        workspaceId: workspaceA,
+        userId: 'user-a',
+        platform: 'LINKEDIN',
+        expiresAt: new Date(Date.now() + 600000),
+      },
+    });
+    expect(await pruneOAuthStates()).toBeGreaterThanOrEqual(0);
+    expect(await prisma.oAuthState.findUnique({ where: { stateHash: liveHash } })).not.toBeNull();
+    await prisma.oAuthState.delete({ where: { stateHash: liveHash } });
+  });
+
+  it('rejects states bound to a different platform', async () => {
+    const { createHash } = await import('crypto');
+    const raw = `platform-${stamp}-a`;
+    const hash = createHash('sha256').update(raw, 'utf8').digest('hex');
+    await prisma.oAuthState.create({
+      data: {
+        stateHash: hash,
+        workspaceId: workspaceA,
+        userId: 'user-a',
+        platform: 'YOUTUBE',
+        expiresAt: new Date(Date.now() + 600000),
+      },
+    });
+    const res = await request(app).get(`/api/v1/social/callback/linkedin?code=c&state=${raw}`).expect(302);
+    expect(res.headers.location).toMatch(/social=error/);
+    // Single-use: consumed even on the failure path.
+    expect(await prisma.oAuthState.findUnique({ where: { stateHash: hash } })).toBeNull();
+  });
+
+  it('rejects a completion attempt from a different signed-in user', async () => {
+    const { createHash } = await import('crypto');
+    const raw = `userx-${stamp}-a`;
+    const hash = createHash('sha256').update(raw, 'utf8').digest('hex');
+    await prisma.oAuthState.create({
+      data: {
+        stateHash: hash,
+        workspaceId: workspaceA,
+        userId: 'someone-else',
+        platform: 'LINKEDIN',
+        expiresAt: new Date(Date.now() + 600000),
+      },
+    });
+    // Caller presents user B's valid session against user A's state.
+    const res = await request(app)
+      .get(`/api/v1/social/callback/linkedin?code=c&state=${raw}`)
+      .set(authB())
+      .expect(302);
+    expect(decodeURIComponent(String(res.headers.location))).toMatch(/different signed-in user/);
+  });
+
   it('forbids cross-workspace disconnect of another workspace connection', async () => {
     await prisma.socialConnection.create({
       data: {
@@ -119,6 +217,25 @@ describe('social connectors (honest states + isolation)', () => {
     // Owning workspace can still disconnect.
     const res = await request(app).delete('/api/v1/social/linkedin').set(authA()).expect(200);
     expect(res.body.disconnected).toBe(true);
+  });
+
+  it('keeps the readiness matrix consistent with the real adapters and worker', async () => {
+    const { SOCIAL_PLATFORMS, getPlatformCapability } = await import('@growth-operator/social');
+    const { WORKER_ELIGIBLE_SOURCE_TYPES } = await import('@growth-operator/intelligence');
+    for (const platform of SOCIAL_PLATFORMS) {
+      const desc = getPlatformCapability(platform);
+      expect(desc.accountSupported).toBe(true);
+      expect(desc.readiness.oauthImplemented).toBe(true);
+      // End-to-end is never asserted from code — only from a real callback.
+      expect(desc.readiness.endToEndVerified).toBe(false);
+      expect(desc.serverSetup.requiredEnvVars.length).toBeGreaterThan(0);
+      expect(desc.serverSetup.docsUrl).toMatch(/^https:\/\//);
+      // Research wiring claims must match the worker's executable set exactly.
+      const upper = platform.toUpperCase();
+      expect(desc.research.wired).toBe((WORKER_ELIGIBLE_SOURCE_TYPES as readonly string[]).includes(upper));
+      expect(desc.publishing.supported).toBe(false);
+      expect(desc.publishing.wired).toBe(false);
+    }
   });
 
   it('builds correct provider authorization URLs without leaking secrets', async () => {

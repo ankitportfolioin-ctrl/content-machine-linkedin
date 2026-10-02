@@ -1,0 +1,88 @@
+- generic [ref=f76e3]:
+  - navigation "Main navigation" [ref=f76e4]:
+    - generic [ref=f76e12]:
+      - text: Growth Operator
+      - generic [ref=f76e13]: Content Brain
+    - navigation [ref=f76e14]:
+      - generic [ref=f76e15]:
+        - generic [ref=f76e16]: Core
+        - link "Home" [ref=f76e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f76e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f76e29]:
+        - generic [ref=f76e30]: Intelligence
+        - link "Learning" [ref=f76e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f76e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f76e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f76e46]:
+        - generic [ref=f76e47]: Sales
+        - link "Leads" [ref=f76e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f76e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f76e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f76e65]:
+        - generic [ref=f76e66]: System
+        - link "Analytics" [ref=f76e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f76e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f76e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f76e89]:
+      - paragraph [ref=f76e90]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f76e91] [cursor=pointer]
+  - main [ref=f76e80]:
+    - generic [ref=f76e81]:
+      - link [ref=f76e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f76e83]
+      - paragraph [ref=f76e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f76e85]:
+      - generic [ref=f76e86]:
+        - generic [ref=f76e92]:
+          - heading "Brain / Intelligence" [level=2] [ref=f76e93]
+          - paragraph [ref=f76e94]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f76e95]:
+          - generic [ref=f76e96]:
+            - generic [ref=f76e97]: Workspace
+            - combobox "Workspace" [ref=f76e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f76e99] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f76e100]:
+        - tab "Overview" [ref=f76e101] [cursor=pointer]
+        - tab "Opportunities" [ref=f76e102] [cursor=pointer]
+        - tab "Trends" [ref=f76e103] [cursor=pointer]
+        - tab "Gaps" [ref=f76e104] [cursor=pointer]
+        - tab "Sources" [ref=f76e105] [cursor=pointer]
+        - tab "Learning" [active] [selected] [ref=f76e106] [cursor=pointer]
+      - generic [ref=f76e112]:
+        - generic [ref=f76e113]:
+          - heading "Proposed learning" [level=3] [ref=f76e114]
+          - paragraph [ref=f76e115]: Derived only from recorded measurements. Proposed items are not active until explicitly confirmed.
+          - generic [ref=f76e116]:
+            - textbox "Metric name (e.g. replies)" [ref=f76e117]
+            - textbox "Min sample size" [ref=f76e118]: "5"
+            - button "Derive proposal" [ref=f76e119] [cursor=pointer]
+        - generic [ref=f76e120]:
+          - generic [ref=f76e121]:
+            - heading "Proposals (0)" [level=3] [ref=f76e122]
+            - generic [ref=f76e123]:
+              - combobox "Filter by status" [ref=f76e124]:
+                - option "All statuses" [selected]
+                - option "Proposed"
+                - option "Confirmed"
+                - option "Rejected"
+                - option "Revoked"
+              - button "Refresh" [ref=f76e125] [cursor=pointer]
+          - paragraph [ref=f76e126]: Confirming or revoking requires an owner or admin role. Other roles will see an access message.
+          - generic [ref=f76e128]:
+            - heading "No proposals yet" [level=2] [ref=f76e129]
+            - paragraph [ref=f76e130]: "Insufficient data: derive a proposal from recorded measurements above, or adjust the status filter."

@@ -8,7 +8,7 @@ vi.mock('../context/AuthContext', () => ({
     user: null,
     token: 'test-token',
     workspaceId: 'ws-1',
-    workspaces: [],
+    workspaces: [{ id: 'ws-1', name: 'WS' }],
     loading: false,
     error: null,
     isAuthenticated: true,

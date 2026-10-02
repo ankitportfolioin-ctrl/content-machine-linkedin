@@ -1,0 +1,87 @@
+- generic [ref=f21e3]:
+  - navigation "Main navigation" [ref=f21e4]:
+    - generic [ref=f21e12]:
+      - text: Growth Operator
+      - generic [ref=f21e13]: Content Brain
+    - navigation [ref=f21e14]:
+      - generic [ref=f21e15]:
+        - generic [ref=f21e16]: Core
+        - link "Home" [ref=f21e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f21e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f21e29]:
+        - generic [ref=f21e30]: Intelligence
+        - link "Learning" [ref=f21e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f21e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f21e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f21e46]:
+        - generic [ref=f21e47]: Sales
+        - link "Leads" [ref=f21e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f21e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f21e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f21e65]:
+        - generic [ref=f21e66]: System
+        - link "Analytics" [ref=f21e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f21e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f21e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f21e89]:
+      - paragraph [ref=f21e90]: qa.growthoperator+202609301200@example.com
+      - button "Sign out" [ref=f21e91] [cursor=pointer]
+  - main [ref=f21e80]:
+    - generic [ref=f21e81]:
+      - link [ref=f21e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f21e83]
+      - paragraph [ref=f21e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f21e85]:
+      - generic [ref=f21e86]:
+        - generic [ref=f21e92]:
+          - heading "Leads" [level=2] [ref=f21e93]
+          - paragraph [ref=f21e94]: Track people, research them, and prepare reviewed outreach.
+        - generic [ref=f21e95]:
+          - generic [ref=f21e96]:
+            - generic [ref=f21e97]: Workspace
+            - combobox "Workspace" [ref=f21e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f21e99] [cursor=pointer]
+      - generic [ref=f21e100]:
+        - heading "Look up a person" [level=3] [ref=f21e101]
+        - paragraph [ref=f21e102]: Enter details you already know. Results are suggestions only — confirm before saving.
+        - generic [ref=f21e103]:
+          - generic [ref=f21e104]:
+            - textbox "Name" [ref=f21e105]
+            - textbox "Job title" [ref=f21e106]
+            - textbox "Company" [ref=f21e107]
+            - textbox "Location" [ref=f21e108]
+          - textbox "Public source URL (optional)" [ref=f21e109]
+          - button "Look up" [ref=f21e110] [cursor=pointer]
+      - generic [ref=f21e111]:
+        - generic [ref=f21e112]:
+          - heading "Add a lead manually" [level=3] [ref=f21e113]
+          - generic [ref=f21e114]:
+            - textbox "Profile URL" [ref=f21e115]
+            - textbox "Full name" [ref=f21e116]
+            - textbox "Company (optional)" [ref=f21e117]
+            - button "Add lead" [ref=f21e118] [cursor=pointer]
+        - generic [ref=f21e119]:
+          - heading "Leads (1)" [level=3] [ref=f21e120]
+          - list [ref=f21e121]:
+            - listitem [ref=f21e122]:
+              - generic [ref=f21e123]:
+                - generic [ref=f21e124]:
+                  - paragraph [ref=f21e125]: Priya Nair
+                  - paragraph [ref=f21e126]: Head of Growth at WorkspaceB-Corp · WorkspaceB-Corp · Mumbai
+                  - generic [ref=f21e127]: NEW
+                - button "View details" [ref=f21e128] [cursor=pointer]

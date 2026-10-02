@@ -1,0 +1,83 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [active] [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e595]:
+      - generic [ref=f9e596]:
+        - generic [ref=f9e597]:
+          - heading "Content" [level=2] [ref=f9e598]
+          - paragraph [ref=f9e599]: Ideas, content plans, drafts, reviews, and finalized versions.
+        - generic [ref=f9e600]:
+          - generic [ref=f9e601]: Workspace
+          - combobox "Workspace" [ref=f9e602]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e603]:
+        - heading "New idea" [level=3] [ref=f9e604]
+        - generic [ref=f9e605]:
+          - textbox "Idea title (e.g. Lessons from shipping weekly)" [ref=f9e606]
+          - textbox "Optional description" [ref=f9e607]
+          - button "Create idea" [disabled] [ref=f9e608]
+        - paragraph [ref=f9e609]: "Tip: ideas converted from Brain → Opportunities also appear in the list below."
+      - generic [ref=f9e610]:
+        - heading "Ideas (3)" [level=3] [ref=f9e611]
+        - list [ref=f9e612]:
+          - listitem [ref=f9e613]:
+            - generic [ref=f9e614]:
+              - generic [ref=f9e615]:
+                - paragraph [ref=f9e616]: "DEMO: What I would cut from my first 10 demos"
+                - paragraph [ref=f9e617]: Reflection-style demo idea (synthetic).
+                - generic [ref=f9e618]: DRAFT
+              - button "Open" [ref=f9e619] [cursor=pointer]
+          - listitem [ref=f9e620]:
+            - generic [ref=f9e621]:
+              - generic [ref=f9e622]:
+                - paragraph [ref=f9e623]: "DEMO: Onboarding teardown draft"
+                - paragraph [ref=f9e624]: Standalone demo idea for the onboarding pillar.
+                - generic [ref=f9e625]: DRAFT
+              - button "Open" [ref=f9e626] [cursor=pointer]
+          - listitem [ref=f9e627]:
+            - generic [ref=f9e628]:
+              - generic [ref=f9e629]:
+                - paragraph [ref=f9e630]: "DEMO: The 15-minute founder demo checklist"
+                - paragraph [ref=f9e631]: Turn the demo opportunity into a checklist post.
+                - generic [ref=f9e632]: DRAFT
+              - button "Open" [ref=f9e633] [cursor=pointer]

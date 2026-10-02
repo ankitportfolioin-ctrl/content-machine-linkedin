@@ -89,7 +89,10 @@ describe('auth bootstrap (real JWT session, no bypass)', () => {
     await request(app).get('/api/v1/runs?take=1').set(headers).expect(200);
     await request(app).get('/api/v1/operator/next-actions?status=pending').set(headers).expect(200);
     const readiness = await request(app).get('/api/v1/readiness').set(headers).expect(200);
-    expect(readiness.body.readiness.linkedInExecution.ready).toBe(false);
+    expect(readiness.body.readiness.platformExecution).toBeDefined();
+    const linkedIn = readiness.body.readiness.platformExecution.find((p: any) => p.platform === 'LINKEDIN');
+    expect(linkedIn).toBeDefined();
+    expect(linkedIn.publishingReady).toBe(false);
     await request(app).get('/api/v1/auto-preparation/status').set(headers).expect(200);
   });
 

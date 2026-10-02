@@ -1,0 +1,1 @@
+- generic [active] [ref=f12e1]: "{\"error\":{\"code\":\"AUTHENTICATION_ERROR\",\"message\":\"Missing or invalid authorization header\",\"timestamp\":\"2026-10-01T19:08:54.766Z\",\"path\":\"/api/v1/social/connections\"}}"

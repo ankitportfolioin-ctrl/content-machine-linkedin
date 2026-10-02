@@ -1,0 +1,126 @@
+- generic [ref=f14e3]:
+  - navigation "Main navigation" [ref=f14e4]:
+    - generic [ref=f14e12]:
+      - text: Growth Operator
+      - generic [ref=f14e13]: Content Brain
+    - navigation [ref=f14e14]:
+      - generic [ref=f14e15]:
+        - generic [ref=f14e16]: Core
+        - link "Home" [ref=f14e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f14e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f14e29]:
+        - generic [ref=f14e30]: Intelligence
+        - link "Learning" [ref=f14e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f14e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f14e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f14e46]:
+        - generic [ref=f14e47]: Sales
+        - link "Leads" [ref=f14e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f14e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f14e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f14e65]:
+        - generic [ref=f14e66]: System
+        - link "Analytics" [ref=f14e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f14e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f14e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f14e89]:
+      - paragraph [ref=f14e90]: qa.growthoperator+r202610011556@example.com
+      - button "Sign out" [ref=f14e91] [cursor=pointer]
+  - main [ref=f14e80]:
+    - generic [ref=f14e81]:
+      - link [ref=f14e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f14e83]
+      - paragraph [ref=f14e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f14e85]:
+      - generic [ref=f14e86]:
+        - generic [ref=f14e92]:
+          - heading "Brain / Intelligence" [level=2] [ref=f14e93]
+          - paragraph [ref=f14e94]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f14e95]:
+          - generic [ref=f14e96]:
+            - generic [ref=f14e97]: Workspace
+            - combobox "Workspace" [ref=f14e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace R202610011556" [selected]
+              - option "Ankit Demo Growth R202610011556"
+          - button "New workspace" [ref=f14e99] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f14e100]:
+        - tab "Overview" [ref=f14e101] [cursor=pointer]
+        - tab "Opportunities" [ref=f14e102] [cursor=pointer]
+        - tab "Trends" [ref=f14e103] [cursor=pointer]
+        - tab "Gaps" [ref=f14e104] [cursor=pointer]
+        - tab "Sources" [active] [selected] [ref=f14e105] [cursor=pointer]
+        - tab "Audience Problems" [ref=f14e106] [cursor=pointer]
+        - tab "YFP Scoring" [ref=f14e107] [cursor=pointer]
+        - tab "Content Studio" [ref=f14e108] [cursor=pointer]
+        - tab "Performance" [ref=f14e109] [cursor=pointer]
+        - tab "Learning" [ref=f14e110] [cursor=pointer]
+      - generic [ref=f14e116]:
+        - generic [ref=f14e117]:
+          - heading "Connected platforms (optional)" [level=3] [ref=f14e118]
+          - paragraph [ref=f14e119]: Optional inspiration for the Content Brain — read-only, per workspace. Everything works with zero connectors. Pulled items become content ideas only when you save them, always as DRAFT.
+          - list [ref=f14e120]:
+            - listitem [ref=f14e121]:
+              - generic [ref=f14e122]:
+                - paragraph [ref=f14e123]: Instagram
+                - generic [ref=f14e124]: Not configured
+              - group [ref=f14e125]:
+                - generic "What this connector can and cannot read" [ref=f14e126] [cursor=pointer]
+              - generic [ref=f14e127]:
+                - button "Connect" [disabled] [ref=f14e128]
+                - generic [ref=f14e129]: Not configured on this server — ask the operator to add INSTAGRAM_CLIENT_ID / _CLIENT_SECRET.
+            - listitem [ref=f14e130]:
+              - generic [ref=f14e131]:
+                - paragraph [ref=f14e132]: Facebook
+                - generic [ref=f14e133]: Not configured
+              - group [ref=f14e134]:
+                - generic "What this connector can and cannot read" [ref=f14e135] [cursor=pointer]
+              - generic [ref=f14e136]:
+                - button "Connect" [disabled] [ref=f14e137]
+                - generic [ref=f14e138]: Not configured on this server — ask the operator to add FACEBOOK_CLIENT_ID / _CLIENT_SECRET.
+            - listitem [ref=f14e139]:
+              - generic [ref=f14e140]:
+                - paragraph [ref=f14e141]: LinkedIn
+                - generic [ref=f14e142]: Not connected
+              - group [ref=f14e143]:
+                - generic "What this connector can and cannot read" [ref=f14e144] [cursor=pointer]
+              - button "Connect" [ref=f14e146] [cursor=pointer]
+            - listitem [ref=f14e147]:
+              - generic [ref=f14e148]:
+                - paragraph [ref=f14e149]: YouTube
+                - generic [ref=f14e150]: Not configured
+              - group [ref=f14e151]:
+                - generic "What this connector can and cannot read" [ref=f14e152] [cursor=pointer]
+              - generic [ref=f14e153]:
+                - button "Connect" [disabled] [ref=f14e154]
+                - generic [ref=f14e155]: Not configured on this server — ask the operator to add YOUTUBE_CLIENT_ID / _CLIENT_SECRET.
+            - listitem [ref=f14e156]:
+              - generic [ref=f14e157]:
+                - paragraph [ref=f14e158]: X
+                - generic [ref=f14e159]: Not configured
+              - group [ref=f14e160]:
+                - generic "What this connector can and cannot read" [ref=f14e161] [cursor=pointer]
+              - generic [ref=f14e162]:
+                - button "Connect" [disabled] [ref=f14e163]
+                - generic [ref=f14e164]: Not configured on this server — ask the operator to add X_CLIENT_ID / _CLIENT_SECRET.
+        - generic [ref=f14e165]:
+          - generic [ref=f14e166]:
+            - heading "Add a source" [level=3] [ref=f14e167]
+            - generic [ref=f14e168]:
+              - textbox "https://example.com/article" [ref=f14e169]
+              - button "Add source" [disabled] [ref=f14e170]
+          - generic [ref=f14e172]:
+            - heading "No sources yet" [level=2] [ref=f14e173]
+            - paragraph [ref=f14e174]: Add your first source above to start building intelligence.

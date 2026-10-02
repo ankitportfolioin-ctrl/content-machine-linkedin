@@ -1,0 +1,180 @@
+- generic [ref=f66e3]:
+  - navigation "Main navigation" [ref=f66e4]:
+    - generic [ref=f66e12]:
+      - text: Growth Operator
+      - generic [ref=f66e13]: Content Brain
+    - navigation [ref=f66e14]:
+      - generic [ref=f66e15]:
+        - generic [ref=f66e16]: Core
+        - link "Home" [ref=f66e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f66e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f66e29]:
+        - generic [ref=f66e30]: Intelligence
+        - link "Learning" [ref=f66e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f66e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f66e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f66e46]:
+        - generic [ref=f66e47]: Sales
+        - link "Leads" [ref=f66e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f66e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f66e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f66e65]:
+        - generic [ref=f66e66]: System
+        - link "Analytics" [ref=f66e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f66e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f66e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f66e89]:
+      - paragraph [ref=f66e90]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f66e91] [cursor=pointer]
+  - main [ref=f66e80]:
+    - generic [ref=f66e81]:
+      - link [ref=f66e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f66e83]
+      - paragraph [ref=f66e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f66e129]:
+      - button "← Back to leads" [ref=f66e130] [cursor=pointer]
+      - generic [ref=f66e131]:
+        - generic [ref=f66e132]:
+          - heading "Rahul Sharma" [level=2] [ref=f66e133]
+          - paragraph [ref=f66e134]: Founder at DemoCommerce Labs · DemoCommerce Labs · Bengaluru
+        - generic [ref=f66e135]:
+          - generic [ref=f66e136]:
+            - generic [ref=f66e137]: Workspace
+            - combobox "Workspace" [ref=f66e138]:
+              - option "Select a workspace" [disabled]
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f66e139] [cursor=pointer]
+      - generic [ref=f66e140]:
+        - heading "Background research" [level=3] [ref=f66e141]
+        - generic [ref=f66e142]:
+          - textbox "Job title (optional)" [ref=f66e143]
+          - textbox "Company (optional)" [ref=f66e144]
+          - button "Run research" [ref=f66e145] [cursor=pointer]
+          - button "Refresh" [ref=f66e146] [cursor=pointer]
+        - generic [ref=f66e148]:
+          - paragraph [ref=f66e149]: Evidence
+          - generic [ref=f66e151]:
+            - paragraph [ref=f66e152]: Rahul Sharma — Founder at DemoCommerce Labs · DemoCommerce Labs · Bengaluru
+            - list [ref=f66e153]:
+              - listitem [ref=f66e154]: "Headline: Founder at DemoCommerce Labs"
+              - listitem [ref=f66e155]: "Company: DemoCommerce Labs"
+              - listitem [ref=f66e156]: "Location: Bengaluru"
+            - paragraph [ref=f66e157]: "Still unknown: Public background not yet researched from public sources."
+      - generic [ref=f66e158]:
+        - heading "Interest signals" [level=3] [ref=f66e159]
+        - paragraph [ref=f66e160]:
+          - text: "Current interest:"
+          - generic [ref=f66e161]: NO_SIGNAL
+        - generic [ref=f66e162]:
+          - textbox "Signal type (e.g. job change)" [ref=f66e163]
+          - textbox "Source note" [ref=f66e164]
+          - textbox "What this means (optional)" [ref=f66e165]
+          - button "Record signal" [ref=f66e166] [cursor=pointer]
+        - paragraph [ref=f66e167]: No signals recorded yet.
+      - generic [ref=f66e168]:
+        - heading "Fit assessment" [level=3] [ref=f66e169]
+        - generic [ref=f66e170]:
+          - button "Run fit assessment" [ref=f66e171] [cursor=pointer]
+          - button "Refresh" [ref=f66e172] [cursor=pointer]
+        - generic [ref=f66e173]:
+          - paragraph [ref=f66e174]:
+            - text: "Result:"
+            - generic [ref=f66e175]: POSSIBLE_FIT
+          - paragraph [ref=f66e176]: "Overall score: 0.52"
+          - list [ref=f66e177]:
+            - listitem [ref=f66e178]:
+              - paragraph [ref=f66e179]: icp_fit — 0.2
+              - paragraph [ref=f66e180]: "ICP mismatch: Industry does not match (D2C, ecommerce, SaaS)."
+              - generic [ref=f66e181]:
+                - paragraph [ref=f66e182]: Evidence
+                - generic [ref=f66e183]:
+                  - listitem [ref=f66e184]: Role matches ICP target roles (Founder, CEO, Head of Growth).
+                  - listitem [ref=f66e185]: Industry does not match (D2C, ecommerce, SaaS).
+            - listitem [ref=f66e186]:
+              - paragraph [ref=f66e187]: role_fit — 0.9
+              - paragraph [ref=f66e188]: Role assessed against ICP target roles.
+              - generic [ref=f66e189]:
+                - paragraph [ref=f66e190]: Evidence
+                - listitem [ref=f66e192]: Founder at DemoCommerce Labs
+            - listitem [ref=f66e193]:
+              - paragraph [ref=f66e194]: industry_fit — 0.25
+              - paragraph [ref=f66e195]: Industry assessed against ICP industries.
+              - generic [ref=f66e196]:
+                - paragraph [ref=f66e197]: Evidence
+                - listitem [ref=f66e199]: DemoCommerce Labs
+            - listitem [ref=f66e200]:
+              - paragraph [ref=f66e201]: company_fit — 0.6
+              - paragraph [ref=f66e202]: Company known; size/revenue unverified — fit is provisional.
+              - generic [ref=f66e203]:
+                - paragraph [ref=f66e204]: Evidence
+                - listitem [ref=f66e206]: DemoCommerce Labs
+            - listitem [ref=f66e207]:
+              - paragraph [ref=f66e208]: problem_relevance — 0.3
+              - paragraph [ref=f66e209]: No problem evidence supplied.
+              - generic [ref=f66e210]:
+                - paragraph [ref=f66e211]: Evidence
+                - text: None noted
+              - paragraph [ref=f66e212]: "Missing: true"
+            - listitem [ref=f66e213]:
+              - paragraph [ref=f66e214]: evidence_strength — 0.7000000000000001
+              - paragraph [ref=f66e215]: 3 verified research fact(s).
+              - generic [ref=f66e216]:
+                - paragraph [ref=f66e217]: Evidence
+                - text: None noted
+            - listitem [ref=f66e218]:
+              - paragraph [ref=f66e219]: timing_signal — 0.4
+              - paragraph [ref=f66e220]: No timing signals observed (neutral, not negative).
+              - generic [ref=f66e221]:
+                - paragraph [ref=f66e222]: Evidence
+                - text: None noted
+              - paragraph [ref=f66e223]: "Missing: true"
+            - listitem [ref=f66e224]:
+              - paragraph [ref=f66e225]: research_completeness — 1
+              - paragraph [ref=f66e226]: 100% of core research fields present.
+              - generic [ref=f66e227]:
+                - paragraph [ref=f66e228]: Evidence
+                - text: None noted
+          - paragraph [ref=f66e229]: "Still needed: No problem-relevance evidence."
+          - generic [ref=f66e230]:
+            - paragraph [ref=f66e231]: Why this result
+            - paragraph [ref=f66e232]: "Possible fit (average dimension score 0.54). Missing: No problem-relevance evidence.."
+      - generic [ref=f66e233]:
+        - heading "Briefs" [level=3] [ref=f66e234]
+        - button "Create brief" [ref=f66e235] [cursor=pointer]
+        - list [ref=f66e236]:
+          - listitem [ref=f66e237]:
+            - paragraph [ref=f66e238]: e1f9da31-6bba-4037-b26e-3293dd577562
+            - button "View + combine notes" [ref=f66e239] [cursor=pointer]
+      - generic [ref=f66e240]:
+        - heading "Outreach plans" [level=3] [ref=f66e241]
+        - generic [ref=f66e242]:
+          - generic [ref=f66e243]:
+            - textbox "Goal (e.g. intro call)" [ref=f66e244]
+            - textbox "Audience" [ref=f66e245]
+            - textbox "Angle" [ref=f66e246]
+          - textbox "Why contact now?" [ref=f66e247]
+          - button "Create outreach plan" [ref=f66e248] [cursor=pointer]
+        - generic [ref=f66e249]:
+          - paragraph [ref=f66e250]: Suggested content for this prospect
+          - paragraph [ref=f66e251]: No relevant content recorded for this prospect yet.
+        - paragraph [ref=f66e252]: No outreach plans yet.
+      - generic [ref=f66e253]:
+        - heading "Message drafts" [level=3] [ref=f66e254]
+        - generic [ref=f66e255]:
+          - textbox "Outreach plan ID" [ref=f66e256]
+          - textbox "Message type (e.g. first note)" [ref=f66e257]
+          - button "Compose draft" [ref=f66e258] [cursor=pointer]
+          - button "Refresh" [ref=f66e259] [cursor=pointer]
+        - paragraph [ref=f66e260]: No drafts yet. Approve an outreach plan, then compose a draft from it.

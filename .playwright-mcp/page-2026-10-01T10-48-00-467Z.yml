@@ -1,0 +1,78 @@
+- generic [ref=f5e3]:
+  - navigation "Main navigation" [ref=f5e4]:
+    - generic [ref=f5e12]:
+      - text: Growth Operator
+      - generic [ref=f5e13]: Content Brain
+    - navigation [ref=f5e14]:
+      - generic [ref=f5e15]:
+        - generic [ref=f5e16]: Core
+        - link "Home" [ref=f5e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f5e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f5e29]:
+        - generic [ref=f5e30]: Intelligence
+        - link "Learning" [ref=f5e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f5e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f5e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f5e46]:
+        - generic [ref=f5e47]: Sales
+        - link "Leads" [ref=f5e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f5e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f5e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f5e65]:
+        - generic [ref=f5e66]: System
+        - link "Analytics" [ref=f5e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f5e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f5e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f5e99]:
+      - paragraph [ref=f5e100]: qa.growthoperator+r202610011556@example.com
+      - button "Sign out" [ref=f5e101] [cursor=pointer]
+  - main [ref=f5e80]:
+    - generic [ref=f5e81]:
+      - link [ref=f5e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f5e83]
+      - paragraph [ref=f5e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f5e85]:
+      - generic [ref=f5e86]:
+        - generic [ref=f5e102]:
+          - heading "Leads" [level=2] [ref=f5e103]
+          - paragraph [ref=f5e104]: Track people, research them, and prepare reviewed outreach.
+        - generic [ref=f5e105]:
+          - paragraph [ref=f5e106]: No workspaces yet. Create one to begin — all data stays scoped to it.
+          - generic [ref=f5e107]:
+            - textbox "Workspace name" [ref=f5e108]
+            - button "Create workspace" [ref=f5e109] [cursor=pointer]
+      - generic [ref=f5e110]:
+        - heading "Look up a person" [level=3] [ref=f5e111]
+        - paragraph [ref=f5e112]: Enter details you already know. Results are suggestions only — confirm before saving.
+        - generic [ref=f5e113]:
+          - generic [ref=f5e114]:
+            - textbox "Name" [ref=f5e115]
+            - textbox "Job title" [ref=f5e116]
+            - textbox "Company" [ref=f5e117]
+            - textbox "Location" [ref=f5e118]
+          - textbox "Public source URL (optional)" [ref=f5e119]
+          - button "Look up" [ref=f5e120] [cursor=pointer]
+      - generic [ref=f5e121]:
+        - generic [ref=f5e122]:
+          - heading "Add a lead manually" [level=3] [ref=f5e123]
+          - generic [ref=f5e124]:
+            - textbox "Profile URL" [ref=f5e125]
+            - textbox "Full name" [ref=f5e126]
+            - textbox "Company (optional)" [ref=f5e127]
+            - button "Add lead" [ref=f5e128] [cursor=pointer]
+        - generic [ref=f5e130]:
+          - heading "Something went wrong" [level=2] [ref=f5e131]
+          - paragraph [ref=f5e132]: You do not have access to this workspace item.
+          - button "Retry" [ref=f5e133] [cursor=pointer]

@@ -1,0 +1,220 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e85]:
+      - generic [ref=f9e86]:
+        - heading "Finish workspace setup" [level=2] [ref=f9e87]
+        - paragraph [ref=f9e88]: "Onboarding is incomplete — next: Offers. Recommendations improve as each step lands in the workspace."
+        - link "Continue onboarding" [ref=f9e89] [cursor=pointer]:
+          - /url: /onboarding
+      - generic [ref=f9e90]:
+        - generic [ref=f9e91]:
+          - generic [ref=f9e92]:
+            - heading "API Health" [level=2] [ref=f9e93]
+            - generic [ref=f9e94]: "Status: healthy"
+          - generic [ref=f9e96]:
+            - generic [ref=f9e97]:
+              - generic [ref=f9e98]: Service
+              - generic [ref=f9e99]: growth-operator-api
+            - generic [ref=f9e100]:
+              - generic [ref=f9e101]: Version
+              - generic [ref=f9e102]: 0.0.0
+            - generic [ref=f9e103]:
+              - generic [ref=f9e104]: Timestamp
+              - generic [ref=f9e105]: 2026-09-29T20:47:16.240Z
+        - generic [ref=f9e106]:
+          - generic [ref=f9e107]:
+            - heading "API Readiness" [level=2] [ref=f9e108]
+            - generic [ref=f9e109]: "Status: ready"
+          - generic [ref=f9e111]:
+            - generic [ref=f9e112]:
+              - generic [ref=f9e113]: Database
+              - generic [ref=f9e114]: connected
+            - generic [ref=f9e115]:
+              - generic [ref=f9e116]: Timestamp
+              - generic [ref=f9e117]: 2026-09-29T20:47:16.247Z
+      - generic [ref=f9e118]:
+        - heading "System Readiness" [level=3] [ref=f9e119]
+        - generic [ref=f9e120]:
+          - generic [ref=f9e121]:
+            - generic [ref=f9e122]: ✗
+            - generic [ref=f9e123]:
+              - generic [ref=f9e124]:
+                - strong [ref=f9e125]: Workspace Intelligence Ready
+                - generic [ref=f9e126]: Not Ready
+              - paragraph [ref=f9e127]: "Missing: has Audience Segments, has Offers, has Strategy"
+          - generic [ref=f9e128]:
+            - generic [ref=f9e129]: ✗
+            - generic [ref=f9e130]:
+              - generic [ref=f9e131]:
+                - strong [ref=f9e132]: Human Approval Ready
+                - generic [ref=f9e133]: Not Ready
+              - paragraph [ref=f9e134]: "Missing: policy Acknowledged, schedule Configured, tier1 Enabled"
+          - generic [ref=f9e135]:
+            - generic [ref=f9e136]: ✗
+            - generic [ref=f9e137]:
+              - generic [ref=f9e138]:
+                - strong [ref=f9e139]: LinkedIn Execution
+                - generic [ref=f9e140]: Not Ready
+              - paragraph [ref=f9e141]: No LinkedIn integration exists. Publishing/execution remains unavailable.
+        - paragraph [ref=f9e143]: Overall:not ready
+      - generic [ref=f9e145]:
+        - generic [ref=f9e146]: 🔔
+        - generic [ref=f9e147]:
+          - strong [ref=f9e148]: "Learning proposals waiting for confirmation: 1"
+          - paragraph [ref=f9e149]: Review and confirm proposed learnings to improve future recommendations.
+        - link "Open Learning" [ref=f9e150] [cursor=pointer]:
+          - /url: /learning
+      - generic [ref=f9e151]:
+        - heading "Today" [level=2] [ref=f9e152]
+        - paragraph [ref=f9e153]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - generic [ref=f9e154]:
+          - generic [ref=f9e155]:
+            - heading "Daily digest" [level=3] [ref=f9e157]
+            - paragraph [ref=f9e158]: No digest yet. Trigger the loop to generate today's batch.
+          - generic [ref=f9e159]:
+            - heading "Latest loop run" [level=3] [ref=f9e161]
+            - paragraph [ref=f9e162]: No runs recorded yet.
+            - generic [ref=f9e163]:
+              - button "Run today’s loop now" [ref=f9e164] [cursor=pointer]
+              - button "Refresh" [ref=f9e165] [cursor=pointer]
+        - heading "Recommended next steps" [level=2] [ref=f9e166]
+        - paragraph [ref=f9e167]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - generic [ref=f9e168]:
+          - generic [ref=f9e169]:
+            - paragraph [ref=f9e170]: "Auto-preparation: 0/10 used today"
+            - button "Refresh" [ref=f9e171] [cursor=pointer]
+          - list [ref=f9e172]:
+            - listitem [ref=f9e173]:
+              - generic [ref=f9e174]:
+                - paragraph [ref=f9e175]: "1. Review opportunity: DEMO: The 15-minute founder demo checklist"
+                - paragraph [ref=f9e176]: "Content opportunity · Score: 64"
+                - paragraph [ref=f9e177]: Content opportunity scored 0.82 awaits review.
+                - button "Show details" [ref=f9e179] [cursor=pointer]
+            - listitem [ref=f9e180]:
+              - generic [ref=f9e181]:
+                - paragraph [ref=f9e182]: "2. Follow up: follow up now — Dana Example"
+                - paragraph [ref=f9e183]: "Follow-up · Score: 63"
+                - paragraph [ref=f9e184]: "Recommended next step: follow up now. DEMO: fictional prospect asked for a call; timely human follow-up is appropriate."
+                - button "Show details" [ref=f9e186] [cursor=pointer]
+            - listitem [ref=f9e187]:
+              - generic [ref=f9e188]:
+                - paragraph [ref=f9e189]: "3. Authorize prepared action: send first message — Dana Example"
+                - paragraph [ref=f9e190]: "Prepared next step · Score: 61"
+                - paragraph [ref=f9e191]: Prepared action is ready and awaiting human authorization. Preparing does not execute.
+                - button "Show details" [ref=f9e193] [cursor=pointer]
+            - listitem [ref=f9e194]:
+              - generic [ref=f9e195]:
+                - paragraph [ref=f9e196]: "4. Review opportunity: DEMO: Onboarding checklist teardown"
+                - paragraph [ref=f9e197]: "Content opportunity · Score: 60"
+                - paragraph [ref=f9e198]: Content opportunity scored 0.74 awaits review.
+                - button "Show details" [ref=f9e200] [cursor=pointer]
+            - listitem [ref=f9e201]:
+              - generic [ref=f9e202]:
+                - paragraph [ref=f9e203]: 5. Act on trending trend (2 sources)
+                - paragraph [ref=f9e204]: "Trend · Score: 55"
+                - paragraph [ref=f9e205]: TRENDING trend across 2 source(s) with recency 90%.
+                - button "Show details" [ref=f9e207] [cursor=pointer]
+            - listitem [ref=f9e208]:
+              - generic [ref=f9e209]:
+                - paragraph [ref=f9e210]: "6. Confirm learning: hook_strength (+0.05)"
+                - paragraph [ref=f9e211]: "Suggested improvement · Score: 51"
+                - paragraph [ref=f9e212]: Learning proposal on hook_strength awaits confirmation (n=3).
+                - button "Show details" [ref=f9e214] [cursor=pointer]
+            - listitem [ref=f9e215]:
+              - generic [ref=f9e216]:
+                - paragraph [ref=f9e217]: "7. Review content draft for \"DEMO: The 15-minute founder demo checklist\""
+                - paragraph [ref=f9e218]: "Review · Score: 49"
+                - paragraph [ref=f9e219]: Content review waiting 0 day(s).
+                - button "Show details" [ref=f9e221] [cursor=pointer]
+            - listitem [ref=f9e222]:
+              - generic [ref=f9e223]:
+                - paragraph [ref=f9e224]: 8. Review outreach draft
+                - paragraph [ref=f9e225]: "Review · Score: 49"
+                - paragraph [ref=f9e226]: Outreach review waiting 0 day(s).
+                - button "Show details" [ref=f9e228] [cursor=pointer]
+            - listitem [ref=f9e229]:
+              - generic [ref=f9e230]:
+                - paragraph [ref=f9e231]: 9. Act on relevant trend (1 sources)
+                - paragraph [ref=f9e232]: "Trend · Score: 48"
+                - paragraph [ref=f9e233]: RELEVANT trend across 1 source(s) with recency 70%.
+                - button "Show details" [ref=f9e235] [cursor=pointer]
+            - listitem [ref=f9e236]:
+              - generic [ref=f9e237]:
+                - paragraph [ref=f9e238]: "10. Address content gap: DEMO: missing checklist angle for founder-led demo follow-up."
+                - paragraph [ref=f9e239]: "Content gap · Score: 48"
+                - paragraph [ref=f9e240]: Unaddressed ANGLE gap with importance 0.7.
+                - button "Show details" [ref=f9e242] [cursor=pointer]
+            - listitem [ref=f9e243]:
+              - generic [ref=f9e244]:
+                - paragraph [ref=f9e245]: "11. Address content gap: DEMO: onboarding checklist topic lacks a worked example."
+                - paragraph [ref=f9e246]: "Content gap · Score: 45"
+                - paragraph [ref=f9e247]: Unaddressed DEPTH gap with importance 0.6.
+                - button "Show details" [ref=f9e249] [cursor=pointer]
+            - listitem [ref=f9e250]:
+              - generic [ref=f9e251]:
+                - paragraph [ref=f9e252]: "12. Turn signal into content: \"Checklist post on demo length.\""
+                - paragraph [ref=f9e253]: "Sales signal · Score: 35"
+                - paragraph [ref=f9e254]: "Recorded sales signal (REPEATED_QUESTION) across 1 conversation(s): \"DEMO: fictional prospects repeatedly ask how long a founder demo should run.\"."
+                - button "Show details" [ref=f9e256] [cursor=pointer]
+        - heading "Sections" [level=2] [ref=f9e257]
+        - generic [ref=f9e258]:
+          - link "Today's Brain" [ref=f9e259] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f9e260] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f9e261] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f9e262] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f9e263] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f9e264] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f9e265] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f9e266] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f9e267] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f9e268] [cursor=pointer]:
+            - /url: /onboarding

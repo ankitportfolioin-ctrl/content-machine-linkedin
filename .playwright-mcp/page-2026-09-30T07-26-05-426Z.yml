@@ -1,0 +1,80 @@
+- generic [ref=f30e3]:
+  - navigation "Main navigation" [ref=f30e4]:
+    - generic [ref=f30e12]:
+      - text: Growth Operator
+      - generic [ref=f30e13]: Content Brain
+    - navigation [ref=f30e14]:
+      - generic [ref=f30e15]:
+        - generic [ref=f30e16]: Core
+        - link "Home" [ref=f30e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f30e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f30e29]:
+        - generic [ref=f30e30]: Intelligence
+        - link "Learning" [ref=f30e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f30e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f30e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f30e46]:
+        - generic [ref=f30e47]: Sales
+        - link "Leads" [ref=f30e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f30e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f30e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f30e65]:
+        - generic [ref=f30e66]: System
+        - link "Analytics" [ref=f30e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f30e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f30e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f30e89]:
+      - paragraph [ref=f30e90]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f30e91] [cursor=pointer]
+  - main [ref=f30e80]:
+    - generic [ref=f30e81]:
+      - link [ref=f30e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f30e83]
+      - paragraph [ref=f30e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f30e85]:
+      - generic [ref=f30e86]:
+        - generic [ref=f30e92]:
+          - heading "Brain / Intelligence" [level=2] [ref=f30e93]
+          - paragraph [ref=f30e94]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f30e95]:
+          - generic [ref=f30e96]:
+            - generic [ref=f30e97]: Workspace
+            - combobox "Workspace" [ref=f30e98]:
+              - option "Select a workspace" [disabled]
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f30e99] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f30e100]:
+        - tab "Overview" [ref=f30e101] [cursor=pointer]
+        - tab "Opportunities" [ref=f30e102] [cursor=pointer]
+        - tab "Trends" [ref=f30e103] [cursor=pointer]
+        - tab "Gaps" [ref=f30e104] [cursor=pointer]
+        - tab "Sources" [active] [selected] [ref=f30e105] [cursor=pointer]
+        - tab "Learning" [ref=f30e106] [cursor=pointer]
+      - generic [ref=f30e112]:
+        - generic [ref=f30e113]:
+          - heading "Connected platforms (optional)" [level=3] [ref=f30e114]
+          - paragraph [ref=f30e115]: Optional inspiration for the Content Brain — read-only, per workspace. Everything works with zero connectors. Pulled items become content ideas only when you save them, always as DRAFT.
+          - generic [ref=f30e116]:
+            - alert [ref=f30e117]: Internal server error
+            - button "Retry" [ref=f30e118] [cursor=pointer]
+        - generic [ref=f30e119]:
+          - generic [ref=f30e120]:
+            - heading "Add a source" [level=3] [ref=f30e121]
+            - generic [ref=f30e122]:
+              - textbox "https://example.com/article" [ref=f30e123]
+              - button "Add source" [disabled] [ref=f30e124]
+          - generic [ref=f30e126]:
+            - heading "No sources yet" [level=2] [ref=f30e127]
+            - paragraph [ref=f30e128]: Add your first source above to start building intelligence.

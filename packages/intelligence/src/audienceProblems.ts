@@ -1,6 +1,13 @@
 import { PrismaClient } from '@prisma/client';
 import { AIProviderRegistry } from '@growth-operator/ai';
 import { z } from 'zod';
+import {
+  validateAndNormalize,
+  createStrictPrompt,
+  AI_OUTPUT_SCHEMAS,
+  AIValidationContext,
+  AudienceProblemsOutput,
+} from './aiOutputValidation';
 
 export interface AudienceProblemInput {
   workspaceId: string;
@@ -182,6 +189,92 @@ Group recurring problems (minimum ${minOccurrences} sources per group). For each
 - confidence: 0-1`;
 
     try {
+      const baseSystemPrompt = `You are an audience research analyst for YourFirstProject (YFP), a digital education brand helping complete beginners learn practical technology skills, build real projects, and earn money offering those skills.
+
+Target Audience:
+- Beginner developers
+- Students learning AI and technology
+- People interested in vibe coding / AI-assisted development
+- Aspiring freelancers
+- People learning AI tools
+- Beginner entrepreneurs
+- People who want to build their first real project
+- People interested in practical technology skills
+
+Core Content Categories:
+1. AI news and new AI tools
+2. Latest technology updates
+3. Vibe coding and AI-assisted development
+4. Beginner-friendly coding tutorials
+5. Practical AI use cases
+6. Free tools and platforms
+7. Web development and rapid prototyping
+8. AI workflow automation
+9. Freelancing and client acquisition
+10. Real-world project building
+11. Common beginner problems and solutions
+12. Startup and developer productivity tips
+
+TASK: Analyze the provided Reddit discussions, YouTube content, and other signals to identify RECURRING problems that YFP's audience faces. Group related problems together.
+
+RULES:
+1. Only group problems that appear in MULTIPLE sources (minimum ${minOccurrences} occurrences)
+2. Each group must have a clear problem statement, target audience, and supporting evidence
+3. Generate a suggested content angle that YFP could create to address this problem
+4. Rate YFP relevance: HIGH (directly matches core categories), MEDIUM (tangentially related), LOW (weak connection)
+5. Return valid JSON only.`;
+
+      const baseUserPrompt = `Analyze these ${sources.length} sources for recurring audience problems:
+
+${sources.map((s: (typeof sources)[number], i: number) => `
+SOURCE ${i + 1}:
+- ID: ${s.id}
+- Type: ${s.sourceType}
+- Title: ${s.title || 'Untitled'}
+- URL: ${s.url}
+- Publisher: ${s.publisher || 'Unknown'}
+- Published: ${s.publishedAt?.toISOString() || 'Unknown'}
+- Description: ${s.description || 'No description'}
+- Main Content: ${s.documents[0]?.cleanContent?.slice(0, 2000) || 'No content'}
+- Key Claims: ${s.claims.map((c: (typeof sources)[number]['claims'][number]) => `[${c.claimType}] ${c.claimText.slice(0, 200)} (confidence: ${c.confidence})`).join('; ') || 'None'}
+`).join('\n')}
+
+Group recurring problems (minimum ${minOccurrences} sources per group). For each group, provide:
+- problem: Clear problem statement
+- audience: Specific audience segment
+- evidence: Array of {sourceId, sourceTitle, sourceUrl, sourceType, quote, publishedAt}
+- frequency: Number of sources mentioning this problem
+- suggestedContent: {angle, format, hook, educationalValue}
+- yfpRelevance: HIGH/MEDIUM/LOW
+- businessAlignment: How this supports YFP's business
+- confidence: 0-1`;
+
+      const systemPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.audienceProblems, baseSystemPrompt, {
+        groups: 'Array of problem groups',
+        id: 'Unique identifier for the group',
+        problem: 'Clear problem statement',
+        audience: 'Specific audience segment',
+        evidence: 'Array of evidence objects with sourceId, sourceTitle, sourceUrl, sourceType, quote, publishedAt',
+        frequency: 'Number of sources mentioning this problem',
+        suggestedContent: 'Object with angle, format, hook, educationalValue',
+        yfpRelevance: 'HIGH|MEDIUM|LOW',
+        businessAlignment: 'How this supports YFP business',
+        confidence: '0-1 confidence score',
+      });
+
+      const userPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.audienceProblems, baseUserPrompt, {
+        groups: 'Array of problem groups',
+        id: 'Unique identifier for the group',
+        problem: 'Clear problem statement',
+        audience: 'Specific audience segment',
+        evidence: 'Array of evidence objects with sourceId, sourceTitle, sourceUrl, sourceType, quote, publishedAt',
+        frequency: 'Number of sources mentioning this problem',
+        suggestedContent: 'Object with angle, format, hook, educationalValue',
+        yfpRelevance: 'HIGH|MEDIUM|LOW',
+        businessAlignment: 'How this supports YFP business',
+        confidence: '0-1 confidence score',
+      });
+
       const response = await provider.chatCompletion({
         messages: [
           { role: 'system', content: systemPrompt },
@@ -196,17 +289,22 @@ Group recurring problems (minimum ${minOccurrences} sources per group). For each
       const content = response.choices[0]?.message?.content;
       if (!content) throw new Error('Empty AI response');
 
-      const parsed = JSON.parse(content);
-      const schema = z.object({
-        groups: z.array(ProblemGroupSchema),
-      });
+      const validationContext: AIValidationContext = {
+        workspaceId,
+        stage: 'audienceProblems',
+        provider: provider.type,
+        model: 'gpt-4o-mini',
+        schemaName: 'AudienceProblems',
+      };
 
-      const validated = schema.safeParse(parsed);
-      if (!validated.success) {
+      const validationResult = validateAndNormalize(AI_OUTPUT_SCHEMAS.audienceProblems, content, validationContext);
+
+      if (!validationResult.ok) {
+        console.warn('AI audience problems validation failed, using fallback:', validationResult.message);
         return this.fallbackProblemGrouping(sources, minOccurrences);
       }
 
-      const groups = validated.data.groups.map(g => ({
+      const groups = validationResult.data.groups.map(g => ({
         ...g,
         evidence: g.evidence.map(e => ({
           ...e,
@@ -225,6 +323,7 @@ Group recurring problems (minimum ${minOccurrences} sources per group). For each
         errors: [],
       };
     } catch (error) {
+      console.warn('AI audience problems failed, using fallback:', error);
       return this.fallbackProblemGrouping(sources, minOccurrences);
     }
   }

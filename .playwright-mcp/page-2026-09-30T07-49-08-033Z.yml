@@ -1,0 +1,118 @@
+- generic [ref=f48e3]:
+  - navigation "Main navigation" [ref=f48e4]:
+    - generic [ref=f48e12]:
+      - text: Growth Operator
+      - generic [ref=f48e13]: Content Brain
+    - navigation [ref=f48e14]:
+      - generic [ref=f48e15]:
+        - generic [ref=f48e16]: Core
+        - link "Home" [ref=f48e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f48e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f48e29]:
+        - generic [ref=f48e30]: Intelligence
+        - link "Learning" [ref=f48e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f48e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f48e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f48e46]:
+        - generic [ref=f48e47]: Sales
+        - link "Leads" [ref=f48e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f48e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f48e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f48e65]:
+        - generic [ref=f48e66]: System
+        - link "Analytics" [ref=f48e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f48e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f48e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f48e189]:
+      - paragraph [ref=f48e190]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f48e191] [cursor=pointer]
+  - main [ref=f48e80]:
+    - generic [ref=f48e81]:
+      - link [ref=f48e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f48e83]
+      - paragraph [ref=f48e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f48e192]:
+      - generic [ref=f48e193]:
+        - generic [ref=f48e194]:
+          - heading "Settings" [level=2] [ref=f48e195]
+          - paragraph [ref=f48e196]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f48e197]:
+          - generic [ref=f48e198]:
+            - generic [ref=f48e199]: Workspace
+            - combobox "Workspace" [ref=f48e200]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace" [selected]
+              - option "Dream Pair AI"
+          - button "New workspace" [ref=f48e201] [cursor=pointer]
+      - generic [ref=f48e202]:
+        - heading "Profile" [level=3] [ref=f48e203]
+        - paragraph [ref=f48e204]: Signed in as qa.growthoperator+202609300730@example.com — the fields below are your workspace profile facts.
+        - generic [ref=f48e205]:
+          - paragraph [ref=f48e206]: No profile in this workspace yet — describe yourself to begin onboarding.
+          - textbox "Headline" [ref=f48e207]:
+            - /placeholder: Headline (e.g. Founder at Acme)
+          - textbox "Role" [ref=f48e208]:
+            - /placeholder: Role (e.g. Founder)
+          - textbox "Summary" [ref=f48e209]
+          - textbox "Professional context" [ref=f48e210]
+          - textbox "Industry" [ref=f48e211]
+          - textbox "Location" [ref=f48e212]
+          - textbox "LinkedIn URL" [ref=f48e213]:
+            - /placeholder: LinkedIn URL (optional)
+          - button "Create profile" [ref=f48e214] [cursor=pointer]
+      - generic [ref=f48e215]:
+        - heading "Ideal audiences" [level=3] [ref=f48e216]
+        - paragraph [ref=f48e217]: Define who your content is for.
+        - generic [ref=f48e218]:
+          - generic [ref=f48e219]:
+            - textbox "Name *" [ref=f48e220]
+            - textbox "Target roles (comma-separated)" [ref=f48e221]
+            - textbox "Industries (comma-separated)" [ref=f48e222]
+            - textbox "Company size" [ref=f48e223]
+          - textbox "Description" [ref=f48e224]
+          - textbox "Problems they face" [ref=f48e225]
+          - textbox "Who this is not for" [ref=f48e226]
+          - button "Add audience" [disabled] [ref=f48e227]
+        - paragraph [ref=f48e228]: No audiences yet.
+      - generic [ref=f48e229]:
+        - heading "Your voice" [level=3] [ref=f48e230]
+        - paragraph [ref=f48e231]: No voice saved yet. Fill in the form to create one.
+        - generic [ref=f48e232]:
+          - generic [ref=f48e233]:
+            - textbox "Role" [ref=f48e234]
+            - textbox "Headline" [ref=f48e235]
+            - textbox "Tone (e.g. direct, warm)" [ref=f48e236]
+            - textbox "Writing style" [ref=f48e237]
+          - textbox "Professional context" [ref=f48e238]
+          - textbox "Words to avoid (comma-separated)" [ref=f48e239]
+          - textbox "Preferred words (comma-separated)" [ref=f48e240]
+          - textbox "Content pillars (comma-separated)" [ref=f48e241]
+          - button "Save voice" [ref=f48e242] [cursor=pointer]
+      - generic [ref=f48e243]:
+        - heading "Proof points" [level=3] [ref=f48e244]
+        - paragraph [ref=f48e245]: Facts and results your content can reference.
+        - generic [ref=f48e246]:
+          - textbox "Fact or result *" [ref=f48e247]
+          - textbox "Context (optional)" [ref=f48e248]
+          - button "Add" [disabled] [ref=f48e249]
+        - paragraph [ref=f48e250]: No proof points yet.
+      - generic [ref=f48e251]:
+        - heading "Writing samples" [level=3] [ref=f48e252]
+        - paragraph [ref=f48e253]: Examples that show your style.
+        - generic [ref=f48e254]:
+          - textbox "Title (optional)" [ref=f48e255]
+          - textbox "Paste a writing sample *" [ref=f48e256]
+          - button "Add sample" [disabled] [ref=f48e257]
+        - paragraph [ref=f48e258]: No samples yet.

@@ -1,0 +1,77 @@
+- generic [ref=f28e3]:
+  - navigation "Main navigation" [ref=f28e4]:
+    - generic [ref=f28e12]:
+      - text: Growth Operator
+      - generic [ref=f28e13]: Content Brain
+    - navigation [ref=f28e14]:
+      - generic [ref=f28e15]:
+        - generic [ref=f28e16]: Core
+        - link "Home" [ref=f28e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f28e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f28e29]:
+        - generic [ref=f28e30]: Intelligence
+        - link "Learning" [ref=f28e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f28e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f28e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f28e46]:
+        - generic [ref=f28e47]: Sales
+        - link "Leads" [ref=f28e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f28e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f28e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f28e65]:
+        - generic [ref=f28e66]: System
+        - link "Analytics" [ref=f28e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f28e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f28e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f28e89]:
+      - paragraph [ref=f28e90]: qa.growthoperator+202609301605@example.com
+      - button "Sign out" [ref=f28e91] [cursor=pointer]
+  - main [ref=f28e80]:
+    - generic [ref=f28e81]:
+      - link [ref=f28e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f28e83]
+      - paragraph [ref=f28e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f28e85]:
+      - generic [ref=f28e86]:
+        - generic [ref=f28e92]:
+          - heading "Brain / Intelligence" [level=2] [ref=f28e93]
+          - paragraph [ref=f28e94]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f28e95]:
+          - generic [ref=f28e96]:
+            - generic [ref=f28e97]: Workspace
+            - combobox "Workspace" [ref=f28e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f28e99] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f28e100]:
+        - tab "Overview" [ref=f28e101] [cursor=pointer]
+        - tab "Opportunities" [active] [selected] [ref=f28e102] [cursor=pointer]
+        - tab "Trends" [ref=f28e103] [cursor=pointer]
+        - tab "Gaps" [ref=f28e104] [cursor=pointer]
+        - tab "Sources" [ref=f28e105] [cursor=pointer]
+        - tab "Learning" [ref=f28e106] [cursor=pointer]
+      - generic [ref=f28e107]:
+        - generic [ref=f28e108]:
+          - text: Status
+          - combobox "Filter by status" [ref=f28e109]:
+            - option "New" [selected]
+            - option "Reviewed"
+            - option "Dismissed"
+            - option "Converted"
+            - option "All"
+        - generic [ref=f28e111]:
+          - heading "No opportunities yet" [level=2] [ref=f28e112]
+          - paragraph [ref=f28e113]: New content opportunities will appear here when they are detected.

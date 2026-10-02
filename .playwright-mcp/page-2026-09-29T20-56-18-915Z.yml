@@ -1,0 +1,160 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e468]:
+      - generic [ref=f9e469]:
+        - generic [ref=f9e470]:
+          - heading "Brain / Intelligence" [level=2] [ref=f9e471]
+          - paragraph [ref=f9e472]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f9e473]:
+          - generic [ref=f9e474]: Workspace
+          - combobox "Workspace" [ref=f9e475]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - tablist "Intelligence sections" [ref=f9e476]:
+        - tab "Overview" [ref=f9e477] [cursor=pointer]
+        - tab "Opportunities" [active] [selected] [ref=f9e478] [cursor=pointer]
+        - tab "Trends" [ref=f9e479] [cursor=pointer]
+        - tab "Gaps" [ref=f9e480] [cursor=pointer]
+        - tab "Sources" [ref=f9e481] [cursor=pointer]
+        - tab "Learning" [ref=f9e482] [cursor=pointer]
+      - generic [ref=f9e504]:
+        - button "← Back to opportunities" [ref=f9e505] [cursor=pointer]
+        - generic [ref=f9e506]:
+          - 'heading "DEMO: Onboarding checklist teardown" [level=3] [ref=f9e507]'
+          - generic [ref=f9e508]:
+            - generic [ref=f9e509]: NEW
+            - generic [ref=f9e510]: "[object Object]"
+        - generic [ref=f9e511]:
+          - heading "Why recommended" [level=3] [ref=f9e512]
+          - paragraph [ref=f9e513]: "Score: 57"
+          - generic [ref=f9e514]:
+            - generic [ref=f9e515]:
+              - strong [ref=f9e516]: "Signal Confidence:"
+              - generic [ref=f9e517]: MEDIUM
+            - generic [ref=f9e518]:
+              - strong [ref=f9e519]: "Recommendation Confidence:"
+              - generic [ref=f9e520]: MEDIUM
+          - list [ref=f9e521]:
+            - listitem [ref=f9e522]: Content opportunity scored 0.74 awaits review.
+            - listitem [ref=f9e523]: High relevance score (74%).
+            - listitem [ref=f9e524]: 2 evidence reference(s) attached.
+            - listitem [ref=f9e525]: Directly actionable in an existing workflow.
+            - listitem [ref=f9e526]: Created within the last 7 days.
+          - generic [ref=f9e527]:
+            - paragraph [ref=f9e528]: Why not ranked higher
+            - list [ref=f9e529]:
+              - listitem [ref=f9e530]: No time-sensitive urgency
+              - listitem [ref=f9e531]: Does not visibly support any configured objective
+          - generic [ref=f9e532]:
+            - paragraph [ref=f9e533]: Score breakdown
+            - list [ref=f9e534]:
+              - listitem [ref=f9e535]: "urgency: 4 of 30 — null"
+              - listitem [ref=f9e536]: "relevance: 16 of 25 — High relevance score (74%)."
+              - listitem [ref=f9e537]: "evidence_strength: 12 of 20 — 2 evidence reference(s) attached."
+              - listitem [ref=f9e538]: "readiness: 15 of 15 — Directly actionable in an existing workflow."
+              - listitem [ref=f9e539]: "freshness: 10 of 10 — Created within the last 7 days."
+              - listitem [ref=f9e540]: "learning_boost: 0 of 10 — null"
+              - listitem [ref=f9e541]: "attribution: 0 of 5 — null"
+          - paragraph [ref=f9e542]: "Status: Informational candidate; opening its workflow is the action."
+        - generic [ref=f9e543]:
+          - heading "Score breakdown" [level=3] [ref=f9e544]
+          - generic [ref=f9e545]:
+            - generic [ref=f9e546]: "Score: 0.58"
+            - generic [ref=f9e547]: "Base: 0.58"
+            - generic [ref=f9e548]: 1 confirmed learning adjustment(s)
+          - list [ref=f9e549]:
+            - listitem [ref=f9e550]:
+              - strong [ref=f9e551]: relevance
+              - text: ": 0.70How relevant this topic is to the workspace and audience"
+            - listitem [ref=f9e552]:
+              - strong [ref=f9e553]: audience_fit
+              - text: ": 0.60How well the topic aligns with the target audience and ICP"
+            - listitem [ref=f9e554]:
+              - strong [ref=f9e555]: evidence_strength
+              - text: ": 0.90Strength and reliability of extracted evidence"
+            - listitem [ref=f9e556]:
+              - strong [ref=f9e557]: timeliness
+              - text: ": 0.64How current and timely the topic is"
+            - listitem [ref=f9e558]:
+              - strong [ref=f9e559]: source_diversity
+              - text: ": 0.30Diversity of sources by publisher and type"
+            - listitem [ref=f9e560]:
+              - strong [ref=f9e561]: differentiation
+              - text: ": 0.30No content gaps identified"
+            - listitem [ref=f9e562]:
+              - strong [ref=f9e563]: content_gap_alignment
+              - text: ": 0.30No gaps to align with"
+            - listitem [ref=f9e564]:
+              - strong [ref=f9e565]: trend_strength
+              - text: ": 0.70Strength of trend signals for this topic"
+            - listitem [ref=f9e566]:
+              - strong [ref=f9e567]: thesis_clarity
+              - text: ": 0.70Thesis clarity assessed during AI generation"
+            - listitem [ref=f9e568]:
+              - strong [ref=f9e569]: actionability
+              - text: ": 0.70How actionable this opportunity is for content creation"
+        - generic [ref=f9e570]:
+          - heading "Was this helpful?" [level=3] [ref=f9e571]
+          - generic [ref=f9e572]:
+            - button "Useful" [ref=f9e573] [cursor=pointer]
+            - button "Not useful" [ref=f9e574] [cursor=pointer]
+            - button "Already covered" [ref=f9e575] [cursor=pointer]
+            - button "Wrong audience" [ref=f9e576] [cursor=pointer]
+            - button "Weak evidence" [ref=f9e577] [cursor=pointer]
+            - button "Not timely" [ref=f9e578] [cursor=pointer]
+          - textbox "Optional reason (e.g. why this fits or not)" [ref=f9e579]
+        - generic [ref=f9e580]:
+          - heading "Workspace feedback" [level=3] [ref=f9e581]
+          - paragraph [ref=f9e582]: No feedback recorded yet.
+        - generic [ref=f9e583]:
+          - heading "Convert to content idea" [level=3] [ref=f9e584]
+          - paragraph [ref=f9e585]: Turn this opportunity into a draft idea you can develop under Content.
+          - generic [ref=f9e586]:
+            - textbox "Optional idea title" [ref=f9e587]
+            - button "Convert to content idea" [ref=f9e588] [cursor=pointer]
+        - generic [ref=f9e589]:
+          - heading "Triage" [level=3] [ref=f9e590]
+          - paragraph [ref=f9e591]: Acknowledge this opportunity or dismiss it. Either way it stays here for history and leaves the active queue.
+          - generic [ref=f9e592]:
+            - button "Mark reviewed" [ref=f9e593] [cursor=pointer]
+            - button "Dismiss" [ref=f9e594] [cursor=pointer]

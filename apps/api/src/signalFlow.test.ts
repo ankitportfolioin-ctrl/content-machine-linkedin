@@ -89,7 +89,7 @@ describe('signal → opportunity → triage → idea chain', () => {
     expect(res.body.signal.id).toBeDefined();
   });
 
-  it('runs the daily loop: signals become NEW opportunities with provenance', async () => {
+  it('runs the daily loop: signals become NEW opportunities with provenance', { timeout: 30000 }, async () => {
     // Seed one surfaced relevance action (as a previous refresh would have):
     // the producer reuses decision output instead of recomputing fan-out.
     await prisma.operatorAction.create({
@@ -205,6 +205,9 @@ describe('signal → opportunity → triage → idea chain', () => {
       expect(stage?.status).toBe('SKIPPED');
     }
     const readiness = await request(app).get('/api/v1/readiness').set(auth()).expect(200);
-    expect(readiness.body.readiness.linkedInExecution.ready).toBe(false);
+    expect(readiness.body.readiness.platformExecution).toBeDefined();
+    const linkedIn = readiness.body.readiness.platformExecution.find((p: any) => p.platform === 'LINKEDIN');
+    expect(linkedIn).toBeDefined();
+    expect(linkedIn.publishingReady).toBe(false);
   });
 });

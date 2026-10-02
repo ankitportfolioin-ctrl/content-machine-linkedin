@@ -801,9 +801,8 @@ function SetupRequirementsBlock({ conn }: { conn: SocialConnection }) {
         <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
           <p style={{ margin: 0 }}>Required application credentials:</p>
           <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
-            {(server?.requiredEnvVars ?? []).map((v) => (
-              <li key={v}><code>{v}</code></li>
-            ))}
+            <li>Client ID</li>
+            <li>Client Secret</li>
           </ul>
           {server?.redirectUri ? (
             <p style={{ margin: 0 }}>
@@ -813,6 +812,15 @@ function SetupRequirementsBlock({ conn }: { conn: SocialConnection }) {
               </button>
             </p>
           ) : null}
+          <details>
+            <summary style={{ cursor: 'pointer' }}>Developer details</summary>
+            <ul style={{ paddingLeft: '1.25rem', margin: '0.25rem 0 0' }}>
+              {(server?.requiredEnvVars ?? []).map((v) => (
+                <li key={v}><code>{v}</code></li>
+              ))}
+              {server?.redirectUriSource ? <li>Redirect source: <code>{server.redirectUriSource}</code></li> : null}
+            </ul>
+          </details>
           {server?.docsUrl ? (
             <p style={{ margin: 0 }}>
               <a href={server.docsUrl} target="_blank" rel="noreferrer">Official setup instructions</a>

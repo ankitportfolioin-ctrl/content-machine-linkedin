@@ -1,6 +1,8 @@
 import { NavItem } from './NavItem';
+import { useAuth } from '../context/AuthContext';
 
 export function Sidebar() {
+  const { user, isAuthenticated, logout } = useAuth();
   const navigation = [
     { to: '/', label: 'Home', icon: HomeIcon },
     { to: '/dashboard', label: "Today's Brain", icon: BrainIcon },
@@ -66,6 +68,18 @@ export function Sidebar() {
           ))}
         </div>
       </nav>
+      {isAuthenticated ? (
+        <div style={{ padding: '0.75rem', borderTop: '1px solid var(--color-border)', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+          {user?.email ? (
+            <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={user.email}>
+              {user.email}
+            </p>
+          ) : null}
+          <button type="button" className="btn btn-secondary" onClick={logout}>
+            Sign out
+          </button>
+        </div>
+      ) : null}
     </aside>
   );
 }

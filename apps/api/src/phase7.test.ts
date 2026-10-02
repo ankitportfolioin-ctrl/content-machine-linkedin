@@ -17,6 +17,8 @@ let workspaceId = '';
 let leadId = '';
 let topicId = '';
 let proposalId = '';
+let sourceId = '';
+let claimId = '';
 
 async function registerAndLogin(email: string): Promise<string> {
   await request(app).post('/api/v1/auth/register').send({ email, password, name: 'Phase7 User' }).expect(201);
@@ -77,6 +79,47 @@ describe('Phase 7 setup', () => {
       },
     });
     topicId = topic.id;
+
+    // Add at least one source and claim to the topic so scoring doesn't fail on zero backing signals
+    const source = await prisma.intelligenceSource.create({
+      data: {
+        workspaceId,
+        url: `https://example.com/phase7-source-${stamp}`,
+        canonicalUrl: `https://example.com/phase7-source-${stamp}`,
+        sourceType: 'ARTICLE',
+        title: 'AI agents for sales prospecting',
+        status: 'ACTIVE',
+        contentHash: `hash-${stamp}`,
+        urlHash: `urlhash-${stamp}`,
+      },
+    });
+    const doc = await prisma.sourceDocument.create({
+      data: {
+        workspaceId,
+        sourceId: source.id,
+        rawContent: 'AI agents can automate outbound prospecting workflows.',
+        cleanContent: 'AI agents can automate outbound prospecting workflows.',
+        contentType: 'TEXT',
+        wordCount: 10,
+        language: 'en',
+        extractionMethod: 'TEXT',
+        extractionStatus: 'SUCCESS',
+      },
+    });
+    const claim = await prisma.sourceClaim.create({
+      data: {
+        workspaceId,
+        sourceId: source.id,
+        documentId: doc.id,
+        claimText: 'AI agents can automate outbound prospecting workflows.',
+        claimType: 'OBSERVATION',
+        evidenceText: 'AI agents can automate outbound prospecting workflows.',
+        confidence: 0.8,
+        status: 'SUPPORTED',
+      },
+    });
+    sourceId = source.id;
+    claimId = claim.id;
   });
 });
 
@@ -270,7 +313,7 @@ describe('Opportunity scoring seam (learning -> opportunity explanation)', () =>
     const before = await request(app)
       .post('/api/v1/intelligence/opportunities/score')
       .set(authOwner())
-      .send({ topicId })
+      .send({ topicId, sourceIds: [sourceId], claimIds: [claimId] })
       .expect(200);
     expect(before.body.scoring.dimensions).toHaveLength(10);
     expect(before.body.scoring.learning.applied).toEqual([]);
@@ -280,7 +323,7 @@ describe('Opportunity scoring seam (learning -> opportunity explanation)', () =>
     const after = await request(app)
       .post('/api/v1/intelligence/opportunities/score')
       .set(authOwner())
-      .send({ topicId })
+      .send({ topicId, sourceIds: [sourceId], claimIds: [claimId] })
       .expect(200);
     expect(after.body.scoring.learning.applied.length).toBeGreaterThan(0);
     expect(after.body.scoring.overallScore).not.toBe(after.body.scoring.baseOverallScore);
@@ -314,8 +357,8 @@ describe('Opportunity scoring seam (learning -> opportunity explanation)', () =>
         angle: 'Recorded angle.',
         objective: 'Recorded objective.',
         opportunityScore: 0.55,
-        sourceIds: [],
-        claimIds: [],
+        sourceIds: [sourceId],
+        claimIds: [claimId],
         trendSignalIds: [],
         reasoning: 'Recorded reasoning.',
         evidenceSummary: 'Recorded evidence.',
@@ -338,7 +381,7 @@ describe('Opportunity scoring seam (learning -> opportunity explanation)', () =>
     const res = await request(app)
       .post('/api/v1/intelligence/opportunities/score')
       .set(authOwner())
-      .send({ topicId })
+      .send({ topicId, sourceIds: [sourceId], claimIds: [claimId] })
       .expect(200);
     expect(res.body.scoring.learning.applied).toEqual([]);
     expect(res.body.scoring.overallScore).toBe(res.body.scoring.baseOverallScore);

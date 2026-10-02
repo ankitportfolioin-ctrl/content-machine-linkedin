@@ -1,0 +1,91 @@
+- generic [ref=f4e3]:
+  - navigation "Main navigation" [ref=f4e4]:
+    - generic [ref=f4e12]:
+      - text: Growth Operator
+      - generic [ref=f4e13]: Content Brain
+    - navigation [ref=f4e14]:
+      - generic [ref=f4e15]:
+        - generic [ref=f4e16]: Core
+        - link "Home" [ref=f4e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f4e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f4e29]:
+        - generic [ref=f4e30]: Intelligence
+        - link "Learning" [ref=f4e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f4e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f4e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f4e46]:
+        - generic [ref=f4e47]: Sales
+        - link "Leads" [ref=f4e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f4e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f4e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f4e65]:
+        - generic [ref=f4e66]: System
+        - link "Analytics" [ref=f4e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f4e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f4e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f4e80]:
+    - generic [ref=f4e81]:
+      - link [ref=f4e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f4e83]
+      - paragraph [ref=f4e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f4e85]:
+      - generic [ref=f4e86]:
+        - generic [ref=f4e89]:
+          - heading "Settings" [level=2] [ref=f4e90]
+          - paragraph [ref=f4e91]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f4e136]:
+          - generic [ref=f4e137]: Workspace
+          - combobox "Workspace" [ref=f4e138]:
+            - option "Select a workspace" [disabled]
+            - option "Dream Pair AI" [selected]
+      - generic [ref=f4e97]:
+        - heading "Profile" [level=3] [ref=f4e98]
+        - paragraph [ref=f4e99]: Signed in as qa.growthoperator+202609300550@example.com — the fields below are your workspace profile facts.
+        - generic [ref=f4e100]:
+          - paragraph [ref=f4e101]: You do not have access to this workspace item.
+          - button "Retry" [ref=f4e102] [cursor=pointer]
+      - generic [ref=f4e103]:
+        - heading "Ideal audiences" [level=3] [ref=f4e104]
+        - paragraph [ref=f4e105]: Define who your content is for.
+        - generic [ref=f4e106]:
+          - generic [ref=f4e107]:
+            - textbox "Name *" [ref=f4e108]
+            - textbox "Target roles (comma-separated)" [ref=f4e109]
+            - textbox "Industries (comma-separated)" [ref=f4e110]
+            - textbox "Company size" [ref=f4e111]
+          - textbox "Description" [ref=f4e112]
+          - textbox "Problems they face" [ref=f4e113]
+          - textbox "Who this is not for" [ref=f4e114]
+          - button "Add audience" [disabled] [ref=f4e115]
+        - paragraph [ref=f4e116]: You do not have access to this workspace item.
+      - generic [ref=f4e117]:
+        - heading "Your voice" [level=3] [ref=f4e118]
+        - paragraph [ref=f4e119]: You do not have access to this workspace item.
+      - generic [ref=f4e120]:
+        - heading "Proof points" [level=3] [ref=f4e121]
+        - paragraph [ref=f4e122]: Facts and results your content can reference.
+        - generic [ref=f4e123]:
+          - textbox "Fact or result *" [ref=f4e124]
+          - textbox "Context (optional)" [ref=f4e125]
+          - button "Add" [disabled] [ref=f4e126]
+        - paragraph [ref=f4e127]: You do not have access to this workspace item.
+      - generic [ref=f4e128]:
+        - heading "Writing samples" [level=3] [ref=f4e129]
+        - paragraph [ref=f4e130]: Examples that show your style.
+        - generic [ref=f4e131]:
+          - textbox "Title (optional)" [ref=f4e132]
+          - textbox "Paste a writing sample *" [ref=f4e133]
+          - button "Add sample" [disabled] [ref=f4e134]
+        - paragraph [ref=f4e135]: You do not have access to this workspace item.

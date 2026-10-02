@@ -1,0 +1,92 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e634]:
+      - generic [ref=f9e635]:
+        - generic [ref=f9e685]:
+          - paragraph [ref=f9e686]: Learning Brain
+          - heading "What the business knows" [level=2] [ref=f9e687]
+          - paragraph [ref=f9e688]: What we know, think, test, and don't know — with evidence, never magic numbers.
+        - generic [ref=f9e689]:
+          - generic [ref=f9e690]: Workspace
+          - combobox "Workspace" [ref=f9e691]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e692]:
+        - heading "What we know confirmed" [level=3] [ref=f9e693]:
+          - text: What we know
+          - generic [ref=f9e694]: confirmed
+        - list [ref=f9e695]:
+          - listitem [ref=f9e696]:
+            - strong [ref=f9e697]: hook_strength
+            - text: ": DEMO (synthetic): checklist hooks attracted the only recorded check-ins. (n=3, evidence CONFIRMED)"
+          - listitem [ref=f9e698]:
+            - strong [ref=f9e699]: cta_clarity
+            - text: ": DEMO (synthetic): single-question CTAs were used in all prepared drafts. (n=2, evidence HYPOTHESIS)"
+      - generic [ref=f9e700]:
+        - heading "What we think proposed" [level=3] [ref=f9e701]:
+          - text: What we think
+          - generic [ref=f9e702]: proposed
+        - paragraph [ref=f9e703]: No proposed patterns.
+      - generic [ref=f9e704]:
+        - heading "Needs your confirmation" [level=3] [ref=f9e705]
+        - paragraph [ref=f9e706]: Proposed learnings with their evidence. Confirming records you as the decider and lets the proposal influence future recommendations; rejecting drops it. Confirmation requires owner/admin.
+        - paragraph [ref=f9e707]: Nothing awaiting confirmation.
+      - generic [ref=f9e708]:
+        - heading "What we are testing running" [level=3] [ref=f9e709]:
+          - text: What we are testing
+          - generic [ref=f9e710]: running
+        - paragraph [ref=f9e711]: No running experiments.
+      - generic [ref=f9e712]:
+        - heading "What we don't know" [level=3] [ref=f9e713]
+        - list [ref=f9e714]:
+          - listitem [ref=f9e715]: Whether posting time materially affects reach (no timing experiment yet).
+          - listitem [ref=f9e716]: Whether carousel vs text holds within comparable beginner groups (sample too small until n>=5 per arm).
+      - generic [ref=f9e717]:
+        - heading "Design an experiment" [level=3] [ref=f9e718]
+        - generic [ref=f9e719]:
+          - textbox "Hypothesis (e.g. Problem-first hooks may outperform announcement-first for tutorials)" [ref=f9e720]
+          - generic [ref=f9e721]:
+            - textbox "Variable (e.g. hook)" [ref=f9e722]
+            - textbox "Control description" [ref=f9e723]
+            - textbox "Variant description" [ref=f9e724]
+            - button "Design" [ref=f9e725] [cursor=pointer]

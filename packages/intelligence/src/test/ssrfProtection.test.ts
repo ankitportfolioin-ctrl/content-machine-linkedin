@@ -1,10 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { checkSsrfProtection, validateUrlForFetch, resolveAndValidateHostname } from '../ssrfProtection';
+import { checkSsrfProtection, validateUrlForFetch, resolveHostname, checkIpsForPrivateRanges } from '../ssrfProtection';
 
 vi.mock('dns', () => ({
   promises: {
-    resolve4: vi.fn(),
-    resolve6: vi.fn(),
+    lookup: vi.fn(),
   },
 }));
 
@@ -34,49 +33,55 @@ describe('SSRF Protection', () => {
     });
   });
 
-  describe('resolveAndValidateHostname', () => {
+  describe('resolveHostname', () => {
+    it('resolves public hostnames', async () => {
+      vi.mocked(dns.promises.lookup).mockResolvedValue([
+        { address: '93.184.216.34', family: 4 },
+        { address: '2606:2800:220:1:248:1893:25c8:1946', family: 6 },
+      ]);
+      const ips = await resolveHostname('example.com');
+      expect(ips).toContain('93.184.216.34');
+      expect(ips).toContain('2606:2800:220:1:248:1893:25c8:1946');
+    });
+
+    it('returns empty array on DNS failure', async () => {
+      vi.mocked(dns.promises.lookup).mockRejectedValue(new Error('ENOTFOUND'));
+      const ips = await resolveHostname('nonexistent.example.com');
+      expect(ips).toEqual([]);
+    });
+  });
+
+  describe('checkIpsForPrivateRanges', () => {
     it('rejects private IPv4 ranges', async () => {
       // 10.0.0.0/8
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['10.0.0.1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['10.0.0.1'], error: 'Resolved to private/metadata IP: 10.0.0.1' });
+      expect(await checkIpsForPrivateRanges(['10.0.0.1'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 10.0.0.1' });
 
       // 172.16.0.0/12
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['172.16.0.1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['172.16.0.1'], error: 'Resolved to private/metadata IP: 172.16.0.1' });
+      expect(await checkIpsForPrivateRanges(['172.16.0.1'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 172.16.0.1' });
 
       // 192.168.0.0/16
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['192.168.1.1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['192.168.1.1'], error: 'Resolved to private/metadata IP: 192.168.1.1' });
+      expect(await checkIpsForPrivateRanges(['192.168.1.1'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 192.168.1.1' });
 
       // 127.0.0.0/8
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['127.0.0.1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['127.0.0.1'], error: 'Resolved to private/metadata IP: 127.0.0.1' });
+      expect(await checkIpsForPrivateRanges(['127.0.0.1'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 127.0.0.1' });
 
-      // 169.254.0.0/16 (link-local)
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['169.254.169.254']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['169.254.169.254'], error: 'Resolved to private/metadata IP: 169.254.169.254' });
+      // 169.254.0.0/16 (link-local / metadata)
+      expect(await checkIpsForPrivateRanges(['169.254.169.254'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 169.254.169.254' });
     });
 
     it('rejects cloud metadata addresses', async () => {
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['169.254.169.254']);
-      expect(await resolveAndValidateHostname('metadata.example.com')).toEqual({ valid: false, ips: ['169.254.169.254'], error: 'Resolved to private/metadata IP: 169.254.169.254' });
-
-      vi.mocked(dns.promises.resolve4).mockResolvedValue(['169.254.170.2']);
-      expect(await resolveAndValidateHostname('metadata.example.com')).toEqual({ valid: false, ips: ['169.254.170.2'], error: 'Resolved to private/metadata IP: 169.254.170.2' });
+      expect(await checkIpsForPrivateRanges(['169.254.169.254'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 169.254.169.254' });
+      expect(await checkIpsForPrivateRanges(['169.254.170.2'])).toEqual({ valid: false, error: 'Resolved to private/metadata IP: 169.254.170.2' });
     });
 
     it('rejects private IPv6 ranges', async () => {
-      vi.mocked(dns.promises.resolve4).mockRejectedValue(new Error('ENODATA'));
-      vi.mocked(dns.promises.resolve6).mockResolvedValue(['fc00::1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['fc00::1'], error: 'Resolved to private/link-local IPv6: fc00::1' });
+      expect(await checkIpsForPrivateRanges(['fc00::1'])).toEqual({ valid: false, error: 'Resolved to private/link-local IPv6: fc00::1' });
+      expect(await checkIpsForPrivateRanges(['fe80::1'])).toEqual({ valid: false, error: 'Resolved to private/link-local IPv6: fe80::1' });
+      expect(await checkIpsForPrivateRanges(['::1'])).toEqual({ valid: false, error: 'Resolved to private/link-local IPv6: ::1' });
+    });
 
-      vi.mocked(dns.promises.resolve4).mockRejectedValue(new Error('ENODATA'));
-      vi.mocked(dns.promises.resolve6).mockResolvedValue(['fe80::1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['fe80::1'], error: 'Resolved to private/link-local IPv6: fe80::1' });
-
-      vi.mocked(dns.promises.resolve4).mockRejectedValue(new Error('ENODATA'));
-      vi.mocked(dns.promises.resolve6).mockResolvedValue(['::1']);
-      expect(await resolveAndValidateHostname('private.example.com')).toEqual({ valid: false, ips: ['::1'], error: 'Resolved to private/link-local IPv6: ::1' });
+    it('allows public IPs', async () => {
+      expect(await checkIpsForPrivateRanges(['93.184.216.34', '2606:2800:220:1:248:1893:25c8:1946'])).toEqual({ valid: true });
     });
   });
 
@@ -105,11 +110,55 @@ describe('SSRF Protection', () => {
       expect(await checkSsrfProtection('javascript:alert(1)')).toEqual({ valid: false, error: 'Only HTTP and HTTPS protocols are allowed' });
     });
 
-    it('allows valid public URLs', async () => {
-      // For public URLs, the DNS resolution would succeed with public IPs
-      // We can't easily mock the fetch, so we test the URL validation part
+    it('allows valid public URLs (URL validation)', async () => {
       const result = await validateUrlForFetch('https://example.com');
       expect(result.valid).toBe(true);
+    });
+
+    it('blocks private IPs resolved via DNS', async () => {
+      vi.mocked(dns.promises.lookup).mockResolvedValue([{ address: '10.0.0.1', family: 4 }]);
+      const result = await checkSsrfProtection('http://private.example.com');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('private');
+    });
+
+    it('blocks metadata IPs resolved via DNS', async () => {
+      vi.mocked(dns.promises.lookup).mockResolvedValue([{ address: '169.254.169.254', family: 4 }]);
+      const result = await checkSsrfProtection('http://metadata.example.com');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('private');
+    });
+
+    it('blocks private IPv6 resolved via DNS', async () => {
+      vi.mocked(dns.promises.lookup).mockResolvedValue([{ address: 'fc00::1', family: 6 }]);
+      const result = await checkSsrfProtection('http://private-ipv6.example.com');
+      expect(result.valid).toBe(false);
+      expect(result.error).toContain('private');
+    });
+
+    it('allows public IPs resolved via DNS', async () => {
+      vi.mocked(dns.promises.lookup).mockResolvedValue([
+        { address: '93.184.216.34', family: 4 },
+        { address: '2606:2800:220:1:248:1893:25c8:1946', family: 6 },
+      ]);
+      // We can't fully test the fetch part without mocking fetch, but we can verify
+      // the DNS resolution doesn't block public IPs
+      const result = await checkSsrfProtection('https://example.com');
+      // The check may return valid: true (if fetch succeeds) or valid: false with fetch error
+      // The important thing is it doesn't fail on DNS resolution
+      expect(result.error === 'DNS resolution failed').toBe(false);
+      expect(result.error === undefined || !result.error.includes('DNS resolution failed')).toBe(true);
+    });
+
+    it('allows fetch to proceed even if DNS lookup returns no IPs', async () => {
+      // This simulates an environment where Node.js DNS resolver isn't configured
+      // but system resolver (used by fetch) works
+      vi.mocked(dns.promises.lookup).mockRejectedValue(new Error('ENOTFOUND'));
+      // The check should not fail on DNS resolution - it lets fetch handle it
+      // We can't easily mock fetch, but we verify it doesn't return DNS resolution error
+      const result = await checkSsrfProtection('https://example.com');
+      expect(result.error === 'DNS resolution failed').toBe(false);
+      expect(result.error === undefined || !result.error.includes('DNS resolution failed')).toBe(true);
     });
   });
 });

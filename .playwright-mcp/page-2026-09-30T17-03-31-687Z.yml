@@ -1,0 +1,76 @@
+- generic [ref=f24e3]:
+  - navigation "Main navigation" [ref=f24e4]:
+    - generic [ref=f24e12]:
+      - text: Growth Operator
+      - generic [ref=f24e13]: Content Brain
+    - navigation [ref=f24e14]:
+      - generic [ref=f24e15]:
+        - generic [ref=f24e16]: Core
+        - link "Home" [ref=f24e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f24e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f24e29]:
+        - generic [ref=f24e30]: Intelligence
+        - link "Learning" [ref=f24e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f24e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f24e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f24e46]:
+        - generic [ref=f24e47]: Sales
+        - link "Leads" [ref=f24e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f24e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f24e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f24e65]:
+        - generic [ref=f24e66]: System
+        - link "Analytics" [ref=f24e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f24e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f24e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f24e89]:
+      - paragraph [ref=f24e90]: qa.growthoperator+202609301605@example.com
+      - button "Sign out" [ref=f24e91] [cursor=pointer]
+  - main [ref=f24e80]:
+    - generic [ref=f24e81]:
+      - link [ref=f24e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f24e83]
+      - paragraph [ref=f24e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f24e92]:
+      - generic [ref=f24e93]:
+        - generic [ref=f24e94]:
+          - heading "Content" [level=2] [ref=f24e95]
+          - paragraph [ref=f24e96]: Ideas, content plans, drafts, reviews, and finalized versions.
+        - generic [ref=f24e97]:
+          - generic [ref=f24e98]:
+            - generic [ref=f24e99]: Workspace
+            - combobox "Workspace" [ref=f24e100]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f24e101] [cursor=pointer]
+      - generic [ref=f24e102]:
+        - heading "New idea" [level=3] [ref=f24e103]
+        - generic [ref=f24e104]:
+          - textbox "Idea title (e.g. Lessons from shipping weekly)" [ref=f24e105]
+          - textbox "Optional description" [ref=f24e106]
+          - button "Create idea" [disabled] [ref=f24e107]
+        - paragraph [ref=f24e113]: Created “[DEMO] 5 Ways AI Automates Ecommerce Customer Support”.
+        - paragraph [ref=f24e108]: "Tip: ideas converted from Brain → Opportunities also appear in the list below."
+      - generic [ref=f24e114]:
+        - heading "Ideas (1)" [level=3] [ref=f24e115]
+        - list [ref=f24e116]:
+          - listitem [ref=f24e117]:
+            - generic [ref=f24e118]:
+              - generic [ref=f24e119]:
+                - paragraph [ref=f24e120]: "[DEMO] 5 Ways AI Automates Ecommerce Customer Support"
+                - paragraph [ref=f24e121]: Practical guide for D2C founders on implementing AI customer support automation
+                - generic [ref=f24e122]: DRAFT
+              - button "Open" [ref=f24e123] [cursor=pointer]

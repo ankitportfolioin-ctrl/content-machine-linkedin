@@ -1,0 +1,76 @@
+- generic [ref=f71e3]:
+  - navigation "Main navigation" [ref=f71e4]:
+    - generic [ref=f71e12]:
+      - text: Growth Operator
+      - generic [ref=f71e13]: Content Brain
+    - navigation [ref=f71e14]:
+      - generic [ref=f71e15]:
+        - generic [ref=f71e16]: Core
+        - link "Home" [ref=f71e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f71e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f71e29]:
+        - generic [ref=f71e30]: Intelligence
+        - link "Learning" [ref=f71e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f71e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f71e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f71e46]:
+        - generic [ref=f71e47]: Sales
+        - link "Leads" [ref=f71e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f71e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f71e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f71e65]:
+        - generic [ref=f71e66]: System
+        - link "Analytics" [ref=f71e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f71e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f71e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f71e89]:
+      - paragraph [ref=f71e90]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f71e91] [cursor=pointer]
+  - main [ref=f71e80]:
+    - generic [ref=f71e81]:
+      - link [ref=f71e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f71e83]
+      - paragraph [ref=f71e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f71e92]:
+      - generic [ref=f71e93]:
+        - generic [ref=f71e94]:
+          - heading "Content" [level=2] [ref=f71e95]
+          - paragraph [ref=f71e96]: Ideas, content plans, drafts, reviews, and finalized versions.
+        - generic [ref=f71e97]:
+          - generic [ref=f71e98]:
+            - generic [ref=f71e99]: Workspace
+            - combobox "Workspace" [ref=f71e100]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f71e101] [cursor=pointer]
+      - generic [ref=f71e102]:
+        - heading "New idea" [level=3] [ref=f71e103]
+        - generic [ref=f71e104]:
+          - textbox "Idea title (e.g. Lessons from shipping weekly)" [ref=f71e105]
+          - textbox "Optional description" [ref=f71e106]
+          - button "Create idea" [disabled] [ref=f71e107]
+        - paragraph [ref=f71e113]: "Created “QA5: Demo-length checklist for founders”."
+        - paragraph [ref=f71e108]: "Tip: ideas converted from Brain → Opportunities also appear in the list below."
+      - generic [ref=f71e114]:
+        - heading "Ideas (1)" [level=3] [ref=f71e115]
+        - list [ref=f71e116]:
+          - listitem [ref=f71e117]:
+            - generic [ref=f71e118]:
+              - generic [ref=f71e119]:
+                - paragraph [ref=f71e120]: "QA5: Demo-length checklist for founders"
+                - paragraph [ref=f71e121]: How long a founder demo should run, from demo call notes
+                - generic [ref=f71e122]: DRAFT
+              - button "Open" [ref=f71e123] [cursor=pointer]

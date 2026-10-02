@@ -1,0 +1,85 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [active] [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e930]:
+      - generic [ref=f9e931]:
+        - generic [ref=f9e932]:
+          - heading "Inbox" [level=2] [ref=f9e933]
+          - paragraph [ref=f9e934]: Conversations, manual notes, and suggested next steps. Nothing is sent automatically.
+        - generic [ref=f9e935]:
+          - generic [ref=f9e936]: Workspace
+          - combobox "Workspace" [ref=f9e937]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e938]:
+        - generic [ref=f9e939]:
+          - heading "Start a conversation record" [level=3] [ref=f9e940]
+          - generic [ref=f9e941]:
+            - textbox "Lead ID" [ref=f9e942]
+            - textbox "Topic (optional)" [ref=f9e943]
+            - button "Create record" [ref=f9e944] [cursor=pointer]
+        - generic [ref=f9e945]:
+          - heading "Conversations" [level=3] [ref=f9e946]
+          - list [ref=f9e947]:
+            - listitem [ref=f9e948]:
+              - generic [ref=f9e949]:
+                - generic [ref=f9e950]:
+                  - paragraph [ref=f9e951]: DEMO conversation (synthetic)
+                  - paragraph [ref=f9e952]: "Lead: ad02f3b3-2c62-4b61-aec7-4092fad020d8"
+                - button "Open conversation" [ref=f9e953] [cursor=pointer]
+      - generic [ref=f9e954]:
+        - heading "Topic patterns from conversations" [level=3] [ref=f9e955]
+        - paragraph [ref=f9e956]: Save themes you notice across conversations so content planning can use them later.
+        - generic [ref=f9e957]:
+          - textbox "Pattern type" [ref=f9e958]
+          - textbox "Conversation IDs (comma separated)" [ref=f9e959]
+          - textbox "Evidence notes" [ref=f9e960]
+          - button "Save pattern" [ref=f9e961] [cursor=pointer]
+        - list [ref=f9e962]:
+          - listitem [ref=f9e963]:
+            - paragraph [ref=f9e964]: REPEATED_QUESTION
+            - paragraph [ref=f9e965]: "Suggested angle: Checklist post on demo length."
+            - paragraph [ref=f9e966]: DEMO — synthetic cross-machine signal for demonstration.
+      - generic [ref=f9e967]:
+        - heading "Comment sales signals (0 pending review)" [level=3] [ref=f9e968]
+        - paragraph [ref=f9e969]: Buying-intent signals extracted from comment classifications. A signal is not a lead — review first, then create a prospect explicitly if warranted.
+        - paragraph [ref=f9e970]: No comment sales signals yet.

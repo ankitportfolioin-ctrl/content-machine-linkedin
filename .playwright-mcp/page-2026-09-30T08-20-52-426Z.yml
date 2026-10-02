@@ -1,0 +1,198 @@
+- generic [ref=f69e3]:
+  - navigation "Main navigation" [ref=f69e4]:
+    - generic [ref=f69e12]:
+      - text: Growth Operator
+      - generic [ref=f69e13]: Content Brain
+    - navigation [ref=f69e14]:
+      - generic [ref=f69e15]:
+        - generic [ref=f69e16]: Core
+        - link "Home" [ref=f69e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f69e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f69e29]:
+        - generic [ref=f69e30]: Intelligence
+        - link "Learning" [ref=f69e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f69e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f69e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f69e46]:
+        - generic [ref=f69e47]: Sales
+        - link "Leads" [ref=f69e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f69e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f69e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f69e65]:
+        - generic [ref=f69e66]: System
+        - link "Analytics" [ref=f69e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f69e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f69e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f69e89]:
+      - paragraph [ref=f69e90]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f69e91] [cursor=pointer]
+  - main [ref=f69e80]:
+    - generic [ref=f69e81]:
+      - link [ref=f69e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f69e83]
+      - paragraph [ref=f69e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f69e129]:
+      - button "← Back to leads" [ref=f69e130] [cursor=pointer]
+      - generic [ref=f69e131]:
+        - generic [ref=f69e132]:
+          - heading "Rahul Sharma" [level=2] [ref=f69e133]
+          - paragraph [ref=f69e134]: Founder at DemoCommerce Labs · DemoCommerce Labs · Bengaluru
+        - generic [ref=f69e135]:
+          - generic [ref=f69e136]:
+            - generic [ref=f69e137]: Workspace
+            - combobox "Workspace" [ref=f69e138]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f69e139] [cursor=pointer]
+      - generic [ref=f69e140]:
+        - heading "Background research" [level=3] [ref=f69e141]
+        - generic [ref=f69e142]:
+          - textbox "Job title (optional)" [ref=f69e143]
+          - textbox "Company (optional)" [ref=f69e144]
+          - button "Run research" [ref=f69e145] [cursor=pointer]
+          - button "Refresh" [ref=f69e146] [cursor=pointer]
+        - generic [ref=f69e148]:
+          - paragraph [ref=f69e149]: Evidence
+          - generic [ref=f69e151]:
+            - paragraph [ref=f69e152]: Rahul Sharma — Founder at DemoCommerce Labs · DemoCommerce Labs · Bengaluru
+            - list [ref=f69e153]:
+              - listitem [ref=f69e154]: "Headline: Founder at DemoCommerce Labs"
+              - listitem [ref=f69e155]: "Company: DemoCommerce Labs"
+              - listitem [ref=f69e156]: "Location: Bengaluru"
+            - paragraph [ref=f69e157]: "Still unknown: Public background not yet researched from public sources."
+      - generic [ref=f69e158]:
+        - heading "Interest signals" [level=3] [ref=f69e159]
+        - paragraph [ref=f69e160]:
+          - text: "Current interest:"
+          - generic [ref=f69e161]: NO_SIGNAL
+        - generic [ref=f69e162]:
+          - generic [ref=f69e163]:
+            - text: Signal type *
+            - combobox "Signal type" [ref=f69e164]:
+              - option "Hiring"
+              - option "Product launch"
+              - option "Tech migration"
+              - option "Expansion"
+              - option "Operational change"
+              - option "Announcement"
+              - option "Problem / content signal" [selected]
+              - option "Company initiative"
+          - textbox "Source note" [ref=f69e165]
+          - textbox "What this means (optional)" [ref=f69e166]
+          - button "Record signal" [ref=f69e167] [cursor=pointer]
+        - paragraph [ref=f69e262]: Signal recorded.
+        - list [ref=f69e263]:
+          - listitem [ref=f69e264]:
+            - paragraph [ref=f69e265]: PROBLEM_CONTENT
+            - paragraph [ref=f69e266]: Prospect repeatedly asks how long a founder demo should run
+            - generic [ref=f69e267]:
+              - paragraph [ref=f69e268]: Evidence
+              - text: Demo call notes
+      - generic [ref=f69e169]:
+        - heading "Fit assessment" [level=3] [ref=f69e170]
+        - generic [ref=f69e171]:
+          - button "Run fit assessment" [ref=f69e172] [cursor=pointer]
+          - button "Refresh" [ref=f69e173] [cursor=pointer]
+        - generic [ref=f69e174]:
+          - paragraph [ref=f69e175]:
+            - text: "Result:"
+            - generic [ref=f69e176]: POSSIBLE_FIT
+          - paragraph [ref=f69e177]: "Overall score: 0.52"
+          - list [ref=f69e178]:
+            - listitem [ref=f69e179]:
+              - paragraph [ref=f69e180]: icp_fit — 0.2
+              - paragraph [ref=f69e181]: "ICP mismatch: Industry does not match (D2C, ecommerce, SaaS)."
+              - generic [ref=f69e182]:
+                - paragraph [ref=f69e183]: Evidence
+                - generic [ref=f69e184]:
+                  - listitem [ref=f69e185]: Role matches ICP target roles (Founder, CEO, Head of Growth).
+                  - listitem [ref=f69e186]: Industry does not match (D2C, ecommerce, SaaS).
+            - listitem [ref=f69e187]:
+              - paragraph [ref=f69e188]: role_fit — 0.9
+              - paragraph [ref=f69e189]: Role assessed against ICP target roles.
+              - generic [ref=f69e190]:
+                - paragraph [ref=f69e191]: Evidence
+                - listitem [ref=f69e193]: Founder at DemoCommerce Labs
+            - listitem [ref=f69e194]:
+              - paragraph [ref=f69e195]: industry_fit — 0.25
+              - paragraph [ref=f69e196]: Industry assessed against ICP industries.
+              - generic [ref=f69e197]:
+                - paragraph [ref=f69e198]: Evidence
+                - listitem [ref=f69e200]: DemoCommerce Labs
+            - listitem [ref=f69e201]:
+              - paragraph [ref=f69e202]: company_fit — 0.6
+              - paragraph [ref=f69e203]: Company known; size/revenue unverified — fit is provisional.
+              - generic [ref=f69e204]:
+                - paragraph [ref=f69e205]: Evidence
+                - listitem [ref=f69e207]: DemoCommerce Labs
+            - listitem [ref=f69e208]:
+              - paragraph [ref=f69e209]: problem_relevance — 0.3
+              - paragraph [ref=f69e210]: No problem evidence supplied.
+              - generic [ref=f69e211]:
+                - paragraph [ref=f69e212]: Evidence
+                - text: None noted
+              - paragraph [ref=f69e213]: "Missing: true"
+            - listitem [ref=f69e214]:
+              - paragraph [ref=f69e215]: evidence_strength — 0.7000000000000001
+              - paragraph [ref=f69e216]: 3 verified research fact(s).
+              - generic [ref=f69e217]:
+                - paragraph [ref=f69e218]: Evidence
+                - text: None noted
+            - listitem [ref=f69e219]:
+              - paragraph [ref=f69e220]: timing_signal — 0.4
+              - paragraph [ref=f69e221]: No timing signals observed (neutral, not negative).
+              - generic [ref=f69e222]:
+                - paragraph [ref=f69e223]: Evidence
+                - text: None noted
+              - paragraph [ref=f69e224]: "Missing: true"
+            - listitem [ref=f69e225]:
+              - paragraph [ref=f69e226]: research_completeness — 1
+              - paragraph [ref=f69e227]: 100% of core research fields present.
+              - generic [ref=f69e228]:
+                - paragraph [ref=f69e229]: Evidence
+                - text: None noted
+          - paragraph [ref=f69e230]: "Still needed: No problem-relevance evidence."
+          - generic [ref=f69e231]:
+            - paragraph [ref=f69e232]: Why this result
+            - paragraph [ref=f69e233]: "Possible fit (average dimension score 0.54). Missing: No problem-relevance evidence.."
+      - generic [ref=f69e234]:
+        - heading "Briefs" [level=3] [ref=f69e235]
+        - button "Create brief" [ref=f69e236] [cursor=pointer]
+        - list [ref=f69e237]:
+          - listitem [ref=f69e238]:
+            - paragraph [ref=f69e239]: e1f9da31-6bba-4037-b26e-3293dd577562
+            - button "View + combine notes" [ref=f69e240] [cursor=pointer]
+      - generic [ref=f69e241]:
+        - heading "Outreach plans" [level=3] [ref=f69e242]
+        - generic [ref=f69e243]:
+          - generic [ref=f69e244]:
+            - textbox "Goal (e.g. intro call)" [ref=f69e245]
+            - textbox "Audience" [ref=f69e246]
+            - textbox "Angle" [ref=f69e247]
+          - textbox "Why contact now?" [ref=f69e248]
+          - button "Create outreach plan" [ref=f69e249] [cursor=pointer]
+        - generic [ref=f69e250]:
+          - paragraph [ref=f69e251]: Suggested content for this prospect
+          - paragraph [ref=f69e252]: No relevant content recorded for this prospect yet.
+        - paragraph [ref=f69e253]: No outreach plans yet.
+      - generic [ref=f69e254]:
+        - heading "Message drafts" [level=3] [ref=f69e255]
+        - generic [ref=f69e256]:
+          - textbox "Outreach plan ID" [ref=f69e257]
+          - textbox "Message type (e.g. first note)" [ref=f69e258]
+          - button "Compose draft" [ref=f69e259] [cursor=pointer]
+          - button "Refresh" [ref=f69e260] [cursor=pointer]
+        - paragraph [ref=f69e261]: No drafts yet. Approve an outreach plan, then compose a draft from it.

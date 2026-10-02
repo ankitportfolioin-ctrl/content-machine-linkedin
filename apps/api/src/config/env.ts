@@ -34,6 +34,23 @@ const envSchema = z.object({
   OPENROUTER_API_KEY: z.string().optional(),
   OPENROUTER_MODEL: z.string().optional(),
 
+  // Optional social connectors (Content Brain inspiration, read-only OAuth).
+  // All empty = every platform honestly reports "Not configured".
+  SOCIAL_CONNECTOR_KEY: z.string().optional(),
+  SOCIAL_REDIRECT_URI: z.string().url().optional(),
+  INSTAGRAM_CLIENT_ID: z.string().optional(),
+  INSTAGRAM_CLIENT_SECRET: z.string().optional(),
+  FACEBOOK_CLIENT_ID: z.string().optional(),
+  FACEBOOK_CLIENT_SECRET: z.string().optional(),
+  LINKEDIN_CLIENT_ID: z.string().optional(),
+  LINKEDIN_CLIENT_SECRET: z.string().optional(),
+  YOUTUBE_CLIENT_ID: z.string().optional(),
+  YOUTUBE_CLIENT_SECRET: z.string().optional(),
+  YOUTUBE_API_KEY: z.string().optional(),
+  YOUTUBE_ACCESS_TOKEN: z.string().optional(),
+  X_CLIENT_ID: z.string().optional(),
+  X_CLIENT_SECRET: z.string().optional(),
+
   CORS_ORIGIN: z.string().url().default('http://localhost:5173'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),
   RATE_LIMIT_MAX_REQUESTS: z.coerce.number().int().positive().default(100),
@@ -84,7 +101,27 @@ export function getEnv(): Env {
   }
 
   cachedEnv = result.data;
+  // Production redirect safety: OAuth providers reject callbacks they have
+  // not allow-listed. A localhost/loopback API_URL in production guarantees
+  // every provider refuses with redirect_uri_mismatch, so warn loudly once
+  // instead of failing mysteriously at the provider. Non-fatal by design.
+  if (cachedEnv.NODE_ENV === 'production') {
+    const base = (process.env.SOCIAL_REDIRECT_URI ?? cachedEnv.API_URL).toLowerCase();
+    if (base.includes('localhost') || base.includes('127.0.0.1') || base.startsWith('http://')) {
+      console.warn(
+        '⚠️  Production redirect risk: the OAuth callback base is not a public HTTPS URL ' +
+          `(${maskRedirectBase(base)}). Providers will refuse authorization until a public ` +
+          'API_URL (or SOCIAL_REDIRECT_URI override) is configured and allow-listed.',
+      );
+    }
+  }
   return cachedEnv;
+}
+
+function maskRedirectBase(base: string): string {
+  // Never log secrets — the base URL carries none, but keep the helper
+  // explicit so future edits cannot accidentally interpolate credentials.
+  return base.slice(0, 120);
 }
 
 export const env = getEnv();

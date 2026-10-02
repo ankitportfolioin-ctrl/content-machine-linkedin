@@ -17,6 +17,23 @@ export interface PlatformServerSetup {
   docsLabel: string;
 }
 
+export interface PlatformReadiness {
+  /** OAuth start/callback/exchange code paths exist and are tested. */
+  oauthImplemented: boolean;
+  /** The provider issues refresh tokens this app can use silently. */
+  supportsRefresh: boolean;
+  /** The provider must allow-list the application redirect URI. */
+  externalAllowListRequired: boolean;
+  /**
+   * End-to-end account connection cannot be asserted from code: it needs a
+   * configured server, an allow-listed redirect URI, and a real provider
+   * grant. This flag stays false until a real callback completes — it must
+   * never be set from a button existing or a URL being built.
+   */
+  endToEndVerified: false;
+  readinessNote: string;
+}
+
 export interface PlatformCapabilityDescriptor {
   platform: SocialPlatform;
   displayName: string;
@@ -25,6 +42,7 @@ export interface PlatformCapabilityDescriptor {
   serverSetup: PlatformServerSetup;
   research: { supported: boolean; wired: boolean; note: string };
   publishing: { supported: boolean; wired: boolean; note: string };
+  readiness: PlatformReadiness;
 }
 
 const RESEARCH_NOT_WIRED =
@@ -42,6 +60,13 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
     },
     research: { supported: true, wired: false, note: RESEARCH_NOT_WIRED },
     publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    readiness: {
+      oauthImplemented: true,
+      supportsRefresh: false,
+      externalAllowListRequired: true,
+      endToEndVerified: false,
+      readinessNote: 'Business/creator accounts only; long-lived tokens are exchanged once, then reconnect.',
+    },
   },
   facebook: {
     platform: 'facebook',
@@ -54,6 +79,13 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
     },
     research: { supported: true, wired: false, note: 'No runnable research path exists for Facebook in this version.' },
     publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    readiness: {
+      oauthImplemented: true,
+      supportsRefresh: false,
+      externalAllowListRequired: true,
+      endToEndVerified: false,
+      readinessNote: 'Administered Pages only; tokens do not refresh silently, then reconnect.',
+    },
   },
   linkedin: {
     platform: 'linkedin',
@@ -66,6 +98,13 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
     },
     research: { supported: true, wired: false, note: RESEARCH_NOT_WIRED },
     publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    readiness: {
+      oauthImplemented: true,
+      supportsRefresh: false,
+      externalAllowListRequired: true,
+      endToEndVerified: false,
+      readinessNote: 'Short-lived tokens with no silent refresh; post reads additionally need an approved LinkedIn product.',
+    },
   },
   youtube: {
     platform: 'youtube',
@@ -82,6 +121,13 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
       note: 'Registry research runs only when the server holds a YouTube Data API key or token — separate from account connection.',
     },
     publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    readiness: {
+      oauthImplemented: true,
+      supportsRefresh: true,
+      externalAllowListRequired: true,
+      endToEndVerified: false,
+      readinessNote: 'Offline access with consent prompt; silent refresh supported.',
+    },
   },
   x: {
     platform: 'x',
@@ -94,6 +140,13 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
     },
     research: { supported: true, wired: false, note: RESEARCH_NOT_WIRED },
     publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    readiness: {
+      oauthImplemented: true,
+      supportsRefresh: true,
+      externalAllowListRequired: true,
+      endToEndVerified: false,
+      readinessNote: 'PKCE flow with offline.access; silent refresh supported.',
+    },
   },
 };
 

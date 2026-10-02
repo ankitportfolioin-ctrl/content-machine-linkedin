@@ -1,0 +1,95 @@
+- generic [ref=f40e3]:
+  - navigation "Main navigation" [ref=f40e4]:
+    - generic [ref=f40e12]:
+      - text: Growth Operator
+      - generic [ref=f40e13]: Content Brain
+    - navigation [ref=f40e14]:
+      - generic [ref=f40e15]:
+        - generic [ref=f40e16]: Core
+        - link "Home" [ref=f40e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f40e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f40e29]:
+        - generic [ref=f40e30]: Intelligence
+        - link "Learning" [ref=f40e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f40e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f40e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f40e46]:
+        - generic [ref=f40e47]: Sales
+        - link "Leads" [ref=f40e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f40e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f40e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f40e65]:
+        - generic [ref=f40e66]: System
+        - link "Analytics" [ref=f40e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f40e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f40e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f40e89]:
+      - paragraph [ref=f40e90]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f40e91] [cursor=pointer]
+  - main [ref=f40e80]:
+    - generic [ref=f40e81]:
+      - link [ref=f40e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f40e83]
+      - paragraph [ref=f40e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f40e85]:
+      - generic [ref=f40e86]:
+        - generic [ref=f40e92]:
+          - heading "Leads" [level=2] [ref=f40e93]
+          - paragraph [ref=f40e94]: Track people, research them, and prepare reviewed outreach.
+        - generic [ref=f40e95]:
+          - generic [ref=f40e96]:
+            - generic [ref=f40e97]: Workspace
+            - combobox "Workspace" [ref=f40e98]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f40e99] [cursor=pointer]
+      - generic [ref=f40e100]:
+        - heading "Look up a person" [level=3] [ref=f40e101]
+        - paragraph [ref=f40e102]: Enter details you already know. Results are suggestions only — confirm before saving.
+        - generic [ref=f40e103]:
+          - generic [ref=f40e104]:
+            - textbox "Name" [ref=f40e105]
+            - textbox "Job title" [ref=f40e106]
+            - textbox "Company" [ref=f40e107]
+            - textbox "Location" [ref=f40e108]
+          - textbox "Public source URL (optional)" [ref=f40e109]
+          - button "Look up" [ref=f40e110] [cursor=pointer]
+      - generic [ref=f40e111]:
+        - generic [ref=f40e112]:
+          - heading "Add a lead manually" [level=3] [ref=f40e113]
+          - generic [ref=f40e114]:
+            - textbox "Profile URL" [ref=f40e115]
+            - textbox "Full name" [ref=f40e116]
+            - textbox "Company (optional)" [ref=f40e117]
+            - button "Add lead" [ref=f40e118] [cursor=pointer]
+          - paragraph [ref=f40e129]: Lead added.
+        - generic [ref=f40e119]:
+          - heading "Leads (2)" [level=3] [ref=f40e130]
+          - list [ref=f40e121]:
+            - listitem [ref=f40e131]:
+              - generic [ref=f40e132]:
+                - generic [ref=f40e133]:
+                  - paragraph [ref=f40e134]: Priya Nair
+                  - paragraph [ref=f40e135]: DemoKart
+                  - generic [ref=f40e136]: NEW
+                - button "View details" [ref=f40e137] [cursor=pointer]
+            - listitem [ref=f40e122]:
+              - generic [ref=f40e123]:
+                - generic [ref=f40e124]:
+                  - paragraph [ref=f40e125]: Shared Lead
+                  - paragraph [ref=f40e126]: Founder at SharedCo · SharedCo · Bengaluru
+                  - generic [ref=f40e127]: NEW
+                - button "View details" [ref=f40e128] [cursor=pointer]

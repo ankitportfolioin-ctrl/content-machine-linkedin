@@ -1,0 +1,95 @@
+- generic [ref=f67e3]:
+  - navigation "Main navigation" [ref=f67e4]:
+    - generic [ref=f67e12]:
+      - text: Growth Operator
+      - generic [ref=f67e13]: Content Brain
+    - navigation [ref=f67e14]:
+      - generic [ref=f67e15]:
+        - generic [ref=f67e16]: Core
+        - link "Home" [ref=f67e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f67e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f67e29]:
+        - generic [ref=f67e30]: Intelligence
+        - link "Learning" [ref=f67e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f67e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f67e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f67e46]:
+        - generic [ref=f67e47]: Sales
+        - link "Leads" [ref=f67e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f67e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f67e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f67e65]:
+        - generic [ref=f67e66]: System
+        - link "Analytics" [ref=f67e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f67e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f67e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f67e253]:
+      - paragraph [ref=f67e254]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f67e255] [cursor=pointer]
+  - main [ref=f67e80]:
+    - generic [ref=f67e81]:
+      - link [ref=f67e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f67e83]
+      - paragraph [ref=f67e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f67e323]:
+      - generic [ref=f67e324]:
+        - generic [ref=f67e325]:
+          - heading "Settings" [level=2] [ref=f67e326]
+          - paragraph [ref=f67e327]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f67e328]:
+          - generic [ref=f67e329]:
+            - generic [ref=f67e330]: Workspace
+            - combobox "Workspace" [ref=f67e331]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f67e332] [cursor=pointer]
+      - generic [ref=f67e333]:
+        - heading "Profile" [level=3] [ref=f67e334]
+        - paragraph [ref=f67e335]: Signed in as qa.growthoperator+202609300830@example.com — the fields below are your workspace profile facts.
+        - paragraph [ref=f67e336]: Loading profile...
+      - generic [ref=f67e337]:
+        - heading "Ideal audiences" [level=3] [ref=f67e338]
+        - paragraph [ref=f67e339]: Define who your content is for.
+        - generic [ref=f67e340]:
+          - generic [ref=f67e341]:
+            - textbox "Name *" [ref=f67e342]
+            - textbox "Target roles (comma-separated)" [ref=f67e343]
+            - textbox "Industries (comma-separated)" [ref=f67e344]
+            - textbox "Company size" [ref=f67e345]
+          - textbox "Description" [ref=f67e346]
+          - textbox "Problems they face" [ref=f67e347]
+          - textbox "Who this is not for" [ref=f67e348]
+          - button "Add audience" [disabled] [ref=f67e349]
+        - paragraph [ref=f67e350]: Loading audiences...
+      - generic [ref=f67e351]:
+        - heading "Your voice" [level=3] [ref=f67e352]
+        - paragraph [ref=f67e353]: Loading voice...
+      - generic [ref=f67e354]:
+        - heading "Proof points" [level=3] [ref=f67e355]
+        - paragraph [ref=f67e356]: Facts and results your content can reference.
+        - generic [ref=f67e357]:
+          - textbox "Fact or result *" [ref=f67e358]
+          - textbox "Context (optional)" [ref=f67e359]
+          - button "Add" [disabled] [ref=f67e360]
+        - paragraph [ref=f67e361]: Loading proof points...
+      - generic [ref=f67e362]:
+        - heading "Writing samples" [level=3] [ref=f67e363]
+        - paragraph [ref=f67e364]: Examples that show your style.
+        - generic [ref=f67e365]:
+          - textbox "Title (optional)" [ref=f67e366]
+          - textbox "Paste a writing sample *" [ref=f67e367]
+          - button "Add sample" [disabled] [ref=f67e368]
+        - paragraph [ref=f67e369]: Loading samples...

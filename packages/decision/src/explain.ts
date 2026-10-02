@@ -155,6 +155,8 @@ export async function explainWithAi(
   registry: AIProviderRegistry,
   explanation: ActionExplanation
 ): Promise<{ summary: string; aiAvailable: true }> {
+  // AI availability is determined by the provider registry actually
+  // containing a usable provider — never by NODE_ENV.
   const available = registry.getAvailable();
   if (available.length === 0) {
     throw new DecisionError('AI_UNAVAILABLE', 'No AI provider available for explanation summaries. Use the deterministic reasons.');

@@ -1,0 +1,119 @@
+- generic [ref=f1e3]:
+  - navigation "Main navigation" [ref=f1e4]:
+    - generic [ref=f1e12]:
+      - text: Growth Operator
+      - generic [ref=f1e13]: Content Brain
+    - navigation [ref=f1e14]:
+      - generic [ref=f1e15]:
+        - generic [ref=f1e16]: Core
+        - link "Home" [ref=f1e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f1e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f1e29]:
+        - generic [ref=f1e30]: Intelligence
+        - link "Learning" [ref=f1e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f1e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f1e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f1e46]:
+        - generic [ref=f1e47]: Sales
+        - link "Leads" [ref=f1e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f1e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f1e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f1e65]:
+        - generic [ref=f1e66]: System
+        - link "Analytics" [ref=f1e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f1e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f1e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f1e80]:
+    - generic [ref=f1e81]:
+      - link [ref=f1e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f1e83]
+      - paragraph [ref=f1e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f1e85]:
+      - generic [ref=f1e86]:
+        - heading "Sign in to start" [level=2] [ref=f1e92]
+        - paragraph [ref=f1e93]: Register a local account, create a workspace, then work the onboarding checklist.
+        - generic [ref=f1e94]:
+          - heading "Create account" [level=2] [ref=f1e151]
+          - paragraph [ref=f1e96]: Create a local account, then create a workspace to begin.
+          - generic [ref=f1e97]:
+            - generic [ref=f1e152]:
+              - text: Name
+              - textbox "Name" [ref=f1e153]:
+                - /placeholder: Your name
+            - generic [ref=f1e98]:
+              - text: Email
+              - textbox "Email" [ref=f1e99]:
+                - /placeholder: you@example.com
+            - generic [ref=f1e100]:
+              - text: Password
+              - textbox "Password" [ref=f1e101]:
+                - /placeholder: Your password
+            - button "Create account" [ref=f1e154] [cursor=pointer]
+            - button "Have an account? Sign in" [active] [ref=f1e155] [cursor=pointer]
+      - generic [ref=f1e104]:
+        - generic [ref=f1e105]:
+          - generic [ref=f1e106]:
+            - heading "API Health" [level=2] [ref=f1e107]
+            - generic [ref=f1e108]: "Status: healthy"
+          - generic [ref=f1e110]:
+            - generic [ref=f1e111]:
+              - generic [ref=f1e112]: Service
+              - generic [ref=f1e113]: growth-operator-api
+            - generic [ref=f1e114]:
+              - generic [ref=f1e115]: Version
+              - generic [ref=f1e116]: 0.0.0
+            - generic [ref=f1e117]:
+              - generic [ref=f1e118]: Timestamp
+              - generic [ref=f1e119]: 2026-10-01T10:38:23.499Z
+        - generic [ref=f1e120]:
+          - generic [ref=f1e121]:
+            - heading "API Readiness" [level=2] [ref=f1e122]
+            - generic [ref=f1e123]: "Status: ready"
+          - generic [ref=f1e125]:
+            - generic [ref=f1e126]:
+              - generic [ref=f1e127]: Database
+              - generic [ref=f1e128]: connected
+            - generic [ref=f1e129]:
+              - generic [ref=f1e130]: Timestamp
+              - generic [ref=f1e131]: 2026-10-01T10:38:23.539Z
+      - generic [ref=f1e132]:
+        - heading "Today" [level=2] [ref=f1e133]
+        - paragraph [ref=f1e134]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - paragraph [ref=f1e135]: Sign in to see today's batch.
+        - heading "Recommended next steps" [level=2] [ref=f1e136]
+        - paragraph [ref=f1e137]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - paragraph [ref=f1e138]: Sign in to see your recommended next steps.
+        - heading "Sections" [level=2] [ref=f1e139]
+        - generic [ref=f1e140]:
+          - link "Today's Brain" [ref=f1e141] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f1e142] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f1e143] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f1e144] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f1e145] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f1e146] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f1e147] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f1e148] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f1e149] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f1e150] [cursor=pointer]:
+            - /url: /onboarding

@@ -1,0 +1,121 @@
+- generic [ref=f8e3]:
+  - navigation "Main navigation" [ref=f8e4]:
+    - generic [ref=f8e12]:
+      - text: Growth Operator
+      - generic [ref=f8e13]: Content Brain
+    - navigation [ref=f8e14]:
+      - generic [ref=f8e15]:
+        - generic [ref=f8e16]: Core
+        - link "Home" [ref=f8e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f8e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f8e29]:
+        - generic [ref=f8e30]: Intelligence
+        - link "Learning" [ref=f8e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f8e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f8e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f8e46]:
+        - generic [ref=f8e47]: Sales
+        - link "Leads" [ref=f8e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f8e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f8e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f8e65]:
+        - generic [ref=f8e66]: System
+        - link "Analytics" [ref=f8e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f8e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f8e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f8e151]:
+      - paragraph [ref=f8e152]: qa.growthoperator+r202610011556@example.com
+      - button "Sign out" [ref=f8e153] [cursor=pointer]
+  - main [ref=f8e80]:
+    - generic [ref=f8e81]:
+      - link [ref=f8e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f8e83]
+      - paragraph [ref=f8e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f8e85]:
+      - generic [ref=f8e154]:
+        - heading "Create your first workspace" [level=2] [ref=f8e155]
+        - paragraph [ref=f8e156]: Workspaces keep every profile, lead, draft, and learning strictly separated. Create one to unlock onboarding, the daily loop, and recommendations.
+        - generic [ref=f8e157]:
+          - paragraph [ref=f8e158]: No workspaces yet. Create one to begin — all data stays scoped to it.
+          - generic [ref=f8e159]:
+            - textbox "Workspace name" [ref=f8e160]
+            - button "Create workspace" [ref=f8e161] [cursor=pointer]
+      - generic [ref=f8e104]:
+        - generic [ref=f8e105]:
+          - generic [ref=f8e106]:
+            - heading "API Health" [level=2] [ref=f8e107]
+            - generic [ref=f8e108]: "Status: healthy"
+          - generic [ref=f8e110]:
+            - generic [ref=f8e111]:
+              - generic [ref=f8e112]: Service
+              - generic [ref=f8e113]: growth-operator-api
+            - generic [ref=f8e114]:
+              - generic [ref=f8e115]: Version
+              - generic [ref=f8e116]: 0.0.0
+            - generic [ref=f8e117]:
+              - generic [ref=f8e118]: Timestamp
+              - generic [ref=f8e119]: 2026-10-01T10:55:30.921Z
+        - generic [ref=f8e120]:
+          - generic [ref=f8e121]:
+            - heading "API Readiness" [level=2] [ref=f8e122]
+            - generic [ref=f8e123]: "Status: ready"
+          - generic [ref=f8e125]:
+            - generic [ref=f8e126]:
+              - generic [ref=f8e127]: Database
+              - generic [ref=f8e128]: connected
+            - generic [ref=f8e129]:
+              - generic [ref=f8e130]: Timestamp
+              - generic [ref=f8e131]: 2026-10-01T10:55:30.946Z
+      - generic [ref=f8e132]:
+        - heading "Today" [level=2] [ref=f8e133]
+        - paragraph [ref=f8e134]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - generic [ref=f8e162]:
+          - paragraph [ref=f8e163]: Create your first workspace to start the daily loop — all data stays scoped to it.
+          - generic [ref=f8e164]:
+            - paragraph [ref=f8e165]: No workspaces yet. Create one to begin — all data stays scoped to it.
+            - generic [ref=f8e166]:
+              - textbox "Workspace name" [ref=f8e167]
+              - button "Create workspace" [ref=f8e168] [cursor=pointer]
+        - heading "Recommended next steps" [level=2] [ref=f8e136]
+        - paragraph [ref=f8e137]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - generic [ref=f8e169]:
+          - paragraph [ref=f8e170]: Your recommendations will appear here once your first workspace exists.
+          - generic [ref=f8e171]:
+            - paragraph [ref=f8e172]: No workspaces yet. Create one to begin — all data stays scoped to it.
+            - generic [ref=f8e173]:
+              - textbox "Workspace name" [ref=f8e174]
+              - button "Create workspace" [ref=f8e175] [cursor=pointer]
+        - heading "Sections" [level=2] [ref=f8e139]
+        - generic [ref=f8e140]:
+          - link "Today's Brain" [ref=f8e141] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f8e142] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f8e143] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f8e144] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f8e145] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f8e146] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f8e147] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f8e148] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f8e149] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f8e150] [cursor=pointer]:
+            - /url: /onboarding

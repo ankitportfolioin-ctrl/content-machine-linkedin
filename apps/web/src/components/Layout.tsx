@@ -1,7 +1,9 @@
 import { Outlet, NavLink } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
+import { useAuth } from '../context/AuthContext';
 
 export function Layout() {
+  const { workspaceId } = useAuth();
   return (
     <div className="layout">
       <Sidebar />
@@ -12,7 +14,9 @@ export function Layout() {
           </NavLink>
           <p className="page-description">Human-guided AI operating system for LinkedIn growth</p>
         </header>
-        <Outlet />
+        {/* Remount routed pages on workspace switch so no section can keep
+            showing the previous workspace's data (stale-list isolation bug). */}
+        <Outlet key={workspaceId ?? 'no-workspace'} />
       </main>
     </div>
   );

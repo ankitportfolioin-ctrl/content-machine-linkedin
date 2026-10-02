@@ -1,6 +1,7 @@
 import { PrismaClient } from '@prisma/client';
 import { SourceUnderstanding } from './sourceUnderstanding';
 import { AIProviderRegistry } from '@growth-operator/ai';
+import { validateAndNormalize, createStrictPrompt, AI_OUTPUT_SCHEMAS, AIValidationContext, TopicClusteringOutput } from './aiOutputValidation';
 
 export interface NormalizedTopic {
   canonicalName: string;
@@ -230,15 +231,15 @@ export class TopicClusteringService {
       .map(t => `- "${t.name}" (mentioned ${t.count} times): ${t.contexts.slice(0, 2).join('; ')}`)
       .join('\n');
 
-    const systemPrompt = `You are a topic normalization expert. Group similar topics together and create canonical names.
-    
+    const baseSystemPrompt = `You are a topic normalization expert. Group similar topics together and create canonical names.
+
 Rules:
-1. Merge synonyms and related concepts (e.g., "AI agents", "agentic AI", "AI Agent Systems" → "AI agents")
+1. Merge synonyms and related concepts (e.g., "AI agents", "agentic AI", "AI Agent Systems" -> "AI agents")
 2. Don't merge distinct concepts
 3. Create clear, descriptive canonical names
 4. Return only valid JSON matching the schema`;
 
-    const userPrompt = `Normalize these topic candidates from workspace content analysis:
+    const baseUserPrompt = `Normalize these topic candidates from workspace content analysis:
 
 ${candidateText}
 
@@ -246,8 +247,24 @@ Return a JSON array of normalized topics with:
 - canonicalName: normalized identifier (lowercase, hyphenated)
 - name: display name
 - description: brief description
-- aliases: alternative names
+- aliases: alternative names (array of strings)
 - confidence: 0-1 confidence in the grouping`;
+
+    const systemPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.topicClustering, baseSystemPrompt, {
+      canonicalName: 'Normalized identifier (lowercase, hyphenated)',
+      name: 'Display name',
+      description: 'Brief description',
+      aliases: 'Alternative names - MUST BE ARRAY OF STRINGS',
+      confidence: '0-1 confidence in the grouping',
+    });
+
+    const userPrompt = createStrictPrompt(AI_OUTPUT_SCHEMAS.topicClustering, baseUserPrompt, {
+      canonicalName: 'Normalized identifier (lowercase, hyphenated)',
+      name: 'Display name',
+      description: 'Brief description',
+      aliases: 'Alternative names - MUST BE ARRAY OF STRINGS',
+      confidence: '0-1 confidence in the grouping',
+    });
 
     try {
       const provider = availableProviders[0]!;
@@ -265,24 +282,35 @@ Return a JSON array of normalized topics with:
       const content = response.choices[0]?.message?.content;
       if (!content) throw new Error('Empty AI response');
 
-      const parsed = JSON.parse(content);
-      if (Array.isArray(parsed)) {
-        return parsed.map(t => ({
-          canonicalName: t.canonicalName || this.normalizeTopicName(t.name || ''),
-          name: t.name || '',
-          description: t.description || '',
-          aliases: t.aliases || [],
-          confidence: t.confidence || 0.7,
-          sourceIds: [],
-          count: 0,
-          contexts: [],
-        }));
+      const validationContext: AIValidationContext = {
+        workspaceId,
+        stage: 'topicClustering',
+        provider: provider.type,
+        model: 'gpt-4o-mini',
+        schemaName: 'TopicClustering',
+      };
+
+      const validationResult = validateAndNormalize(AI_OUTPUT_SCHEMAS.topicClustering, content, validationContext);
+
+      if (!validationResult.ok) {
+        console.warn('AI topic clustering validation failed, using deterministic:', validationResult.message);
+        return this.deterministicClustering(topicCandidates);
       }
+
+      return validationResult.data.map(t => ({
+        canonicalName: t.canonicalName || this.normalizeTopicName(t.name || ''),
+        name: t.name || '',
+        description: t.description || '',
+        aliases: t.aliases || [],
+        confidence: t.confidence || 0.7,
+        sourceIds: [],
+        count: 0,
+        contexts: [],
+      }));
     } catch (error) {
       console.warn('AI topic clustering failed, using deterministic:', error);
+      return this.deterministicClustering(topicCandidates);
     }
-
-    return this.deterministicClustering(topicCandidates);
   }
 
   private deterministicClustering(

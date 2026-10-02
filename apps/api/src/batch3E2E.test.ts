@@ -291,7 +291,10 @@ describe('batch 3 end-to-end: fresh workspace preparation workflow', () => {
     const reports = await request(app).get('/api/v1/brain/reports?frequency=DAILY&limit=1').set(auth()).expect(200);
     expect((reports.body.reports as unknown[]).length).toBeGreaterThanOrEqual(1);
     const readiness = await request(app).get('/api/v1/readiness').set(auth()).expect(200);
-    expect(readiness.body.readiness.linkedInExecution.ready).toBe(false);
+    expect(readiness.body.readiness.platformExecution).toBeDefined();
+    const linkedIn = readiness.body.readiness.platformExecution.find((p: any) => p.platform === 'LINKEDIN');
+    expect(linkedIn).toBeDefined();
+    expect(linkedIn.publishingReady).toBe(false);
     const runs = await request(app).get('/api/v1/runs?take=1').set(auth()).expect(200);
     expect((runs.body.runs as unknown[]).length).toBeGreaterThanOrEqual(1);
   });

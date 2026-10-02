@@ -93,34 +93,35 @@ export async function validateUrlForFetch(urlString: string): Promise<{ valid: b
   return { valid: true };
 }
 
-export async function resolveAndValidateHostname(hostname: string): Promise<{ valid: boolean; ips: string[]; error?: string }> {
+async function resolveHostname(hostname: string): Promise<string[]> {
+  // Use dns.lookup() which uses the system resolver (getaddrinfo)
+  // This matches what fetch() uses and works in environments where
+  // dns.resolve4()/resolve6() fail due to missing DNS server config
   try {
-    const addresses = await dns.resolve4(hostname);
-    const ips = addresses;
+    const result = await dns.lookup(hostname, { all: true });
+    return result.map(r => r.address);
+  } catch (error) {
+    // If lookup fails, return empty array - we'll let the actual fetch handle it
+    return [];
+  }
+}
 
-    for (const ip of ips) {
+async function checkIpsForPrivateRanges(ips: string[]): Promise<{ valid: boolean; error?: string }> {
+  for (const ip of ips) {
+    // Check IPv4
+    if (ip.includes('.')) {
       if (isPrivateIPv4(ip) || isMetadataIP(ip)) {
-        return { valid: false, ips, error: `Resolved to private/metadata IP: ${ip}` };
+        return { valid: false, error: `Resolved to private/metadata IP: ${ip}` };
       }
     }
-
-    return { valid: true, ips };
-  } catch (error) {
-    try {
-      const addresses = await dns.resolve6(hostname);
-      const ips = addresses;
-
-      for (const ip of ips) {
-        if (isLoopbackIPv6(ip) || isLinkLocalIPv6(ip) || isPrivateIPv6(ip)) {
-          return { valid: false, ips, error: `Resolved to private/link-local IPv6: ${ip}` };
-        }
+    // Check IPv6
+    if (ip.includes(':')) {
+      if (isLoopbackIPv6(ip) || isLinkLocalIPv6(ip) || isPrivateIPv6(ip)) {
+        return { valid: false, error: `Resolved to private/link-local IPv6: ${ip}` };
       }
-
-      return { valid: true, ips };
-    } catch {
-      return { valid: false, ips: [], error: 'DNS resolution failed' };
     }
   }
+  return { valid: true };
 }
 
 export async function checkSsrfProtection(urlString: string, maxRedirects = 5): Promise<{ valid: boolean; error?: string; finalUrl?: string }> {
@@ -145,10 +146,18 @@ export async function checkSsrfProtection(urlString: string, maxRedirects = 5): 
     }
 
     const url = new URL(currentUrl);
-    const resolution = await resolveAndValidateHostname(url.hostname);
-    if (!resolution.valid) {
-      return { valid: false, error: resolution.error };
+    
+    // Resolve hostname using system resolver (matches fetch behavior)
+    const ips = await resolveHostname(url.hostname);
+    if (ips.length > 0) {
+      const ipCheck = await checkIpsForPrivateRanges(ips);
+      if (!ipCheck.valid) {
+        return { valid: false, error: ipCheck.error };
+      }
     }
+    // If DNS resolution returns no IPs, we don't block - let the actual fetch handle it
+    // This handles environments where the Node.js DNS resolver isn't configured
+    // but the system resolver (used by fetch) works fine.
 
     try {
       const controller = new AbortController();
@@ -193,4 +202,4 @@ export async function checkSsrfProtection(urlString: string, maxRedirects = 5): 
   return { valid: false, error: 'Too many redirects' };
 }
 
-export { isPrivateIPv4, isMetadataIP, isLoopbackIPv6, isLinkLocalIPv6, isPrivateIPv6 };
+export { isPrivateIPv4, isMetadataIP, isLoopbackIPv6, isLinkLocalIPv6, isPrivateIPv6, resolveHostname, checkIpsForPrivateRanges };

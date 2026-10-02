@@ -11,6 +11,15 @@ import {
 } from './strategy';
 import { ContentAngle, ContentFormatKind, ContentNarrative, ContentObjective } from './types';
 
+function extractJsonFromMarkdown(content: string): string {
+  const trimmed = content.trim();
+  const markdownMatch = trimmed.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/);
+  if (markdownMatch?.[1]) {
+    return markdownMatch[1].trim();
+  }
+  return trimmed;
+}
+
 export const PlanEvidenceMapSchema = z.array(z.object({
   claimRef: z.string().min(1).max(2000),
   sourceClaimId: z.string().uuid().optional(),
@@ -69,8 +78,14 @@ export class ContentPlanService {
       throw new ContentError('INSUFFICIENT_CONTEXT', 'Cannot resolve an audience: no ICP is configured and no audience override was supplied. Refusing to invent audience details.');
     }
 
-    const objective: ContentObjective = input.objective ?? 'EDUCATE';
-    const angle: ContentAngle = input.angle ?? 'EDUCATIONAL';
+    const validObjectives: ContentObjective[] = ['EDUCATE', 'EXPLAIN', 'CHALLENGE', 'BUILD_AUTHORITY', 'SHARE_FRAMEWORK', 'START_DISCUSSION', 'TEACH_PRACTICAL', 'ANALYZE', 'REFRAME'];
+    const objective: ContentObjective = (input.objective && validObjectives.includes(input.objective as ContentObjective))
+      ? input.objective as ContentObjective
+      : 'EDUCATE';
+    const validAngles: ContentAngle[] = ['EDUCATIONAL', 'CONTRARIAN', 'PRACTICAL', 'FRAMEWORK', 'ANALYSIS', 'OBSERVATION', 'BREAKDOWN'];
+    const angle: ContentAngle = (input.angle && validAngles.includes(input.angle as ContentAngle))
+      ? input.angle as ContentAngle
+      : 'EDUCATIONAL';
     const format = this.normalizeFormat(input.format ?? 'TEXT_POST');
     const narrative = selectNarrative(objective, angle, format);
     assertValidStrategy({ objective, angle, format, narrative });
@@ -90,40 +105,59 @@ export class ContentPlanService {
     const gapLines = (input.gaps ?? []).map((g) => `- [${g.type}] ${g.description.slice(0, 300)}`).join('\n');
     const contradictionLines = (input.contradictions ?? []).map((c) => `- "${c.claim1.slice(0, 200)}" vs "${c.claim2.slice(0, 200)}" (severity ${c.severity})`).join('\n');
 
-    const provider = available[0]!;
+const provider = available[0]!;
     let response;
+    let content: string | undefined;
     try {
       response = await provider.chatCompletion({
         messages: [
           { role: 'system', content: 'You are a content strategist. Build a structured content plan from the supplied thesis, audience, evidence, and gaps. Use ONLY the supplied material. Never invent statistics, experiences, or evidence. Return only valid JSON matching the schema.' },
-          { role: 'user', content: `Thesis: ${thesis}\nAudience: ${audience.primaryAudience}\nObjective: ${objective}\nAngle: ${angle}\nFormat: ${format}\nNarrative: ${narrative}\n\nClaims:\n${claimLines || '(none)'}\n\nGaps:\n${gapLines || '(none)'}\n\nContradictions:\n${contradictionLines || '(none)'}\n\nHook guidance: ${influence.hookGuidance}\nCTA guidance: ${influence.ctaGuidance}\n\nReturn JSON: { coreQuestion, keyPoints[3-8], hookDirection, ctaStrategy, reasoning, mustNotClaim[], evidenceMap[{claimRef, note}], contradictionNotes }` },
+          { role: 'user', content: `Thesis: ${thesis}\nAudience: ${audience.primaryAudience}\nObjective: ${objective}\nAngle: ${angle}\nFormat: ${format}\nNarrative: ${narrative}\n\nClaims:\n${claimLines || '(none)'}\n\nGaps:\n${gapLines || '(none)'}\n\nContradictions:\n${contradictionLines || '(none)'}\n\nHook guidance: ${influence.hookGuidance}\nCTA guidance: ${influence.ctaGuidance}\n\nReturn JSON with EXACTLY these fields:
+- coreQuestion: string (optional)
+- keyPoints: array of 3-8 strings (REQUIRED)
+- hookDirection: string (optional)
+- ctaStrategy: string (optional)
+- reasoning: string (optional)
+- mustNotClaim: array of strings (optional)
+- evidenceMap: array of objects with claimRef and note (optional)
+- contradictionNotes: string (optional)
+
+ALL string fields MUST be strings, NOT arrays. ALL array fields MUST be arrays, NOT strings.` },
         ],
         model: 'gpt-4o-mini',
         temperature: 0.3,
-      maxTokens: 2500,
-      responseFormat: { type: 'json_object' },
-    });
-  } catch (error) {
-    if (error instanceof AIProviderError) {
+        maxTokens: 2500,
+        responseFormat: { type: 'json_object' },
+      });
+      content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new ContentError('AI_UNAVAILABLE', 'AI returned an empty plan response.');
+      }
+    } catch (error) {
+      if (error instanceof AIProviderError) {
+        throw new ContentError('AI_UNAVAILABLE', 'Cannot generate a content plan without an AI provider.');
+      }
+      if (error instanceof ContentError) throw error;
+      // Any other error (network, timeout, JSON parse, etc.) = provider unavailable
       throw new ContentError('AI_UNAVAILABLE', 'Cannot generate a content plan without an AI provider.');
     }
-    throw error;
-  }
 
-  const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new ContentError('AI_UNAVAILABLE', 'AI returned an empty plan response.');
+    let parsed;
+    try {
+      const extractedJson = extractJsonFromMarkdown(content!);
+      parsed = z.object({
+        coreQuestion: z.string().max(2000).nullish(),
+        keyPoints: z.array(z.string().min(1).max(1000)).min(1).max(20),
+        hookDirection: z.string().max(2000).nullish(),
+        ctaStrategy: z.string().max(2000).nullish(),
+        reasoning: z.string().max(5000).nullish(),
+        mustNotClaim: z.array(z.string().min(1).max(1000)).max(30).default([]),
+        evidenceMap: PlanEvidenceMapSchema.default([]),
+        contradictionNotes: z.string().max(5000).nullish(),
+      }).safeParse(JSON.parse(extractedJson));
+    } catch {
+      throw new ContentError('AI_UNAVAILABLE', 'AI returned an invalid response format.');
     }
-    const parsed = z.object({
-      coreQuestion: z.string().max(2000).nullish(),
-      keyPoints: z.array(z.string().min(1).max(1000)).min(1).max(20),
-      hookDirection: z.string().max(2000).nullish(),
-      ctaStrategy: z.string().max(2000).nullish(),
-      reasoning: z.string().max(5000).nullish(),
-      mustNotClaim: z.array(z.string().min(1).max(1000)).max(30).default([]),
-      evidenceMap: PlanEvidenceMapSchema.default([]),
-      contradictionNotes: z.string().max(5000).nullish(),
-    }).safeParse(JSON.parse(content));
     if (!parsed.success) {
       throw new ContentError('PLAN_INVALID', `AI plan output validation failed: ${parsed.error.message}`);
     }

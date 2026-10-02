@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { detailedErrorMessage } from '../services/api';
 
 export function LoginForm() {
   const { login, register, loading, error: authError } = useAuth();
@@ -13,19 +14,26 @@ export function LoginForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     setError(null);
+    
+    const fieldErrors: string[] = [];
+    if (!email.trim()) fieldErrors.push('Email is required');
+    if (!password.trim()) fieldErrors.push('Password is required');
+    if (mode === 'register' && !name.trim()) fieldErrors.push('Name is required');
+    
+    if (fieldErrors.length > 0) {
+      setError(fieldErrors.join(', '));
+      return;
+    }
+    
     setSubmitting(true);
     try {
       if (mode === 'register') {
-        if (!name.trim()) {
-          setError('Please enter your name to create an account.');
-          return;
-        }
         await register(name.trim(), email.trim(), password);
       } else {
         await login(email.trim(), password);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Sign in failed. Please try again.');
+      setError(detailedErrorMessage(err));
     } finally {
       setSubmitting(false);
     }
@@ -60,7 +68,6 @@ export function LoginForm() {
             Name
             <input
               type="text"
-              required
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Your name"
@@ -72,7 +79,6 @@ export function LoginForm() {
           Email
           <input
             type="email"
-            required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="you@example.com"
@@ -83,7 +89,6 @@ export function LoginForm() {
           Password
           <input
             type="password"
-            required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Your password"

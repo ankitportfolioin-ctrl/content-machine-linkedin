@@ -1,0 +1,70 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [active] [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e971]:
+      - generic [ref=f9e972]:
+        - generic [ref=f9e973]:
+          - heading "Pipeline" [level=2] [ref=f9e974]
+          - paragraph [ref=f9e975]: Track open deals by stage. Stages only move forward through valid steps.
+        - generic [ref=f9e976]:
+          - generic [ref=f9e977]: Workspace
+          - combobox "Workspace" [ref=f9e978]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e979]:
+        - generic [ref=f9e980]:
+          - heading "Add a deal" [level=3] [ref=f9e981]
+          - generic [ref=f9e982]:
+            - textbox "Lead ID" [ref=f9e983]
+            - textbox "Deal name" [ref=f9e984]
+            - button "Add deal" [ref=f9e985] [cursor=pointer]
+        - generic [ref=f9e986]:
+          - heading "Deals (1)" [level=3] [ref=f9e987]
+          - list [ref=f9e988]:
+            - listitem [ref=f9e989]:
+              - generic [ref=f9e990]:
+                - generic [ref=f9e991]:
+                  - paragraph [ref=f9e992]: "DEMO: Acme AI Labs pilot conversation"
+                  - generic [ref=f9e993]:
+                    - generic [ref=f9e994]: PROSPECTING
+                    - generic [ref=f9e995]: "Value: 5000"
+                - button "View details" [ref=f9e996] [cursor=pointer]

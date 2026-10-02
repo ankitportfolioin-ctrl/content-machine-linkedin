@@ -1,0 +1,60 @@
+- generic [ref=f3e3]:
+  - navigation "Main navigation" [ref=f3e4]:
+    - generic [ref=f3e12]:
+      - text: Growth Operator
+      - generic [ref=f3e13]: Content Brain
+    - navigation [ref=f3e14]:
+      - generic [ref=f3e15]:
+        - generic [ref=f3e16]: Core
+        - link "Home" [ref=f3e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f3e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f3e29]:
+        - generic [ref=f3e30]: Intelligence
+        - link "Learning" [ref=f3e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f3e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f3e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f3e46]:
+        - generic [ref=f3e47]: Sales
+        - link "Leads" [ref=f3e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f3e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f3e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f3e65]:
+        - generic [ref=f3e66]: System
+        - link "Analytics" [ref=f3e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f3e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f3e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f3e80]:
+    - generic [ref=f3e81]:
+      - link [ref=f3e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f3e83]
+      - paragraph [ref=f3e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f3e85]:
+      - generic [ref=f3e86]:
+        - heading "Today's Brain" [level=2] [ref=f3e87]
+        - paragraph [ref=f3e88]: Sign in to see recommendations.
+      - generic [ref=f3e89]:
+        - heading "Sign in" [level=2] [ref=f3e90]
+        - paragraph [ref=f3e91]: Sign in to access your workspace content.
+        - generic [ref=f3e92]:
+          - generic [ref=f3e93]:
+            - text: Email
+            - textbox "Email" [ref=f3e94]:
+              - /placeholder: you@example.com
+          - generic [ref=f3e95]:
+            - text: Password
+            - textbox "Password" [ref=f3e96]:
+              - /placeholder: Your password
+          - button "Sign in" [ref=f3e97] [cursor=pointer]
+          - button "New here? Create an account" [ref=f3e98] [cursor=pointer]

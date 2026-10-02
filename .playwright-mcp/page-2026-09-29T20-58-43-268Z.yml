@@ -1,0 +1,132 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [active] [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e845]:
+      - generic [ref=f9e846]:
+        - generic [ref=f9e847]:
+          - heading "Settings" [level=2] [ref=f9e848]
+          - paragraph [ref=f9e849]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f9e850]:
+          - generic [ref=f9e851]: Workspace
+          - combobox "Workspace" [ref=f9e852]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e853]:
+        - heading "Profile" [level=3] [ref=f9e854]
+        - paragraph [ref=f9e855]: Signed in as test@gmail.com — the fields below are your workspace profile facts.
+        - generic [ref=f9e856]:
+          - paragraph [ref=f9e857]: No profile in this workspace yet — describe yourself to begin onboarding.
+          - textbox "Headline" [ref=f9e858]:
+            - /placeholder: Headline (e.g. Founder at Acme)
+          - textbox "Role" [ref=f9e859]:
+            - /placeholder: Role (e.g. Founder)
+          - textbox "Summary" [ref=f9e860]
+          - textbox "Professional context" [ref=f9e861]
+          - textbox "Industry" [ref=f9e862]
+          - textbox "Location" [ref=f9e863]
+          - textbox "LinkedIn URL" [ref=f9e864]:
+            - /placeholder: LinkedIn URL (optional)
+          - button "Create profile" [ref=f9e865] [cursor=pointer]
+      - generic [ref=f9e866]:
+        - heading "Ideal audiences" [level=3] [ref=f9e867]
+        - paragraph [ref=f9e868]: Define who your content is for.
+        - generic [ref=f9e869]:
+          - generic [ref=f9e870]:
+            - textbox "Name *" [ref=f9e871]
+            - textbox "Target roles (comma-separated)" [ref=f9e872]
+            - textbox "Industries (comma-separated)" [ref=f9e873]
+            - textbox "Company size" [ref=f9e874]
+          - textbox "Description" [ref=f9e875]
+          - textbox "Problems they face" [ref=f9e876]
+          - textbox "Who this is not for" [ref=f9e877]
+          - button "Add audience" [disabled] [ref=f9e878]
+        - list [ref=f9e879]:
+          - listitem [ref=f9e880]:
+            - generic [ref=f9e881]:
+              - generic [ref=f9e882]:
+                - paragraph [ref=f9e883]: Example SaaS founders
+                - paragraph [ref=f9e884]: Founders at SaaS companies.
+                - paragraph [ref=f9e885]: "Roles: Founder"
+                - paragraph [ref=f9e886]: "Industries: SaaS"
+                - paragraph [ref=f9e887]: "Company size: 1-50"
+              - button "Edit" [ref=f9e888] [cursor=pointer]
+      - generic [ref=f9e889]:
+        - heading "Your voice" [level=3] [ref=f9e890]
+        - generic [ref=f9e891]:
+          - generic [ref=f9e892]:
+            - textbox "Role" [ref=f9e893]
+            - textbox "Headline" [ref=f9e894]
+            - textbox "Tone (e.g. direct, warm)" [ref=f9e895]
+            - textbox "Writing style" [ref=f9e896]
+          - textbox "Professional context" [ref=f9e897]
+          - textbox "Words to avoid (comma-separated)" [ref=f9e898]
+          - textbox "Preferred words (comma-separated)" [ref=f9e899]
+          - textbox "Content pillars (comma-separated)" [ref=f9e900]: AI automation, Customer experience, Ecommerce growth, AI agents, Startup execution
+          - button "Save voice" [ref=f9e901] [cursor=pointer]
+      - generic [ref=f9e902]:
+        - heading "Proof points" [level=3] [ref=f9e903]
+        - paragraph [ref=f9e904]: Facts and results your content can reference.
+        - generic [ref=f9e905]:
+          - textbox "Fact or result *" [ref=f9e906]
+          - textbox "Context (optional)" [ref=f9e907]
+          - button "Add" [disabled] [ref=f9e908]
+        - list [ref=f9e909]:
+          - listitem [ref=f9e910]:
+            - generic [ref=f9e911]:
+              - generic [ref=f9e912]:
+                - paragraph [ref=f9e913]: "DEMO: the operator prefers checklist-style posts."
+                - paragraph [ref=f9e914]: Demo preference
+              - button "Remove" [ref=f9e915] [cursor=pointer]
+      - generic [ref=f9e916]:
+        - heading "Writing samples" [level=3] [ref=f9e917]
+        - paragraph [ref=f9e918]: Examples that show your style.
+        - generic [ref=f9e919]:
+          - textbox "Title (optional)" [ref=f9e920]
+          - textbox "Paste a writing sample *" [ref=f9e921]
+          - button "Add sample" [disabled] [ref=f9e922]
+        - list [ref=f9e923]:
+          - listitem [ref=f9e924]:
+            - generic [ref=f9e925]:
+              - generic [ref=f9e926]:
+                - paragraph [ref=f9e927]: DEMO sample (synthetic)
+                - paragraph [ref=f9e928]: "DEMO sample post (synthetic, never published): three things I cut from my demos — long intros, feature tours, and vague closes."
+              - button "Remove" [ref=f9e929] [cursor=pointer]

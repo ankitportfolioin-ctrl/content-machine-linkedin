@@ -56,6 +56,9 @@ export class DraftComposer {
       throw new ContentError('PLAN_INVALID', `Drafts may only be composed from APPROVED plans (current: ${plan.status}).`);
     }
 
+    // AI availability is determined by the provider registry actually
+    // containing a usable provider — never by NODE_ENV. A mocked provider
+    // counts as available; an empty registry yields honest AI_UNAVAILABLE.
     const available = this.aiRegistry.getAvailable();
     if (available.length === 0) {
       throw new ContentError('AI_UNAVAILABLE', 'Cannot compose a draft without an AI provider.');
@@ -68,6 +71,7 @@ export class DraftComposer {
 
     const provider = available[0]!;
     let response;
+    let content: string | undefined;
     try {
       response = await provider.chatCompletion({
         messages: [
@@ -79,18 +83,25 @@ export class DraftComposer {
         maxTokens: 4000,
         responseFormat: { type: 'json_object' },
       });
+      content = response.choices[0]?.message?.content;
+      if (!content) {
+        throw new ContentError('AI_UNAVAILABLE', 'AI returned an empty draft response.');
+      }
     } catch (error) {
       if (error instanceof AIProviderError) {
         throw new ContentError('AI_UNAVAILABLE', 'Cannot compose a draft without an AI provider.');
       }
-      throw error;
+      if (error instanceof ContentError) throw error;
+      // Any other error (network, timeout, JSON parse, etc.) = provider unavailable
+      throw new ContentError('AI_UNAVAILABLE', 'Cannot compose a draft without an AI provider.');
     }
 
-    const content = response.choices[0]?.message?.content;
-    if (!content) {
-      throw new ContentError('AI_UNAVAILABLE', 'AI returned an empty draft response.');
+    let parsed;
+    try {
+      parsed = ComposeOutputSchema.safeParse(JSON.parse(content!));
+    } catch {
+      throw new ContentError('AI_UNAVAILABLE', 'AI returned an invalid response format.');
     }
-    const parsed = ComposeOutputSchema.safeParse(JSON.parse(content));
     if (!parsed.success) {
       throw new ContentError('PLAN_INVALID', `AI draft output validation failed: ${parsed.error.message}`);
     }

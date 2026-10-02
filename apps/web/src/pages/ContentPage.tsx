@@ -14,6 +14,7 @@ import {
   createPublishRecord,
   decideReview,
   deleteVersion,
+  detailedErrorMessage,
   finalizeVersion,
   friendlyErrorMessage,
   generatePlan,
@@ -243,13 +244,15 @@ function IdeaWorkspace({ ideaId, onBack }: { ideaId: string; onBack: () => void 
   const [generating, setGenerating] = useState(false);
   const [genMessage, setGenMessage] = useState<string | null>(null);
 
-  // Manual create-plan form
+  // Manual create-plan form. Objective/angle/format/structure are strict
+  // server enums: constrained selects keep human input valid; the API error
+  // details are surfaced verbatim if the contract ever drifts.
   const [thesis, setThesis] = useState('');
   const [audience, setAudience] = useState('');
-  const [objective, setObjective] = useState('');
-  const [angle, setAngle] = useState('');
-  const [format, setFormat] = useState('');
-  const [structure, setStructure] = useState('');
+  const [objective, setObjective] = useState('build_authority');
+  const [angle, setAngle] = useState('practical');
+  const [format, setFormat] = useState('checklist');
+  const [structure, setStructure] = useState('problem_why_solution');
   const [keyPoints, setKeyPoints] = useState('');
   const [creating, setCreating] = useState(false);
   const [createMessage, setCreateMessage] = useState<string | null>(null);
@@ -315,6 +318,11 @@ function IdeaWorkspace({ ideaId, onBack }: { ideaId: string; onBack: () => void 
 
   async function handleCreatePlan(event: React.FormEvent) {
     event.preventDefault();
+    const points = keyPoints.split('\n').map((s) => s.trim()).filter(Boolean);
+    if (points.length === 0) {
+      setCreateMessage('Add at least one key point (one per line).');
+      return;
+    }
     setCreating(true);
     setCreateMessage(null);
     try {
@@ -325,20 +333,20 @@ function IdeaWorkspace({ ideaId, onBack }: { ideaId: string; onBack: () => void 
         angle: angle.trim(),
         format: format.trim(),
         narrativeStructure: structure.trim(),
-        keyPoints: keyPoints.split('\n').map((s) => s.trim()).filter(Boolean),
+        keyPoints: points,
         contentIdeaId: ideaId,
       });
       setThesis('');
       setAudience('');
-      setObjective('');
-      setAngle('');
-      setFormat('');
-      setStructure('');
+      setObjective('build_authority');
+      setAngle('practical');
+      setFormat('checklist');
+      setStructure('problem_why_solution');
       setKeyPoints('');
       setCreateMessage('Content plan created.');
       await fetchPlans();
     } catch (err) {
-      setCreateMessage(friendlyErrorMessage(err));
+      setCreateMessage(detailedErrorMessage(err));
     } finally {
       setCreating(false);
     }
@@ -407,12 +415,40 @@ function IdeaWorkspace({ ideaId, onBack }: { ideaId: string; onBack: () => void 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '0.5rem' }}>
             <input value={thesis} onChange={(e) => setThesis(e.target.value)} placeholder="Thesis *" required style={fieldStyle} />
             <input value={audience} onChange={(e) => setAudience(e.target.value)} placeholder="Audience *" required style={fieldStyle} />
-            <input value={objective} onChange={(e) => setObjective(e.target.value)} placeholder="Objective *" required style={fieldStyle} />
-            <input value={angle} onChange={(e) => setAngle(e.target.value)} placeholder="Angle *" required style={fieldStyle} />
-            <input value={format} onChange={(e) => setFormat(e.target.value)} placeholder="Format *" required style={fieldStyle} />
-            <input value={structure} onChange={(e) => setStructure(e.target.value)} placeholder="Narrative structure *" required style={fieldStyle} />
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Objective *
+              <select value={objective} onChange={(e) => setObjective(e.target.value)} required style={fieldStyle} aria-label="Objective">
+                {OBJECTIVE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Angle *
+              <select value={angle} onChange={(e) => setAngle(e.target.value)} required style={fieldStyle} aria-label="Angle">
+                {ANGLE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Format *
+              <select value={format} onChange={(e) => setFormat(e.target.value)} required style={fieldStyle} aria-label="Format">
+                {FORMAT_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+            <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)' }}>
+              Narrative structure *
+              <select value={structure} onChange={(e) => setStructure(e.target.value)} required style={fieldStyle} aria-label="Narrative structure">
+                {STRUCTURE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>{o.label}</option>
+                ))}
+              </select>
+            </label>
           </div>
-          <textarea value={keyPoints} onChange={(e) => setKeyPoints(e.target.value)} placeholder="Key points (one per line)" rows={3} style={fieldStyle} />
+          <textarea value={keyPoints} onChange={(e) => setKeyPoints(e.target.value)} placeholder="Key points (one per line, at least one required)" rows={3} style={fieldStyle} />
           <button type="submit" className="btn btn-secondary" disabled={creating} style={{ alignSelf: 'flex-start' }}>
             {creating ? 'Creating...' : 'Create plan'}
           </button>
@@ -1514,3 +1550,48 @@ const fieldStyle: React.CSSProperties = {
   padding: '0.625rem 0.75rem',
   width: '100%',
 };
+
+// Server-enforced enums for manual content plans (mirrors
+// contentObjectiveSchema / contentAngleSchema / contentFormatSchema /
+// contentNarrativeSchema). Labels are human-readable; values are exact.
+const OBJECTIVE_OPTIONS = [
+  { value: 'educate', label: 'Educate' },
+  { value: 'explain', label: 'Explain' },
+  { value: 'challenge', label: 'Challenge' },
+  { value: 'build_authority', label: 'Build authority' },
+  { value: 'share_framework', label: 'Share framework' },
+  { value: 'start_discussion', label: 'Start discussion' },
+  { value: 'teach_practical', label: 'Teach practical' },
+  { value: 'analyze', label: 'Analyze' },
+  { value: 'reframe', label: 'Reframe' },
+];
+
+const ANGLE_OPTIONS = [
+  { value: 'educational', label: 'Educational' },
+  { value: 'contrarian', label: 'Contrarian' },
+  { value: 'practical', label: 'Practical' },
+  { value: 'framework', label: 'Framework' },
+  { value: 'analysis', label: 'Analysis' },
+  { value: 'observation', label: 'Observation' },
+  { value: 'breakdown', label: 'Breakdown' },
+];
+
+const FORMAT_OPTIONS = [
+  { value: 'post', label: 'Post' },
+  { value: 'text_post', label: 'Text post' },
+  { value: 'article', label: 'Article' },
+  { value: 'carousel', label: 'Carousel' },
+  { value: 'video', label: 'Video' },
+  { value: 'poll', label: 'Poll' },
+  { value: 'checklist', label: 'Checklist' },
+  { value: 'framework', label: 'Framework' },
+  { value: 'contrarian', label: 'Contrarian' },
+];
+
+const STRUCTURE_OPTIONS = [
+  { value: 'problem_why_solution', label: 'Problem → why → solution' },
+  { value: 'observation_analysis_implication', label: 'Observation → analysis → implication' },
+  { value: 'hook_context_framework_application_takeaway', label: 'Hook → context → framework → takeaway' },
+  { value: 'mistake_consequence_better_approach', label: 'Mistake → consequence → better approach' },
+  { value: 'thesis_evidence_tradeoff_conclusion', label: 'Thesis → evidence → tradeoff → conclusion' },
+];

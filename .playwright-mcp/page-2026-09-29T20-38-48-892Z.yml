@@ -1,0 +1,103 @@
+- generic [ref=f3e3]:
+  - navigation "Main navigation" [ref=f3e4]:
+    - generic [ref=f3e12]:
+      - text: Growth Operator
+      - generic [ref=f3e13]: Content Brain
+    - navigation [ref=f3e14]:
+      - generic [ref=f3e15]:
+        - generic [ref=f3e16]: Core
+        - link "Home" [ref=f3e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f3e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f3e29]:
+        - generic [ref=f3e30]: Intelligence
+        - link "Learning" [ref=f3e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f3e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f3e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f3e46]:
+        - generic [ref=f3e47]: Sales
+        - link "Leads" [ref=f3e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f3e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f3e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f3e65]:
+        - generic [ref=f3e66]: System
+        - link "Analytics" [ref=f3e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f3e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f3e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f3e80]:
+    - generic [ref=f3e81]:
+      - link [ref=f3e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f3e83]
+      - paragraph [ref=f3e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f3e85]:
+      - generic [ref=f3e92]:
+        - generic [ref=f3e93]:
+          - generic [ref=f3e94]:
+            - heading "API Health" [level=2] [ref=f3e95]
+            - generic [ref=f3e96]: "Status: healthy"
+          - generic [ref=f3e98]:
+            - generic [ref=f3e99]:
+              - generic [ref=f3e100]: Service
+              - generic [ref=f3e101]: growth-operator-api
+            - generic [ref=f3e102]:
+              - generic [ref=f3e103]: Version
+              - generic [ref=f3e104]: 0.0.0
+            - generic [ref=f3e105]:
+              - generic [ref=f3e106]: Timestamp
+              - generic [ref=f3e107]: 2026-09-29T20:38:26.889Z
+        - generic [ref=f3e108]:
+          - generic [ref=f3e109]:
+            - heading "API Readiness" [level=2] [ref=f3e110]
+            - generic [ref=f3e111]: "Status: ready"
+          - generic [ref=f3e113]:
+            - generic [ref=f3e114]:
+              - generic [ref=f3e115]: Database
+              - generic [ref=f3e116]: connected
+            - generic [ref=f3e117]:
+              - generic [ref=f3e118]: Timestamp
+              - generic [ref=f3e119]: 2026-09-29T20:38:26.897Z
+      - paragraph [ref=f3e121]: "Failed to load readiness: You do not have access to this workspace item."
+      - generic [ref=f3e122]:
+        - heading "Today" [level=2] [ref=f3e123]
+        - paragraph [ref=f3e124]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - generic [ref=f3e125]:
+          - alert [ref=f3e126]: You do not have access to this workspace item.
+          - button "Refresh" [ref=f3e128] [cursor=pointer]
+        - heading "Recommended next steps" [level=2] [ref=f3e129]
+        - paragraph [ref=f3e130]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - generic [ref=f3e131]:
+          - alert [ref=f3e132]: You do not have access to this workspace item.
+          - button "Refresh" [ref=f3e134] [cursor=pointer]
+        - heading "Sections" [level=2] [ref=f3e135]
+        - generic [ref=f3e136]:
+          - link "Today's Brain" [ref=f3e137] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f3e138] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f3e139] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f3e140] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f3e141] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f3e142] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f3e143] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f3e144] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f3e145] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f3e146] [cursor=pointer]:
+            - /url: /onboarding

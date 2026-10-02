@@ -1,0 +1,102 @@
+- generic [ref=f81e3]:
+  - navigation "Main navigation" [ref=f81e4]:
+    - generic [ref=f81e12]:
+      - text: Growth Operator
+      - generic [ref=f81e13]: Content Brain
+    - navigation [ref=f81e14]:
+      - generic [ref=f81e15]:
+        - generic [ref=f81e16]: Core
+        - link "Home" [ref=f81e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f81e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f81e29]:
+        - generic [ref=f81e30]: Intelligence
+        - link "Learning" [ref=f81e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f81e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f81e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f81e46]:
+        - generic [ref=f81e47]: Sales
+        - link "Leads" [ref=f81e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f81e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f81e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f81e65]:
+        - generic [ref=f81e66]: System
+        - link "Analytics" [ref=f81e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f81e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f81e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f81e89]:
+      - paragraph [ref=f81e90]: qa.growthoperator+202609300830@example.com
+      - button "Sign out" [ref=f81e91] [cursor=pointer]
+  - main [ref=f81e80]:
+    - generic [ref=f81e81]:
+      - link [ref=f81e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f81e83]
+      - paragraph [ref=f81e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f81e119]:
+      - button "← Back to deals" [ref=f81e120] [cursor=pointer]
+      - generic [ref=f81e121]:
+        - heading "SharedCo pilot QA5" [level=2] [ref=f81e122]
+        - generic [ref=f81e123]:
+          - generic [ref=f81e124]: PROSPECTING
+          - generic [ref=f81e125]: "Likelihood: 0"
+        - paragraph [ref=f81e126]: "Source lead: 71c0213a-9c30-4ea4-8ee5-96e6a13c07ee"
+      - generic [ref=f81e127]:
+        - heading "Next step" [level=3] [ref=f81e128]
+        - paragraph [ref=f81e129]: No suggested next step yet. Check the Inbox for follow-up suggestions for this lead.
+      - generic [ref=f81e130]:
+        - heading "Change stage" [level=3] [ref=f81e131]
+        - generic [ref=f81e132]:
+          - combobox "Change stage" [ref=f81e133]:
+            - option "Select a stage" [selected]
+            - option "Prospecting"
+            - option "Qualification"
+            - option "Proposal"
+            - option "Negotiation"
+            - option "Closed won"
+            - option "Closed lost"
+          - button "Update stage" [ref=f81e134] [cursor=pointer]
+      - generic [ref=f81e135]:
+        - heading "Recorded results (4)" [level=3] [ref=f81e176]
+        - paragraph [ref=f81e137]: Recording only. Values are stored as recorded, never estimated or inferred.
+        - generic [ref=f81e138]:
+          - textbox "Metric name * (e.g. deal_value)" [ref=f81e139]
+          - textbox "Value * (number)" [ref=f81e140]
+          - textbox "Source * (e.g. manual)" [ref=f81e141]
+          - button "Record outcome" [ref=f81e142] [cursor=pointer]
+        - paragraph [ref=f81e177]: Outcome recorded (user assertion, not verified). User-recorded outcome. Values are stored as recorded, never estimated or inferred.
+        - list [ref=f81e178]:
+          - listitem [ref=f81e179]:
+            - paragraph [ref=f81e180]: "intro_replies: 6"
+            - paragraph [ref=f81e181]: "Source: manual"
+            - paragraph [ref=f81e182]: "Attribution: UNKNOWN — no defensible connection recorded"
+            - paragraph [ref=f81e183]: Recorded at 2026-09-30T08:42:45.542Z
+          - listitem [ref=f81e184]:
+            - paragraph [ref=f81e185]: "intro_replies: 4"
+            - paragraph [ref=f81e186]: "Source: manual"
+            - paragraph [ref=f81e187]: "Attribution: UNKNOWN — no defensible connection recorded"
+            - paragraph [ref=f81e188]: Recorded at 2026-09-30T08:42:30.867Z
+          - listitem [ref=f81e189]:
+            - paragraph [ref=f81e190]: "demo_calls_booked: 2"
+            - paragraph [ref=f81e191]: "Source: manual"
+            - paragraph [ref=f81e192]: "Attribution: UNKNOWN — no defensible connection recorded"
+            - paragraph [ref=f81e193]: Recorded at 2026-09-30T08:36:40.394Z
+          - listitem [ref=f81e194]:
+            - paragraph [ref=f81e195]: "demo_calls_booked: 3"
+            - paragraph [ref=f81e196]: "Source: manual"
+            - paragraph [ref=f81e197]: "Attribution: UNKNOWN — no defensible connection recorded"
+            - paragraph [ref=f81e198]: Recorded at 2026-09-30T08:32:13.988Z
+      - generic [ref=f81e154]:
+        - heading "Remove deal" [level=3] [ref=f81e155]
+        - paragraph [ref=f81e156]: Removing a deal is permanent.
+        - button "Remove deal" [ref=f81e157] [cursor=pointer]

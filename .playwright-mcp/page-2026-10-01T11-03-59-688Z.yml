@@ -1,0 +1,68 @@
+- generic [ref=f23e3]:
+  - navigation "Main navigation" [ref=f23e4]:
+    - generic [ref=f23e12]:
+      - text: Growth Operator
+      - generic [ref=f23e13]: Content Brain
+    - navigation [ref=f23e14]:
+      - generic [ref=f23e15]:
+        - generic [ref=f23e16]: Core
+        - link "Home" [ref=f23e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f23e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f23e29]:
+        - generic [ref=f23e30]: Intelligence
+        - link "Learning" [ref=f23e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f23e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f23e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f23e46]:
+        - generic [ref=f23e47]: Sales
+        - link "Leads" [ref=f23e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f23e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f23e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f23e65]:
+        - generic [ref=f23e66]: System
+        - link "Analytics" [ref=f23e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f23e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f23e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f23e89]:
+      - paragraph [ref=f23e90]: qa.growthoperator+r202610011556@example.com
+      - button "Sign out" [ref=f23e91] [cursor=pointer]
+  - main [ref=f23e80]:
+    - generic [ref=f23e81]:
+      - link [ref=f23e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f23e83]
+      - paragraph [ref=f23e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f23e119]:
+      - generic [ref=f23e120]:
+        - generic [ref=f23e121]:
+          - heading "Content" [level=2] [ref=f23e122]
+          - paragraph [ref=f23e123]: Ideas, content plans, drafts, reviews, and finalized versions.
+        - generic [ref=f23e124]:
+          - generic [ref=f23e125]:
+            - generic [ref=f23e126]: Workspace
+            - combobox "Workspace" [ref=f23e127]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace R202610011556" [selected]
+              - option "Ankit Demo Growth R202610011556"
+          - button "New workspace" [ref=f23e128] [cursor=pointer]
+      - generic [ref=f23e129]:
+        - heading "New idea" [level=3] [ref=f23e130]
+        - generic [ref=f23e131]:
+          - textbox "Idea title (e.g. Lessons from shipping weekly)" [ref=f23e132]
+          - textbox "Optional description" [ref=f23e133]
+          - button "Create idea" [disabled] [ref=f23e134]
+        - paragraph [ref=f23e135]: "Tip: ideas converted from Brain → Opportunities also appear in the list below."
+      - generic [ref=f23e137]:
+        - heading "Loading ideas..." [level=2] [ref=f23e138]
+        - paragraph [ref=f23e139]: Please wait while we fetch your ideas

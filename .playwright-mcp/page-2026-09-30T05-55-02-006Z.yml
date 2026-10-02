@@ -1,0 +1,160 @@
+- generic [ref=f7e3]:
+  - navigation "Main navigation" [ref=f7e4]:
+    - generic [ref=f7e12]:
+      - text: Growth Operator
+      - generic [ref=f7e13]: Content Brain
+    - navigation [ref=f7e14]:
+      - generic [ref=f7e15]:
+        - generic [ref=f7e16]: Core
+        - link "Home" [ref=f7e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f7e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f7e29]:
+        - generic [ref=f7e30]: Intelligence
+        - link "Learning" [ref=f7e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f7e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f7e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f7e46]:
+        - generic [ref=f7e47]: Sales
+        - link "Leads" [ref=f7e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f7e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f7e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f7e65]:
+        - generic [ref=f7e66]: System
+        - link "Analytics" [ref=f7e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f7e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f7e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f7e80]:
+    - generic [ref=f7e81]:
+      - link [ref=f7e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f7e83]
+      - paragraph [ref=f7e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f7e85]:
+      - generic [ref=f7e86]:
+        - generic [ref=f7e87]:
+          - generic [ref=f7e88]:
+            - heading "API Health" [level=2] [ref=f7e89]
+            - generic [ref=f7e90]: "Status: healthy"
+          - generic [ref=f7e92]:
+            - generic [ref=f7e93]:
+              - generic [ref=f7e94]: Service
+              - generic [ref=f7e95]: growth-operator-api
+            - generic [ref=f7e96]:
+              - generic [ref=f7e97]: Version
+              - generic [ref=f7e98]: 0.0.0
+            - generic [ref=f7e99]:
+              - generic [ref=f7e100]: Timestamp
+              - generic [ref=f7e101]: 2026-09-30T05:54:54.179Z
+        - generic [ref=f7e102]:
+          - generic [ref=f7e103]:
+            - heading "API Readiness" [level=2] [ref=f7e104]
+            - generic [ref=f7e105]: "Status: ready"
+          - generic [ref=f7e107]:
+            - generic [ref=f7e108]:
+              - generic [ref=f7e109]: Database
+              - generic [ref=f7e110]: connected
+            - generic [ref=f7e111]:
+              - generic [ref=f7e112]: Timestamp
+              - generic [ref=f7e113]: 2026-09-30T05:54:54.185Z
+      - generic [ref=f7e135]:
+        - heading "System Readiness" [level=3] [ref=f7e136]
+        - generic [ref=f7e137]:
+          - generic [ref=f7e138]:
+            - generic [ref=f7e139]: ✗
+            - generic [ref=f7e140]:
+              - generic [ref=f7e141]:
+                - strong [ref=f7e142]: Workspace Intelligence Ready
+                - generic [ref=f7e143]: Not Ready
+              - paragraph [ref=f7e144]: "Missing: has Audience Segments"
+          - generic [ref=f7e145]:
+            - generic [ref=f7e146]: ✓
+            - generic [ref=f7e147]:
+              - generic [ref=f7e148]:
+                - strong [ref=f7e149]: Human Approval Ready
+                - generic [ref=f7e150]: Ready
+              - paragraph [ref=f7e151]: Human approval gates configured
+          - generic [ref=f7e152]:
+            - generic [ref=f7e153]: ✗
+            - generic [ref=f7e154]:
+              - generic [ref=f7e155]:
+                - strong [ref=f7e156]: LinkedIn Execution
+                - generic [ref=f7e157]: Not Ready
+              - paragraph [ref=f7e158]: No LinkedIn integration exists. Publishing/execution remains unavailable.
+        - paragraph [ref=f7e160]: Overall:partial
+      - generic [ref=f7e116]:
+        - heading "Today" [level=2] [ref=f7e117]
+        - paragraph [ref=f7e118]: What the loop found, prepared, and needs from you — approve, edit, or dismiss below.
+        - generic [ref=f7e177]:
+          - generic [ref=f7e178]:
+            - generic [ref=f7e179]:
+              - heading "Daily digest" [level=3] [ref=f7e180]
+              - generic [ref=f7e181]: DAILY
+            - generic [ref=f7e182]:
+              - paragraph [ref=f7e183]: Period 2026-09-30 → 2026-09-30 · confidence INSUFFICIENT DATA
+              - list [ref=f7e184]:
+                - listitem [ref=f7e185]: "Emerging topics: 0"
+                - listitem [ref=f7e186]: "Strong signals: 0 · weak signals: 0"
+                - listitem [ref=f7e187]: "Learned patterns: 0 · experiments: 0"
+                - listitem [ref=f7e188]: "Recommended topics: 0"
+              - generic [ref=f7e189]:
+                - link "Review opportunities" [ref=f7e190] [cursor=pointer]:
+                  - /url: /brain
+                - link "Learning" [ref=f7e191] [cursor=pointer]:
+                  - /url: /learning
+          - generic [ref=f7e192]:
+            - generic [ref=f7e193]:
+              - heading "Latest loop run" [level=3] [ref=f7e194]
+              - generic [ref=f7e195]: COMPLETED
+            - generic [ref=f7e196]:
+              - paragraph [ref=f7e197]: 2026-09-30 · finished 05:55 UTC
+              - generic [ref=f7e198]:
+                - 'generic "INTELLIGENCE (Discovery): SUCCEEDED" [ref=f7e199]': Intelligence (Discovery)
+                - 'generic "DECISION (Recommendation): SUCCEEDED" [ref=f7e200]': Decision (Recommendation)
+                - 'generic "CONTENT (CONTENT): SUCCEEDED" [ref=f7e201]': CONTENT
+                - 'generic "SALES (SALES): SUCCEEDED" [ref=f7e202]': SALES
+                - 'generic "APPROVAL_SNAPSHOT (Human Decision): SUCCEEDED" [ref=f7e203]': Approval Snapshot (Human Decision)
+                - 'generic "EXECUTION (Execution): SKIPPED" [ref=f7e204]': Execution
+                - 'generic "OBSERVE_LEARN (OBSERVE_LEARN): SUCCEEDED" [ref=f7e205]': OBSERVE_LEARN
+                - 'generic "DIGEST (Learning): SUCCEEDED" [ref=f7e206]': Digest (Learning)
+            - generic [ref=f7e207]:
+              - button "Run today’s loop now" [ref=f7e208] [cursor=pointer]
+              - button "Refresh" [ref=f7e209] [cursor=pointer]
+            - paragraph [ref=f7e210]: Loop finished with status COMPLETED.
+        - heading "Recommended next steps" [level=2] [ref=f7e120]
+        - paragraph [ref=f7e121]: Ranked suggestions based on your recent activity. Open one to work on it, or record your decision.
+        - generic [ref=f7e173]:
+          - paragraph [ref=f7e174]: No pending actions. You are all caught up — new suggestions will appear here when available.
+          - button "Refresh" [ref=f7e176] [cursor=pointer]
+        - heading "Sections" [level=2] [ref=f7e123]
+        - generic [ref=f7e124]:
+          - link "Today's Brain" [ref=f7e125] [cursor=pointer]:
+            - /url: /dashboard
+          - link "Content" [ref=f7e126] [cursor=pointer]:
+            - /url: /content
+          - link "Brain / Intelligence" [ref=f7e127] [cursor=pointer]:
+            - /url: /brain
+          - link "Learning" [ref=f7e128] [cursor=pointer]:
+            - /url: /learning
+          - link "Leads" [ref=f7e129] [cursor=pointer]:
+            - /url: /leads
+          - link "Inbox" [ref=f7e130] [cursor=pointer]:
+            - /url: /inbox
+          - link "Pipeline" [ref=f7e131] [cursor=pointer]:
+            - /url: /pipeline
+          - link "Analytics" [ref=f7e132] [cursor=pointer]:
+            - /url: /analytics
+          - link "Settings" [ref=f7e133] [cursor=pointer]:
+            - /url: /settings
+          - link "Onboarding" [ref=f7e134] [cursor=pointer]:
+            - /url: /onboarding

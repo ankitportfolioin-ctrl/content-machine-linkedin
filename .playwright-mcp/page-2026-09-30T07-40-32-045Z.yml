@@ -1,0 +1,111 @@
+- generic [ref=f39e3]:
+  - navigation "Main navigation" [ref=f39e4]:
+    - generic [ref=f39e12]:
+      - text: Growth Operator
+      - generic [ref=f39e13]: Content Brain
+    - navigation [ref=f39e14]:
+      - generic [ref=f39e15]:
+        - generic [ref=f39e16]: Core
+        - link "Home" [ref=f39e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f39e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f39e29]:
+        - generic [ref=f39e30]: Intelligence
+        - link "Learning" [ref=f39e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f39e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f39e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f39e46]:
+        - generic [ref=f39e47]: Sales
+        - link "Leads" [ref=f39e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f39e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f39e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f39e65]:
+        - generic [ref=f39e66]: System
+        - link "Analytics" [ref=f39e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f39e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f39e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f39e89]:
+      - paragraph [ref=f39e90]: qa.growthoperator+202609300730@example.com
+      - button "Sign out" [ref=f39e91] [cursor=pointer]
+  - main [ref=f39e80]:
+    - generic [ref=f39e81]:
+      - link [ref=f39e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f39e83]
+      - paragraph [ref=f39e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f39e129]:
+      - button "← Back to leads" [ref=f39e130] [cursor=pointer]
+      - generic [ref=f39e131]:
+        - generic [ref=f39e132]:
+          - heading "Shared Lead" [level=2] [ref=f39e133]
+          - paragraph [ref=f39e134]: Founder at SharedCo · SharedCo · Bengaluru
+        - generic [ref=f39e135]:
+          - generic [ref=f39e136]:
+            - generic [ref=f39e137]: Workspace
+            - combobox "Workspace" [ref=f39e138]:
+              - option "Select a workspace" [disabled]
+              - option "Second Demo Workspace"
+              - option "Dream Pair AI" [selected]
+          - button "New workspace" [ref=f39e139] [cursor=pointer]
+      - generic [ref=f39e140]:
+        - heading "Background research" [level=3] [ref=f39e141]
+        - generic [ref=f39e142]:
+          - textbox "Job title (optional)" [ref=f39e143]
+          - textbox "Company (optional)" [ref=f39e144]
+          - button "Run research" [ref=f39e145] [cursor=pointer]
+          - button "Refresh" [ref=f39e146] [cursor=pointer]
+        - generic [ref=f39e148]:
+          - paragraph [ref=f39e149]: Evidence
+          - paragraph [ref=f39e150]: No research facts recorded yet. Add a job title or company above and run research again.
+      - generic [ref=f39e151]:
+        - heading "Interest signals" [level=3] [ref=f39e152]
+        - paragraph [ref=f39e153]:
+          - text: "Current interest:"
+          - generic [ref=f39e154]: NO_SIGNAL
+        - generic [ref=f39e155]:
+          - textbox "Signal type (e.g. job change)" [ref=f39e156]
+          - textbox "Source note" [ref=f39e157]
+          - textbox "What this means (optional)" [ref=f39e158]
+          - button "Record signal" [ref=f39e159] [cursor=pointer]
+        - paragraph [ref=f39e160]: No signals recorded yet.
+      - generic [ref=f39e161]:
+        - heading "Fit assessment" [level=3] [ref=f39e162]
+        - generic [ref=f39e163]:
+          - button "Run fit assessment" [ref=f39e164] [cursor=pointer]
+          - button "Refresh" [ref=f39e165] [cursor=pointer]
+        - paragraph [ref=f39e166]: No fit assessment yet. Run one to see strengths, gaps, and missing information.
+      - generic [ref=f39e167]:
+        - heading "Briefs" [level=3] [ref=f39e168]
+        - button "Create brief" [ref=f39e169] [cursor=pointer]
+        - paragraph [ref=f39e170]: No briefs yet.
+      - generic [ref=f39e171]:
+        - heading "Outreach plans" [level=3] [ref=f39e172]
+        - generic [ref=f39e173]:
+          - generic [ref=f39e174]:
+            - textbox "Goal (e.g. intro call)" [ref=f39e175]
+            - textbox "Audience" [ref=f39e176]
+            - textbox "Angle" [ref=f39e177]
+          - textbox "Why contact now?" [ref=f39e178]
+          - button "Create outreach plan" [ref=f39e179] [cursor=pointer]
+        - generic [ref=f39e180]:
+          - paragraph [ref=f39e181]: Suggested content for this prospect
+          - paragraph [ref=f39e182]: No relevant content recorded for this prospect yet.
+        - paragraph [ref=f39e183]: No outreach plans yet.
+      - generic [ref=f39e184]:
+        - heading "Message drafts" [level=3] [ref=f39e185]
+        - generic [ref=f39e186]:
+          - textbox "Outreach plan ID" [ref=f39e187]
+          - textbox "Message type (e.g. first note)" [ref=f39e188]
+          - button "Compose draft" [ref=f39e189] [cursor=pointer]
+          - button "Refresh" [ref=f39e190] [cursor=pointer]
+        - paragraph [ref=f39e191]: No drafts yet. Approve an outreach plan, then compose a draft from it.

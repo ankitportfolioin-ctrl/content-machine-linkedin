@@ -13,6 +13,20 @@ router.use(authMiddleware);
 router.use(workspaceMiddleware);
 router.use(workspaceMembershipMiddleware);
 
+export interface PlatformExecutionStatus {
+  platform: string;
+  displayName: string;
+  connected: boolean;
+  publishingReady: boolean;
+  reason: string;
+  details: {
+    integrationExists: boolean;
+    oauthConnected: boolean;
+    publishingEnabled: boolean;
+    lastVerifiedAt: string | null;
+  };
+}
+
 export interface ReadinessState {
   workspaceIntelligenceReady: {
     ready: boolean;
@@ -40,15 +54,7 @@ export interface ReadinessState {
       tier1Reason: string;
     };
   };
-  linkedInExecution: {
-    ready: boolean;
-    reason: string;
-    details: {
-      integrationExists: boolean;
-      oauthConnected: boolean;
-      publishingEnabled: boolean;
-    };
-  };
+  platformExecution: PlatformExecutionStatus[];
   overall: 'ready' | 'partial' | 'not_ready';
 }
 
@@ -66,6 +72,7 @@ async function computeReadiness(workspaceId: string): Promise<ReadinessState> {
     leadCount,
     policy,
     settings,
+    socialConnections,
   ] = await Promise.all([
     prisma.profile.findFirst({ where: { workspaceId } }),
     prisma.voiceProfile.findFirst({ where: { workspaceId } }),
@@ -81,6 +88,7 @@ async function computeReadiness(workspaceId: string): Promise<ReadinessState> {
     prisma.lead.count({ where: { workspaceId } }),
     prisma.autonomyPolicy.findUnique({ where: { workspaceId } }),
     prisma.workspaceSettings.findUnique({ where: { workspaceId } }),
+    prisma.socialConnection.findMany({ where: { workspaceId } }),
   ]);
 
   const hasProfile = !!profile && !!(profile.headline || profile.role || profile.summary);
@@ -143,20 +151,60 @@ async function computeReadiness(workspaceId: string): Promise<ReadinessState> {
         .map(([k]) => k.replace(/([A-Z])/g, ' $1').trim())
         .join(', ');
 
-  const integrationExists = false;
-  const oauthConnected = false;
-  const publishingEnabled = false;
-
-  const executionDetails = {
-    integrationExists,
-    oauthConnected,
-    publishingEnabled,
+  // Platform execution status based on actual connections
+  const platformCapabilities: Record<string, { publishing: boolean; displayName: string }> = {
+    LINKEDIN: { publishing: false, displayName: 'LinkedIn' },
+    INSTAGRAM: { publishing: false, displayName: 'Instagram' },
+    FACEBOOK: { publishing: false, displayName: 'Facebook' },
+    X: { publishing: false, displayName: 'X' },
+    YOUTUBE: { publishing: false, displayName: 'YouTube' },
+    TIKTOK: { publishing: false, displayName: 'TikTok' },
   };
 
-  const executionReady = integrationExists && oauthConnected && publishingEnabled;
+  const connectedPlatforms = new Set(socialConnections.map(c => c.platform));
+
+  const platformExecution: PlatformExecutionStatus[] = Object.entries(platformCapabilities).map(([platform, caps]) => {
+    const connection = socialConnections.find(c => c.platform === platform);
+    const connected = !!connection && connection.status === 'CONNECTED' && connection.active;
+    const publishingReady = connected && caps.publishing;
+    
+    let reason: string;
+    if (!connected) {
+      const connStatus = connection?.status as string | undefined;
+      if (connStatus === 'NOT_CONFIGURED') {
+        reason = 'Not configured on server';
+      } else if (connStatus === 'EXPIRED') {
+        reason = 'Token expired — reconnect';
+      } else if (connStatus === 'ERROR') {
+        reason = `Error: ${connection?.lastError ?? 'unknown'}`;
+      } else {
+        reason = 'Not connected';
+      }
+    } else if (!publishingReady) {
+      reason = 'Connected — publishing not available (requires approved product/API access)';
+    } else {
+      reason = 'Publishing ready';
+    }
+
+    return {
+      platform,
+      displayName: caps.displayName,
+      connected,
+      publishingReady,
+      reason,
+      details: {
+        integrationExists: connected,
+        oauthConnected: connected,
+        publishingEnabled: publishingReady,
+        lastVerifiedAt: connection?.lastPulledAt?.toISOString() ?? null,
+      },
+    };
+  });
+
+  const executionReady = platformExecution.some(p => p.publishingReady);
   const executionReason = executionReady
-    ? 'LinkedIn integration active'
-    : 'No LinkedIn integration exists. Publishing/execution remains unavailable.';
+    ? 'At least one platform has publishing ready'
+    : 'No platform has publishing ready. Connect and verify platforms to enable publishing.';
 
   const readyCount = [intelligenceReady, approvalReady, executionReady].filter(Boolean).length;
   const overall: ReadinessState['overall'] = readyCount === 3 ? 'ready' : readyCount > 0 ? 'partial' : 'not_ready';
@@ -164,7 +212,7 @@ async function computeReadiness(workspaceId: string): Promise<ReadinessState> {
   return {
     workspaceIntelligenceReady: { ready: intelligenceReady, reason: intelligenceReason, details: intelligenceDetails },
     humanApprovalReady: { ready: approvalReady, reason: approvalReason, details: approvalDetails },
-    linkedInExecution: { ready: executionReady, reason: executionReason, details: executionDetails },
+    platformExecution,
     overall,
   };
 }

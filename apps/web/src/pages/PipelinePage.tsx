@@ -6,6 +6,7 @@ import {
   createOutcome,
   createPipelineOpportunity,
   deletePipelineOpportunity,
+  detailedErrorMessage,
   friendlyErrorMessage,
   getAttributionForTarget,
   listFollowUps,
@@ -15,7 +16,16 @@ import {
 } from '../services/api';
 import { FollowUpRecommendation, OutcomeMetric, PipelineOpportunity } from '../types';
 
-const STAGES = ['new', 'contacted', 'engaged', 'proposal', 'won', 'lost'];
+// Server-enforced pipeline stages (mirrors pipelineStageUpdateSchema).
+// Labels are human-readable; values are exact.
+const STAGES = [
+  { value: 'prospecting', label: 'Prospecting' },
+  { value: 'qualification', label: 'Qualification' },
+  { value: 'proposal', label: 'Proposal' },
+  { value: 'negotiation', label: 'Negotiation' },
+  { value: 'closed_won', label: 'Closed won' },
+  { value: 'closed_lost', label: 'Closed lost' },
+];
 
 export function PipelinePage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -83,6 +93,7 @@ function PipelineList({ onSelect }: { onSelect: (id: string) => void }) {
   const [error, setError] = useState<string | null>(null);
   const [leadId, setLeadId] = useState('');
   const [name, setName] = useState('');
+  const [stage, setStage] = useState('prospecting');
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
@@ -112,13 +123,14 @@ function PipelineList({ onSelect }: { onSelect: (id: string) => void }) {
     setSaving(true);
     setMessage(null);
     try {
-      const result = await createPipelineOpportunity({ leadId: leadId.trim(), name: name.trim() });
+      const result = await createPipelineOpportunity({ leadId: leadId.trim(), name: name.trim(), stage: stage.trim() });
       setOpportunities((prev) => [result.opportunity, ...prev]);
       setLeadId('');
       setName('');
+      setStage('prospecting');
       setMessage('Deal added.');
     } catch (err) {
-      setMessage(friendlyErrorMessage(err));
+      setMessage(detailedErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -133,6 +145,16 @@ function PipelineList({ onSelect }: { onSelect: (id: string) => void }) {
         <form onSubmit={(e) => void handleCreate(e)} style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <input value={leadId} onChange={(e) => setLeadId(e.target.value)} placeholder="Lead ID" style={{ ...fieldStyle, flex: '1 1 160px' }} />
           <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Deal name" style={{ ...fieldStyle, flex: '2 1 220px' }} />
+          <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.75rem', color: 'var(--color-text-secondary)', flex: '1 1 140px' }}>
+            Stage *
+            <select value={stage} onChange={(e) => setStage(e.target.value)} required style={fieldStyle} aria-label="Stage">
+              {STAGES.map((s) => (
+                <option key={s.value} value={s.value}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
           <button type="submit" className="btn btn-primary" disabled={saving}>
             {saving ? 'Adding...' : 'Add deal'}
           </button>
@@ -259,7 +281,7 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
       setOpportunity(result.opportunity);
       setMessage('Stage updated.');
     } catch (err) {
-      setMessage(friendlyErrorMessage(err));
+      setMessage(detailedErrorMessage(err));
     } finally {
       setSaving(false);
     }
@@ -392,11 +414,11 @@ function OpportunityDetail({ opportunityId, onBack }: { opportunityId: string; o
           Change stage
         </h3>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <select value={stage} onChange={(e) => setStage(e.target.value)} style={{ ...fieldStyle, width: 'auto' }}>
+          <select value={stage} onChange={(e) => setStage(e.target.value)} style={{ ...fieldStyle, width: 'auto' }} aria-label="Change stage">
             <option value="">Select a stage</option>
             {STAGES.map((s) => (
-              <option key={s} value={s}>
-                {s}
+              <option key={s.value} value={s.value}>
+                {s.label}
               </option>
             ))}
           </select>

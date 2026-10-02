@@ -1,0 +1,89 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [active] [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e997]:
+      - generic [ref=f9e998]:
+        - generic [ref=f9e999]:
+          - heading "Analytics" [level=2] [ref=f9e1000]
+          - paragraph [ref=f9e1001]: Recorded results computed only from user-recorded outcome metrics. No estimates.
+        - generic [ref=f9e1002]:
+          - generic [ref=f9e1003]: Workspace
+          - combobox "Workspace" [ref=f9e1004]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e1005]:
+        - heading "Filters" [level=3] [ref=f9e1006]
+        - generic [ref=f9e1007]:
+          - textbox "Metric name filter (e.g. replies)" [ref=f9e1008]
+          - 'textbox "Rates format: name:numeratorMetric:denominatorMetric, comma-separated" [ref=f9e1009]':
+            - /placeholder: Rates as name:num:den, comma-separated
+            - text: reply_rate:replies:sends
+          - button "Refresh" [ref=f9e1010] [cursor=pointer]
+        - paragraph [ref=f9e1011]: "Rates format: name:numeratorMetric:denominatorMetric, separated by commas. Rates with insufficient data are omitted with a reason, never estimated."
+      - generic [ref=f9e1012]:
+        - generic [ref=f9e1013]:
+          - heading "Recorded results (1 recorded metric)" [level=3] [ref=f9e1014]
+          - paragraph [ref=f9e1015]: Computed exclusively from user-recorded OutcomeMetric rows. Empty or insufficient data is reported explicitly, never estimated.
+          - table [ref=f9e1017]:
+            - rowgroup [ref=f9e1018]:
+              - row [ref=f9e1019]:
+                - columnheader "Metric" [ref=f9e1020]
+                - columnheader "Value (avg)" [ref=f9e1021]
+                - columnheader "Count / sample" [ref=f9e1022]
+                - columnheader "Sources" [ref=f9e1023]
+                - columnheader "Period" [ref=f9e1024]
+            - rowgroup [ref=f9e1025]:
+              - row [ref=f9e1026]:
+                - cell "demo_manual_checkins" [ref=f9e1027]
+                - cell "3 (sum 3, min 3, max 3)" [ref=f9e1028]
+                - cell "1 recorded · sample size 1" [ref=f9e1029]
+                - cell "DEMO — manually recorded sample value for demonstration only; not real engagement." [ref=f9e1030]
+                - cell "2026-09-29T11:43:06.183Z → 2026-09-29T11:43:06.183Z" [ref=f9e1031]
+        - generic [ref=f9e1032]:
+          - heading "Observed patterns (rates)" [level=3] [ref=f9e1033]
+          - paragraph [ref=f9e1034]: "Insufficient data: no rates could be computed from recorded metrics."
+        - generic [ref=f9e1035]:
+          - heading "Omitted rates" [level=3] [ref=f9e1036]
+          - list [ref=f9e1037]:
+            - listitem [ref=f9e1038]:
+              - paragraph [ref=f9e1039]: reply_rate
+              - paragraph [ref=f9e1040]: "Insufficient data: \"replies\" has 0 recorded value(s), \"sends\" has 0. Rates are omitted, never estimated."

@@ -1,0 +1,102 @@
+- generic [ref=f9e3]:
+  - navigation "Main navigation" [ref=f9e4]:
+    - generic [ref=f9e12]:
+      - text: Growth Operator
+      - generic [ref=f9e13]: Content Brain
+    - navigation [ref=f9e14]:
+      - generic [ref=f9e15]:
+        - generic [ref=f9e16]: Core
+        - link "Home" [ref=f9e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f9e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f9e29]:
+        - generic [ref=f9e30]: Intelligence
+        - link "Learning" [ref=f9e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f9e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f9e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f9e46]:
+        - generic [ref=f9e47]: Sales
+        - link "Leads" [active] [ref=f9e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f9e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f9e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f9e65]:
+        - generic [ref=f9e66]: System
+        - link "Analytics" [ref=f9e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f9e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f9e75] [cursor=pointer]:
+          - /url: /onboarding
+  - main [ref=f9e80]:
+    - generic [ref=f9e81]:
+      - link [ref=f9e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f9e83]
+      - paragraph [ref=f9e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f9e726]:
+      - generic [ref=f9e727]:
+        - generic [ref=f9e728]:
+          - heading "Leads" [level=2] [ref=f9e729]
+          - paragraph [ref=f9e730]: Track people, research them, and prepare reviewed outreach.
+        - generic [ref=f9e731]:
+          - generic [ref=f9e732]: Workspace
+          - combobox "Workspace" [ref=f9e733]:
+            - option "Select a workspace" [disabled]
+            - option "Demo Workspace" [selected]
+      - generic [ref=f9e734]:
+        - heading "Look up a person" [level=3] [ref=f9e735]
+        - paragraph [ref=f9e736]: Enter details you already know. Results are suggestions only — confirm before saving.
+        - generic [ref=f9e737]:
+          - generic [ref=f9e738]:
+            - textbox "Name" [ref=f9e739]
+            - textbox "Job title" [ref=f9e740]
+            - textbox "Company" [ref=f9e741]
+            - textbox "Location" [ref=f9e742]
+          - textbox "Public source URL (optional)" [ref=f9e743]
+          - button "Look up" [ref=f9e744] [cursor=pointer]
+      - generic [ref=f9e745]:
+        - generic [ref=f9e746]:
+          - heading "Add a lead manually" [level=3] [ref=f9e747]
+          - generic [ref=f9e748]:
+            - textbox "Profile URL" [ref=f9e749]
+            - textbox "Full name" [ref=f9e750]
+            - textbox "Company (optional)" [ref=f9e751]
+            - button "Add lead" [ref=f9e752] [cursor=pointer]
+        - generic [ref=f9e753]:
+          - heading "Leads (4)" [level=3] [ref=f9e754]
+          - list [ref=f9e755]:
+            - listitem [ref=f9e756]:
+              - generic [ref=f9e757]:
+                - generic [ref=f9e758]:
+                  - paragraph [ref=f9e759]: Demo Nadia New
+                  - paragraph [ref=f9e760]: CTO at Example Robotics (synthetic demo lead) · Example Robotics · Example City
+                  - generic [ref=f9e761]: NEW
+                - button "View details" [ref=f9e762] [cursor=pointer]
+            - listitem [ref=f9e763]:
+              - generic [ref=f9e764]:
+                - generic [ref=f9e765]:
+                  - paragraph [ref=f9e766]: Priya Demo
+                  - paragraph [ref=f9e767]: Operations Lead at Northwind Demo Systems · Northwind Demo Systems · Demo City
+                  - generic [ref=f9e768]: NEW
+                - button "View details" [ref=f9e769] [cursor=pointer]
+            - listitem [ref=f9e770]:
+              - generic [ref=f9e771]:
+                - generic [ref=f9e772]:
+                  - paragraph [ref=f9e773]: Evan Sample
+                  - paragraph [ref=f9e774]: Head of Growth at Example SaaS Co · Example SaaS Co · Sample Town
+                  - generic [ref=f9e775]: NEW
+                - button "View details" [ref=f9e776] [cursor=pointer]
+            - listitem [ref=f9e777]:
+              - generic [ref=f9e778]:
+                - generic [ref=f9e779]:
+                  - paragraph [ref=f9e780]: Dana Example
+                  - paragraph [ref=f9e781]: Founder at SaaS company · Acme AI Labs (SaaS company) · Example City
+                  - generic [ref=f9e782]: NEW
+                - button "View details" [ref=f9e783] [cursor=pointer]
