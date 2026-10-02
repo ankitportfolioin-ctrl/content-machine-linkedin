@@ -769,6 +769,62 @@ function statusLabel(status: string): string {
   return status.charAt(0) + status.slice(1).toLowerCase();
 }
 
+/**
+ * Setup state for platforms whose server-side app credentials are missing.
+ * Never a dead button: explains who must act, what is required, and where
+ * the official provider setup lives. No internal paths, no secrets.
+ */
+function SetupRequirementsBlock({ conn }: { conn: SocialConnection }) {
+  const [copied, setCopied] = useState(false);
+  const server = conn.server;
+
+  async function handleCopy() {
+    if (!server?.redirectUri) return;
+    try {
+      await navigator.clipboard.writeText(server.redirectUri);
+      setCopied(true);
+    } catch {
+      setCopied(false);
+    }
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: '1 1 100%' }}>
+      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+        Account connection is not available yet — this integration must first be configured by the
+        SaaS administrator.
+      </p>
+      <details>
+        <summary style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', cursor: 'pointer' }}>
+          View setup requirements
+        </summary>
+        <div style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', marginTop: '0.25rem', display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+          <p style={{ margin: 0 }}>Required application credentials:</p>
+          <ul style={{ paddingLeft: '1.25rem', margin: 0 }}>
+            {(server?.requiredEnvVars ?? []).map((v) => (
+              <li key={v}><code>{v}</code></li>
+            ))}
+          </ul>
+          {server?.redirectUri ? (
+            <p style={{ margin: 0 }}>
+              Redirect URI to allow-list in the provider app: <code style={{ wordBreak: 'break-all' }}>{server.redirectUri}</code>{' '}
+              <button className="btn btn-secondary" onClick={() => void handleCopy()}>
+                {copied ? 'Copied' : 'Copy redirect URI'}
+              </button>
+            </p>
+          ) : null}
+          {server?.docsUrl ? (
+            <p style={{ margin: 0 }}>
+              <a href={server.docsUrl} target="_blank" rel="noreferrer">Official setup instructions</a>
+              {server.docsLabel ? ` — ${server.docsLabel}` : null}
+            </p>
+          ) : null}
+        </div>
+      </details>
+    </div>
+  );
+}
+
 function ConnectorsSection() {
   const [connections, setConnections] = useState<SocialConnection[]>([]);
   const [loading, setLoading] = useState(true);
@@ -926,19 +982,20 @@ function ConnectorsSection() {
               </details>
               <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
                 {conn.status === 'NOT_CONFIGURED' ? (
-                  <button className="btn btn-secondary" disabled title="Server has no developer credentials for this platform">
-                    Connect
-                  </button>
-                ) : null}
-                {conn.status === 'NOT_CONFIGURED' ? (
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', alignSelf: 'center' }}>
-                    Not configured on this server — ask the operator to add {conn.platform.toUpperCase()}_CLIENT_ID / _CLIENT_SECRET.
-                  </span>
+                  <SetupRequirementsBlock conn={conn} />
                 ) : null}
                 {(conn.status === 'NOT_CONNECTED' || conn.status === 'EXPIRED' || conn.status === 'ERROR') ? (
-                  <button className="btn btn-primary" disabled={working === `connect:${conn.platform}`} onClick={() => handleConnect(conn.platform)}>
-                    {conn.status === 'NOT_CONNECTED' ? 'Connect' : 'Reconnect'}
-                  </button>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
+                    <button className="btn btn-primary" disabled={working === `connect:${conn.platform}`} onClick={() => handleConnect(conn.platform)}>
+                      {working === `connect:${conn.platform}` ? 'Opening provider…' : conn.status === 'NOT_CONNECTED' ? `Connect ${conn.displayName}` : 'Reconnect'}
+                    </button>
+                    {conn.server?.redirectUri ? (
+                      <p className="tiny" style={{ margin: 0 }}>
+                        If the provider refuses, allow-list this redirect URI in the provider app:{' '}
+                        <code style={{ wordBreak: 'break-all' }}>{conn.server.redirectUri}</code>
+                      </p>
+                    ) : null}
+                  </div>
                 ) : null}
                 {(conn.status === 'CONNECTED' || conn.status === 'PAUSED') ? (
                   <button className="btn btn-secondary" disabled={working === `refresh:${conn.platform}`} onClick={() => handleRefresh(conn.platform)}>
@@ -961,6 +1018,27 @@ function ConnectorsSection() {
                   </button>
                 ) : null}
               </div>
+              <dl style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', margin: '0.5rem 0 0', fontSize: '0.75rem' }}>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <dt style={{ color: 'var(--color-text-muted)', minWidth: '7rem' }}>Research</dt>
+                  <dd style={{ margin: 0, color: 'var(--color-text-secondary)' }}>
+                    {conn.research?.wired ? 'Available through separate configuration' : 'Not currently available'}
+                    {conn.research?.note ? ` — ${conn.research.note}` : null}
+                  </dd>
+                </div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <dt style={{ color: 'var(--color-text-muted)', minWidth: '7rem' }}>Publishing</dt>
+                  <dd style={{ margin: 0, color: 'var(--color-text-secondary)' }}>Not configured</dd>
+                </div>
+                {conn.lastPulledAt ? (
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <dt style={{ color: 'var(--color-text-muted)', minWidth: '7rem' }}>Last verified</dt>
+                    <dd style={{ margin: 0, color: 'var(--color-text-secondary)' }}>
+                      {new Date(conn.lastPulledAt).toLocaleString()}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
               {postsFor === conn.platform ? (
                 <div style={{ marginTop: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   {posts.length === 0 ? (
@@ -1131,7 +1209,10 @@ function ResearchCatalogueSection() {
                   {entry.notWiredReason ? (
                     <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.notWiredReason}</p>
                   ) : null}
-                  <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+                  <details>
+                    <summary className="tiny" style={{ cursor: 'pointer' }}>Developer details</summary>
+                    <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+                  </details>
                 </li>
               ))}
             </ul>
@@ -1147,7 +1228,10 @@ function ResearchCatalogueSection() {
                       <span className="badge badge-error">Unavailable</span>
                     </div>
                     <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.description}</p>
-                    <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+                    <details>
+                      <summary className="tiny" style={{ cursor: 'pointer' }}>Why unavailable</summary>
+                      <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+                    </details>
                   </li>
                 ))}
               </ul>
@@ -1240,14 +1324,18 @@ function ResearchCard({
       </div>
       <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.description}</p>
       <p className="tiny" style={{ margin: '0.25rem 0 0' }}>
-        Auth: {entry.authKind === 'NONE' ? 'Public / no OAuth' : entry.authKind} · Capability: {entry.sourceOfTruth}
+        Auth: {entry.authKind === 'NONE' ? 'Public / no OAuth' : entry.authKind}
       </p>
+      <details>
+        <summary className="tiny" style={{ cursor: 'pointer' }}>Developer details</summary>
+        <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+      </details>
       {entry.probe.error ? (
         <p role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-error)', margin: '0.25rem 0 0' }}>{entry.probe.error}</p>
       ) : null}
       {entry.sourceType === 'YOUTUBE' && !entry.serverCredsPresent ? (
         <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>
-          Not configured on this server — ask the operator to add a YouTube Data API key. Enabling it without credentials will honestly skip every run.
+          Not configured by the administrator — no YouTube Data API key on this server. Enabling it without credentials will honestly skip every run.
         </p>
       ) : null}
       {(entry.sourceType === 'REDDIT' || entry.sourceType === 'GOOGLE_TRENDS') && entry.enabled ? (

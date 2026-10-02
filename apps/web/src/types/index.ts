@@ -1164,6 +1164,28 @@ export interface IntegrationCapabilities {
   lastVerifiedAt?: string | null;
 }
 
+export interface SocialAccountBlock {
+  supported: boolean;
+  status: 'CONNECTED' | 'PAUSED' | 'NOT_CONNECTED' | 'NOT_AVAILABLE';
+  connectable: boolean;
+  reasonCode?: string | null;
+}
+
+export interface SocialServerBlock {
+  configured: boolean;
+  redirectUri: string;
+  requiredEnvVars: string[];
+  docsUrl: string;
+  docsLabel: string;
+}
+
+export interface SocialCapabilityBlock {
+  supported: boolean;
+  wired: boolean;
+  status: string;
+  note?: string | null;
+}
+
 export interface SocialConnection {
   platform: string;
   displayName: string;
@@ -1179,6 +1201,10 @@ export interface SocialConnection {
   limitations: string[];
   scopes: string[];
   capabilities?: IntegrationCapabilities;
+  account?: SocialAccountBlock;
+  server?: SocialServerBlock;
+  research?: SocialCapabilityBlock;
+  publishing?: SocialCapabilityBlock;
   [key: string]: unknown;
 }
 

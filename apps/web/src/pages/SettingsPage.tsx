@@ -66,6 +66,7 @@ export function SettingsPage() {
       <VoiceProfileSection />
       <ReceiptsSection />
       <SamplesSection />
+      <IntegrationsSection />
     </div>
   );
 }
@@ -643,6 +644,19 @@ function SamplesSection() {
   );
 }
 
+function IntegrationsSection() {
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Connected platforms & research sources</h3>
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+        All connectors live in one place: Brain &rarr; Sources &rarr; Research catalogue and Connected platforms.
+        Connect accounts, configure Reddit and Google Trends, and review health there � per workspace, with honest states.
+      </p>
+      <a href="/brain" className="btn btn-primary">Open connector center</a>
+    </div>
+  );
+}
+
 const fieldStyle: React.CSSProperties = {
   backgroundColor: 'var(--color-bg)',
   border: '1px solid var(--color-border)',
@@ -656,3 +670,4 @@ const mutedStyle: React.CSSProperties = {
   color: 'var(--color-text-secondary)',
   fontSize: '0.875rem',
 };
+
