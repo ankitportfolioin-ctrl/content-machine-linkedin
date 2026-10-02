@@ -41,10 +41,9 @@ intelligence run —
 
 **Not claimed**: no provider is newly REAL_REQUEST_VERIFIED. Live probes from
 this environment: Reddit → HTTP 403 (bot mitigation), Google Trends CSV →
-HTTP 400, Trends explore page → HTTP 429. Reddit status is BLOCKED per Gate 2
-(see audit §Gate 2); Trends stays WIRED_NOT_RUNTIME_VERIFIED. No platform
-accounts connected; no publishing/analytics/comments work (unchanged,
-future gates).
+HTTP 400, Trends explore page → HTTP 429. Reddit status is BLOCKED per Gate 2;
+Google Trends status is BLOCKED per Gate 3 (see audit). No platform accounts
+connected; no publishing/analytics/comments work (unchanged, future gates).
 
 ---
 
@@ -59,7 +58,7 @@ future gates).
 | User-provided URL | Generic fetch | None | N/A (sourceIngestion.ts) | extractHtmlContent | FeedSource type | ExtractedContent → SourceIngestion | INTELLIGENCE stage | ✅ VERIFIED | REAL_REQUEST_VERIFIED |
 | Reddit | Public JSON API (`{sub}/hot.json`, GET, no auth) | None (primed valid-empty) | redditConnector.ts | N/A (direct) | connectorRegistry (primed, once/run) | RawSignal → NormalizedSignal → ingest → Document | INTELLIGENCE stage, once per cycle | Gate 2 live probes 2026-10-02: r/artificial → 403 (975ms), r/technology → 403 (358ms), r/AskReddit → 403, r/programming → 403. 0 records, 0 documents. Network-wide bot mitigation. | BLOCKED |
 | YouTube | YouTube Data API v3 | OAuth2 + API Key (env-primed iff present) | youtubeConnector.ts | N/A (direct) | connectorRegistry (primed iff env) | RawSignal → NormalizedSignal → ingest → Document | INTELLIGENCE stage, once per cycle | NOT_CONFIGURED here (no env creds; honest) | AUTH_REQUIRED |
-| Google Trends | Unofficial CSV API | None (primed valid-empty) | googleTrendsConnector.ts | N/A (direct) | connectorRegistry (primed, once/run) | RawSignal → NormalizedSignal → ingest → Document | INTELLIGENCE stage, once per cycle | BLOCKED here (live probe: CSV HTTP 400, explore 429); deterministic wiring ✅ | WIRED_NOT_RUNTIME_VERIFIED |
+| Google Trends | Unofficial CSV API (`widgetdata/{relatedsearches,multiline}/csv`, GET, no auth) | None (primed valid-empty) | googleTrendsConnector.ts | N/A (direct) | connectorRegistry (primed, once/run) | RawSignal → NormalizedSignal → ingest → Document | INTELLIGENCE stage, once per cycle | Gate 3 live probes 2026-10-02: topic 'AI' → CSV HTTP 400 (701ms); topic 'Claude Code' → CSV HTTP 400 + 1691-byte HTML error page (671ms); explore page → 429 (Gate 1). 0 records, 0 documents. Unofficial endpoint refuses this network. | BLOCKED |
 | LinkedIn | LinkedIn API v2 | OAuth2 (approved product req) | linkedinConnector.ts | N/A (direct) | connectorRegistry | RawSignal → NormalizedSignal | INTELLIGENCE stage (connectors) | ⚠️ NOT_RUNTIME_VERIFIED (requires approved product) | REQUIRES_APPROVAL |
 | X/Twitter | X API v2 | OAuth2 PKCE | xConnector.ts | N/A (direct) | connectorRegistry | RawSignal → NormalizedSignal | INTELLIGENCE stage (connectors) | ⚠️ NOT_RUNTIME_VERIFIED (needs OAuth) | AUTH_REQUIRED |
 | Instagram | Instagram Graph API | OAuth2 (FB Login) | instagramConnector.ts | N/A (direct) | connectorRegistry | RawSignal → NormalizedSignal | INTELLIGENCE stage (connectors) | ⚠️ NOT_RUNTIME_VERIFIED (needs OAuth) | AUTH_REQUIRED |

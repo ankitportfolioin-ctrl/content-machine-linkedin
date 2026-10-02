@@ -376,6 +376,49 @@ and flip the status. Until then, no Reddit-dependent product work.
 
 ---
 
+## Gate 3 — Google Trends Live Verification (2026-10-02): BLOCKED
+
+**Verdict: GOOGLE_TRENDS LIVE VERIFICATION = BLOCKED.** The existing connector
+was inspected first and used exactly as implemented (status-checked CSV
+fetches, 15s timeouts, bounded concurrency — all Gate 1 code, unmodified
+here). Zero code changed for this gate; throwaway probe deleted afterwards.
+
+- **Request**: `GoogleTrendsConnector.fetchRecentItems({}, 5,
+  { topics: ['AI'], geo: 'US', timeRange: 'now 7-d', category: 0 })` —
+  one small deterministic query matching production defaults. Underlying
+  HTTP: `GET https://trends.google.com/trends/api/widgetdata/
+  relatedsearches/csv?req={comparisonItem:[{keyword,geo,time}]…}&tz=0`
+  (plus the `multiline/csv` interest endpoint per topic), no auth.
+- **Request timestamp (UTC)**: 2026-10-02T10:11:17Z (`AI`), 10:11:29Z
+  (`Claude Code`, alternate production-default topic).
+- **HTTP status**: **400 on both topics** (`AI` in 701ms, `Claude Code` in
+  671ms). Response is a 1691-byte HTML error page, not CSV — genuinely
+  unusable by the existing parser (which correctly threw instead of parsing
+  garbage). Gate 1 additionally recorded the explore endpoint → 429.
+  Endpoint-wide refusal, not topic-specific.
+- **Provider error**: `Google Trends responded 400`, surfaced through the
+  registry as `Google Trends: "AI": Google Trends responded 400` (failure
+  isolation held; nothing else affected).
+- **RawSignal / NormalizedSignal / SourceDocument / Claims / Topics /
+  Trends-Gaps / Opportunity**: all 0 — live pipeline stopped at the
+  provider refusal per mandate; nothing fabricated.
+- **Deduplication / workspace isolation**: not exercisable (no items);
+  mechanisms unchanged, covered by deterministic wiring tests.
+- **Tests**: none added or modified. Existing `connectorWiring` Trends
+  isolation test and opt-in `connectorLive` test already encode this
+  failure mode. Default suite remains deterministic.
+- **Final status**: Trends row → **BLOCKED** in `CONNECTOR_MATRIX.md`.
+  `REAL_REQUEST_VERIFIED` required (1) usable provider data + (2) pipeline
+  traversal; condition 1 unmet, so the status is refused honestly. No
+  scraping bypass, proxy, UA-spoof, or parser-weakening was used.
+
+**Exact next gate**: re-run this Gate 3 probe from an allowing network. On
+the first 200 with parseable CSV through the unmodified connector, continue
+the chain with real counts. Until then, no Trends-dependent product work —
+and no other connector in this task.
+
+---
+
 ## Appendix — file inventory (all read this gate)
 
 `packages/intelligence/src/researchConnectors.ts`, `connectors/index.ts`, `connectors/{reddit,youtube,googleTrends,linkedin,x,instagram,tiktok,facebook,quora}Connector.ts`, `feedAdapters.ts`, `sourceIngestion.ts`, `index.ts`, `test/{connectorIsolation,connectorAuth,feedAdapters,sourceIngestion,sourceExtraction}.test.ts`, `packages/social/src/{types,adapters,index}.ts`, `packages/shared/src/intelligence/sourceExtraction.ts` (+ `urlCanonicalization.ts` referenced), `apps/api/src/worker/stages.ts`, `apps/api/src/routes/{social,intelligence,feeds,readiness}.ts`, `apps/api/src/utils/tokenVault.ts`, `apps/api/src/{social,feedAdapters,dailyLoop,loopStages,signalFlow}.test.ts`, `packages/db/prisma/schema.prisma`, `apps/web/src/pages/{BrainPage,SettingsPage,HomePage}.tsx`, `.env.example`, `apps/api/src/config/env.ts`.
