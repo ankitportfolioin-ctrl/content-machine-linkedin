@@ -44,6 +44,7 @@ export async function computeOnboarding(workspaceId: string) {
     strategy,
     business,
     activeSources,
+    enabledConnectors,
     completedBatches,
     leadCount,
     policy,
@@ -57,6 +58,9 @@ export async function computeOnboarding(workspaceId: string) {
     prisma.strategyProfile.findUnique({ where: { workspaceId } }),
     prisma.businessProfile.findUnique({ where: { workspaceId } }),
     prisma.feedSource.count({ where: { workspaceId, active: true } }),
+    // Enabled registry connectors count as signal sources too — a
+    // Reddit-only workspace honestly completes the sources step.
+    prisma.workspaceConnector.count({ where: { workspaceId, enabled: true } }),
     prisma.leadImportBatch.count({
       where: { workspaceId, status: { in: ['COMPLETED', 'COMPLETED_WITH_SKIPS'] } },
     }),
@@ -80,7 +84,7 @@ export async function computeOnboarding(workspaceId: string) {
     )
     : [];
   const offersDone = offerFields.some((v) => Array.isArray(v) && v.length >= 1);
-  const sourcesDone = activeSources >= 1;
+  const sourcesDone = activeSources >= 1 || enabledConnectors >= 1;
   const leadsDone = completedBatches >= 1 || leadCount >= 1;
   const policyDone = policy?.tier2HumanApprovalAck === true;
   // scheduleConfigured is set ONLY by an explicit PUT /schedule save —

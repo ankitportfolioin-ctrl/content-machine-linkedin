@@ -831,6 +831,96 @@ export const leadImportSchema = z.object({
   filename: z.string().max(255).optional(),
 });
 
+/**
+ * Workspace connector configuration (research connectors only).
+ * Feed-driven sources (RSS, ATOM, HACKERNEWS, GITHUB_RELEASES, BLOG, SITE)
+ * keep FeedSource as their source of truth and are rejected by the
+ * connectors API. Each config mirrors parameters the existing connector
+ * implementation actually reads — no invented options.
+ */
+export const researchConnectorTypeSchema = z.enum([
+  'REDDIT',
+  'GOOGLE_TRENDS',
+  'YOUTUBE',
+  'LINKEDIN',
+  'X',
+  'INSTAGRAM',
+  'TIKTOK',
+  'FACEBOOK',
+  'QUORA',
+]);
+
+const subredditName = z
+  .string()
+  .trim()
+  .min(1)
+  .max(40)
+  .regex(/^[A-Za-z0-9_]+$/, 'Subreddit names may only contain letters, numbers and underscores (without the r/ prefix).')
+  .transform((s) => s.replace(/^r\//i, ''));
+
+export const redditConnectorConfigSchema = z
+  .object({
+    // Mirrors redditConnector.fetchRecentItems: subreddits (capped at 20),
+    // timeFilter (default 'day'), sortBy (default 'hot').
+    subreddits: z.array(subredditName).min(1).max(20).default(['programming', 'artificial', 'technology']),
+    timeFilter: z.enum(['hour', 'day', 'week', 'month', 'year', 'all']).default('day'),
+    sortBy: z.enum(['hot', 'new', 'top', 'rising', 'controversial']).default('hot'),
+  })
+  .strict();
+
+export const googleTrendsConnectorConfigSchema = z
+  .object({
+    // Mirrors googleTrendsConnector.fetchRecentItems: topics, geo, timeRange,
+    // category. Endpoints are unofficial public CSV — never an official API.
+    topics: z.array(z.string().trim().min(1).max(100)).min(1).max(10).default(['AI']),
+    geo: z
+      .string()
+      .trim()
+      .min(2)
+      .max(8)
+      .regex(/^[A-Za-z-]+$/, 'Region must be a Trends geo code such as US or GB.')
+      .default('US')
+      .transform((g) => g.toUpperCase()),
+    timeRange: z.string().trim().min(1).max(30).default('now 7-d'),
+    category: z.number().int().min(0).max(2000).default(0),
+  })
+  .strict();
+
+export const emptyConnectorConfigSchema = z.object({}).strict();
+
+export const linkedinConnectorConfigSchema = z
+  .object({
+    // Mirrors linkedinConnector.fetchRecentItems: optional organizationIds.
+    organizationIds: z.array(z.string().trim().min(1).max(100)).max(25).default([]),
+  })
+  .strict();
+
+export function connectorConfigSchemaFor(sourceType: string) {
+  switch (sourceType) {
+    case 'REDDIT':
+      return redditConnectorConfigSchema;
+    case 'GOOGLE_TRENDS':
+      return googleTrendsConnectorConfigSchema;
+    case 'LINKEDIN':
+      return linkedinConnectorConfigSchema;
+    case 'YOUTUBE':
+    case 'X':
+    case 'INSTAGRAM':
+    case 'TIKTOK':
+    case 'FACEBOOK':
+    case 'QUORA':
+      return emptyConnectorConfigSchema;
+    default:
+      return null;
+  }
+}
+
+export const workspaceConnectorUpsertSchema = z.object({
+  enabled: z.boolean(),
+  // Validated per sourceType by the route via connectorConfigSchemaFor().
+  config: z.record(z.unknown()).default({}),
+});
+
 export const performanceRecordSchema = z.object({
   impressions: z.number().int().nonnegative().optional(),
   reach: z.number().int().nonnegative().optional(),

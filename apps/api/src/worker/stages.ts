@@ -26,6 +26,7 @@ import { ContentOutcomeService, LearningDerivationService } from '@growth-operat
 import { BrainReportService } from '@growth-operator/business';
 import { createDefaultRegistry } from '@growth-operator/ai';
 import { getEnv } from '../config/env';
+import { loadWorkspaceConnectorConfigs, buildWorkerFetchConfigs } from '../services/workspaceConnectors';
 import { assertRunAllowed } from './settings';
 import type { RunBudget } from './budget';
 
@@ -117,8 +118,16 @@ const intelligence: StageFn = async (ctx) => {
     topicsNormalized: 0,
     opportunitiesCreated: 0,
   };
-  if (feeds.length === 0) {
-    return { status: 'SUCCEEDED', counts, note: 'No active feed sources configured; nothing to fetch.' };
+  // Workspace connector configuration is the ONLY source of connector
+  // selection. A missing row means DISABLED; nothing is ever inferred as
+  // enabled. Feed fetching and connector execution are independent: either
+  // can run without the other.
+  const persistedConnectorConfigs = await loadWorkspaceConnectorConfigs(workspaceId);
+  const { fetchConfigs: workerFetchConfigs, skipped: skippedConnectors } =
+    buildWorkerFetchConfigs(persistedConnectorConfigs);
+  const anyConnectorEnabled = Object.values(workerFetchConfigs).some((c) => c.enabled);
+  if (feeds.length === 0 && !anyConnectorEnabled) {
+    return { status: 'SUCCEEDED', counts, note: 'No active feed sources and no enabled connectors; nothing to fetch.' };
   }
 
   const registry = aiRegistry();
@@ -260,12 +269,16 @@ const intelligence: StageFn = async (ctx) => {
   }
 
   // Research connectors run ONCE per intelligence cycle — never once per
-  // feed (Gate 1 fix). Credential priming comes first: without it,
-  // fetchFromAllSources() honestly skips every connector as "not configured".
-  // Connector signals re-enter the SAME ingestion pipeline as feed items
-  // (SSRF-checked, canonical-URL deduped, workspace-scoped). Connector
-  // failures are recorded in notes and never fail the run.
-  if (aiAvailable) {
+  // feed — and ONLY when the workspace enabled them. Selection comes solely
+  // from persisted WorkspaceConnector rows (missing row == DISABLED).
+  // Fetching needs no AI key: without AI the fetch-only path applies and
+  // understanding is deferred below, exactly like feed fetching.
+  // Credential priming comes first: without server credentials, eligible
+  // connectors are honestly skipped as "not configured". Connector signals
+  // re-enter the SAME ingestion pipeline as feed items (SSRF-checked,
+  // canonical-URL deduped, workspace-scoped). Connector failures are
+  // recorded in notes and never fail the run.
+  if (anyConnectorEnabled) {
     const { primed, skippedAuthRequired } = primeConnectorRegistry(connectorRegistry, {
       YOUTUBE_API_KEY: env.YOUTUBE_API_KEY,
       YOUTUBE_ACCESS_TOKEN: env.YOUTUBE_ACCESS_TOKEN,
@@ -274,29 +287,41 @@ const intelligence: StageFn = async (ctx) => {
       `Connector registry primed (${primed.length > 0 ? primed.join(', ') : 'none'}); ` +
       `awaiting credentials: ${skippedAuthRequired.length > 0 ? skippedAuthRequired.join(', ') : 'none'}.`,
     );
-    // Bounded default scope (Gate 1): mirrors the /research/trigger defaults
-    // (5 subreddits / 5 topics). These defaults were never live before this
-    // gate, so nothing depends on a wider scan; wider scopes remain
-    // configurable per future gates. Bounded scope keeps every daily run's
-    // provider cost predictable.
-    const connectorConfigs = {
-      REDDIT: { enabled: true, config: { subreddits: ['programming', 'MachineLearning', 'artificial', 'OpenAI', 'ClaudeAI'], timeFilter: 'day', sortBy: 'hot' } },
-      YOUTUBE: { enabled: true, config: { queries: ['AI automation', 'AI coding', 'vibe coding', 'Claude Code', 'Cursor AI', 'AI agents', 'web development', 'freelancing with AI'] } },
-      GOOGLE_TRENDS: { enabled: true, config: { topics: ['AI', 'AI coding', 'AI agents', 'Claude Code', 'vibe coding'], geo: 'US', timeRange: 'now 7-d', category: 0 } },
-      LINKEDIN: { enabled: false, config: { organizationIds: [] } }, // Requires OAuth
-      X: { enabled: false, config: {} }, // Requires OAuth
-      INSTAGRAM: { enabled: false, config: {} }, // Requires OAuth, Tier 2
-      TIKTOK: { enabled: false, config: {} }, // Requires OAuth, Tier 2
-    };
+    const enabledList = Object.entries(workerFetchConfigs)
+      .filter(([, c]) => c.enabled)
+      .map(([t]) => t);
+    notes.push(`Workspace connectors enabled: ${enabledList.join(', ')}.`);
 
     const { signals: connectorSignals, errors: connectorErrors } = await connectorRegistry.fetchFromAllSources(
       workspaceId,
       Math.min(50, MAX_NEW_DOCS_PER_RUN - docsProcessed),
-      connectorConfigs
+      workerFetchConfigs
     );
 
+    const signalsBySource = new Map<string, number>();
+    for (const s of connectorSignals) {
+      signalsBySource.set(s.sourceType, (signalsBySource.get(s.sourceType) ?? 0) + 1);
+    }
+    for (const [sourceType, count] of signalsBySource) {
+      notes.push(`✓ ${sourceType} — ${count} signal(s) discovered.`);
+    }
     if (connectorErrors.length > 0) {
       notes.push(`Connector errors: ${connectorErrors.join('; ')}`);
+      for (const sourceType of enabledList) {
+        const display = connectorRegistry.getConnector(sourceType)?.displayName ?? sourceType;
+        if (!signalsBySource.has(sourceType) && connectorErrors.some((e) => e.startsWith(`${display}:`))) {
+          notes.push(`⚠ ${sourceType} — ran but returned no signals (see connector errors).`);
+        }
+      }
+    }
+    // Non-executable catalogue entries are reported, never executed.
+    for (const skipped of skippedConnectors) {
+      const persisted = persistedConnectorConfigs[skipped.sourceType];
+      if (persisted?.enabled) {
+        notes.push(`○ ${skipped.sourceType} — enabled but not executed: ${skipped.reason}`);
+      } else {
+        notes.push(`○ ${skipped.sourceType} — disabled.`);
+      }
     }
 
     for (const signal of connectorSignals) {
@@ -317,6 +342,10 @@ const intelligence: StageFn = async (ctx) => {
         counts.failed += 1;
       }
     }
+  }
+
+  if (!anyConnectorEnabled) {
+    notes.push('○ Connectors — all disabled for this workspace; nothing executed.');
   }
 
   if (aiAvailable) {

@@ -1769,6 +1769,10 @@ export async function refreshSocial(platform: string, limit = 10): Promise<{ pla
   return authedRequest(`/social/${encodeURIComponent(platform)}/refresh`, { method: 'POST', body: JSON.stringify({ limit }) });
 }
 
+export async function verifySocial(platform: string): Promise<{ platform: string; verified: boolean; verification: { success: boolean; error?: string; details?: any } }> {
+  return authedRequest(`/social/${encodeURIComponent(platform)}/verify`, { method: 'POST' });
+}
+
 export async function listSocialPosts(platform?: string, limit = 20): Promise<{ posts: import('../types').SocialPost[] }> {
   const query = new URLSearchParams();
   if (platform) query.set('platform', platform);
@@ -1778,6 +1782,30 @@ export async function listSocialPosts(platform?: string, limit = 20): Promise<{ 
 
 export async function saveSocialIdea(postId: string, title?: string): Promise<{ contentIdea: import('../types').ContentIdea }> {
   return authedRequest(`/social/posts/${encodeURIComponent(postId)}/save-idea`, { method: 'POST', body: JSON.stringify({ title }) });
+}
+
+// ---------------------------------------------------------------------------
+// Workspace connector catalogue (research sources configured per workspace)
+// ---------------------------------------------------------------------------
+
+export async function listConnectors(): Promise<{ connectors: import('../types').WorkspaceConnectorEntry[] }> {
+  return authedRequest<{ connectors: import('../types').WorkspaceConnectorEntry[] }>(`/connectors`);
+}
+
+export async function updateConnectorConfig(
+  sourceType: string,
+  input: { enabled: boolean; config?: Record<string, unknown> },
+): Promise<{ connector: { sourceType: string; enabled: boolean; config: unknown; probe: unknown } }> {
+  return authedRequest(`/connectors/${encodeURIComponent(sourceType)}`, {
+    method: 'PUT',
+    body: JSON.stringify(input),
+  });
+}
+
+export async function verifyConnector(
+  sourceType: string,
+): Promise<{ probe: { status: string; scope?: string }; note?: string }> {
+  return authedRequest(`/connectors/${encodeURIComponent(sourceType)}/verify`, { method: 'POST' });
 }
 
 // ---------------------------------------------------------------------------

@@ -6,7 +6,7 @@ export interface IngestionResult {
   sourceId: string;
   documentId: string | null;
   status: 'SUCCESS' | 'FAILED' | 'PARTIAL';
-  sourceType: 'ARTICLE' | 'RSS' | 'ATOM' | 'SITEMAP' | 'WEBSITE' | 'USER_URL';
+  sourceType: 'ARTICLE' | 'RSS' | 'ATOM' | 'SITEMAP' | 'WEBSITE' | 'USER_URL' | 'REDDIT' | 'YOUTUBE' | 'GOOGLE_TRENDS' | 'LINKEDIN' | 'X' | 'INSTAGRAM' | 'TIKTOK';
   extractedContent: ExtractedContent | null;
   feedItems: FeedItem[];
   sitemapUrls: string[];
@@ -14,7 +14,7 @@ export interface IngestionResult {
 }
 
 export interface IngestionOptions {
-  sourceType?: 'ARTICLE' | 'RSS' | 'ATOM' | 'SITEMAP' | 'WEBSITE' | 'USER_URL';
+  sourceType?: 'ARTICLE' | 'RSS' | 'ATOM' | 'SITEMAP' | 'WEBSITE' | 'USER_URL' | 'REDDIT' | 'YOUTUBE' | 'GOOGLE_TRENDS' | 'LINKEDIN' | 'X' | 'INSTAGRAM' | 'TIKTOK';
   maxResponseSize?: number;
   timeout?: number;
 }
@@ -61,7 +61,8 @@ export class SourceIngestionService {
       },
     });
 
-    if (existingSource) {
+    // Allow re-ingestion of previously failed sources
+    if (existingSource && existingSource.status !== 'FAILED') {
       return {
         sourceId: existingSource.id,
         documentId: null,
@@ -254,24 +255,49 @@ export class SourceIngestionService {
       extractionWarnings.push(`Extraction failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
 
-    const source = await this.prisma.intelligenceSource.create({
-      data: {
-        workspaceId,
-        url: finalUrl,
-        canonicalUrl,
-        sourceType: detectedType,
-        title: extractedContent?.title || null,
-        publisher: extractedContent?.publisher || null,
-        author: extractedContent?.author || null,
-        publishedAt: extractedContent?.publishedAt || null,
-        publishedAtConfidence: extractedContent?.publishedAtConfidence || 'UNKNOWN',
-        description: extractedContent?.description || null,
-        contentHash,
-        urlHash,
-        status: extractionStatus === 'FAILED' ? 'FAILED' : 'ACTIVE',
-        lastFetchedAt: new Date(),
-      },
-    });
+    // Create or update the source
+    let source: { id: string };
+    if (existingSource && existingSource.status === 'FAILED') {
+      // Update existing failed source
+      source = await this.prisma.intelligenceSource.update({
+        where: { id: existingSource.id },
+        data: {
+          url: finalUrl,
+          canonicalUrl,
+          sourceType: detectedType,
+          title: extractedContent?.title || null,
+          publisher: extractedContent?.publisher || null,
+          author: extractedContent?.author || null,
+          publishedAt: extractedContent?.publishedAt || null,
+          publishedAtConfidence: extractedContent?.publishedAtConfidence || 'UNKNOWN',
+          description: extractedContent?.description || null,
+          contentHash,
+          urlHash,
+          status: extractionStatus === 'FAILED' ? 'FAILED' : 'ACTIVE',
+          lastFetchedAt: new Date(),
+        },
+        select: { id: true },
+      });
+    } else {
+      source = await this.prisma.intelligenceSource.create({
+        data: {
+          workspaceId,
+          url: finalUrl,
+          canonicalUrl,
+          sourceType: detectedType,
+          title: extractedContent?.title || null,
+          publisher: extractedContent?.publisher || null,
+          author: extractedContent?.author || null,
+          publishedAt: extractedContent?.publishedAt || null,
+          publishedAtConfidence: extractedContent?.publishedAtConfidence || 'UNKNOWN',
+          description: extractedContent?.description || null,
+          contentHash,
+          urlHash,
+          status: extractionStatus === 'FAILED' ? 'FAILED' : 'ACTIVE',
+          lastFetchedAt: new Date(),
+        },
+      });
+    }
 
     const document = await this.prisma.sourceDocument.create({
       data: {
@@ -316,6 +342,28 @@ export class SourceIngestionService {
     // re-failures of the same URL still dedupe via the pre-check in ingest.
     const contentHash = getContentHash(`${canonicalUrl}\n${error}`);
 
+    // Re-failures of the same URL reach here because ingest() allows
+    // re-ingestion of FAILED rows — but the old FAILED row still holds the
+    // (workspaceId, canonicalUrl) unique slot, so a blind create throws
+    // P2002 on the second failing run. Refresh the FAILED row instead.
+    // An ACTIVE row is never touched here (ingest() returns those early).
+    const existing = await this.prisma.intelligenceSource.findUnique({
+      where: { workspaceId_canonicalUrl: { workspaceId, canonicalUrl } },
+    });
+    if (existing) {
+      if (existing.status !== 'FAILED') return existing;
+      return this.prisma.intelligenceSource.update({
+        where: { id: existing.id },
+        data: {
+          url: originalUrl,
+          sourceType: sourceType as any,
+          contentHash,
+          urlHash,
+          status: 'FAILED',
+          lastFetchedAt: new Date(),
+        },
+      });
+    }
     return this.prisma.intelligenceSource.create({
       data: {
         workspaceId,
@@ -336,7 +384,7 @@ export class SourceIngestionService {
     });
   }
 
-  private mapContentTypeToSourceType(detected: string): 'ARTICLE' | 'RSS' | 'ATOM' | 'SITEMAP' | 'WEBSITE' | 'USER_URL' {
+  private mapContentTypeToSourceType(detected: string): 'ARTICLE' | 'RSS' | 'ATOM' | 'SITEMAP' | 'WEBSITE' | 'USER_URL' | 'REDDIT' | 'YOUTUBE' | 'GOOGLE_TRENDS' | 'LINKEDIN' | 'X' | 'INSTAGRAM' | 'TIKTOK' {
     switch (detected) {
       case 'rss': return 'RSS';
       case 'atom': return 'ATOM';
@@ -354,6 +402,13 @@ export class SourceIngestionService {
       case 'ARTICLE':
       case 'WEBSITE':
       case 'USER_URL':
+      case 'REDDIT':
+      case 'YOUTUBE':
+      case 'GOOGLE_TRENDS':
+      case 'LINKEDIN':
+      case 'X':
+      case 'INSTAGRAM':
+      case 'TIKTOK':
       default: return 'HTML';
     }
   }
@@ -366,6 +421,13 @@ export class SourceIngestionService {
       case 'ARTICLE':
       case 'WEBSITE':
       case 'USER_URL':
+      case 'REDDIT':
+      case 'YOUTUBE':
+      case 'GOOGLE_TRENDS':
+      case 'LINKEDIN':
+      case 'X':
+      case 'INSTAGRAM':
+      case 'TIKTOK':
       default: return 'HTML';
     }
   }

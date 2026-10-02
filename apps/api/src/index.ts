@@ -1,11 +1,21 @@
 import path from 'path';
 import dotenv from 'dotenv';
+import { setServers } from 'dns';
 // Load the repository-root .env regardless of the process working directory
 // (e.g. `pnpm --filter @growth-operator/api dev` runs with CWD=apps/api,
 // so from apps/api/src the repo root is three levels up),
 // then fall back to default dotenv behavior for a package-local .env.
 dotenv.config({ path: path.resolve(__dirname, '../../../.env') });
 dotenv.config();
+
+// Configure DNS servers to avoid ECONNREFUSED on Windows hosts where the
+// default system DNS resolver may not be reachable from Node.js.
+// Use Google (8.8.8.8) and Cloudflare (1.1.1.1) public DNS servers.
+try {
+  setServers(['8.8.8.8', '1.1.1.1']);
+} catch {
+  // Ignore if DNS configuration fails (e.g., in test environment)
+}
 import express, { Application } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
@@ -14,6 +24,7 @@ import { requestIdMiddleware, requestLogger } from './middleware/requestLogger';
 import { rateLimiter } from './middleware/rateLimiter';
 import { errorHandler, notFoundHandler } from './middleware/errorHandler';
 import { prisma } from '@growth-operator/db';
+import { getMigrationStatus } from './utils/migrations';
 import authRoutes from './routes/auth';
 import workspaceRoutes from './routes/workspaces';
 import profileRoutes from './routes/profiles';
@@ -48,7 +59,9 @@ import brainRoutes from './routes/brain';
 import runsRoutes from './routes/runs';
 import onboardingRoutes from './routes/onboarding';
 import feedsRoutes from './routes/feeds';
+import connectorsRoutes from './routes/connectors';
 import readinessRoutes from './routes/readiness';
+import socialRoutes, { socialCallbackRouter } from './routes/social';
 
 const env = getEnv();
 const isProd = env.NODE_ENV === 'production';
@@ -103,12 +116,18 @@ app.get('/api/v1/health', (_req, res) => {
 app.get('/api/v1/ready', async (_req, res) => {
   try {
     await prisma.$queryRaw`SELECT 1`;
+    const migrations = await getMigrationStatus();
     res.json({
       status: 'ready',
       timestamp: new Date().toISOString(),
       service: 'growth-operator-api',
       version: '0.0.0',
       dependencies: { database: 'connected' },
+      migrations: {
+        applied: migrations.applied.length,
+        pending: migrations.pending,
+        ...(migrations.note ? { note: migrations.note } : {}),
+      },
     });
   } catch {
     res.status(503).json({
@@ -157,14 +176,19 @@ app.use('/api/v1/brain', brainRoutes);
 app.use('/api/v1/runs', runsRoutes);
 app.use('/api/v1/onboarding', onboardingRoutes);
 app.use('/api/v1/feeds', feedsRoutes);
+app.use('/api/v1/connectors', connectorsRoutes);
 app.use('/api/v1/readiness', readinessRoutes);
+// OAuth callbacks are unauthenticated by design (the platform redirects
+// here); the state token binds each callback to its workspace.
+app.use('/api/v1/social', socialCallbackRouter);
+app.use('/api/v1/social', socialRoutes);
 
 app.use(notFoundHandler);
 app.use(errorHandler);
 
 // Supertest exercises the app instance directly, so skip binding a port in
 // test runs (multiple test files import this module in one process).
-const server = env.NODE_ENV === 'test' ? null : app.listen(env.PORT, () => {
+const server = env.NODE_ENV === 'test' ? null : app.listen(env.PORT, '0.0.0.0', () => {
   console.log(`🚀 API server running on http://localhost:${env.PORT}`);
   console.log(`📖 Health: http://localhost:${env.PORT}/api/v1/health`);
   console.log(`🔍 Ready: http://localhost:${env.PORT}/api/v1/ready`);

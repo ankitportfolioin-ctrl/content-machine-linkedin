@@ -27,6 +27,7 @@ import { fetchFeedbackSummary, applyFeedbackDemotion } from '@growth-operator/in
 import { ContentGapService } from '@growth-operator/intelligence';
 import { LearningDerivationService, applyLearningInfluence } from '@growth-operator/learning';
 import { AIProviderRegistry, createDefaultRegistry } from '@growth-operator/ai';
+import { loadWorkspaceConnectorConfigs, buildWorkerFetchConfigs } from '../services/workspaceConnectors';
 import { getEnv } from '../config/env';
 
 const router: ExpressRouter = Router();
@@ -1032,17 +1033,13 @@ router.post('/research/trigger', async (req, res, next) => {
     const data = researchTriggerSchema.parse(req.body ?? {});
     const requested = (data.sources ?? {}) as Record<string, { enabled?: boolean; config?: Record<string, unknown> }>;
 
-    const defaultConfigs: Record<string, { enabled: boolean; config: Record<string, unknown> }> = {
-      REDDIT: { enabled: true, config: { subreddits: ['learnprogramming', 'webdev', 'artificial', 'freelance', 'Entrepreneur'], timeFilter: 'day', sortBy: 'hot' } },
-      YOUTUBE: { enabled: false, config: {} },
-      GOOGLE_TRENDS: { enabled: true, config: { topics: ['vibe coding', 'AI agents', 'Claude Code', 'AI website builder', 'AI automation'], geo: 'US', timeRange: 'now 7-d', category: 0 } },
-      LINKEDIN: { enabled: false, config: {} },
-      X: { enabled: false, config: {} },
-      INSTAGRAM: { enabled: false, config: {} },
-      TIKTOK: { enabled: false, config: {} },
-    };
+    // Persisted workspace configuration is the default; the request body
+    // may override per call (one-shot, never persisted). Missing rows mean
+    // disabled — nothing is inferred as enabled.
+    const persisted = await loadWorkspaceConnectorConfigs(authReq.workspaceId);
+    const { fetchConfigs: eligible } = buildWorkerFetchConfigs(persisted);
     const merged: Record<string, { enabled: boolean; config: Record<string, unknown> }> = {};
-    for (const [key, def] of Object.entries(defaultConfigs)) {
+    for (const [key, def] of Object.entries(eligible)) {
       const override = requested[key];
       merged[key] = {
         enabled: typeof override?.enabled === 'boolean' ? override.enabled : def.enabled,

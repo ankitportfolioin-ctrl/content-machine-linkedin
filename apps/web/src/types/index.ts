@@ -1054,6 +1054,20 @@ export interface AutonomyPolicy {
   [key: string]: unknown;
 }
 
+export interface PlatformExecutionStatus {
+  platform: string;
+  displayName: string;
+  connected: boolean;
+  publishingReady: boolean;
+  reason: string;
+  details: {
+    integrationExists: boolean;
+    oauthConnected: boolean;
+    publishingEnabled: boolean;
+    lastVerifiedAt: string | null;
+  };
+}
+
 export interface ReadinessDetail {
   ready: boolean;
   reason: string;
@@ -1063,7 +1077,7 @@ export interface ReadinessDetail {
 export interface ReadinessState {
   workspaceIntelligenceReady: ReadinessDetail;
   humanApprovalReady: ReadinessDetail;
-  linkedInExecution: ReadinessDetail;
+  platformExecution: PlatformExecutionStatus[];
   overall: 'ready' | 'partial' | 'not_ready';
 }
 
@@ -1140,6 +1154,16 @@ export type SocialConnectionStatus =
   | 'ERROR'
   | 'EXPIRED';
 
+export interface IntegrationCapabilities {
+  research?: boolean;
+  publishing?: boolean;
+  analytics?: boolean;
+  comments?: boolean;
+  audience?: boolean;
+  verification?: 'NOT_VERIFIED' | 'VERIFIED' | 'FAILED';
+  lastVerifiedAt?: string | null;
+}
+
 export interface SocialConnection {
   platform: string;
   displayName: string;
@@ -1154,6 +1178,37 @@ export interface SocialConnection {
   provides: string[];
   limitations: string[];
   scopes: string[];
+  capabilities?: IntegrationCapabilities;
+  [key: string]: unknown;
+}
+
+export interface ConnectorProbe {
+  status: string;
+  checkedAt?: string | null;
+  error?: string | null;
+  scope?: string;
+}
+
+export interface WorkspaceConnectorEntry {
+  sourceType: string;
+  displayName: string;
+  group: 'RESEARCH' | 'CONNECTED_PLATFORM' | 'UNAVAILABLE';
+  description: string;
+  authKind: 'NONE' | 'API_KEY' | 'OAUTH';
+  sourceOfTruth: string;
+  workerEligible: boolean;
+  notWiredReason?: string | null;
+  accountConnectable: boolean;
+  requiresAccountNote?: string | null;
+  userAction: string;
+  enabled: boolean;
+  enabledState: 'ENABLED' | 'DISABLED';
+  configState: 'CONFIGURED' | 'NOT_CONFIGURED';
+  config: Record<string, unknown>;
+  accountState: 'CONNECTED' | 'NOT_CONNECTED' | 'NOT_CONFIGURED';
+  serverCredsPresent: boolean;
+  workerWillRun: boolean;
+  probe: ConnectorProbe;
   [key: string]: unknown;
 }
 

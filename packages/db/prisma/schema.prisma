@@ -73,6 +73,13 @@ enum SourceType {
   SITEMAP
   WEBSITE
   USER_URL
+  REDDIT
+  YOUTUBE
+  GOOGLE_TRENDS
+  LINKEDIN
+  X
+  INSTAGRAM
+  TIKTOK
 }
 
 enum SourceStatus {
@@ -412,6 +419,13 @@ enum FeedSourceType {
   GITHUB_RELEASES
   BLOG
   SITE
+  REDDIT
+  YOUTUBE
+  GOOGLE_TRENDS
+  LINKEDIN
+  X
+  INSTAGRAM
+  TIKTOK
 }
 
 enum DailyRunStatus {
@@ -888,6 +902,107 @@ model FeedSource {
   @@index([workspaceId, active])
 }
 
+// Workspace-level research-connector configuration. ONLY for genuine
+// research connectors driven by ConnectorRegistry (REDDIT, GOOGLE_TRENDS,
+// YOUTUBE, LINKEDIN, X, INSTAGRAM, TIKTOK, FACEBOOK, QUORA). Feed-driven
+// sources (RSS, ATOM, HACKERNEWS, GITHUB_RELEASES, BLOG, SITE) keep
+// FeedSource as their sole source of truth and must never get rows here.
+//
+// State separation (deliberate — never collapse into one status):
+// - enabled: the user's ON/OFF choice. Missing row == DISABLED == never runs.
+// - config: validated per-connector parameters (subreddits, topics, ...).
+// - lastProbeStatus/lastProbeAt/lastProbeError: outcome of the last real
+//   verification probe only. A passing probe proves that one probe request
+//   worked; it never promises future runtime data.
+// - Authentication (OAuth account state) lives in SocialConnection and is
+//   joined at read time, never copied here. A connected account never
+//   implies research is enabled.
+model WorkspaceConnector {
+  id              String    @id @default(uuid())
+  workspaceId     String
+  sourceType      String    @db.VarChar(50)
+  enabled         Boolean   @default(false)
+  config          Json      @default("{}")
+  lastProbeStatus String    @db.VarChar(50) @default("NEVER_PROBED")
+  lastProbeAt     DateTime?
+  lastProbeError  String?   @db.Text
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, sourceType])
+  @@index([workspaceId])
+}
+
+enum SocialPlatform {
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  YOUTUBE
+  X
+}
+
+enum SocialConnectionStatus {
+  CONNECTED
+  PAUSED
+  ERROR
+  EXPIRED
+}
+
+// Optional OAuth connections to social platforms (read-only). Tokens are
+// stored AES-256-GCM encrypted and never leave the server. Pulled items live
+// in SocialPost with full source attribution. Disconnecting deletes the
+// connection row (tokens die with it); pulled posts are KEPT as inspiration
+// and keep pointing at the platform + original URL.
+model SocialConnection {
+  id               String                  @id @default(uuid())
+  workspaceId      String
+  platform         SocialPlatform
+  accountLabel     String?                 @db.VarChar(200)
+  encryptedAccess  String                  @db.Text
+  encryptedRefresh String?                 @db.Text
+  tokenExpiresAt   DateTime?
+  status           SocialConnectionStatus  @default(CONNECTED)
+  active           Boolean                 @default(true)
+  lastPulledAt     DateTime?
+  lastError        String?                 @db.Text
+  createdAt        DateTime                @default(now())
+  updatedAt        DateTime                @updatedAt
+
+  workspace        Workspace               @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  posts            SocialPost[]
+
+  @@unique([workspaceId, platform])
+  @@index([workspaceId])
+}
+
+model SocialPost {
+  id           String         @id @default(uuid())
+  workspaceId  String
+  connectionId String?
+  platform     SocialPlatform
+  externalId   String         @db.VarChar(500)
+  url          String?        @db.VarChar(2048)
+  title        String?        @db.VarChar(500)
+  text         String?        @db.Text
+  author       String?        @db.VarChar(200)
+  publishedAt  DateTime?
+  mediaKind    String?        @db.VarChar(50)
+  hashtags     String[]       @default([])
+  fetchedAt    DateTime       @default(now())
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  workspace    Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  connection   SocialConnection? @relation(fields: [connectionId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, platform, externalId])
+  @@index([workspaceId])
+  @@index([workspaceId, platform])
+  @@index([connectionId])
+}
+
 model DailyRun {
   id          String         @id @default(uuid())
   workspaceId String
@@ -1061,6 +1176,9 @@ model Workspace {
   workspaceSettings        WorkspaceSettings?
   autonomyPolicy           AutonomyPolicy?
   feedSources              FeedSource[]
+  workspaceConnectors      WorkspaceConnector[]
+  socialConnections        SocialConnection[]
+  socialPosts              SocialPost[]
   dailyRuns                DailyRun[]
   runStages                RunStage[]
   onboardingState          OnboardingState?
@@ -1225,7 +1343,7 @@ model Lead {
   id            String     @id @default(uuid())
   workspaceId   String
   assigneeId    String?
-  linkedinUrl   String     @unique @db.VarChar(2048)
+  linkedinUrl   String     @db.VarChar(2048)
   name          String     @db.VarChar(100)
   headline      String?    @db.VarChar(220)
   company       String?    @db.VarChar(200)
@@ -1254,6 +1372,7 @@ model Lead {
   @@index([status])
   @@index([linkedinUrl])
   @@index([createdAt])
+  @@unique([workspaceId, linkedinUrl])
 }
 
 model Conversation {

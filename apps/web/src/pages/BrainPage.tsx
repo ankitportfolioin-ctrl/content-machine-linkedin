@@ -19,9 +19,12 @@ import {
   listAudienceProblems,
   listGaps,
   listLearningProposals,
+  listConnectors,
   listNextActions,
   listOpportunities,
   listSocialConnections,
+  updateConnectorConfig,
+  verifyConnector,
   listSocialPosts,
   listSources,
   listTrends,
@@ -54,6 +57,7 @@ import {
   SocialConnection,
   SocialPost,
   Source,
+  WorkspaceConnectorEntry,
   TrendSignal,
   YFPQualityGateInput,
   YFPQualityGateResult,
@@ -149,6 +153,7 @@ export function BrainPage() {
       {tab === 'sources' ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
           <SocialCallbackBanner />
+          <ResearchCatalogueSection />
           <ConnectorsSection />
           <SourcesSection />
         </div>
@@ -998,6 +1003,314 @@ function ConnectorsSection() {
         <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{message}</p>
       ) : null}
     </div>
+  );
+}
+
+function probeBadgeClass(status: string): string {
+  if (status === 'VERIFIED') return 'badge badge-success';
+  if (status === 'FAILED' || status === 'BLOCKED' || status === 'UNAVAILABLE') return 'badge badge-error';
+  return 'badge badge-neutral';
+}
+
+/**
+ * Research catalogue: every registry-backed source the product supports,
+ * driven by persisted per-workspace configuration. Feed-owned sources
+ * (RSS/Atom/HN/GitHub/Blog/Site) are NOT configured here — the feed list
+ * below stays their source of truth. OAuth account cards above stay the
+ * account-connection surface; research cards here never imply that a
+ * connected account enables research.
+ */
+function ResearchCatalogueSection() {
+  const [entries, setEntries] = useState<WorkspaceConnectorEntry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [working, setWorking] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const fetchData = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await listConnectors();
+      setEntries(data.connectors ?? []);
+    } catch (err) {
+      setError(friendlyErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void fetchData();
+  }, [fetchData]);
+
+  async function handleToggle(entry: WorkspaceConnectorEntry) {
+    setWorking(`toggle:${entry.sourceType}`);
+    setMessage(null);
+    try {
+      await updateConnectorConfig(entry.sourceType, { enabled: !entry.enabled, config: entry.config });
+      await fetchData();
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+    } finally {
+      setWorking(null);
+    }
+  }
+
+  async function handleVerify(entry: WorkspaceConnectorEntry) {
+    setWorking(`verify:${entry.sourceType}`);
+    setMessage(null);
+    try {
+      const res = await verifyConnector(entry.sourceType);
+      setMessage(`${entry.displayName}: ${res.probe.status} — ${res.note ?? 'probe complete.'}`);
+      await fetchData();
+    } catch (err) {
+      setMessage(friendlyErrorMessage(err));
+      await fetchData();
+    } finally {
+      setWorking(null);
+    }
+  }
+
+  const research = entries.filter((e) => e.group === 'RESEARCH');
+  const platforms = entries.filter((e) => e.group === 'CONNECTED_PLATFORM');
+  const unavailable = entries.filter((e) => e.group === 'UNAVAILABLE');
+
+  return (
+    <div className="card">
+      <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Research catalogue</h3>
+      <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', marginBottom: '0.75rem' }}>
+        What the AI brain may read for this workspace. Only sources you enable here run — nothing is
+        fetched silently. A passing check proves one probe request worked just now, never future data.
+      </p>
+      {loading ? <p style={{ fontSize: '0.875rem' }}>Loading catalogue...</p> : null}
+      {!loading && error ? (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <p role="alert" style={{ color: 'var(--color-error)', fontSize: '0.875rem' }}>{error}</p>
+          <button className="btn btn-secondary" onClick={() => void fetchData()}>Retry</button>
+        </div>
+      ) : null}
+      {!loading && !error ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+          <div>
+            <p className="kicker">Research sources</p>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0, margin: 0 }}>
+              {research.map((entry) => (
+                <ResearchCard
+                  key={entry.sourceType}
+                  entry={entry}
+                  working={working}
+                  onToggle={() => void handleToggle(entry)}
+                  onVerify={() => void handleVerify(entry)}
+                  onSaved={() => void fetchData()}
+                  onMessage={setMessage}
+                />
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="kicker">Feed-managed sources</p>
+            <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', margin: 0 }}>
+              RSS, Atom, Hacker News, GitHub releases, Blog and Site are configured as feed sources —
+              use “Add a source” below or Onboarding → Signal sources. They are not toggled here.
+            </p>
+          </div>
+          <div>
+            <p className="kicker">Connected platforms — research state</p>
+            <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0, margin: 0 }}>
+              {platforms.map((entry) => (
+                <li key={entry.sourceType} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                    <p style={{ fontWeight: 600, margin: 0 }}>{entry.displayName}</p>
+                    <span className="badge badge-neutral">{entry.workerEligible ? (entry.workerWillRun ? 'Will run' : 'Eligible') : 'Research off'}</span>
+                    {entry.accountState === 'CONNECTED' ? <span className="badge badge-success">Account connected</span> : null}
+                  </div>
+                  {entry.requiresAccountNote ? (
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.requiresAccountNote}</p>
+                  ) : null}
+                  {entry.notWiredReason ? (
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.notWiredReason}</p>
+                  ) : null}
+                  <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+          {unavailable.length > 0 ? (
+            <div>
+              <p className="kicker">Unavailable</p>
+              <ul style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', listStyle: 'none', padding: 0, margin: 0 }}>
+                {unavailable.map((entry) => (
+                  <li key={entry.sourceType} style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      <p style={{ fontWeight: 600, margin: 0 }}>{entry.displayName}</p>
+                      <span className="badge badge-error">Unavailable</span>
+                    </div>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.description}</p>
+                    <p className="tiny" style={{ margin: '0.25rem 0 0' }}>Capability: {entry.sourceOfTruth}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
+      ) : null}
+      {message ? (
+        <p style={{ marginTop: '0.75rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{message}</p>
+      ) : null}
+    </div>
+  );
+}
+
+function ResearchCard({
+  entry,
+  working,
+  onToggle,
+  onVerify,
+  onSaved,
+  onMessage,
+}: {
+  entry: WorkspaceConnectorEntry;
+  working: string | null;
+  onToggle: () => void;
+  onVerify: () => void;
+  onSaved: () => void;
+  onMessage: (msg: string | null) => void;
+}) {
+  const [draft, setDraft] = useState<string>('');
+  const [sortBy, setSortBy] = useState<string>('hot');
+  const [timeFilter, setTimeFilter] = useState<string>('day');
+  const [topics, setTopics] = useState<string>('');
+  const [geo, setGeo] = useState<string>('US');
+  const [timeRange, setTimeRange] = useState<string>('now 7-d');
+  const [category, setCategory] = useState<string>('0');
+  const [initialized, setInitialized] = useState(false);
+
+  useEffect(() => {
+    if (initialized) return;
+    const cfg = (entry.config ?? {}) as Record<string, unknown>;
+    if (entry.sourceType === 'REDDIT') {
+      if (Array.isArray(cfg.subreddits)) setDraft((cfg.subreddits as unknown[]).map(String).join(', '));
+      if (typeof cfg.sortBy === 'string') setSortBy(cfg.sortBy);
+      if (typeof cfg.timeFilter === 'string') setTimeFilter(cfg.timeFilter);
+    }
+    if (entry.sourceType === 'GOOGLE_TRENDS') {
+      if (Array.isArray(cfg.topics)) setTopics((cfg.topics as unknown[]).map(String).join(', '));
+      if (typeof cfg.geo === 'string') setGeo(cfg.geo);
+      if (typeof cfg.timeRange === 'string') setTimeRange(cfg.timeRange);
+      if (typeof cfg.category !== 'undefined') setCategory(String(cfg.category));
+    }
+    setInitialized(true);
+  }, [entry, initialized]);
+
+  async function handleSave() {
+    onMessage(null);
+    try {
+      if (entry.sourceType === 'REDDIT') {
+        const subreddits = draft.split(',').map((s) => s.trim()).filter(Boolean);
+        await updateConnectorConfig('REDDIT', { enabled: entry.enabled, config: { subreddits, sortBy, timeFilter } });
+      } else if (entry.sourceType === 'GOOGLE_TRENDS') {
+        const topicList = topics.split(',').map((s) => s.trim()).filter(Boolean);
+        await updateConnectorConfig('GOOGLE_TRENDS', {
+          enabled: entry.enabled,
+          config: { topics: topicList, geo: geo.trim() || 'US', timeRange: timeRange.trim() || 'now 7-d', category: Number.parseInt(category, 10) || 0 },
+        });
+      } else {
+        await updateConnectorConfig(entry.sourceType, { enabled: entry.enabled, config: entry.config });
+      }
+      onSaved();
+    } catch (err) {
+      onMessage(friendlyErrorMessage(err));
+    }
+  }
+
+  return (
+    <li style={{ border: '1px solid var(--color-border)', borderRadius: 'var(--radius)', padding: '0.75rem' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <p style={{ fontWeight: 600, margin: 0 }}>{entry.displayName}</p>
+        <span className={entry.enabled ? 'badge badge-success' : 'badge badge-neutral'}>
+          {entry.enabled ? 'Enabled' : 'Disabled'}
+        </span>
+        <span className={probeBadgeClass(entry.probe.status)}>{entry.probe.status.replace(/_/g, ' ')}</span>
+        {entry.workerWillRun ? (
+          <span className="badge badge-success">Will run</span>
+        ) : (
+          <span className="badge badge-neutral">Will not run</span>
+        )}
+      </div>
+      <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>{entry.description}</p>
+      <p className="tiny" style={{ margin: '0.25rem 0 0' }}>
+        Auth: {entry.authKind === 'NONE' ? 'Public / no OAuth' : entry.authKind} · Capability: {entry.sourceOfTruth}
+      </p>
+      {entry.probe.error ? (
+        <p role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-error)', margin: '0.25rem 0 0' }}>{entry.probe.error}</p>
+      ) : null}
+      {entry.sourceType === 'YOUTUBE' && !entry.serverCredsPresent ? (
+        <p style={{ fontSize: '0.75rem', color: 'var(--color-text-secondary)', margin: '0.25rem 0 0' }}>
+          Not configured on this server — ask the operator to add a YouTube Data API key. Enabling it without credentials will honestly skip every run.
+        </p>
+      ) : null}
+      {(entry.sourceType === 'REDDIT' || entry.sourceType === 'GOOGLE_TRENDS') && entry.enabled ? (
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+          {entry.sourceType === 'REDDIT' ? (
+            <>
+              <input
+                value={draft}
+                onChange={(e) => setDraft(e.target.value)}
+                placeholder="Subreddits, comma-separated (e.g. programming, artificial)"
+                aria-label="Subreddits"
+                style={{ ...fieldStyle, flex: '2 1 220px' }}
+              />
+              <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} aria-label="Sort" style={fieldStyle}>
+                <option value="hot">hot</option>
+                <option value="new">new</option>
+                <option value="top">top</option>
+                <option value="rising">rising</option>
+                <option value="controversial">controversial</option>
+              </select>
+              <select value={timeFilter} onChange={(e) => setTimeFilter(e.target.value)} aria-label="Time window" style={fieldStyle}>
+                <option value="hour">hour</option>
+                <option value="day">day</option>
+                <option value="week">week</option>
+                <option value="month">month</option>
+                <option value="year">year</option>
+                <option value="all">all</option>
+              </select>
+            </>
+          ) : (
+            <>
+              <input
+                value={topics}
+                onChange={(e) => setTopics(e.target.value)}
+                placeholder="Topics, comma-separated (e.g. AI, vibe coding)"
+                aria-label="Topics"
+                style={{ ...fieldStyle, flex: '2 1 220px' }}
+              />
+              <input value={geo} onChange={(e) => setGeo(e.target.value)} placeholder="US" aria-label="Region" style={{ ...fieldStyle, flex: '0 1 90px' }} />
+              <select value={timeRange} onChange={(e) => setTimeRange(e.target.value)} aria-label="Time range" style={fieldStyle}>
+                <option value="now 1-d">now 1-d</option>
+                <option value="now 7-d">now 7-d</option>
+                <option value="today 1-m">today 1-m</option>
+                <option value="today 3-m">today 3-m</option>
+                <option value="today 12-m">today 12-m</option>
+              </select>
+              <input value={category} onChange={(e) => setCategory(e.target.value)} placeholder="0" inputMode="numeric" aria-label="Category (0 = all)" style={{ ...fieldStyle, flex: '0 1 90px' }} />
+            </>
+          )}
+          <button className="btn btn-secondary" onClick={() => void handleSave()}>
+            Save
+          </button>
+        </div>
+      ) : null}
+      <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.5rem' }}>
+        <button className="btn btn-secondary" disabled={working === `toggle:${entry.sourceType}`} onClick={onToggle}>
+          {entry.enabled ? 'Disable' : 'Enable'}
+        </button>
+        <button className="btn btn-secondary" disabled={working === `verify:${entry.sourceType}`} onClick={onVerify}>
+          Verify now
+        </button>
+      </div>
+    </li>
   );
 }
 

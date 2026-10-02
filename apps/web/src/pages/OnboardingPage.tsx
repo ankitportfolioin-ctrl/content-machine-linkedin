@@ -35,7 +35,8 @@ const STEP_META: Array<{ id: string; title: string; hint: string }> = [
 ];
 
 export function OnboardingPage() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, workspaceId } = useAuth();
+  const hasWorkspace = workspaceId !== null;
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [settings, setSettings] = useState<WorkspaceSettings | null>(null);
   const [policy, setPolicy] = useState<AutonomyPolicy | null>(null);
@@ -67,9 +68,9 @@ export function OnboardingPage() {
   }, []);
 
   useEffect(() => {
-    if (!authLoading && isAuthenticated) void fetchAll();
-    if (!authLoading && !isAuthenticated) setLoading(false);
-  }, [authLoading, isAuthenticated, fetchAll]);
+    if (!authLoading && isAuthenticated && hasWorkspace) void fetchAll();
+    if (!authLoading && (!isAuthenticated || !hasWorkspace)) setLoading(false);
+  }, [authLoading, isAuthenticated, workspaceId, fetchAll]);
 
   if (authLoading || loading) {
     return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Loading onboarding...</h2></div></div>;
@@ -77,8 +78,34 @@ export function OnboardingPage() {
   if (!isAuthenticated) {
     return <div className="stack"><div className="card"><h2 className="section-title">Onboarding</h2><p className="muted">Sign in to set up your workspace.</p></div><LoginForm /></div>;
   }
+  if (!hasWorkspace) {
+    return (
+      <div className="stack">
+        <div className="card row-between">
+          <div>
+            <p className="kicker">One-time setup</p>
+            <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Onboarding</h2>
+            <p className="muted">Create a workspace first — onboarding progress is detected from its data.</p>
+          </div>
+          <WorkspaceSelector />
+        </div>
+      </div>
+    );
+  }
   if (error || !progress) {
-    return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Something went wrong</h2><p className="empty-state-description">{error ?? 'No progress returned.'}</p><button className="btn btn-secondary" onClick={() => void fetchAll()} style={{ marginTop: '1rem' }}>Retry</button></div></div>;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="card row-between">
+          <div>
+            <p className="kicker">One-time setup</p>
+            <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Onboarding</h2>
+            <p className="muted">Create a workspace first — onboarding progress is detected from its data.</p>
+          </div>
+          <WorkspaceSelector />
+        </div>
+        <div className="card"><div className="empty-state"><h2 className="empty-state-title">Something went wrong</h2><p className="empty-state-description">{error ?? 'No progress returned.'}</p><button className="btn btn-secondary" onClick={() => void fetchAll()} style={{ marginTop: '1rem' }}>Retry</button></div></div>
+      </div>
+    );
   }
 
   return (
@@ -346,6 +373,10 @@ function SourcesStep({ onChanged }: { onChanged: () => void }) {
 
   return (
     <div className="stack-sm">
+      <p className="muted">
+        Registry research sources (Reddit, Google Trends) are configured per workspace in the{' '}
+        <NavLink to="/brain">Brain → Sources → Research catalogue</NavLink>. They count toward this step once enabled.
+      </p>
       <form onSubmit={(e) => void handleAdd(e)} className="actions">
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/feed" className="field" style={{ flex: '2 1 220px' }} />
         <select value={type} onChange={(e) => setType(e.target.value)} className="field" style={{ flex: '1 1 140px' }} aria-label="Source type">

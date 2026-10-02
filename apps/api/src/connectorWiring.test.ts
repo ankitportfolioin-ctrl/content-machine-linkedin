@@ -69,10 +69,9 @@ describe('Gate 1: FeedSource type honesty', () => {
   });
 });
 
-describe('Gate 1: connector registry runs once per intelligence cycle', () => {
-  it('invokes fetchFromAllSources exactly once and isolates connector failures', async () => {
-    // Fail-closed network: every external request 404s. AI hosts are never
-    // reached here because no new documents exist to understand.
+describe('Workspace-configured connectors run at most once per intelligence cycle', () => {
+  it('never invokes the registry when the workspace enabled nothing', async () => {
+    // Fail-closed network: every external request 404s.
     vi.stubGlobal(
       'fetch',
       vi.fn().mockImplementation(async () => new Response('unavailable', { status: 404 })),
@@ -81,19 +80,45 @@ describe('Gate 1: connector registry runs once per intelligence cycle', () => {
 
     const result = await runDailyLoop(workspaceId, '2026-12-01');
     expect(['COMPLETED', 'COMPLETED_WITH_FAILURES']).toContain(result.status);
-    expect(spy).toHaveBeenCalledTimes(1);
+    // Zero hidden execution: no rows enabled, so no registry call at all.
+    expect(spy).not.toHaveBeenCalled();
 
     const row = await prisma.runStage.findFirst({
       where: { workspaceId, dailyRun: { runDate: new Date('2026-12-01T00:00:00.000Z') }, stage: 'INTELLIGENCE' },
     });
     expect(row?.status).toBe('SUCCEEDED');
+    const evidence = String(row?.error ?? '');
+    expect(evidence).toMatch(/all disabled for this workspace/i);
+    // Failure isolation: feed failures never fail the stage.
+    const counts = row?.counts as Record<string, number>;
+    expect(counts.sourcesAttempted).toBe(1);
+  });
+
+  it('invokes fetchFromAllSources exactly once when enabled, isolating failures', async () => {
+    await request(app)
+      .put('/api/v1/connectors/REDDIT')
+      .set(auth())
+      .send({ enabled: true, config: { subreddits: ['programming'], timeFilter: 'day', sortBy: 'hot' } })
+      .expect(200);
+    vi.stubGlobal(
+      'fetch',
+      vi.fn().mockImplementation(async () => new Response('unavailable', { status: 404 })),
+    );
+    const spy = vi.spyOn(connectorRegistry, 'fetchFromAllSources');
+
+    const result = await runDailyLoop(workspaceId, '2026-12-04');
+    expect(['COMPLETED', 'COMPLETED_WITH_FAILURES']).toContain(result.status);
+    expect(spy).toHaveBeenCalledTimes(1);
+
+    const row = await prisma.runStage.findFirst({
+      where: { workspaceId, dailyRun: { runDate: new Date('2026-12-04T00:00:00.000Z') }, stage: 'INTELLIGENCE' },
+    });
+    expect(row?.status).toBe('SUCCEEDED');
     // Stage notes persist on the row's error column (pre-existing shape).
     const evidence = String(row?.error ?? '');
     expect(evidence).toContain('Connector registry primed (REDDIT, GOOGLE_TRENDS, QUORA');
+    expect(evidence).toContain('Workspace connectors enabled: REDDIT');
     expect(evidence).toContain('Connector errors:');
-    expect(evidence).toMatch(/YouTube.*not configured|not configured.*YouTube/i);
-    // Failure isolation: connector + feed failures never fail the stage.
-    const counts = row?.counts as Record<string, number>;
-    expect(counts.sourcesAttempted).toBe(1);
+    expect(evidence).toMatch(/Reddit/i);
   });
 });
