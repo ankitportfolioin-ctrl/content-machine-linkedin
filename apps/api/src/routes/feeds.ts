@@ -26,6 +26,34 @@ const TYPE_MAP = {
   tiktok: 'TIKTOK',
 } as const;
 
+// Gate 1 honesty: these types are served by the research connector registry
+// (once per intelligence run), NOT by per-feed URL fetching. Accepting them
+// as FeedSource rows would imply per-feed connector capability that does not
+// exist, so creation/retargeting is refused with an honest explanation.
+// The onboarding UI already offers only rss/atom/hackernews/github_releases/
+// blog/site. The DB enum is left untouched (no migration; legacy rows, if any,
+// keep flowing through generic URL ingestion).
+const CONNECTOR_MANAGED_TYPES = new Set<string>([
+  'REDDIT',
+  'YOUTUBE',
+  'GOOGLE_TRENDS',
+  'LINKEDIN',
+  'X',
+  'INSTAGRAM',
+  'TIKTOK',
+]);
+
+function rejectConnectorManagedType(rawType: string): void {
+  const mapped = TYPE_MAP[rawType as keyof typeof TYPE_MAP];
+  if (mapped && CONNECTOR_MANAGED_TYPES.has(mapped)) {
+    throw new ValidationError(
+      `Feed type '${rawType}' is served by the research connector registry, not by feed fetching. ` +
+        `It cannot be added as a feed source. Reddit and Google Trends run automatically once per ` +
+        `intelligence cycle; authenticated platforms need their own connection first. Nothing was created.`,
+    );
+  }
+}
+
 router.get('/', async (req, res, next) => {
   try {
     const authReq = req as unknown as AuthenticatedRequest;
@@ -49,6 +77,7 @@ router.post('/', async (req, res, next) => {
   try {
     const authReq = req as unknown as AuthenticatedRequest;
     const data = feedSourceCreateSchema.parse(req.body);
+    rejectConnectorManagedType(data.type);
     const existing = await prisma.feedSource.findUnique({
       where: { workspaceId_url: { workspaceId: authReq.workspaceId, url: data.url } },
     });
@@ -76,6 +105,9 @@ router.patch('/:feedId', async (req, res, next) => {
     const { feedId } = req.params;
     if (!feedId) throw new NotFoundError('Feed Source');
     const data = feedSourceUpdateSchema.parse(req.body);
+    if (data.type !== undefined) {
+      rejectConnectorManagedType(data.type);
+    }
     const existing = await prisma.feedSource.findFirst({
       where: { id: feedId, workspaceId: authReq.workspaceId },
     });

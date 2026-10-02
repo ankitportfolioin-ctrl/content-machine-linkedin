@@ -11,6 +11,7 @@ import {
   expandHackerNewsFeed,
   resolveReleaseFeedUrl,
   connectorRegistry,
+  primeConnectorRegistry,
 } from '@growth-operator/intelligence';
 import { ContentPlanService, DraftComposer } from '@growth-operator/content';
 import {
@@ -138,13 +139,17 @@ const intelligence: StageFn = async (ctx) => {
     t === 'RSS' ? 'RSS' : t === 'ATOM' ? 'ATOM' : undefined;
 
   let docsProcessed = 0;
+  const env = getEnv();
+  // Run-scoped document queue: feed fetching AND the once-per-run connector
+  // block below both push here; processNewDocs() runs a single pass after
+  // all fetching completes.
+  const newDocs: Array<{ sourceId: string; documentId: string }> = [];
   for (const feed of feeds) {
     if (!ctx.budget.spendFetch()) {
       notes.push('Fetch budget exhausted; remaining feeds deferred to the next run.');
       break;
     }
     counts.sourcesAttempted += 1;
-    const newDocs: Array<{ sourceId: string; documentId: string }> = [];
 
     // Dedicated platform adapters (Batch 3 #13). GitHub repo URLs resolve
     // to their official releases Atom feed and take the generic path; HN
@@ -164,6 +169,7 @@ const intelligence: StageFn = async (ctx) => {
         continue;
       }
       if (adapterItems) {
+        let adapterFailed = 0;
         for (const item of adapterItems.slice(0, MAX_ITEMS_PER_FEED)) {
           if (!ctx.budget.spendFetch()) {
             notes.push('Fetch budget exhausted; remaining items deferred.');
@@ -173,18 +179,21 @@ const intelligence: StageFn = async (ctx) => {
             const itemResult = await ingestion.ingest(workspaceId, item.url, {});
             if (itemResult.status !== 'FAILED' && itemResult.documentId) {
               newDocs.push({ sourceId: itemResult.sourceId, documentId: itemResult.documentId });
+            } else {
+              adapterFailed += 1;
+              notes.push(`HN story ingestion failed for ${item.url}: ${itemResult.error ?? 'unknown'}`);
             }
-          } catch {
-            counts.failed += 1;
+          } catch (e) {
+            adapterFailed += 1;
+            notes.push(`HN story ingestion error for ${item.url}: ${e instanceof Error ? e.message : 'unknown'}`);
           }
         }
+        counts.failed += adapterFailed;
         await prisma.feedSource.update({
           where: { id: feed.id },
           data: { lastFetchedAt: new Date(), lastError: null, lastCursor: adapterItems[0]?.url ?? null },
         });
         counts.fetched += 1;
-        if (!aiAvailable) continue;
-        await processNewDocs();
         continue;
       }
     }
@@ -248,58 +257,71 @@ const intelligence: StageFn = async (ctx) => {
       }
     }
 
-    // NEW: Connector-based research (Reddit, YouTube, Google Trends, LinkedIn, X, etc.)
-    // These connectors run independently of feed sources and provide additional research signals
-    if (aiAvailable) {
-      const env = getEnv();
-      const connectorConfigs = {
-        REDDIT: { enabled: true, config: { subreddits: ['programming', 'MachineLearning', 'artificial', 'OpenAI', 'ClaudeAI', 'LocalLLaMA', 'singularity', 'Futurology', 'technology', 'startups', 'Entrepreneur', 'SaaS', 'webdev', 'learnprogramming', 'coding', 'devops', 'sysadmin', 'kubernetes', 'aws', 'googlecloud', 'azure'], timeFilter: 'day', sortBy: 'hot' } },
-        YOUTUBE: { enabled: !!env.YOUTUBE_API_KEY, config: { queries: ['AI automation', 'AI coding', 'vibe coding', 'Claude Code', 'Cursor AI', 'AI agents', 'web development', 'freelancing with AI'], apiKey: env.YOUTUBE_API_KEY } },
-        GOOGLE_TRENDS: { enabled: true, config: { topics: ['AI', 'AI coding', 'AI agents', 'Claude Code', 'vibe coding', 'automation', 'developer tools'], geo: 'US', timeRange: 'now 7-d', category: 0 } },
-        LINKEDIN: { enabled: false, config: { organizationIds: [] } }, // Requires OAuth
-        X: { enabled: false, config: {} }, // Requires OAuth
-        INSTAGRAM: { enabled: false, config: {} }, // Requires OAuth, Tier 2
-        TIKTOK: { enabled: false, config: {} }, // Requires OAuth, Tier 2
-      };
+  }
 
-      const credentials: Record<string, any> = {
-        YOUTUBE: { accessToken: env.YOUTUBE_ACCESS_TOKEN, apiKey: env.YOUTUBE_API_KEY },
-        // OAuth-based credentials would be loaded from database in production
-      };
+  // Research connectors run ONCE per intelligence cycle — never once per
+  // feed (Gate 1 fix). Credential priming comes first: without it,
+  // fetchFromAllSources() honestly skips every connector as "not configured".
+  // Connector signals re-enter the SAME ingestion pipeline as feed items
+  // (SSRF-checked, canonical-URL deduped, workspace-scoped). Connector
+  // failures are recorded in notes and never fail the run.
+  if (aiAvailable) {
+    const { primed, skippedAuthRequired } = primeConnectorRegistry(connectorRegistry, {
+      YOUTUBE_API_KEY: env.YOUTUBE_API_KEY,
+      YOUTUBE_ACCESS_TOKEN: env.YOUTUBE_ACCESS_TOKEN,
+    });
+    notes.push(
+      `Connector registry primed (${primed.length > 0 ? primed.join(', ') : 'none'}); ` +
+      `awaiting credentials: ${skippedAuthRequired.length > 0 ? skippedAuthRequired.join(', ') : 'none'}.`,
+    );
+    // Bounded default scope (Gate 1): mirrors the /research/trigger defaults
+    // (5 subreddits / 5 topics). These defaults were never live before this
+    // gate, so nothing depends on a wider scan; wider scopes remain
+    // configurable per future gates. Bounded scope keeps every daily run's
+    // provider cost predictable.
+    const connectorConfigs = {
+      REDDIT: { enabled: true, config: { subreddits: ['programming', 'MachineLearning', 'artificial', 'OpenAI', 'ClaudeAI'], timeFilter: 'day', sortBy: 'hot' } },
+      YOUTUBE: { enabled: true, config: { queries: ['AI automation', 'AI coding', 'vibe coding', 'Claude Code', 'Cursor AI', 'AI agents', 'web development', 'freelancing with AI'] } },
+      GOOGLE_TRENDS: { enabled: true, config: { topics: ['AI', 'AI coding', 'AI agents', 'Claude Code', 'vibe coding'], geo: 'US', timeRange: 'now 7-d', category: 0 } },
+      LINKEDIN: { enabled: false, config: { organizationIds: [] } }, // Requires OAuth
+      X: { enabled: false, config: {} }, // Requires OAuth
+      INSTAGRAM: { enabled: false, config: {} }, // Requires OAuth, Tier 2
+      TIKTOK: { enabled: false, config: {} }, // Requires OAuth, Tier 2
+    };
 
-      const { signals: connectorSignals, errors: connectorErrors } = await connectorRegistry.fetchFromAllSources(
-        workspaceId,
-        Math.min(50, MAX_NEW_DOCS_PER_RUN - docsProcessed),
-        connectorConfigs
-      );
+    const { signals: connectorSignals, errors: connectorErrors } = await connectorRegistry.fetchFromAllSources(
+      workspaceId,
+      Math.min(50, MAX_NEW_DOCS_PER_RUN - docsProcessed),
+      connectorConfigs
+    );
 
-      if (connectorErrors.length > 0) {
-        notes.push(`Connector errors: ${connectorErrors.join('; ')}`);
-      }
-
-      // Ingest connector signals
-      for (const signal of connectorSignals) {
-        if (docsProcessed >= MAX_NEW_DOCS_PER_RUN) {
-          notes.push(`New-document cap (${MAX_NEW_DOCS_PER_RUN}) reached; remainder deferred.`);
-          break;
-        }
-        if (!ctx.budget.spendFetch()) {
-          notes.push('Fetch budget exhausted; remaining connector signals deferred.');
-          break;
-        }
-        try {
-          const result = await ingestion.ingest(workspaceId, signal.url, { sourceType: signal.sourceType as 'REDDIT' | 'YOUTUBE' | 'GOOGLE_TRENDS' | 'LINKEDIN' | 'X' | 'INSTAGRAM' | 'TIKTOK' });
-          if (result.status !== 'FAILED' && result.documentId) {
-            newDocs.push({ sourceId: result.sourceId, documentId: result.documentId });
-          }
-        } catch {
-          counts.failed += 1;
-        }
-      }
+    if (connectorErrors.length > 0) {
+      notes.push(`Connector errors: ${connectorErrors.join('; ')}`);
     }
 
-    if (!aiAvailable) continue;
+    for (const signal of connectorSignals) {
+      if (docsProcessed >= MAX_NEW_DOCS_PER_RUN) {
+        notes.push(`New-document cap (${MAX_NEW_DOCS_PER_RUN}) reached; remainder deferred.`);
+        break;
+      }
+      if (!ctx.budget.spendFetch()) {
+        notes.push('Fetch budget exhausted; remaining connector signals deferred.');
+        break;
+      }
+      try {
+        const connectorResult = await ingestion.ingest(workspaceId, signal.url, { sourceType: signal.sourceType as 'REDDIT' | 'YOUTUBE' | 'GOOGLE_TRENDS' | 'LINKEDIN' | 'X' | 'INSTAGRAM' | 'TIKTOK' });
+        if (connectorResult.status !== 'FAILED' && connectorResult.documentId) {
+          newDocs.push({ sourceId: connectorResult.sourceId, documentId: connectorResult.documentId });
+        }
+      } catch {
+        counts.failed += 1;
+      }
+    }
+  }
+
+  if (aiAvailable) {
     await processNewDocs();
+  }
 
     async function processNewDocs(): Promise<void> {
 
@@ -464,7 +486,6 @@ const intelligence: StageFn = async (ctx) => {
         counts.opportunitiesCreated += 1;
       }
     }
-    }
   }
 
   // Per-source fetch failures are data, not stage failure: they are counted
@@ -545,6 +566,7 @@ const content: StageFn = async (ctx) => {
     const sourceIds = (opp.sourceIds as string[] | null) ?? [];
     const claimIds = (opp.claimIds as string[] | null) ?? [];
     const trendSignalIds = (opp.trendSignalIds as string[] | null) ?? [];
+    const objective = opp.objective?.slice(0, 50) ?? '';
     await prisma.contentIdea.create({
       data: {
         workspaceId,
@@ -562,7 +584,7 @@ const content: StageFn = async (ctx) => {
         trendSignalIds,
         thesis: opp.thesis,
         audience: opp.audience,
-        objective: opp.objective,
+        objective,
         reasoning: opp.reasoning,
         evidenceSnapshot: { evidenceSummary: opp.evidenceSummary, sourceIds, claimIds, trendSignalIds },
       },

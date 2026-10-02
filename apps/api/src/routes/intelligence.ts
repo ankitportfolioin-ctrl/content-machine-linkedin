@@ -19,7 +19,7 @@ import { ClaimLedgerService } from '@growth-operator/intelligence';
 import { TopicClusteringService } from '@growth-operator/intelligence';
 import { TrendSignalService } from '@growth-operator/intelligence';
 import { AudienceProblemService } from '@growth-operator/intelligence';
-import { connectorRegistry } from '@growth-operator/intelligence';
+import { connectorRegistry, primeConnectorRegistry } from '@growth-operator/intelligence';
 import { buildFactCheckList, getSourceReliability, listSourceReliabilities } from '@growth-operator/intelligence';
 import { ContentOpportunityService, toOpportunityLearningView,
   ContentOpportunityInput, validateOpportunityTriage } from '@growth-operator/intelligence';
@@ -1050,8 +1050,13 @@ router.post('/research/trigger', async (req, res, next) => {
       };
     }
 
-    const credentials = connectorRegistry.getCredentials('YOUTUBE');
-    void credentials;
+    // Gate 1: prime the shared registry exactly like the daily loop does.
+    // No-auth providers become reachable; authenticated ones stay honest
+    // unless the server actually holds credentials.
+    primeConnectorRegistry(connectorRegistry, {
+      YOUTUBE_API_KEY: env.YOUTUBE_API_KEY,
+      YOUTUBE_ACCESS_TOKEN: env.YOUTUBE_ACCESS_TOKEN,
+    });
     const fetchConfigs: Record<string, Record<string, unknown>> = {};
     for (const [key, value] of Object.entries(merged)) {
       fetchConfigs[key] = { enabled: value.enabled, config: value.config };
