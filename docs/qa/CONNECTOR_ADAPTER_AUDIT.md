@@ -332,6 +332,50 @@ UNAVAILABLE permanently.
 
 ---
 
+## Gate 2 — Reddit Live Verification (2026-10-02): BLOCKED
+
+**Verdict: REDDIT LIVE VERIFICATION = BLOCKED.** No architecture, connector,
+test, or bypass code was changed for this gate (zero code diff). The existing
+`RedditConnector.fetchRecentItems()` was exercised unmodified via throwaway
+probes (deleted afterwards).
+
+- **Environment**: same sandbox as Gates 0–1 (Docker PostgreSQL, Node 24).
+  No alternative authorized network is available from here; no proxy,
+  UA-spoofing, `old.reddit` retarget, or scraping workaround was used
+  (all would violate §8).
+- **Subreddits tried**: `r/artificial` (preferred), then `r/technology`,
+  `r/AskReddit` (alternates recorded per mandate; Gate 1 already showed
+  `r/programming` → 403).
+- **Endpoint**: `GET https://www.reddit.com/r/{sub}/hot.json?t=day&limit=25`
+  (connector default; probe used limit 5/1 — same path).
+- **Request timestamps (UTC)**: 2026-10-02T10:06:25Z (artificial),
+  10:06:34Z (technology).
+- **HTTP status**: **403 on all four subreddits** (artificial 975ms,
+  technology 358ms). Network-wide Reddit bot mitigation, not per-subreddit.
+- **Response result**: 0 items on every attempt. Classified error surfaced
+  through the registry as `Reddit: r/<sub>: Reddit API responded 403 …`
+  (Gate 1 surfacing fix confirmed working against the real provider).
+- **RawSignal**: none created (no response to parse — correctly zero).
+- **NormalizedSignal / SourceDocument / Claims / Topics / Gaps /
+  Opportunities**: none (nothing fabricated; pipeline untouched).
+- **Deduplication**: not exercisable (no items). Existing mechanism
+  unchanged and still covered by deterministic wiring tests.
+- **Workspace isolation**: untouched (no live data entered any workspace).
+- **Tests**: none added or modified. Opt-in `connectorLive.test.ts` already
+  encodes this exact outcome (fails LOUD with the provider reason when
+  enabled; skipped by default). Default suite remains deterministic.
+- **Final status**: Reddit row → **BLOCKED** in `CONNECTOR_MATRIX.md`.
+  `REAL_REQUEST_VERIFIED` requires all 10 §9 conditions; condition 2
+  (successful response) is unmet, so the status is refused honestly.
+
+**Exact next gate**: re-run this Gate 2 probe from an allowing network
+(residential/office egress or approved Reddit API access). The moment any
+public subreddit returns 200 through the unmodified connector, continue the
+chain (normalize → ingest → claims → topics → opportunity) with real counts
+and flip the status. Until then, no Reddit-dependent product work.
+
+---
+
 ## Appendix — file inventory (all read this gate)
 
 `packages/intelligence/src/researchConnectors.ts`, `connectors/index.ts`, `connectors/{reddit,youtube,googleTrends,linkedin,x,instagram,tiktok,facebook,quora}Connector.ts`, `feedAdapters.ts`, `sourceIngestion.ts`, `index.ts`, `test/{connectorIsolation,connectorAuth,feedAdapters,sourceIngestion,sourceExtraction}.test.ts`, `packages/social/src/{types,adapters,index}.ts`, `packages/shared/src/intelligence/sourceExtraction.ts` (+ `urlCanonicalization.ts` referenced), `apps/api/src/worker/stages.ts`, `apps/api/src/routes/{social,intelligence,feeds,readiness}.ts`, `apps/api/src/utils/tokenVault.ts`, `apps/api/src/{social,feedAdapters,dailyLoop,loopStages,signalFlow}.test.ts`, `packages/db/prisma/schema.prisma`, `apps/web/src/pages/{BrainPage,SettingsPage,HomePage}.tsx`, `.env.example`, `apps/api/src/config/env.ts`.
