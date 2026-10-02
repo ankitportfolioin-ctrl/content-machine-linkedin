@@ -419,6 +419,70 @@ and no other connector in this task.
 
 ---
 
+## Gate 4 — GitHub Live Verification (2026-10-02): BLOCKED (internal defect)
+
+**Verdict: GITHUB LIVE VERIFICATION = BLOCKED.** Step 1 inspection first
+established what "the existing GitHub connector" actually is: there is NO
+GitHub connector class, no registry registration, nothing to prime — only
+`resolveReleaseFeedUrl()` (pure rewrite to `releases.atom`), the
+`GITHUB_RELEASES` FeedSource branch (`stages.ts:201`), generic ATOM
+ingestion, and reliability metadata. Tests cover only the pure rewrite.
+Nothing was redesigned; Reddit/Trends untouched; zero product-code changes.
+
+- **Target**: `https://github.com/microsoft/TypeScript` → resolved
+  `https://github.com/microsoft/TypeScript/releases.atom` (stable public
+  repo, tech audience; same repo the unit tests already cite).
+- **Provider request (timestamp 2026-10-02T10:17:12Z)**: HTTP **200**,
+  `application/atom+xml`, 13,656 bytes, **10 `<entry>` items**, valid Atom
+  (`<feed xmlns="http://www.w3.org/2005/Atom">`). First entry: real release
+  `vscode-typescript/v1.0.1`, real timestamp `2026-09-30T19:10:17Z`, real
+  author `typescript-automation[bot]`, real URL. Provider side fully healthy.
+- **Production loop run** (scratch workspace + OWNER + GITHUB_RELEASES feed,
+  real `runDailyLoop`, deleted afterwards — 0 orphan rows verified):
+  run COMPLETED, all stages SUCCEEDED, but the feed source row came back
+  `status: FAILED`, document `extractionStatus: FAILED`, wordCount 0 →
+  **0 claims, 0 topics, 0 trends, 0 gaps, 0 opportunities, 0 ideas, 0 plans**.
+- **Root cause (defect, reported not fixed)**: GitHub's Atom carries
+  `<content type="html">`, which xml2js parses to an OBJECT
+  (`{_: '<p>…', type: 'html'}`). `extractAtomContent`
+  (`shared/sourceExtraction.ts:286`: `entry.summary || entry.content`)
+  passes the object through as `FeedItem.description` (typed
+  `string | null` — violated at runtime), and the ATOM branch in
+  `sourceIngestion.ts` calls `i.description?.split(...)` → TypeError →
+  caught → FAILED. Same latent shape exists in the RSS branch
+  (`content:encoded`). Independent corroboration: the dev DB already held a
+  same-URL row (other workspace, type USER_URL, status FAILED) — this defect
+  predates Gate 4 and reproduces across ingestion paths.
+- **Provenance**: source row kept the real github.com URL and ATOM type;
+  no engagement/velocity/timestamps invented (nothing survived extraction
+  to invent anything from).
+- **Deduplication**: re-ingest of the same URL returned `SUCCESS /
+  "Content already exists"` with null documentId — source-level dedupe
+  held even in the failure state.
+- **Workspace isolation**: every read/write filtered by the scratch
+  workspaceId; the same-URL row elsewhere was counted, never read.
+  Scratch workspace + user deleted (cascade verified: 0 rows remain).
+- **Tests**: none added or modified (a parser unit test belongs to the fix
+  gate, not this verification gate). No suite re-run needed — no code
+  changed.
+- **Final status**: GitHub row → **BLOCKED (internal defect, not
+  provider)**; the prior matrix overclaim for this row is corrected above.
+  `REAL_REQUEST_VERIFIED` refused (downstream traversal unmet).
+
+**Defect report for a future fix gate (not implemented here)**: normalize
+xml2js object nodes to strings in `extractAtomContent` (and audit the RSS
+`content:encoded` twin) — e.g. unwrap `{_: text}` / strip HTML to text in
+`shared/sourceExtraction.ts`, or coerce in `sourceIngestion.ts` ATOM/RSS
+branches. Estimated small, testable with the real bytes captured above
+(10 TypeScript release entries). Until fixed, GitHub releases ingestion
+fails closed honestly.
+
+**Exact next gate**: fix-gate for the Atom content-normalization defect with
+a regression test using real GitHub release bytes; then re-run this Gate 4
+probe end-to-end. Do not implement the next connector in this task.
+
+---
+
 ## Appendix — file inventory (all read this gate)
 
 `packages/intelligence/src/researchConnectors.ts`, `connectors/index.ts`, `connectors/{reddit,youtube,googleTrends,linkedin,x,instagram,tiktok,facebook,quora}Connector.ts`, `feedAdapters.ts`, `sourceIngestion.ts`, `index.ts`, `test/{connectorIsolation,connectorAuth,feedAdapters,sourceIngestion,sourceExtraction}.test.ts`, `packages/social/src/{types,adapters,index}.ts`, `packages/shared/src/intelligence/sourceExtraction.ts` (+ `urlCanonicalization.ts` referenced), `apps/api/src/worker/stages.ts`, `apps/api/src/routes/{social,intelligence,feeds,readiness}.ts`, `apps/api/src/utils/tokenVault.ts`, `apps/api/src/{social,feedAdapters,dailyLoop,loopStages,signalFlow}.test.ts`, `packages/db/prisma/schema.prisma`, `apps/web/src/pages/{BrainPage,SettingsPage,HomePage}.tsx`, `.env.example`, `apps/api/src/config/env.ts`.
