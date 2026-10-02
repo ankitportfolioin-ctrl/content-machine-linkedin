@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { extractHtmlContent, extractRssContent, extractAtomContent, extractSitemapContent, detectContentType } from '@growth-operator/shared';
+import { extractHtmlContent, extractRssContent, extractAtomContent, extractSitemapContent, detectContentType, normalizeXmlText } from '@growth-operator/shared';
 
 describe('Source Extraction', () => {
   describe('detectContentType', () => {
@@ -266,6 +266,146 @@ describe('Source Extraction', () => {
       expect(result.items[0].description).toBeNull();
       expect(result.items[0].publishedAt).toBeNull();
       expect(result.items[0].author).toBeNull();
+    });
+  });
+
+  describe('normalizeXmlText', () => {
+    it('passes strings through untouched', () => {
+      expect(normalizeXmlText('Just text')).toBe('Just text');
+      expect(normalizeXmlText('<p>Kept markup</p>')).toBe('<p>Kept markup</p>');
+    });
+
+    it('maps missing values to empty string', () => {
+      expect(normalizeXmlText(null)).toBe('');
+      expect(normalizeXmlText(undefined)).toBe('');
+    });
+
+    it('joins arrays of values', () => {
+      expect(normalizeXmlText(['Para one', 'Para two'])).toBe('Para one\nPara two');
+      expect(normalizeXmlText(['', null, 'Kept'])).toBe('Kept');
+    });
+
+    it('extracts the text body of typed value nodes, ignoring attributes', () => {
+      expect(normalizeXmlText({ _: 'Plain release text', type: 'text' })).toBe('Plain release text');
+    });
+
+    it('never emits bare attribute metadata as content', () => {
+      expect(normalizeXmlText({ type: 'html' })).toBe('');
+    });
+
+    it('recurses into nested markup without crashing', () => {
+      expect(normalizeXmlText({ type: 'html', p: { _: 'Bundles .', tt: 'x' } })).toContain('Bundles .');
+      expect(normalizeXmlText({ a: { b: { c: 1 } } })).toBe('1');
+    });
+  });
+
+  describe('Gate 4: typed feed content (Atom/RSS object nodes)', () => {
+    // Shape fixtures modeled on the real microsoft/TypeScript releases.atom
+    // bytes captured 2026-10-02 (HTTP 200, 10 entries). Entry content below
+    // is verbatim provider HTML; the surrounding feed is a minimal harness.
+    // These are shape-regression fixtures, not full captured responses.
+    const githubShapedAtom = `
+      <?xml version="1.0" encoding="UTF-8"?>
+      <feed xmlns="http://www.w3.org/2005/Atom">
+        <title>Release notes from TypeScript</title>
+        <link href="https://github.com/microsoft/TypeScript/releases"/>
+        <entry>
+          <title>vscode-typescript/v1.0.1</title>
+          <content type="html"><![CDATA[<p>Bundles TypeScript 7.0.2 from commit <a class="commit-link" href="https://github.com/microsoft/TypeScript/commit/b6eaace9d7cfd63c018ab25340ba463baae07fb5"><tt>b6eaace</tt></a>.</p>]]></content>
+          <link href="https://github.com/microsoft/TypeScript/releases/tag/vscode-typescript%2Fv1.0.1"/>
+          <published>2026-09-30T19:10:17.000Z</published>
+          <author><name>typescript-automation[bot]</name></author>
+        </entry>
+      </feed>
+    `;
+
+    it('A. Atom content type=html normalizes to text instead of crashing', async () => {
+      const result = await extractAtomContent(githubShapedAtom);
+      expect(result.items).toHaveLength(1);
+      expect(typeof result.items[0].description).toBe('string');
+      expect(result.items[0].description).toContain('Bundles TypeScript 7.0.2');
+      expect(result.items[0].description).not.toContain('[object Object]');
+      expect(result.items[0].publishedAt).toEqual(new Date('2026-09-30T19:10:17.000Z'));
+      expect(result.items[0].author).toBe('typescript-automation[bot]');
+    });
+
+    it('B. Atom content type=text normalizes to text', async () => {
+      const xml = `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <title>T</title>
+          <entry>
+            <title>E</title>
+            <content type="text">Plain release text</content>
+            <link href="https://example.com/e"/>
+          </entry>
+        </feed>
+      `;
+      const result = await extractAtomContent(xml);
+      expect(result.items[0].description).toBe('Plain release text');
+    });
+
+    it('C. RSS content:encoded (CDATA and typed) normalizes to text', async () => {
+      const xml = `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <rss version="2.0">
+          <channel>
+            <title>T</title>
+            <item>
+              <title>CData item</title>
+              <link>https://example.com/cdata</link>
+              <content:encoded><![CDATA[<p>Real body</p>]]></content:encoded>
+            </item>
+            <item>
+              <title>Typed item</title>
+              <link>https://example.com/typed</link>
+              <content:encoded type="html"><p>Typed</p></content:encoded>
+            </item>
+          </channel>
+        </rss>
+      `;
+      const result = await extractRssContent(xml);
+      expect(result.items[0].description).toBe('<p>Real body</p>');
+      expect(result.items[1].description).toBe('Typed');
+    });
+
+    it('E. attribute-only and nested-markup shapes never crash nor leak metadata', async () => {
+      const xml = `
+        <?xml version="1.0" encoding="UTF-8"?>
+        <feed xmlns="http://www.w3.org/2005/Atom">
+          <title>T</title>
+          <entry>
+            <title>Empty typed</title>
+            <content type="html"/>
+            <link href="https://example.com/empty"/>
+          </entry>
+          <entry>
+            <title>Nested markup</title>
+            <content type="html"><p>Para one</p><p>Para two</p></content>
+            <link href="https://example.com/nested"/>
+          </entry>
+        </feed>
+      `;
+      const result = await extractAtomContent(xml);
+      expect(result.items).toHaveLength(2);
+      // Pure metadata node → null, and the bare word "html" must never
+      // appear as if it were content.
+      expect(result.items[0].description).toBeNull();
+      // Nested markup → real text preserved.
+      expect(result.items[1].description).toContain('Para one');
+      expect(result.items[1].description).toContain('Para two');
+    });
+
+    it('F. normalized descriptions feed wordCount as text, never as objects', async () => {
+      const result = await extractAtomContent(githubShapedAtom);
+      for (const item of result.items) {
+        expect(item.description === null || typeof item.description === 'string').toBe(true);
+      }
+      // The exact aggregation the ingestion layer performs: must not throw
+      // and must yield a finite number.
+      const wordCount = result.items.reduce((acc, i) => acc + (i.description?.split(/\s+/).length || 0), 0);
+      expect(Number.isFinite(wordCount)).toBe(true);
+      expect(wordCount).toBeGreaterThan(0);
     });
   });
 

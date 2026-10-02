@@ -483,6 +483,41 @@ probe end-to-end. Do not implement the next connector in this task.
 
 ---
 
+## Gate 4-fix — Atom normalization fix + GitHub re-verification: REAL_REQUEST_VERIFIED
+
+**Defect** (as reported): GitHub `<content type="html">` parses to an
+xml2js object that crashed the ATOM/RSS `wordCount` line. Fixed without
+touching architecture, Reddit, Trends, or any test expectations.
+
+**Fix** (`packages/shared/src/intelligence/sourceExtraction.ts`):
+`normalizeXmlText()` + `xmlTextOrNull()` — string passthrough, arrays
+joined, xml2js value/object nodes reduced to their text body (`_` wins
+outright; otherwise non-attribute children joined; attribute-only nodes
+yield `''`; missing → `''`; never throws). Applied to item
+title/description/author and feed title/description/subtitle in
+`extractRssContent`/`extractAtomContent` (RSS `content:encoded` twin
+audited and covered). Shapes were determined empirically against the
+repo's own xml2js config, not assumed.
+
+**Re-run** (same target, production loop, scratch workspace, cleaned up):
+feed HTTP 200 → 6 sources ACTIVE → 6 documents SUCCESS (145–380 words) →
+15 claims (FACT/SUPPORTED, e.g. "The release tag is v7.0.2.") → 10 topics →
+10 trends → 96 gaps → **10 opportunities** (NEW, scores 0.62–0.65, github.com
+source/claim provenance) → 5 ideas → 5 plans. Re-ingest → "Source already
+exists" (dedupe held). Same-URL row elsewhere counted, never read
+(isolation held). 0 orphan rows after cleanup.
+
+**Tests**: 11 new in `sourceExtraction.test.ts` (helper contract A–F incl.
+GitHub-shaped type=html, type=text, CDATA/typed content:encoded,
+attr-only/nested no-crash, wordCount numeric). Suites: intelligence 274
+pass, API 313 pass, web 73 pass; typecheck ✅; build ✅.
+
+**Status**: GitHub row → **REAL_REQUEST_VERIFIED**. First provider in this
+program to complete the full real-data chain. No engagement numbers were
+ever read or stored (connector reads titles/descriptions only).
+
+---
+
 ## Appendix — file inventory (all read this gate)
 
 `packages/intelligence/src/researchConnectors.ts`, `connectors/index.ts`, `connectors/{reddit,youtube,googleTrends,linkedin,x,instagram,tiktok,facebook,quora}Connector.ts`, `feedAdapters.ts`, `sourceIngestion.ts`, `index.ts`, `test/{connectorIsolation,connectorAuth,feedAdapters,sourceIngestion,sourceExtraction}.test.ts`, `packages/social/src/{types,adapters,index}.ts`, `packages/shared/src/intelligence/sourceExtraction.ts` (+ `urlCanonicalization.ts` referenced), `apps/api/src/worker/stages.ts`, `apps/api/src/routes/{social,intelligence,feeds,readiness}.ts`, `apps/api/src/utils/tokenVault.ts`, `apps/api/src/{social,feedAdapters,dailyLoop,loopStages,signalFlow}.test.ts`, `packages/db/prisma/schema.prisma`, `apps/web/src/pages/{BrainPage,SettingsPage,HomePage}.tsx`, `.env.example`, `apps/api/src/config/env.ts`.

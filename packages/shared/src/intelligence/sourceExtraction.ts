@@ -27,6 +27,78 @@ export interface SitemapUrls {
   urls: string[];
 }
 
+/**
+ * Attribute names xml2js merges onto value nodes (mergeAttrs: true) that
+ * carry metadata, never authorial content. Sibling keys with these names
+ * are excluded when a content node has no direct text of its own.
+ */
+const XML_ATTRIBUTE_KEYS = new Set([
+  'type',
+  'href',
+  'src',
+  'rel',
+  'lang',
+  'mode',
+  'scheme',
+  'term',
+  'label',
+  'length',
+  'hreflang',
+  'title',
+  'xml:base',
+  'xml:lang',
+]);
+
+/**
+ * Normalize an xml2js value node to deterministic text (Gate 4 fix).
+ *
+ * Observed shapes (explicitArray:false, mergeAttrs:true):
+ * - plain/CDATA text → string (pass-through)
+ * - `<content type="html"><![CDATA[<p>…]]></content>` → `{ _: '<p>…', type: 'html' }`
+ * - nested elements → `{ p: [...] }`, `{ p: { _: '…', tt: '…' } }`
+ * - empty typed node → `{ type: 'html' }` (metadata only)
+ *
+ * Rules:
+ * - A direct text node (`_`) wins outright: under mergeAttrs its siblings
+ *   are overwhelmingly attributes, so they are never treated as content.
+ * - Without `_`, non-attribute child values are joined (attributes excluded).
+ * - Missing/null/undefined → ''. Never throws on objects. Never invents
+ *   text: attribute-only nodes yield ''.
+ */
+export function normalizeXmlText(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'string') return value;
+  if (typeof value === 'number' || typeof value === 'boolean' || typeof value === 'bigint') {
+    return String(value);
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((entry) => normalizeXmlText(entry))
+      .filter((part) => part.length > 0)
+      .join('\n');
+  }
+  if (typeof value === 'object') {
+    const record = value as Record<string, unknown>;
+    if ('_' in record) {
+      return normalizeXmlText(record._);
+    }
+    const parts: string[] = [];
+    for (const [key, entry] of Object.entries(record)) {
+      if (key === '$' || XML_ATTRIBUTE_KEYS.has(key)) continue;
+      const text = normalizeXmlText(entry);
+      if (text.length > 0) parts.push(text);
+    }
+    return parts.join('\n');
+  }
+  return '';
+}
+
+/** normalizeXmlText(), but preserving the FeedItem null-for-missing contract. */
+export function xmlTextOrNull(value: unknown): string | null {
+  const text = normalizeXmlText(value);
+  return text === '' ? null : text;
+}
+
 function cleanHtmlContent(html: string): string {
   const dom = new JSDOM(html);
   const document = dom.window.document;
@@ -226,8 +298,8 @@ export async function extractRssContent(xml: string): Promise<{ feed: { title: s
     trim: true,
   });
 
-  const feedTitle = result.rss?.channel?.title || null;
-  const feedDescription = result.rss?.channel?.description || null;
+  const feedTitle = xmlTextOrNull(result.rss?.channel?.title);
+  const feedDescription = xmlTextOrNull(result.rss?.channel?.description);
   const feedLink = result.rss?.channel?.link || null;
 
   const items: FeedItem[] = [];
@@ -238,10 +310,12 @@ export async function extractRssContent(xml: string): Promise<{ feed: { title: s
     if (!item) continue;
 
     const link = item.link || item.guid || item['atom:link']?.[0]?.href || null;
-    const title = item.title || null;
-    const description = item.description || item['content:encoded'] || null;
+    const title = xmlTextOrNull(item.title);
+    // Gate 4: content:encoded / description may be an xml2js object node
+    // (typed HTML, nested markup). Normalize — never pass objects downstream.
+    const description = xmlTextOrNull(item.description || item['content:encoded'] || null);
     const pubDate = item.pubDate ? new Date(item.pubDate) : null;
-    const author = item.author || item['dc:creator'] || null;
+    const author = xmlTextOrNull(item.author || item['dc:creator'] || null);
 
     items.push({
       url: link,
@@ -270,8 +344,8 @@ export async function extractAtomContent(xml: string): Promise<{ feed: { title: 
   });
 
   const feed = result.feed || result['atom:feed'];
-  const feedTitle = feed?.title || null;
-  const feedSubtitle = feed?.subtitle || null;
+  const feedTitle = xmlTextOrNull(feed?.title);
+  const feedSubtitle = xmlTextOrNull(feed?.subtitle);
   const feedLink = feed?.link?.[0]?.href || feed?.link?.href || null;
 
   const items: FeedItem[] = [];
@@ -282,10 +356,12 @@ export async function extractAtomContent(xml: string): Promise<{ feed: { title: 
     if (!entry) continue;
 
     const link = entry.link?.[0]?.href || entry.link?.href || entry.id || null;
-    const title = entry.title || null;
-    const description = entry.summary || entry.content || null;
+    const title = xmlTextOrNull(entry.title);
+    // Gate 4: <content type="html"> / <summary> with markup parses to an
+    // xml2js object node. Normalize — never pass objects downstream.
+    const description = xmlTextOrNull(entry.summary || entry.content || null);
     const pubDate = entry.published ? new Date(entry.published) : (entry.updated ? new Date(entry.updated) : null);
-    const author = entry.author?.name || entry.author?.[0]?.name || null;
+    const author = xmlTextOrNull(entry.author?.name || entry.author?.[0]?.name || null);
 
     items.push({
       url: link,
