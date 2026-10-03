@@ -149,19 +149,20 @@ function hashOAuthState(state: string): string {
 
 export async function storeOAuthState(state: PendingOAuthState & { state: string }): Promise<void> {
   const expiresAt = new Date(Date.now() + OAUTH_STATE_TTL_MS);
+  const dbPlatform = toDbPlatform(state.platform);
   await prisma.oAuthState.upsert({
     where: { stateHash: hashOAuthState(state.state) },
     update: {
       workspaceId: state.workspaceId,
       userId: state.userId,
-      platform: state.platform as DbSocialPlatform,
+      platform: dbPlatform,
       expiresAt,
     },
     create: {
       stateHash: hashOAuthState(state.state),
       workspaceId: state.workspaceId,
       userId: state.userId,
-      platform: state.platform as DbSocialPlatform,
+      platform: dbPlatform,
       expiresAt,
     },
   });

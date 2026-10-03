@@ -3,7 +3,7 @@ import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
 import { encryptToken } from '../src/utils/tokenVault';
-import { pruneOAuthStates } from './routes/social';
+import { consumeOAuthState, pruneOAuthStates, storeOAuthState } from './routes/social';
 
 const stamp = Date.now();
 const password = 'testpassword123';
@@ -180,6 +180,27 @@ describe('social connectors (honest states + isolation)', () => {
     expect(res.headers.location).toMatch(/social=error/);
     // Single-use: consumed even on the failure path.
     expect(await prisma.oAuthState.findUnique({ where: { stateHash: hash } })).toBeNull();
+  });
+
+  it('round-trips OAuth state through the connect-route mapping (lowercase in, enum out)', async () => {
+    // The connect route passes the lowercase SocialPlatform ('linkedin');
+    // the OAuthState row must carry the uppercase DB enum ('LINKEDIN') so
+    // the callback comparison in consumeOAuthState can ever succeed.
+    const { createHash } = await import('crypto');
+    const raw = `roundtrip-${stamp}-c`;
+    await storeOAuthState({
+      state: raw,
+      workspaceId: workspaceA,
+      userId: 'user-a',
+      platform: 'linkedin',
+    });
+    const hash = createHash('sha256').update(raw, 'utf8').digest('hex');
+    const row = await prisma.oAuthState.findUnique({ where: { stateHash: hash } });
+    expect(row?.platform).toBe('LINKEDIN');
+    const consumed = await consumeOAuthState(raw, 'linkedin');
+    expect(consumed).toMatchObject({ workspaceId: workspaceA, userId: 'user-a', platform: 'linkedin' });
+    // Single-use: the replay finds nothing.
+    await expect(consumeOAuthState(raw, 'linkedin')).resolves.toBeNull();
   });
 
   it('rejects a completion attempt from a different signed-in user', async () => {

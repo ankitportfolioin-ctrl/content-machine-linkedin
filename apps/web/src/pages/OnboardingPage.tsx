@@ -375,7 +375,7 @@ function SourcesStep({ onChanged }: { onChanged: () => void }) {
     <div className="stack-sm">
       <p className="muted">
         Registry research sources (Reddit, Google Trends) are configured per workspace in the{' '}
-        <NavLink to="/brain">Brain → Sources → Research catalogue</NavLink>. They count toward this step once enabled.
+        <NavLink to="/brain">Brain → Sources → Research sources</NavLink>. They count toward this step once enabled.
       </p>
       <form onSubmit={(e) => void handleAdd(e)} className="actions">
         <input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://example.com/feed" className="field" style={{ flex: '2 1 220px' }} />
