@@ -78,6 +78,23 @@ export interface PlatformCapabilities {
   scopes: string[];
 }
 
+/**
+ * Verified account identity from the provider's OIDC user-identity endpoint.
+ * Only fields the endpoint actually returns are mapped; picture and email
+ * are present only when the granted scopes and the member's profile provide
+ * them. Identity proves *who* connected — never what they posted.
+ */
+export interface SocialAccountIdentity {
+  /** Provider-side member identifier (LinkedIn `sub`). */
+  id: string;
+  /** Display name, when provided. */
+  name: string | null;
+  /** Profile photo URL, when provided. */
+  picture: string | null;
+  /** Email address, when provided. */
+  email: string | null;
+}
+
 export interface SocialAdapter {
   readonly platform: SocialPlatform;
   readonly displayName: string;
@@ -88,6 +105,13 @@ export interface SocialAdapter {
   refreshAccessToken(credentials: OAuthCredentials, refreshToken: string): Promise<TokenPair>;
   /** Returns recent own/channel posts. Throws classified ConnectorError. */
   fetchRecentItems(accessToken: string, limit: number): Promise<SocialItem[]>;
+  /**
+   * Optional identity verification: proves the access token authenticates and
+   * returns the linked account's identity fields. Adapters whose connection
+   * is identity-only (no post reading) implement this; post-reading adapters
+   * derive identity from their normal pulls instead.
+   */
+  fetchAccountIdentity?(accessToken: string): Promise<SocialAccountIdentity>;
 }
 
 export interface AdapterRegistry {

@@ -249,11 +249,13 @@ router.get('/connections', async (req, res, next) => {
     const countBy = new Map(counts.map((c) => [c.platform, c._count.id]));
     const byPlatform = new Map(rows.map((r) => [toPlatform(r.platform), r]));
 
-    // Platform capability mapping based on what each adapter actually supports
+    // Platform capability mapping based on what each adapter actually supports.
+    // LinkedIn is identity-only (OIDC-minimal): a connected account verifies
+    // identity and never enables research, so its research flag is false.
     const platformCapabilities: Record<SocialPlatform, { research: boolean; publishing: boolean; analytics: boolean; comments: boolean; audience: boolean }> = {
       instagram: { research: true, publishing: false, analytics: false, comments: false, audience: false },
       facebook: { research: true, publishing: false, analytics: false, comments: false, audience: false },
-      linkedin: { research: true, publishing: false, analytics: false, comments: false, audience: false },
+      linkedin: { research: false, publishing: false, analytics: false, comments: false, audience: false },
       youtube: { research: true, publishing: false, analytics: false, comments: false, audience: false },
       x: { research: true, publishing: false, analytics: false, comments: false, audience: false },
     };
@@ -724,6 +726,22 @@ socialCallbackRouter.get('/callback/:platform', async (req, res, next) => {
       fail(err instanceof Error ? err.message : 'Token exchange failed. Nothing was stored.');
       return;
     }
+    // Identity linking (adapters that verify account identity only, e.g.
+    // LinkedIn OIDC-minimal): prove the fresh grant authenticates and record
+    // WHO connected as the human-readable account label. A failed identity
+    // read fails the connect honestly — a stored grant without a verified
+    // identity would be a weaker claim than this endpoint promises.
+    let accountLabel: string | null = null;
+    const adapter = getSocialAdapter(platform);
+    if (typeof adapter.fetchAccountIdentity === 'function') {
+      try {
+        const identity = await adapter.fetchAccountIdentity(tokens.accessToken);
+        accountLabel = identity.name;
+      } catch (err) {
+        fail(err instanceof Error ? err.message : 'Could not verify the connected account identity. Nothing was stored.');
+        return;
+      }
+    }
     try {
       vaultGuard();
       await prisma.socialConnection.upsert({
@@ -734,6 +752,7 @@ socialCallbackRouter.get('/callback/:platform', async (req, res, next) => {
           encryptedAccess: encryptToken(tokens.accessToken),
           encryptedRefresh: tokens.refreshToken ? encryptToken(tokens.refreshToken) : null,
           tokenExpiresAt: tokens.expiresAt ? new Date(tokens.expiresAt) : null,
+          accountLabel,
           status: 'CONNECTED',
           active: true,
           lastError: null,
@@ -744,6 +763,7 @@ socialCallbackRouter.get('/callback/:platform', async (req, res, next) => {
           encryptedAccess: encryptToken(tokens.accessToken),
           encryptedRefresh: tokens.refreshToken ? encryptToken(tokens.refreshToken) : null,
           tokenExpiresAt: tokens.expiresAt ? new Date(tokens.expiresAt) : null,
+          accountLabel,
           status: 'CONNECTED',
           active: true,
         },

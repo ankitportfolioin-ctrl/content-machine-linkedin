@@ -94,16 +94,16 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
     serverSetup: {
       requiredEnvVars: ['LINKEDIN_CLIENT_ID', 'LINKEDIN_CLIENT_SECRET'],
       docsUrl: 'https://developer.linkedin.com/product-catalog',
-      docsLabel: 'LinkedIn Developer Portal — create an app, request an approved product for post reads (Share on LinkedIn / Community Management)',
+      docsLabel: 'LinkedIn Developer Portal — create an app and add the Sign In with LinkedIn using OpenID Connect product',
     },
-    research: { supported: true, wired: false, note: RESEARCH_NOT_WIRED },
+    research: { supported: false, wired: false, note: 'Reading member posts requires LinkedIn access that is not available to this application.' },
     publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
     readiness: {
       oauthImplemented: true,
       supportsRefresh: false,
       externalAllowListRequired: true,
       endToEndVerified: false,
-      readinessNote: 'Short-lived tokens with no silent refresh; post reads additionally need an approved LinkedIn product.',
+      readinessNote: 'Short-lived tokens with no silent refresh; connects identity only — member-post reading is unavailable to this application.',
     },
   },
   youtube: {

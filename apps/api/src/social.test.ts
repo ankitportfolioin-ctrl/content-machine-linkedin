@@ -2,7 +2,7 @@ import { describe, it, expect, beforeAll } from 'vitest';
 import request from 'supertest';
 import app from '../src/index';
 import { prisma } from '@growth-operator/db';
-import { encryptToken } from '../src/utils/tokenVault';
+import { decryptToken, encryptToken } from '../src/utils/tokenVault';
 import { consumeOAuthState, pruneOAuthStates, storeOAuthState } from './routes/social';
 
 const stamp = Date.now();
@@ -203,6 +203,94 @@ describe('social connectors (honest states + isolation)', () => {
     await expect(consumeOAuthState(raw, 'linkedin')).resolves.toBeNull();
   });
 
+  it('describes LinkedIn as identity-only: account available, everything else unavailable', async () => {
+    const { getPlatformCapability } = await import('@growth-operator/social');
+    const desc = getPlatformCapability('linkedin');
+    expect(desc.accountSupported).toBe(true);
+    expect(desc.research.supported).toBe(false);
+    expect(desc.research.wired).toBe(false);
+    expect(desc.research.note).toMatch(/not available to this application/);
+    expect(desc.publishing.supported).toBe(false);
+    expect(desc.publishing.wired).toBe(false);
+  });
+
+  it('completes a real provider grant into an encrypted, workspace-bound connection', async () => {
+    // Simulates a server with LinkedIn OAuth configured: flipping NODE_ENV
+    // lifts the test-only credential short-circuit so the REAL callback path
+    // runs (state consume, confused-deputy check, exchange, identity verify,
+    // encrypt, upsert). Only the LinkedIn network boundary is stubbed —
+    // there is no real grant in CI and no code path is bypassed.
+    const previousNodeEnv = process.env.NODE_ENV;
+    const originalFetch = globalThis.fetch;
+    process.env.NODE_ENV = 'development';
+    globalThis.fetch = (async (input: unknown) => {
+      const url = typeof input === 'string' ? input : String((input as { url?: unknown }).url ?? input);
+      if (url.includes('linkedin.com/oauth/v2/accessToken')) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => null },
+          json: async () => ({ access_token: 'tok-linkedin-callback', expires_in: 3600 }),
+        } as unknown as Response;
+      }
+      if (url.includes('api.linkedin.com/v2/userinfo')) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => null },
+          json: async () => ({ sub: 'member-abc', name: 'Linked Tester' }),
+        } as unknown as Response;
+      }
+      throw new Error(`unexpected network call in test: ${url}`);
+    }) as typeof fetch;
+    try {
+      const raw = `grant-${stamp}-ok`;
+      await storeOAuthState({ state: raw, workspaceId: workspaceA, userId: 'user-a', platform: 'linkedin' });
+      const res = await request(app)
+        .get(`/api/v1/social/callback/linkedin?code=grant-code&state=${raw}`)
+        .expect(302);
+      expect(res.headers.location).toMatch(/social=connected/);
+      expect(res.headers.location).toMatch(/platform=linkedin/);
+
+      const row = await prisma.socialConnection.findUnique({
+        where: { workspaceId_platform: { workspaceId: workspaceA, platform: 'LINKEDIN' } },
+      });
+      expect(row).not.toBeNull();
+      expect(row?.status).toBe('CONNECTED');
+      expect(row?.workspaceId).toBe(workspaceA);
+      expect(row?.accountLabel).toBe('Linked Tester');
+      // Encrypted at rest: never plaintext, decrypts to the grant token.
+      expect(row?.encryptedAccess).not.toBe('tok-linkedin-callback');
+      if (row) expect(decryptToken(row.encryptedAccess)).toBe('tok-linkedin-callback');
+
+      // The connections endpoint now reports the real connection with
+      // identity-only capabilities (research/publishing/analytics stay off).
+      const conns = await request(app).get('/api/v1/social/connections').set(authA()).expect(200);
+      const entry = (conns.body.connections as Array<Record<string, unknown>>).find(
+        (c) => c['platform'] === 'linkedin',
+      );
+      expect(entry?.['connected']).toBe(true);
+      expect(entry?.['status']).toBe('CONNECTED');
+      expect(entry?.['accountLabel']).toBe('Linked Tester');
+      const caps = entry?.['capabilities'] as Record<string, unknown>;
+      expect(caps['research']).toBe(false);
+      expect(caps['publishing']).toBe(false);
+      expect(caps['analytics']).toBe(false);
+
+      // Single-use: replaying the consumed state fails honestly.
+      const replay = await request(app)
+        .get(`/api/v1/social/callback/linkedin?code=grant-code&state=${raw}`)
+        .expect(302);
+      expect(replay.headers.location).toMatch(/social=error/);
+    } finally {
+      await prisma.socialConnection.deleteMany({
+        where: { workspaceId: workspaceA, platform: 'LINKEDIN' },
+      });
+      process.env.NODE_ENV = previousNodeEnv;
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('rejects a completion attempt from a different signed-in user', async () => {
     const { createHash } = await import('crypto');
     const raw = `userx-${stamp}-a`;
@@ -267,6 +355,11 @@ describe('social connectors (honest states + isolation)', () => {
     expect(linkedin).toContain('client_id=CID');
     expect(linkedin).toContain('redirect_uri=http');
     expect(linkedin).not.toContain('CSEC');
+    // OIDC-minimal contract: identity scopes only, never restricted ones.
+    const scope = new URL(linkedin).searchParams.get('scope') ?? '';
+    expect(scope.split(' ')).toEqual(['openid', 'profile', 'email']);
+    expect(linkedin).not.toContain('r_member_social');
+    expect(getSocialAdapter('linkedin').capabilities().scopes).toEqual(['openid', 'profile', 'email']);
     const x = getSocialAdapter('x').authorizationUrl(creds, 's1');
     expect(x).toMatch(/^https:\/\/twitter\.com\/i\/oauth2\/authorize\?/);
     const yt = getSocialAdapter('youtube').authorizationUrl(creds, 's1');

@@ -1,6 +1,7 @@
 import {
   ConnectorError,
   OAuthCredentials,
+  SocialAccountIdentity,
   SocialAdapter,
   SocialItem,
   SocialPlatform,
@@ -315,7 +316,14 @@ class FacebookAdapter implements SocialAdapter {
 }
 
 // ---------------------------------------------------------------------------
-// LinkedIn (OAuth2 + UGC posts; approved products required for post reads)
+// LinkedIn (OpenID Connect identity linking only).
+//
+// Product architecture: the connection links the member's professional
+// identity (sub, name, photo, email via userinfo). Member-post reading
+// requires the restricted r_member_social permission, which is not
+// provisioned for this application — so this adapter NEVER calls a
+// post-reading endpoint. Refresh/verify prove the stored grant still
+// authenticates (identity check) and honestly return zero items.
 // ---------------------------------------------------------------------------
 
 class LinkedInAdapter implements SocialAdapter {
@@ -325,15 +333,15 @@ class LinkedInAdapter implements SocialAdapter {
   capabilities() {
     return {
       provides: [
-        'Member/organization UGC posts: text, creation time (when the app has an approved product)',
-        'Hook inspiration: opening lines of real post text',
+        'LinkedIn account identity: member ID, name, photo and email from OpenID Connect sign-in',
+        'Grant verification: proves the stored OAuth grant still authenticates via the identity endpoint',
       ],
       limitations: [
-        'Reading posts requires a LinkedIn developer app with an approved product (Share on LinkedIn / Community Management); without it the API refuses and the connector reports the error honestly',
-        'No reactions, comments, impressions, or reach — engagement is never read or stored',
-        'No feed search or public trends — only your own authorized posts',
+        'No member posts, feed, comments, or reactions — member-post reading requires restricted LinkedIn access this application does not have, and is never attempted',
+        'No publishing, analytics, or organization data — never read, stored, or sent',
+        'No feed search or public trends — identity linking only',
       ],
-      scopes: ['openid', 'profile', 'email', 'r_member_social'],
+      scopes: ['openid', 'profile', 'email'],
     };
   }
 
@@ -345,7 +353,7 @@ class LinkedInAdapter implements SocialAdapter {
         client_id: c.clientId,
         redirect_uri: c.redirectUri,
         response_type: 'code',
-        scope: 'openid profile email r_member_social',
+        scope: 'openid profile email',
         state,
       })
     );
@@ -369,37 +377,28 @@ class LinkedInAdapter implements SocialAdapter {
     );
   }
 
-  async fetchRecentItems(accessToken: string, limit: number): Promise<SocialItem[]> {
+  async fetchAccountIdentity(accessToken: string): Promise<SocialAccountIdentity> {
     const me = (await fetchJson('https://api.linkedin.com/v2/userinfo', {
       headers: bearer(accessToken),
-    })) as { sub?: string; name?: string };
+    })) as { sub?: string; name?: string; picture?: string; email?: string };
     if (!me.sub) {
       throw new ConnectorError('INVALID_RESPONSE', 'LinkedIn returned no member identity for this token.');
     }
-    const capped = Math.min(Math.max(1, limit), 25);
-    const ugc = (await fetchJson(
-      `https://api.linkedin.com/v2/ugcPosts?q=authors&authors=List(urn:li:person:${encodeURIComponent(me.sub)})&count=${capped}&sortBy=CREATED`,
-      { headers: { ...bearer(accessToken), 'X-Restli-Protocol-Version': '2.0.0' } },
-    )) as {
-      elements?: Array<{
-        id?: string;
-        created?: { time?: number };
-        specificContent?: { 'com.linkedin.ugc.ShareContent'?: { shareCommentary?: { text?: string } } };
-      }>;
+    return {
+      id: me.sub,
+      name: me.name ?? null,
+      picture: me.picture ?? null,
+      email: me.email ?? null,
     };
-    return (ugc.elements ?? []).map((post): SocialItem => {
-      const text = post.specificContent?.['com.linkedin.ugc.ShareContent']?.shareCommentary?.text ?? null;
-      return {
-        externalId: post.id ?? `${me.sub}:${post.created?.time ?? 'unknown'}`,
-        url: null,
-        title: null,
-        text,
-        author: me.name ?? null,
-        publishedAt: typeof post.created?.time === 'number' ? new Date(post.created.time).toISOString() : null,
-        mediaKind: 'post',
-        hashtags: extractHashtags(text),
-      };
-    });
+  }
+
+  async fetchRecentItems(accessToken: string, _limit: number): Promise<SocialItem[]> {
+    // Identity check only: proves the stored grant still authenticates.
+    // Member-post endpoints are deliberately never called — reading member
+    // posts requires restricted LinkedIn access this application does not
+    // hold, so a pull honestly yields zero items instead of failing.
+    await this.fetchAccountIdentity(accessToken);
+    return [];
   }
 }
 

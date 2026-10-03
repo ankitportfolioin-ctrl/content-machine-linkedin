@@ -127,17 +127,17 @@ export const CONNECTOR_CATALOGUE: readonly ConnectorCatalogueEntry[] = [
     displayName: 'LinkedIn',
     group: 'CONNECTED_PLATFORM',
     description:
-      'Account role: read your own authorized posts (requires a LinkedIn developer app with an approved product, otherwise the API refuses with 403). Research role via the registry is not wired to workspace tokens in this version.',
+      'Account role: links your LinkedIn professional identity via OpenID Connect sign-in (member ID, name, photo, email). Member-post reading is unavailable: it requires the restricted r_member_social permission, which is not provisioned for this application.',
     authKind: 'OAUTH',
     sourceOfTruth:
-      'packages/social/src/adapters.ts (LinkedInAdapter) for account pulls; packages/intelligence/src/connectors/linkedinConnector.ts exists but receives no workspace token',
+      'packages/social/src/adapters.ts (LinkedInAdapter.fetchAccountIdentity) for identity linking; packages/intelligence/src/connectors/linkedinConnector.ts deterministically reports research UNAVAILABLE and never calls member-post endpoints',
     workerEligible: false,
     notWiredReason:
-      'Research execution is not wired: the worker holds no per-workspace LinkedIn token and never calls this connector. Account connection enables inspiration pulls only.',
+      'Member-post research is unavailable: reading member posts requires restricted LinkedIn access this application does not hold, and the worker holds no per-workspace LinkedIn token. Account connection links identity only.',
     accountConnectable: true,
     requiresAccountNote:
-      'A connected LinkedIn account does not enable LinkedIn research. Research stays off regardless of account state.',
-    userAction: 'Connect your account for inspiration pulls. Research is unavailable in this version.',
+      'A connected LinkedIn account links your professional identity only. It does not enable LinkedIn research, publishing, or analytics.',
+    userAction: 'Connect your account to link your professional identity. Research is unavailable in this version.',
   },
   {
     sourceType: 'X',

@@ -46,4 +46,38 @@ describe('OAuth connector unauthenticated boundaries', () => {
       /short-lived|re-run Connect/i
     );
   });
+
+  it('LinkedIn: authorization uses OIDC-minimal scopes only', () => {
+    const url = linkedinConnector.getAuthorizationUrl(
+      { clientId: 'CID', redirectUri: 'http://localhost/cb' },
+      'state',
+    );
+    const scope = new URL(url).searchParams.get('scope') ?? '';
+    expect(scope.split(' ')).toEqual(['openid', 'profile', 'email']);
+    expect(url).not.toContain('r_member_social');
+    expect(linkedinConnector.capabilities.scopes).not.toContain('r_member_social');
+  });
+
+  it('LinkedIn: member-post retrieval is deterministically unavailable without network', async () => {
+    const calls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: unknown) => {
+      const url = typeof input === 'string' ? input : String((input as { url?: unknown }).url ?? input);
+      calls.push(url);
+      throw new Error('network must not be touched');
+    }) as typeof fetch;
+    try {
+      // No token → auth boundary preserved.
+      await expect(linkedinConnector.fetchRecentItems({}, 5, {})).rejects.toThrow(/access token/i);
+      // A token value still never triggers a member-post request.
+      await expect(linkedinConnector.fetchRecentItems({ accessToken: 'oidc-token' }, 5, {})).rejects.toThrow(
+        /UNAVAILABLE.*r_member_social/
+      );
+      const health = await linkedinConnector.getHealth({ accessToken: 'oidc-token' });
+      expect(health.status).toBe('SOURCE_UNAVAILABLE');
+      expect(calls).toHaveLength(0);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
 });

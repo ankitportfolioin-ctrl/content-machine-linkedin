@@ -272,7 +272,7 @@ function SetupRequirements({ server, displayName }: { server: SocialServerBlock 
 const PLATFORM_ORDER = ['linkedin', 'youtube', 'instagram', 'facebook', 'x'];
 
 const PLATFORM_BLURBS: Record<string, string> = {
-  linkedin: 'Read your own LinkedIn posts for inspiration. Post reads need an approved product on the provider app.',
+  linkedin: 'Connect your LinkedIn account to link your professional identity with Growth Operator.',
   youtube: 'Pull uploads from your own YouTube channel. Research search is a separate server-side capability.',
   instagram: 'Read media from your Instagram business or creator account. Personal accounts are not readable via the API.',
   facebook: 'Read posts from Facebook Pages you administer. Personal timelines are not readable.',
@@ -375,7 +375,7 @@ function PlatformCard({
     setWorking('connect');
     setMessage(null);
     try {
-      // Existing backend OAuth initiation — scopes and security untouched.
+      // Existing backend OAuth initiation — OIDC-minimal scopes, security untouched.
       const res = await connectSocial(conn.platform);
       window.location.href = res.authorizationUrl;
     } catch (err) {

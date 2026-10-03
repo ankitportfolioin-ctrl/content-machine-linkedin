@@ -48,6 +48,64 @@ describe('social connector honesty', () => {
     }
   });
 
+  it('LinkedIn requests OIDC-minimal scopes and nothing restricted', () => {
+    const linkedin = getSocialAdapter('linkedin');
+    const url = linkedin.authorizationUrl(
+      { clientId: 'CID', clientSecret: 'CSEC', redirectUri: 'http://localhost:3001/api/v1/social/callback/linkedin' },
+      's1',
+    );
+    const scope = new URL(url).searchParams.get('scope') ?? '';
+    const scopes = scope.split(' ');
+    expect(scopes).toContain('openid');
+    expect(scopes).toContain('profile');
+    expect(scopes).toContain('email');
+    expect(url).not.toContain('r_member_social');
+    expect(linkedin.capabilities().scopes).toEqual(['openid', 'profile', 'email']);
+    expect(linkedin.capabilities().scopes).not.toContain('r_member_social');
+    expect(linkedin.capabilities().scopes).not.toContain('w_member_social');
+  });
+
+  it('LinkedIn verifies identity without ever calling a post-reading endpoint', async () => {
+    const linkedin = getSocialAdapter('linkedin');
+    if (typeof linkedin.fetchAccountIdentity !== 'function') {
+      expect.unreachable('LinkedIn adapter must verify account identity');
+      return;
+    }
+    const calls: string[] = [];
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input: unknown) => {
+      const url = typeof input === 'string' ? input : String((input as { url?: unknown }).url ?? input);
+      calls.push(url);
+      return {
+        ok: true,
+        status: 200,
+        headers: { get: () => null },
+        json: async () => ({ sub: 'member-123', name: 'Ada Example', picture: 'https://example.com/p.jpg', email: 'ada@example.com' }),
+      } as unknown as Response;
+    }) as typeof fetch;
+    try {
+      const identity = await linkedin.fetchAccountIdentity('oidc-token');
+      expect(identity).toEqual({
+        id: 'member-123',
+        name: 'Ada Example',
+        picture: 'https://example.com/p.jpg',
+        email: 'ada@example.com',
+      });
+      // Exactly one network call, to the identity endpoint only.
+      expect(calls).toHaveLength(1);
+      expect(calls[0]).toContain('/v2/userinfo');
+      expect(calls.join(' ')).not.toContain('ugcPosts');
+
+      // A pull verifies the grant (identity check) and honestly yields zero
+      // items instead of attempting post reads.
+      const items = await linkedin.fetchRecentItems('oidc-token', 10);
+      expect(items).toEqual([]);
+      expect(calls.filter((u) => u.includes('ugcPosts'))).toHaveLength(0);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('extracts hooks verbatim from real items only', () => {
     expect(extractHook({ text: '  \nFirst line here\nsecond', title: null })).toBe('First line here');
     expect(extractHook({ text: null, title: null })).toBeNull();

@@ -30,7 +30,7 @@ const STEP_META: Array<{ id: string; title: string; hint: string }> = [
   { id: 'offers', title: '4. Offers', hint: 'Products, services, guides — and what you are willing to talk about.' },
   { id: 'sources', title: '5. Signal sources', hint: 'Free, public, ToS-respecting feeds. No LinkedIn scraping — ever.' },
   { id: 'leads', title: '6. Lead import', hint: 'Your own CSV or LinkedIn’s official export of your data. Never scraped.' },
-  { id: 'policy', title: '7. Autonomy policy', hint: 'Tier 0 is automatic. Tier 1 stays disabled until the LinkedIn integration exists.' },
+  { id: 'policy', title: '7. Autonomy policy', hint: 'Tier 0 is automatic. Tier 1 stays disabled until LinkedIn posting is available.' },
   { id: 'schedule', title: '8. Schedule & controls', hint: 'Daily time, timezone, budget caps, pause and kill switch.' },
 ];
 

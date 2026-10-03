@@ -260,6 +260,12 @@ describe('BrainPage Sources & Connections (redesigned UX)', () => {
           status: 'CONNECTED',
           accountLabel: 'Jane Doe',
           postCount: 3,
+          research: {
+            supported: false,
+            wired: false,
+            status: 'NOT_AVAILABLE',
+            note: 'Reading member posts requires LinkedIn access that is not available to this application.',
+          },
         }),
       ],
     });
@@ -272,6 +278,10 @@ describe('BrainPage Sources & Connections (redesigned UX)', () => {
     // account does not imply research / publishing / analytics.
     const unavailable = await screen.findAllByText('Not available');
     expect(unavailable.length).toBeGreaterThanOrEqual(3);
+    // The research row explains the provider restriction (not "temporary").
+    expect(
+      await screen.findByText(/Reading member posts requires LinkedIn access/),
+    ).toBeInTheDocument();
 
     fireEvent.click(await screen.findByRole('button', { name: 'Manage connection' }));
     expect(await screen.findByRole('button', { name: 'Refresh' })).toBeInTheDocument();
