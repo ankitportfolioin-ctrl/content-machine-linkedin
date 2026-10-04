@@ -1,6 +1,27 @@
 import { PrismaClient } from '@prisma/client';
 import { z } from 'zod';
 
+export class ExperimentNotFoundError extends Error {
+  constructor(message = 'Experiment not found') {
+    super(message);
+    this.name = 'ExperimentNotFoundError';
+  }
+}
+
+export class ExperimentInvalidStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ExperimentInvalidStateError';
+  }
+}
+
+export class ExperimentNotRunningError extends Error {
+  constructor(message = 'Experiment is not in RUNNING state') {
+    super(message);
+    this.name = 'ExperimentNotRunningError';
+  }
+}
+
 export const ExperimentCreateSchema = z.object({
   hypothesis: z.string().min(10).max(2000),
   variable: z.string().min(1).max(100),
@@ -53,16 +74,16 @@ export class ExperimentEngineService {
 
   async start(workspaceId: string, id: string) {
     const exp = await this.prisma.experiment.findFirst({ where: { id, workspaceId } });
-    if (!exp) throw new Error('Experiment not found in this workspace.');
-    if ((exp.status as string) !== 'DESIGNED') throw new Error(`Only DESIGNED experiments can start (current: ${exp.status}).`);
+    if (!exp) throw new ExperimentNotFoundError();
+    if ((exp.status as string) !== 'DESIGNED') throw new ExperimentInvalidStateError(`Only DESIGNED experiments can start (current: ${exp.status}).`);
     return this.prisma.experiment.update({ where: { id }, data: { status: 'RUNNING' as any, startedAt: new Date() } });
   }
 
   async complete(workspaceId: string, id: string, input: ExperimentComplete) {
     const validated = ExperimentCompleteSchema.parse(input);
     const exp = await this.prisma.experiment.findFirst({ where: { id, workspaceId } });
-    if (!exp) throw new Error('Experiment not found in this workspace.');
-    if ((exp.status as string) !== 'RUNNING') throw new Error(`Only RUNNING experiments can complete (current: ${exp.status}).`);
+    if (!exp) throw new ExperimentNotFoundError();
+    if ((exp.status as string) !== 'RUNNING') throw new ExperimentNotRunningError();
     const analysis = analyzeExperiment(
       validated.controlMetrics as Record<string, number>,
       validated.variantMetrics as Record<string, number>,

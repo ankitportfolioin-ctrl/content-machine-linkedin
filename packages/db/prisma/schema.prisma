@@ -1297,11 +1297,13 @@ model ContentIdea {
   drafts      ContentDraft[]
   plans       ContentPlan[]
   contentDNA  ContentDNA?   @relation("ContentIdeaDNA")
+  topic       Topic?        @relation(fields: [topicId], references: [id], onDelete: SetNull)
 
   @@index([workspaceId])
   @@index([authorId])
   @@index([status])
   @@index([createdAt])
+  @@index([topicId])
 }
 
 model ContentDraft {
@@ -1604,6 +1606,7 @@ model Topic {
   trendSignals    TrendSignal[]
   opportunities   ContentOpportunity[]
   gaps            ContentGap[]
+  contentIdeas    ContentIdea[]
 
   @@unique([workspaceId, canonicalName])
   @@index([workspaceId])

@@ -53,10 +53,31 @@ export class InternalError extends AppError {
   }
 }
 
-export function isAppError(error: unknown): error is AppError {
-  return error instanceof AppError;
-}
-
 export function isValidationError(error: unknown): error is ValidationError {
   return error instanceof ValidationError;
+}
+
+export class ExperimentNotFoundError extends NotFoundError {
+  constructor(message = 'Experiment not found') {
+    super('Experiment');
+    this.name = 'ExperimentNotFoundError';
+  }
+}
+
+export class ExperimentInvalidStateError extends AppError {
+  constructor(message: string) {
+    super(message, 422, 'EXPERIMENT_INVALID_STATE');
+    this.name = 'ExperimentInvalidStateError';
+  }
+}
+
+export class ExperimentNotRunningError extends AppError {
+  constructor(message = 'Only RUNNING experiments can complete') {
+    super(message, 422, 'EXPERIMENT_NOT_RUNNING');
+    this.name = 'ExperimentNotRunningError';
+  }
+}
+
+export function isAppError(error: unknown): error is AppError {
+  return error instanceof AppError;
 }

@@ -3,7 +3,7 @@ import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, Aut
 import { experimentCreateSchema, experimentCompleteSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { ExperimentEngineService } from '@growth-operator/business';
-import { NotFoundError } from '../utils/errors';
+import { NotFoundError, ValidationError, AppError } from '../utils/errors';
 
 const router: ExpressRouter = Router();
 router.use(authMiddleware);
@@ -33,8 +33,17 @@ router.post('/:experimentId/start', async (req, res, next) => {
     const authReq = req as unknown as AuthenticatedRequest;
     const { experimentId } = req.params;
     if (!experimentId) throw new NotFoundError('Experiment');
-    res.json({ experiment: await svc.start(authReq.workspaceId, experimentId) });
-  } catch (e) { next(e); }
+    const experiment = await svc.start(authReq.workspaceId, experimentId);
+    res.json({ experiment });
+  } catch (e) {
+    if (e instanceof Error && e.name === 'ExperimentNotFoundError') {
+      next(new NotFoundError('Experiment'));
+    } else if (e instanceof Error && e.name === 'ExperimentInvalidStateError') {
+      next(new ValidationError(e.message));
+    } else {
+      next(e);
+    }
+  }
 });
 
 router.post('/:experimentId/complete', async (req, res, next) => {
@@ -43,8 +52,19 @@ router.post('/:experimentId/complete', async (req, res, next) => {
     const { experimentId } = req.params;
     if (!experimentId) throw new NotFoundError('Experiment');
     const data = experimentCompleteSchema.parse(req.body);
-    res.json({ experiment: await svc.complete(authReq.workspaceId, experimentId, data) });
-  } catch (e) { next(e); }
+    const experiment = await svc.complete(authReq.workspaceId, experimentId, data);
+    res.status(201).json({ experiment });
+  } catch (e) {
+    if (e instanceof Error && e.name === 'ExperimentNotFoundError') {
+      next(new NotFoundError('Experiment'));
+    } else if (e instanceof Error && e.name === 'ExperimentInvalidStateError') {
+      next(new ValidationError(e.message));
+    } else if (e instanceof Error && e.name === 'ExperimentNotRunningError') {
+      next(new AppError(e.message, 422, 'EXPERIMENT_NOT_RUNNING'));
+    } else {
+      next(e);
+    }
+  }
 });
 
 export default router;

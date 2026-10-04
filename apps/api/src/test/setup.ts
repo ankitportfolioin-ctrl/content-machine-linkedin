@@ -55,4 +55,9 @@ if (FORBIDDEN_DATABASES.has(dbName)) {
 // Override BEFORE any test file imports the Prisma singleton.
 process.env.DATABASE_URL = testDatabaseUrl;
 
+// Ensure AI is unavailable during tests (honest unavailable state)
+process.env.OPENAI_API_KEY = '';
+process.env.ANTHROPIC_API_KEY = '';
+process.env.OPENROUTER_API_KEY = '';
+
 vi.setConfig({ testTimeout: 10000 });
