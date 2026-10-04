@@ -138,9 +138,7 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
   - Open: YouTube probe needs a server key (human-provided, none requested
     yet); LinkedIn research stays UNAVAILABLE (provider permission).
 - [ ] WP3 DECISION ENGINE + OPERATOR QUEUE + "WHY NOT"
-- [x] WP3 DECISION ENGINE + OPERATOR QUEUE + "WHY NOT" — commit with subject
-  `feat(wp3): source-issue queue candidates plus next-action and authorization in explanations`
-  (own hash recorded in the WP4 entry; convention: no post-commit amends).
+- [x] WP3 DECISION ENGINE + OPERATOR QUEUE + "WHY NOT" — commit `0b49cae`.
   - First real gaps found by inspection: (a) failing feeds / failed connector
     probes vanished silently — no queue candidate covered "source failures,
     connector problems" (WP3 list); (b) recommendations lacked explicit
@@ -177,6 +175,38 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
     decision workflow exists, and a queue item without a consumer action
     would repeat the bridges-without-consumers failure (MEMORY.md).
 - [ ] WP4 CONTENT MACHINE + CALENDAR
+- [x] WP4 CONTENT MACHINE + CALENDAR — commit with subject
+  `feat(wp4): planning-only content calendar over existing workflow rows`
+  (own hash recorded in the WP5 entry; convention: no post-commit amends).
+  - First real gap found by inspection: no content calendar existed — only
+    worker "calendar day" scheduling references. Diversity tracking
+    (DiversityService), quality gates (incl. repetition/evidence/stats/
+    contradiction), and YFP potential dimensions already cover the rest of
+    the WP4 pipeline honestly, so they were not rebuilt. Visual asset
+    generation stays NOT_IMPLEMENTED (generating without a provider would
+    be fake capability); ContentPotentialAssessment is covered by existing
+    YFP/opportunity dimensions (per-dimension score+reason+evidence, never
+    impressions).
+  - Changes: `packages/content/src/calendar.ts` CalendarService (read-only
+    view over ContentPlan/ContentReview/ContentDraft/PublishRecord/
+    Experiment/AutonomyPolicy — no schema change): items, counts,
+    objective/format/angle distribution, conflicts (topic_repetition,
+    angle_repetition, format_concentration, approval_bottleneck,
+    over_posting vs policy cap), and a planning-only policy note on every
+    response. `GET /api/v1/calendar?days=` route (auth triple-middleware,
+    workspace-scoped, window clamped 1–90, 401 unauthenticated).
+  - Tests: content `calendar.test.ts` (7: empty view, distribution,
+    repetition, angle/format concentration, bottleneck, over-posting
+    threshold, workspace scoping of every read); api `calendar.test.ts`
+    (6: bootstrap, empty+policy note, sequencing of plan/review/draft/
+    published, topic-repetition conflict, cross-workspace isolation,
+    401 + window clamp).
+  - Commands run + real results: content 102 passed (95 + 7 new); api 351
+    passed, 3 skipped, 1 FAILED (pre-existing operatorMachine AI-env
+    assertion, reproduced on clean tree in WP3 — unchanged);
+    capabilities 7; intelligence 278; decision 107; social 7; web 84;
+    sales 71; learning 34; business 10; `pnpm typecheck` PASS;
+    `pnpm build` PASS; total 1051 passed, 0 regressions.
 - [ ] WP5 EXECUTION CONTROL PLANE + LINKEDIN CONNECTION
 - [ ] WP6 SALES MACHINE + AUTHORIZED MESSAGING
 - [ ] WP7 OBSERVATION + COMMENT BRAIN + AUDIENCE BRAIN
