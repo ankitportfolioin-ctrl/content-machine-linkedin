@@ -6,7 +6,8 @@ import { PreparedActionService } from '../prepared';
 const mockPrisma = {
   outreachDraft: { findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn() },
   outreachReview: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
-  preparedAction: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
+  preparedAction: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), findMany: vi.fn().mockResolvedValue([]), update: vi.fn() },
+  lead: { update: vi.fn().mockImplementation(async ({ data }: never) => data) },
 } as unknown as PrismaClient;
 
 const OWNER = { userId: 'user-1', role: 'OWNER' };
@@ -102,6 +103,40 @@ describe('Prepared actions (terminal boundary)', () => {
     });
     mockPrisma.preparedAction.update.mockImplementation(({ data }: never) => Promise.resolve({ id: 'action-1', ...(data as object) }));
     await expect(service.markReady('workspace-1', 'action-1')).rejects.toMatchObject({ code: 'ACTION_EXPIRED' });
+  });
+
+  it('blocks a second in-flight execution for the same lead (over-contact guard)', async () => {
+    mockPrisma.outreachDraft.findFirst.mockResolvedValue({ ...DRAFT, leadId: 'lead-1' });
+    mockPrisma.outreachReview.findFirst.mockResolvedValue({
+      id: 'review-1', status: 'APPROVED', draftVersion: 1, approvedBodyHash: hashBody(DRAFT.body),
+    });
+    mockPrisma.preparedAction.findFirst.mockResolvedValue({ id: 'action-2', draftId: 'draft-1' });
+    mockPrisma.preparedAction.findMany.mockResolvedValue([{ id: 'action-1' }]);
+    mockPrisma.preparedAction.update.mockImplementation(({ data }: never) => Promise.resolve({ id: 'action-2', ...(data as object) }));
+    const reviews = new OutreachReviewService(mockPrisma);
+    const service = new PreparedActionService(mockPrisma, reviews);
+    await expect(service.markReady('workspace-1', 'action-2')).rejects.toMatchObject({ code: 'ACTION_BLOCKED' });
+    await expect(service.markReady('workspace-1', 'action-2')).rejects.toThrow(/already has a prepared outreach/);
+    expect(mockPrisma.preparedAction.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'action-2' }, data: { status: 'BLOCKED' } })
+    );
+  });
+
+  it('stamps lastContactAt when an action reaches ready with no conflict', async () => {
+    mockPrisma.outreachDraft.findFirst.mockResolvedValue({ ...DRAFT, leadId: 'lead-1' });
+    mockPrisma.outreachReview.findFirst.mockResolvedValue({
+      id: 'review-1', status: 'APPROVED', draftVersion: 1, approvedBodyHash: hashBody(DRAFT.body),
+    });
+    mockPrisma.preparedAction.findFirst.mockResolvedValue({ id: 'action-3', draftId: 'draft-1' });
+    mockPrisma.preparedAction.findMany.mockResolvedValue([]);
+    mockPrisma.preparedAction.update.mockImplementation(({ data }: never) => Promise.resolve({ id: 'action-3', ...(data as object) }));
+    const reviews = new OutreachReviewService(mockPrisma);
+    const service = new PreparedActionService(mockPrisma, reviews);
+    const ready = await service.markReady('workspace-1', 'action-3') as { status: string };
+    expect(ready.status).toBe('READY_FOR_AUTHORIZED_EXECUTION');
+    expect(mockPrisma.lead.update).toHaveBeenCalledWith(
+      expect.objectContaining({ where: { id: 'lead-1' } })
+    );
   });
 
   it('returns the existing row instead of duplicating on idempotency-key retry', async () => {

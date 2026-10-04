@@ -40,7 +40,9 @@ router.put('/:segmentId', async (req, res, next) => {
     const { segmentId } = req.params;
     if (!segmentId) throw new NotFoundError('Audience Segment');
     const data = audienceSegmentSchema.parse(req.body);
-    res.json({ segment: await svc.upsert(authReq.workspaceId, segmentId, data as any) });
+    const result = await svc.upsert(authReq.workspaceId, segmentId, data as any);
+    if (!result) throw new NotFoundError('Audience Segment');
+    res.json({ segment: result });
   } catch (e) { next(e); }
 });
 

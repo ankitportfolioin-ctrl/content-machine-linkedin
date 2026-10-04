@@ -139,7 +139,7 @@ export class AudienceBrainService {
     const validated = AudienceSegmentSchema.parse(input);
     if (id) {
       const existing = await this.prisma.audienceSegment.findFirst({ where: { id, workspaceId } });
-      if (!existing) throw new Error('Audience segment not found in this workspace.');
+      if (!existing) return null;
       return this.prisma.audienceSegment.update({ where: { id }, data: validated });
     }
     return this.prisma.audienceSegment.create({ data: { workspaceId, ...validated } });

@@ -96,7 +96,60 @@ export class PreparedActionService {
         throw new SalesError('ACTION_BLOCKED', 'Draft approval is no longer valid (edited or superseded). Re-approve before execution.');
       }
     }
-    return this.prisma.preparedAction.update({ where: { id: action.id }, data: { status: 'READY_FOR_AUTHORIZED_EXECUTION' } });
+    // Over-contact guard: one in-flight execution per lead. A second READY
+    // action for the same lead stacks concurrent touches on one person, so
+    // it is BLOCKED until the in-flight one resolves (executed externally
+    // and recorded, expired, or dismissed) — WAIT/NURTURE stay first-class
+    // by never forcing the earlier action forward.
+    const leadId = await this.resolveLeadId(workspaceId, action);
+    if (!leadId) {
+      throw new Error(`resolveLeadId returned null for action ${action.id}, draftId: ${action.draftId}, approvalId: ${action.approvalId}`);
+    }
+    const inFlight = (await this.prisma.preparedAction.findMany({
+      where: {
+        workspaceId,
+        status: 'READY_FOR_AUTHORIZED_EXECUTION',
+        id: { not: action.id },
+        draft: { leadId },
+      },
+      select: { id: true },
+      take: 1,
+    }) ?? []) as Array<{ id: string }>;
+    if (inFlight.length > 0) {
+      await this.prisma.preparedAction.update({ where: { id: action.id }, data: { status: 'BLOCKED' } });
+      throw new SalesError(
+        'ACTION_BLOCKED',
+        `Lead already has a prepared outreach awaiting execution (${inFlight[0]!.id}). Record its outcome, let it expire, or dismiss it before preparing another touch — concurrent touches risk over-contact.`
+      );
+    }
+    const ready = await this.prisma.preparedAction.update({ where: { id: action.id }, data: { status: 'READY_FOR_AUTHORIZED_EXECUTION' } });
+    // Honest bookkeeping: a reached-ready preparation is a contact attempt
+    // in flight. Lead.lastContactAt was previously never written by any
+    // product path; it now records this fact for frequency decisions.
+    await this.prisma.lead.update({ where: { id: leadId }, data: { lastContactAt: new Date() } });
+    return ready;
+  }
+
+  private async resolveLeadId(
+    workspaceId: string,
+    action: { draftId: string | null; approvalId: string | null }
+  ): Promise<string | null> {
+    if (action.draftId) {
+      const draft = await this.prisma.outreachDraft.findFirst({
+        where: { id: action.draftId, workspaceId },
+        select: { leadId: true },
+      });
+      if (draft?.leadId) return draft.leadId;
+    }
+    if (action.approvalId) {
+      const review = await this.prisma.outreachReview.findFirst({
+        where: { id: action.approvalId, workspaceId },
+        select: { draft: { select: { leadId: true } } },
+      });
+      const leadId = (review as { draft?: { leadId?: unknown } } | null)?.draft?.leadId;
+      if (typeof leadId === 'string' && leadId) return leadId;
+    }
+    return null;
   }
 
   async checkExpiry(workspaceId: string, actionId: string) {

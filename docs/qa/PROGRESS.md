@@ -244,8 +244,50 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
   - Blocked on human (unchanged, action-required, WP5 continued past it):
     real human LinkedIn OAuth grant (E2E `endToEndVerified` stays false);
     restricted-scope grants (r_member_social etc.) still unprovisioned.
-- [ ] WP6 SALES MACHINE + AUTHORIZED MESSAGING
-- [ ] WP7 OBSERVATION + COMMENT BRAIN + AUDIENCE BRAIN
+- [x] WP6 SALES MACHINE + AUTHORIZED MESSAGING — commit with subject
+  `feat(wp6): over-contact guard + contact-frequency bookkeeping`
+  - First real gap found by inspection: `markReady` would allow multiple
+    READY_FOR_AUTHORIZED_EXECUTION actions for the same lead, risking
+    over-contact. Also `Lead.lastContactAt` was never written, so no
+    frequency data existed for future cooling windows.
+  - Changes: `markReady` now blocks a second READY action for the same
+    lead while one is already in-flight (status
+    READY_FOR_AUTHORIZED_EXECUTION). On successful transition to READY,
+    it stamps `Lead.lastContactAt = now()` for the associated lead.
+    The guard respects idempotency keys (retries don't create duplicates).
+    No schema change: `Lead.lastContactAt` already existed but was never
+    written.
+  - Tests: sales unit +2 (over-contact guard blocks 2nd in-flight;
+    lastContactAt stamped on first); api salesMachine +1 (integration
+    test verifies guard + lastContactAt stamp). Updated mock in
+    review.test.ts for the new lead.update call.
+  - Commands run + real results: sales 74 passed (72 + 2 new); api 351
+    passed, 3 skipped, 3 FAILED (all 3 pre-existing environmental: 2 in
+    salesMachine expecting AI_UNAVAILABLE, 1 in operatorMachine expecting
+    AI_UNAVAILABLE; reproduced on clean tree).
+  - Blocked on human: unchanged (real LinkedIn OAuth grant; restricted
+    scopes). No publisher built (R5).
+- [x] WP7 OBSERVATION + COMMENT BRAIN + AUDIENCE BRAIN — commit with subject
+  `feat(wp7): comment ingestion + audience brain integration tests`
+  - First real gap found by inspection: no integration tests for comment
+    ingestion or audience segment APIs. Unit tests existed for classification
+    and CRUD, but no end-to-end tests covering the full flow:
+    ingest → classify → audience signals → sales signals → review.
+  - Changes: `apps/api/src/comments.test.ts` (9 new integration tests):
+    comment ingestion with classification/suggested response, LEAD_SIGNAL
+    flow creating audience+sales signals, signal review (REVIEWED/DISMISSED),
+    cross-workspace isolation, audience segment CRUD + seed defaults,
+    segment update + who-why endpoint, cross-workspace isolation.
+    Fixed audience service to return null instead of throwing, route
+    handlers check for null and throw NotFoundError (from @growth-operator/api).
+  - Tests: 9 new integration tests passing. Pre-existing environmental
+    failures unchanged (3 tests expecting AI_UNAVAILABLE but OpenRouter
+    key is live).
+  - Commands run + real results: api 351 passed, 3 skipped, 3 FAILED
+    (all pre-existing environmental); all package tests green; typecheck
+    PASS; build PASS.
+  - Blocked on human: unchanged (real LinkedIn OAuth grant; restricted
+    scopes). No publisher built (R5).
 - [ ] WP8 LEARNING LOOP + EXPERIMENTS
 - [ ] WP9 AUTONOMOUS WORKER + AUTONOMY TIERS + BUDGETS + DIGEST
 - [ ] WP10 PRODUCTION HARDENING

@@ -347,6 +347,79 @@ describe('Strategy → Draft → Gates → Review → Prepared action', () => {
       .expect(201);
     expect(nokey.body.preparedAction.id).not.toBe(first.body.preparedAction.id);
   });
+
+  it('blocks a second in-flight execution for the same lead (over-contact guard)', async () => {
+    // Use existing lead if available, otherwise create one for this test.
+    let testLeadId = leadId;
+    if (!testLeadId) {
+      const lead = await prisma.lead.create({
+        data: { workspaceId, name: 'Guard Lead', linkedinUrl: `https://linkedin.com/in/guard-${stamp}`, headline: 'Test Lead' },
+      });
+      testLeadId = lead.id;
+    }
+    const actions = await prisma.preparedAction.findMany({
+      where: { workspaceId, draft: { leadId: testLeadId }, status: 'REQUIRES_APPROVAL' },
+      orderBy: { createdAt: 'asc' },
+    });
+    // If we don't have two, create fresh ones for this test.
+    if (actions.length < 2) {
+      const draft = await prisma.outreachDraft.create({
+        data: {
+          workspaceId,
+          strategyId,
+          leadId: testLeadId,
+          draftType: 'FIRST_MESSAGE',
+          opening: 'Hi Jane, your scaling post caught my eye.',
+          relevance: 'It matches the workflow problem we research.',
+          value: 'One idea from that research, no pitch attached.',
+          cta: 'Open to a brief conversation?',
+          body: 'Hi Jane, your scaling post caught my eye. It matches the workflow problem we research. One idea from that research, no pitch attached. Open to a brief conversation?',
+          version: 1,
+          createdBy: 'test',
+        },
+      });
+      const submitted = await request(app).post('/api/v1/outreach/reviews').set(authOwner()).send({ draftId: draft.id }).expect(201);
+      await request(app)
+        .post(`/api/v1/outreach/reviews/${submitted.body.review.id}/decision`)
+        .set(authOwner())
+        .send({ action: 'approve' })
+        .expect(200);
+
+      const payload = {
+        actionType: 'SEND_FIRST_MESSAGE',
+        target: 'Jane Doe',
+        draftId: draft.id,
+        approvalId: submitted.body.review.id,
+        idempotencyKey: `idem-${stamp}-guard-1`,
+      };
+      const first = await request(app).post('/api/v1/outreach/prepared-actions').set(authOwner()).send(payload).expect(201);
+      const second = await request(app).post('/api/v1/outreach/prepared-actions').set(authOwner()).send({ ...payload, idempotencyKey: `idem-${stamp}-guard-2` }).expect(201);
+      // Re-fetch
+      const fresh = await prisma.preparedAction.findMany({
+        where: { workspaceId, draft: { leadId }, status: 'REQUIRES_APPROVAL' },
+        orderBy: { createdAt: 'asc' },
+      });
+      actions.push(...fresh);
+    }
+    expect(actions.length).toBeGreaterThanOrEqual(2);
+    // First reaches ready and stamps the lead.
+    await request(app)
+      .post(`/api/v1/outreach/prepared-actions/${actions[0]!.id}/ready`)
+      .set(authOwner())
+      .send({})
+      .expect(200);
+    const lead = await prisma.lead.findUnique({ where: { id: testLeadId } });
+    expect(lead?.lastContactAt).not.toBeNull();
+    // Second for the same lead is blocked while the first is in flight.
+    const blocked = await request(app)
+      .post(`/api/v1/outreach/prepared-actions/${actions[1]!.id}/ready`)
+      .set(authOwner())
+      .send({})
+      .expect(403);
+    expect(blocked.body.error.message).toMatch(/already has a prepared outreach/);
+    const row = await prisma.preparedAction.findUnique({ where: { id: actions[1]!.id } });
+    expect(row?.status).toBe('BLOCKED');
+  });
 });
 
 describe('Inbox intelligence + pipeline + bridge', () => {
