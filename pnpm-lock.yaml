@@ -188,6 +188,9 @@ importers:
 
   packages/business:
     dependencies:
+      '@growth-operator/api':
+        specifier: workspace:*
+        version: link:../../apps/api
       '@growth-operator/db':
         specifier: workspace:*
         version: link:../db
@@ -463,6 +466,9 @@ importers:
 
   packages/shared:
     dependencies:
+      '@growth-operator/db':
+        specifier: workspace:*
+        version: link:../db
       jsdom:
         specifier: ^24.0.0
         version: 24.1.3

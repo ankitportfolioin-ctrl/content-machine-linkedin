@@ -1063,6 +1063,85 @@ model RunStage {
     @@index([workspaceId, dailyRunId])
   }
 
+  // WP9 Phase 1: Autonomous Operator Cycle. Separate from DailyRun to support
+  // on-demand execution with explicit idempotency keys. Reuses the same
+  // STAGE_ORDER and stage execution logic but with user-controlled triggers.
+  enum OperatorCycleStatus {
+    QUEUED
+    RUNNING
+    PAUSED
+    COMPLETED
+    PARTIAL
+    FAILED
+    CANCELLED
+  }
+
+  enum OperatorCycleStageName {
+    RESEARCH
+    DECISION
+    CONTENT
+    SALES
+    APPROVAL
+    EXECUTION
+    OBSERVE
+    LEARN
+    FINALIZE
+  }
+
+  enum OperatorCycleStageStatus {
+    PENDING
+    RUNNING
+    SUCCEEDED
+    SKIPPED
+    FAILED
+  }
+
+  model OperatorCycle {
+    id              String                 @id @default(uuid())
+    workspaceId     String
+    idempotencyKey  String                 @db.VarChar(100)
+    status          OperatorCycleStatus    @default(QUEUED)
+    currentStage    OperatorCycleStageName?
+    requestedAt     DateTime               @default(now())
+    startedAt       DateTime?
+    completedAt     DateTime?
+    error           String?                @db.Text
+    errorStage      OperatorCycleStageName?
+    correlationId   String?                @db.VarChar(100)
+    result          Json?
+    createdAt       DateTime               @default(now())
+    updatedAt       DateTime               @updatedAt
+
+    workspace       Workspace              @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    stages          OperatorCycleStage[]
+
+    @@unique([workspaceId, idempotencyKey])
+    @@index([workspaceId, status])
+    @@index([workspaceId, requestedAt])
+  }
+
+  model OperatorCycleStage {
+    id              String                   @id @default(uuid())
+    workspaceId     String
+    cycleId         String
+    stage           OperatorCycleStageName
+    status          OperatorCycleStageStatus @default(PENDING)
+    counts          Json?
+    durationMs      Int?
+    error           String?                  @db.Text
+    startedAt       DateTime?
+    finishedAt      DateTime?
+    attempt         Int                      @default(1)
+    createdAt       DateTime                 @default(now())
+    updatedAt       DateTime                 @updatedAt
+
+    workspace       Workspace                @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+    cycle           OperatorCycle            @relation(fields: [cycleId], references: [id], onDelete: Cascade)
+
+    @@unique([workspaceId, cycleId, stage, attempt])
+    @@index([workspaceId, cycleId])
+  }
+
   model ApprovalSnapshot {
     // Batch 3 (#12): frozen approval state per daily run. Items are plain
     // copied values (ids, scores, reasons, version identifiers) captured at
@@ -1199,6 +1278,8 @@ model Workspace {
   socialPosts              SocialPost[]
   dailyRuns                DailyRun[]
   runStages                RunStage[]
+  operatorCycles           OperatorCycle[]
+  operatorCycleStages      OperatorCycleStage[]
   onboardingState          OnboardingState?
   leadImportBatches        LeadImportBatch[]
   attributionLinks         AttributionLink[]

@@ -610,6 +610,7 @@ export type PerformanceReview = z.infer<typeof performanceReviewSchema>;
 export type ResearchTrigger = z.infer<typeof researchTriggerSchema>;
 export type FactCheck = z.infer<typeof factCheckSchema>;
 export type OperatorActionKind = z.infer<typeof operatorActionKindSchema>;
+export type OperatorCycleTrigger = z.infer<typeof operatorCycleTriggerSchema>;
 
 export const businessProfileSchema = z.object({
   name: z.string().min(1).max(100),
@@ -745,6 +746,11 @@ export const experimentCompleteSchema = z.object({
 
 export const runsTriggerSchema = z.object({
   runDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'runDate must be YYYY-MM-DD').optional(),
+});
+
+export const operatorCycleTriggerSchema = z.object({
+  idempotencyKey: z.string().min(1).max(100),
+  correlationId: z.string().max(100).optional(),
 });
 
 // Step D: onboarding / workspace settings. Autonomy stays Tier 0 until the
