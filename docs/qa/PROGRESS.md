@@ -208,6 +208,42 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
     sales 71; learning 34; business 10; `pnpm typecheck` PASS;
     `pnpm build` PASS; total 1051 passed, 0 regressions.
 - [ ] WP5 EXECUTION CONTROL PLANE + LINKEDIN CONNECTION
+- [x] WP5 EXECUTION CONTROL PLANE + LINKEDIN CONNECTION — commit with subject
+  `feat(wp5): prepared-action idempotency plus LinkedIn reconnect coverage`
+  (own hash recorded in the WP6 entry; convention: no post-commit amends).
+  - First real gaps found by inspection: (a) `prepareAction` created a new
+    row on every call — a retried approval (double-click, network retry)
+    prepared duplicates that could later double into two sends; unlike
+    OutcomeMetric, it had no idempotency key; (b) the LinkedIn grant chain
+    never tested reconnect (second grant overwriting tokens+label).
+    No publisher was built: no legitimate publishing permission exists, so
+    per R5 the adapter interface stays ready and execution stays
+    NOT_IMPLEMENTED (worker EXECUTION still SKIPPED, cap 0).
+  - Changes: `PreparedAction.idempotencyKey` (nullable) +
+    `@@unique([workspaceId, idempotencyKey])`, migration
+    `20261004000000_prepared_action_idempotency` (hand-written in repo
+    style; `migrate dev` is interactive-only so SQL was deployed via
+    `migrate deploy` to dev AND test DBs, zero-drift verified via
+    `migrate diff` → empty); service returns the existing row on key
+    retry (mirrors OutcomeMetric pattern); zod schema + route pass-through.
+    `pnpm db:generate` required stopping the API dev server (engine DLL
+    lock); server restarted and `/health` verified healthy.
+    `src/generated` committed copy left untouched (stale before WP5;
+    typecheck/runtime resolve `dist`, verified passing).
+  - Tests: sales unit (same key → same row, create not called; new key →
+    new row); api salesMachine (double POST same key → same id, one row;
+    other key and no key create independently); social reconnect (two
+    grants → one row, fresh token+label).
+  - Commands run + real results: sales 72 passed (71 + 1 new); social 23
+    (22 + 1 new); api 351 passed, 3 skipped, 3 FAILED — all 3 pre-existing
+    environmental (expected 503 AI_UNAVAILABLE, got live-provider success:
+    operatorMachine×1 from WP3 plus salesMachine×2, the latter reproduced
+    on the CLEAN tree via `git stash -u` in WP5); capabilities 7;
+    intelligence 278; decision 107; web 84; content 102; learning 34;
+    business 10; `pnpm typecheck` PASS; `pnpm build` PASS.
+  - Blocked on human (unchanged, action-required, WP5 continued past it):
+    real human LinkedIn OAuth grant (E2E `endToEndVerified` stays false);
+    restricted-scope grants (r_member_social etc.) still unprovisioned.
 - [ ] WP6 SALES MACHINE + AUTHORIZED MESSAGING
 - [ ] WP7 OBSERVATION + COMMENT BRAIN + AUDIENCE BRAIN
 - [ ] WP8 LEARNING LOOP + EXPERIMENTS

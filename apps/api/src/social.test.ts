@@ -291,6 +291,58 @@ describe('social connectors (honest states + isolation)', () => {
     }
   });
 
+  it('reconnect overwrites the same row (new tokens and label), never duplicates', async () => {
+    // A second grant for the same workspace+platform must upsert: exactly
+    // one SocialConnection row carrying the fresh token and verified name.
+    const previousNodeEnv = process.env.NODE_ENV;
+    const originalFetch = globalThis.fetch;
+    let grant = 0;
+    process.env.NODE_ENV = 'development';
+    globalThis.fetch = (async (input: unknown) => {
+      const url = typeof input === 'string' ? input : String((input as { url?: unknown }).url ?? input);
+      if (url.includes('linkedin.com/oauth/v2/accessToken')) {
+        grant += 1;
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => null },
+          json: async () => ({ access_token: `tok-linkedin-reconnect-${grant}`, expires_in: 3600 }),
+        } as unknown as Response;
+      }
+      if (url.includes('api.linkedin.com/v2/userinfo')) {
+        return {
+          ok: true,
+          status: 200,
+          headers: { get: () => null },
+          json: async () => ({ sub: 'member-abc', name: `Linked Tester ${grant}` }),
+        } as unknown as Response;
+      }
+      throw new Error(`unexpected network call in test: ${url}`);
+    }) as typeof fetch;
+    try {
+      for (const n of [1, 2]) {
+        const raw = `reconnect-${stamp}-${n}`;
+        await storeOAuthState({ state: raw, workspaceId: workspaceA, userId: 'user-a', platform: 'linkedin' });
+        await request(app)
+          .get(`/api/v1/social/callback/linkedin?code=grant-code-${n}&state=${raw}`)
+          .expect(302)
+          .expect('Location', /social=connected/);
+      }
+      const rows = await prisma.socialConnection.findMany({
+        where: { workspaceId: workspaceA, platform: 'LINKEDIN' },
+      });
+      expect(rows).toHaveLength(1);
+      expect(rows[0]?.accountLabel).toBe('Linked Tester 2');
+      if (rows[0]) expect(decryptToken(rows[0].encryptedAccess)).toBe('tok-linkedin-reconnect-2');
+    } finally {
+      await prisma.socialConnection.deleteMany({
+        where: { workspaceId: workspaceA, platform: 'LINKEDIN' },
+      });
+      process.env.NODE_ENV = previousNodeEnv;
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it('rejects a completion attempt from a different signed-in user', async () => {
     const { createHash } = await import('crypto');
     const raw = `userx-${stamp}-a`;

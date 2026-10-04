@@ -2066,11 +2066,17 @@ model PreparedAction {
   evidence       Json?
   status         PreparedActionStatus @default(REQUIRES_APPROVAL)
   expiresAt      DateTime?
+  // WP5: optional idempotency key. Enforced only when provided (NULLs stay
+  // mutually distinct in Postgres): retries with the same key return the
+  // existing row instead of preparing a duplicate that could later double
+  // into two external sends.
+  idempotencyKey String?              @db.VarChar(200)
   createdAt      DateTime             @default(now())
 
   workspace      Workspace            @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   draft          OutreachDraft?       @relation(fields: [draftId], references: [id], onDelete: SetNull)
 
+  @@unique([workspaceId, idempotencyKey])
   @@index([workspaceId])
   @@index([draftId])
   @@index([workspaceId, status])

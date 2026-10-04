@@ -296,6 +296,57 @@ describe('Strategy → Draft → Gates → Review → Prepared action', () => {
       .send({})
       .expect(403);
   });
+
+  it('deduplicates retried preparations on idempotency key (never double-prepares)', async () => {
+    const draft = await prisma.outreachDraft.create({
+      data: {
+        workspaceId,
+        strategyId,
+        leadId,
+        draftType: 'FIRST_MESSAGE',
+        opening: 'Hi Jane, your scaling post caught my eye.',
+        relevance: 'It matches the workflow problem we research.',
+        value: 'One idea from that research, no pitch attached.',
+        cta: 'Open to a brief conversation?',
+        body: 'Hi Jane, your scaling post caught my eye. It matches the workflow problem we research. One idea from that research, no pitch attached. Open to a brief conversation?',
+        version: 1,
+        createdBy: 'test',
+      },
+    });
+    const submitted = await request(app).post('/api/v1/outreach/reviews').set(authOwner()).send({ draftId: draft.id }).expect(201);
+    await request(app)
+      .post(`/api/v1/outreach/reviews/${submitted.body.review.id}/decision`)
+      .set(authOwner())
+      .send({ action: 'approve' })
+      .expect(200);
+
+    const payload = {
+      actionType: 'SEND_FIRST_MESSAGE',
+      target: 'Jane Doe',
+      draftId: draft.id,
+      approvalId: submitted.body.review.id,
+      idempotencyKey: `idem-${stamp}`,
+    };
+    const first = await request(app).post('/api/v1/outreach/prepared-actions').set(authOwner()).send(payload).expect(201);
+    const second = await request(app).post('/api/v1/outreach/prepared-actions').set(authOwner()).send(payload).expect(201);
+    expect(second.body.preparedAction.id).toBe(first.body.preparedAction.id);
+    const rows = await prisma.preparedAction.findMany({ where: { workspaceId, idempotencyKey: `idem-${stamp}` } });
+    expect(rows).toHaveLength(1);
+
+    // A different key prepares independently; no key always creates.
+    const other = await request(app)
+      .post('/api/v1/outreach/prepared-actions')
+      .set(authOwner())
+      .send({ ...payload, idempotencyKey: `idem-${stamp}-other` })
+      .expect(201);
+    expect(other.body.preparedAction.id).not.toBe(first.body.preparedAction.id);
+    const nokey = await request(app)
+      .post('/api/v1/outreach/prepared-actions')
+      .set(authOwner())
+      .send({ actionType: 'SEND_FIRST_MESSAGE', target: 'Jane Doe', draftId: draft.id, approvalId: submitted.body.review.id })
+      .expect(201);
+    expect(nokey.body.preparedAction.id).not.toBe(first.body.preparedAction.id);
+  });
 });
 
 describe('Inbox intelligence + pipeline + bridge', () => {

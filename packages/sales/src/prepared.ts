@@ -31,6 +31,7 @@ export class PreparedActionService {
     approvalId?: string;
     evidence?: Record<string, unknown>;
     expiresAt?: Date;
+    idempotencyKey?: string;
   }) {
     if (input.draftId) {
       const draft = await this.prisma.outreachDraft.findFirst({ where: { id: input.draftId, workspaceId: input.workspaceId } });
@@ -54,6 +55,16 @@ export class PreparedActionService {
     if (!input.draftId && !input.approvalId) {
       throw new SalesError('ACTION_BLOCKED', 'Prepared actions require a draft or approval reference. Unapproved actions are never prepared.');
     }
+    // Idempotent retry: the same key returns the existing row instead of
+    // preparing a duplicate that could later double into two sends.
+    // Mirrors OutcomeMetric.idempotencyKey (learning/outcome.ts).
+    const key = input.idempotencyKey?.trim() || null;
+    if (key) {
+      const existing = await this.prisma.preparedAction.findUnique({
+        where: { workspaceId_idempotencyKey: { workspaceId: input.workspaceId, idempotencyKey: key } },
+      });
+      if (existing) return existing;
+    }
     return this.prisma.preparedAction.create({
       data: {
         workspaceId: input.workspaceId,
@@ -64,6 +75,7 @@ export class PreparedActionService {
         evidence: (input.evidence ?? null) as object | null,
         status: 'REQUIRES_APPROVAL',
         expiresAt: input.expiresAt ?? null,
+        idempotencyKey: key,
       },
     });
   }

@@ -330,6 +330,7 @@ router.post('/prepared-actions', async (req, res, next) => {
       approvalId: data.approvalId,
       evidence: data.evidence,
       expiresAt: data.expiresAt ? new Date(data.expiresAt) : undefined,
+      idempotencyKey: data.idempotencyKey,
     });
     res.status(201).json({ preparedAction: action });
   } catch (error) {

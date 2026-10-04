@@ -404,6 +404,7 @@ export const preparedActionCreateSchema = z.object({
   approvalId: idSchema.optional(),
   evidence: z.record(z.unknown()).optional(),
   expiresAt: isoDateSchema.optional(),
+  idempotencyKey: z.string().max(200).optional(),
 });
 
 export const conversationClassifySchema = z.object({

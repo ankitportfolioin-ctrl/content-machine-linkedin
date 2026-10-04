@@ -6,7 +6,7 @@ import { PreparedActionService } from '../prepared';
 const mockPrisma = {
   outreachDraft: { findFirst: vi.fn(), findMany: vi.fn(), create: vi.fn() },
   outreachReview: { findFirst: vi.fn(), create: vi.fn(), update: vi.fn() },
-  preparedAction: { create: vi.fn(), findFirst: vi.fn(), update: vi.fn() },
+  preparedAction: { create: vi.fn(), findFirst: vi.fn(), findUnique: vi.fn(), update: vi.fn() },
 } as unknown as PrismaClient;
 
 const OWNER = { userId: 'user-1', role: 'OWNER' };
@@ -102,5 +102,31 @@ describe('Prepared actions (terminal boundary)', () => {
     });
     mockPrisma.preparedAction.update.mockImplementation(({ data }: never) => Promise.resolve({ id: 'action-1', ...(data as object) }));
     await expect(service.markReady('workspace-1', 'action-1')).rejects.toMatchObject({ code: 'ACTION_EXPIRED' });
+  });
+
+  it('returns the existing row instead of duplicating on idempotency-key retry', async () => {
+    mockPrisma.outreachDraft.findFirst.mockResolvedValue(DRAFT);
+    mockPrisma.outreachReview.findFirst.mockResolvedValue({
+      id: 'review-1', status: 'APPROVED', draftVersion: 1, approvedBodyHash: hashBody(DRAFT.body),
+    });
+    const existing = { id: 'action-kept', workspaceId: 'workspace-1', idempotencyKey: 'key-9' };
+    mockPrisma.preparedAction.findUnique.mockResolvedValue(existing);
+    mockPrisma.preparedAction.create.mockImplementation(({ data }: never) => Promise.resolve({ id: 'action-new', ...(data as object) }));
+    const reviews = new OutreachReviewService(mockPrisma);
+    const service = new PreparedActionService(mockPrisma, reviews);
+    const first = await service.prepareAction({
+      workspaceId: 'workspace-1', actionType: 'SEND_FIRST_MESSAGE', draftId: 'draft-1', approvalId: 'review-1',
+      idempotencyKey: 'key-9',
+    }) as { id: string };
+    expect(first.id).toBe('action-kept');
+    expect(mockPrisma.preparedAction.create).not.toHaveBeenCalled();
+
+    mockPrisma.preparedAction.findUnique.mockResolvedValue(null);
+    const second = await service.prepareAction({
+      workspaceId: 'workspace-1', actionType: 'SEND_FIRST_MESSAGE', draftId: 'draft-1', approvalId: 'review-1',
+      idempotencyKey: 'key-10',
+    }) as { id: string; idempotencyKey: string };
+    expect(second.id).toBe('action-new');
+    expect(second.idempotencyKey).toBe('key-10');
   });
 });
