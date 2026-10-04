@@ -6,6 +6,7 @@ import {
   AuthenticatedRequest,
 } from '../middleware/auth';
 import { prisma } from '@growth-operator/db';
+import { executionImplementedById } from '@growth-operator/capabilities';
 
 const router: Router = Router();
 
@@ -151,14 +152,18 @@ async function computeReadiness(workspaceId: string): Promise<ReadinessState> {
         .map(([k]) => k.replace(/([A-Z])/g, ' $1').trim())
         .join(', ');
 
-  // Platform execution status based on actual connections
+  // Platform execution status. Publishing support is owned by the capability
+  // registry (@growth-operator/capabilities, execution.* entries) — this
+  // route keeps only display names and overlays live connection state.
+  // Publishing is not implemented for any platform, so every flag is false
+  // until the registry says otherwise (WP5).
   const platformCapabilities: Record<string, { publishing: boolean; displayName: string }> = {
-    LINKEDIN: { publishing: false, displayName: 'LinkedIn' },
-    INSTAGRAM: { publishing: false, displayName: 'Instagram' },
-    FACEBOOK: { publishing: false, displayName: 'Facebook' },
-    X: { publishing: false, displayName: 'X' },
-    YOUTUBE: { publishing: false, displayName: 'YouTube' },
-    TIKTOK: { publishing: false, displayName: 'TikTok' },
+    LINKEDIN: { publishing: executionImplementedById('execution.linkedin_publish'), displayName: 'LinkedIn' },
+    INSTAGRAM: { publishing: executionImplementedById('execution.instagram_publish'), displayName: 'Instagram' },
+    FACEBOOK: { publishing: executionImplementedById('execution.facebook_publish'), displayName: 'Facebook' },
+    X: { publishing: executionImplementedById('execution.x_publish'), displayName: 'X' },
+    YOUTUBE: { publishing: executionImplementedById('execution.youtube_publish'), displayName: 'YouTube' },
+    TIKTOK: { publishing: executionImplementedById('execution.tiktok_publish'), displayName: 'TikTok' },
   };
 
   const connectedPlatforms = new Set(socialConnections.map(c => c.platform));

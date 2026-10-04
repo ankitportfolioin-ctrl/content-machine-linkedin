@@ -19,6 +19,7 @@
   "dependencies": {
     "@growth-operator/ai": "workspace:*",
     "@growth-operator/business": "workspace:*",
+    "@growth-operator/capabilities": "workspace:*",
     "@growth-operator/content": "workspace:*",
     "@growth-operator/db": "workspace:*",
     "@growth-operator/decision": "workspace:*",

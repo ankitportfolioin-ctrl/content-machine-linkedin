@@ -19,6 +19,7 @@ import {
   getPlatformCapability,
   getSocialAdapter,
 } from '@growth-operator/social';
+import { platformCapabilityFlags } from '@growth-operator/capabilities';
 
 const router: ExpressRouter = Router();
 
@@ -249,15 +250,18 @@ router.get('/connections', async (req, res, next) => {
     const countBy = new Map(counts.map((c) => [c.platform, c._count.id]));
     const byPlatform = new Map(rows.map((r) => [toPlatform(r.platform), r]));
 
-    // Platform capability mapping based on what each adapter actually supports.
-    // LinkedIn is identity-only (OIDC-minimal): a connected account verifies
-    // identity and never enables research, so its research flag is false.
+    // Platform capability flags are owned by the capability registry
+    // (@growth-operator/capabilities): research/publishing/analytics/
+    // comments/audience support per platform. LinkedIn is identity-only
+    // (OIDC-minimal): a connected account verifies identity and never
+    // enables research, so its research flag is false. Workspace account
+    // state is overlaid below and never flips these flags.
     const platformCapabilities: Record<SocialPlatform, { research: boolean; publishing: boolean; analytics: boolean; comments: boolean; audience: boolean }> = {
-      instagram: { research: true, publishing: false, analytics: false, comments: false, audience: false },
-      facebook: { research: true, publishing: false, analytics: false, comments: false, audience: false },
-      linkedin: { research: false, publishing: false, analytics: false, comments: false, audience: false },
-      youtube: { research: true, publishing: false, analytics: false, comments: false, audience: false },
-      x: { research: true, publishing: false, analytics: false, comments: false, audience: false },
+      instagram: platformCapabilityFlags('instagram'),
+      facebook: platformCapabilityFlags('facebook'),
+      linkedin: platformCapabilityFlags('linkedin'),
+      youtube: platformCapabilityFlags('youtube'),
+      x: platformCapabilityFlags('x'),
     };
 
     res.json({

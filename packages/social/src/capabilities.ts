@@ -1,12 +1,17 @@
 import type { SocialPlatform } from './types';
+import { getCapability } from '@growth-operator/capabilities';
 
 /**
- * Single source of truth for platform capability claims.
+ * Platform capability descriptors — DERIVED VIEW over the capability registry.
  *
- * The API connections endpoint and the web UI both render from these
- * descriptors — neither layer invents capability. The research `wired`
- * flags mirror the intelligence connector catalogue (`workerEligible`):
- * a connected account never implies research or publishing availability.
+ * Single-source rule: the research/publishing supported+wired booleans are
+ * owned by `@growth-operator/capabilities` (research.* + execution.*
+ * entries). This module keeps the descriptor SHAPE (consumed by the social
+ * connections endpoint and its tests) and derives those booleans; server
+ * setup facts, readiness notes, and account support stay here because they
+ * describe the OAuth plumbing, not product capability. The research `wired`
+ * flags mirror the registry `workerAttempt`: a connected account never
+ * implies research or publishing availability.
  */
 
 export interface PlatformServerSetup {
@@ -48,6 +53,35 @@ export interface PlatformCapabilityDescriptor {
 const RESEARCH_NOT_WIRED =
   'Account connection does not enable research. Registry research is not wired to workspace tokens in this version.';
 
+function researchEntryId(platform: SocialPlatform): string {
+  return `research.${platform}`;
+}
+
+function publishEntryId(platform: SocialPlatform): string {
+  return `execution.${platform}_publish`;
+}
+
+/** True when backend code capable of research exists for the platform. */
+function researchSupported(platform: SocialPlatform): boolean {
+  const entry = getCapability(researchEntryId(platform));
+  return entry?.domain === 'RESEARCH' && 'fields' in entry && entry.fields.researchCodeExists;
+}
+
+/** True when the worker may attempt registry research for the platform. */
+function researchWired(platform: SocialPlatform): boolean {
+  const entry = getCapability(researchEntryId(platform));
+  return entry?.domain === 'RESEARCH' && 'fields' in entry && entry.fields.workerAttempt;
+}
+
+/** True when a publishing execution path exists for the platform. */
+function publishingSupported(platform: SocialPlatform): boolean {
+  const entry = getCapability(publishEntryId(platform));
+  if (!entry) return false;
+  return entry.state !== 'NOT_IMPLEMENTED' && entry.state !== 'UNKNOWN';
+}
+
+const PUBLISHING_NOTE = 'Publishing is not implemented for any platform.';
+
 export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDescriptor> = {
   instagram: {
     platform: 'instagram',
@@ -58,8 +92,8 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
       docsUrl: 'https://developers.facebook.com/apps/',
       docsLabel: 'Meta for Developers — create an app, add Instagram Graph API (business/creator account required)',
     },
-    research: { supported: true, wired: false, note: RESEARCH_NOT_WIRED },
-    publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    research: { supported: researchSupported('instagram'), wired: researchWired('instagram'), note: RESEARCH_NOT_WIRED },
+    publishing: { supported: publishingSupported('instagram'), wired: false, note: PUBLISHING_NOTE },
     readiness: {
       oauthImplemented: true,
       supportsRefresh: false,
@@ -77,8 +111,8 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
       docsUrl: 'https://developers.facebook.com/apps/',
       docsLabel: 'Meta for Developers — create an app, request pages_show_list + pages_read_engagement (administered Pages only)',
     },
-    research: { supported: true, wired: false, note: 'No runnable research path exists for Facebook in this version.' },
-    publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    research: { supported: researchSupported('facebook'), wired: researchWired('facebook'), note: 'No runnable research path exists for Facebook in this version.' },
+    publishing: { supported: publishingSupported('facebook'), wired: false, note: PUBLISHING_NOTE },
     readiness: {
       oauthImplemented: true,
       supportsRefresh: false,
@@ -96,8 +130,8 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
       docsUrl: 'https://developer.linkedin.com/product-catalog',
       docsLabel: 'LinkedIn Developer Portal — create an app and add the Sign In with LinkedIn using OpenID Connect product',
     },
-    research: { supported: false, wired: false, note: 'Reading member posts requires LinkedIn access that is not available to this application.' },
-    publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    research: { supported: researchSupported('linkedin'), wired: researchWired('linkedin'), note: 'Reading member posts requires LinkedIn access that is not available to this application.' },
+    publishing: { supported: publishingSupported('linkedin'), wired: false, note: PUBLISHING_NOTE },
     readiness: {
       oauthImplemented: true,
       supportsRefresh: false,
@@ -116,11 +150,11 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
       docsLabel: 'Google Cloud Console — create OAuth credentials, enable YouTube Data API v3 (youtube.readonly)',
     },
     research: {
-      supported: true,
-      wired: true,
+      supported: researchSupported('youtube'),
+      wired: researchWired('youtube'),
       note: 'Registry research runs only when the server holds a YouTube Data API key or token — separate from account connection.',
     },
-    publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    publishing: { supported: publishingSupported('youtube'), wired: false, note: PUBLISHING_NOTE },
     readiness: {
       oauthImplemented: true,
       supportsRefresh: true,
@@ -138,8 +172,8 @@ export const PLATFORM_CAPABILITIES: Record<SocialPlatform, PlatformCapabilityDes
       docsUrl: 'https://developer.x.com/en/portal/dashboard',
       docsLabel: 'X Developer Portal — create a project/app, enable OAuth 2.0 (tweet.read, users.read, offline.access)',
     },
-    research: { supported: true, wired: false, note: RESEARCH_NOT_WIRED },
-    publishing: { supported: false, wired: false, note: 'Publishing is not implemented for any platform.' },
+    research: { supported: researchSupported('x'), wired: researchWired('x'), note: RESEARCH_NOT_WIRED },
+    publishing: { supported: publishingSupported('x'), wired: false, note: PUBLISHING_NOTE },
     readiness: {
       oauthImplemented: true,
       supportsRefresh: true,

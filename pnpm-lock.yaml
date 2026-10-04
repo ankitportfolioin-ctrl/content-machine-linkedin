@@ -23,6 +23,9 @@ importers:
       '@growth-operator/business':
         specifier: workspace:*
         version: link:../../packages/business
+      '@growth-operator/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
       '@growth-operator/content':
         specifier: workspace:*
         version: link:../../packages/content
@@ -208,6 +211,15 @@ importers:
         specifier: ^2.0.5
         version: 2.1.9(@types/node@22.20.4)(jsdom@25.0.1)
 
+  packages/capabilities:
+    devDependencies:
+      typescript:
+        specifier: ^5.5.4
+        version: 5.9.3
+      vitest:
+        specifier: ^2.0.5
+        version: 2.1.9(@types/node@22.20.4)(jsdom@25.0.1)
+
   packages/content:
     dependencies:
       '@growth-operator/ai':
@@ -309,6 +321,9 @@ importers:
       '@growth-operator/ai':
         specifier: workspace:*
         version: link:../ai
+      '@growth-operator/capabilities':
+        specifier: workspace:*
+        version: link:../capabilities
       '@growth-operator/db':
         specifier: workspace:*
         version: link:../db
@@ -473,6 +488,9 @@ importers:
 
   packages/social:
     dependencies:
+      '@growth-operator/capabilities':
+        specifier: workspace:*
+        version: link:../capabilities
       zod:
         specifier: ^3.23.8
         version: 3.25.76

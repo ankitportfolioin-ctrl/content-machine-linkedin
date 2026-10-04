@@ -1,5 +1,5 @@
 {
-  "name": "@growth-operator/social",
+  "name": "@growth-operator/capabilities",
   "version": "0.0.0",
   "private": true,
   "main": "dist/index.js",
@@ -16,10 +16,7 @@
     "test": "vitest run",
     "test:watch": "vitest"
   },
-  "dependencies": {
-    "@growth-operator/capabilities": "workspace:*",
-    "zod": "^3.23.8"
-  },
+  "dependencies": {},
   "devDependencies": {
     "typescript": "^5.5.4",
     "vitest": "^2.0.5"
