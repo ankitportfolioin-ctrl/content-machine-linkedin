@@ -378,7 +378,9 @@ const intelligence: StageFn = async (ctx) => {
 
       let entries: Array<{ id: string }> = [];
       try {
-        entries = await claims.persistClaims(workspaceId, source.id, document.id, u.understanding);
+        entries = await claims.persistClaims(workspaceId, source.id, document.id, u.understanding, {
+          ...(u.provider && u.model ? { ai: { provider: u.provider, model: u.model } } : {}),
+        });
         counts.claimsPersisted += entries.length;
       } catch {
         continue;

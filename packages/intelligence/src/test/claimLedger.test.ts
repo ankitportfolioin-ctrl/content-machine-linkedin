@@ -74,6 +74,61 @@ describe('ClaimLedgerService', () => {
       expect(result[2].status).toBe('UNCERTAIN');
     });
 
+    it('stamps ai provider and model into provenance when supplied', async () => {
+      const understanding: SourceUnderstanding = {
+        thesis: 'Test thesis',
+        mainProblem: 'Test problem',
+        observations: [],
+        claims: [{ text: 'Model claim', type: 'FACT', evidence: 'Evidence text', confidence: 0.9 }],
+        evidence: [],
+        implications: [],
+        uncertainties: [],
+        contradictions: [],
+        audienceRelevance: [],
+        possibleAngles: [],
+      };
+
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.create.mockImplementation(({ data }) => Promise.resolve({ id: 'claim-id', ...data }));
+
+      const result = await service.persistClaims('workspace-1', 'source-1', 'doc-1', understanding, {
+        ai: { provider: 'openrouter', model: 'test-model-1' },
+      });
+
+      expect(result).toHaveLength(1);
+      const provenance = result[0].provenance as Record<string, unknown>;
+      expect(provenance.generatedBy).toBe('ai');
+      expect(provenance.aiProvider).toBe('openrouter');
+      expect(provenance.aiModel).toBe('test-model-1');
+      expect(provenance.sourceUrl).toBe('https://example.com/article');
+    });
+
+    it('marks provenance generator unknown (never invented) when ai info is absent', async () => {
+      const understanding: SourceUnderstanding = {
+        thesis: 'Test thesis',
+        mainProblem: 'Test problem',
+        observations: [],
+        claims: [{ text: 'Orphan claim', type: 'FACT', evidence: 'Evidence text', confidence: 0.9 }],
+        evidence: [],
+        implications: [],
+        uncertainties: [],
+        contradictions: [],
+        audienceRelevance: [],
+        possibleAngles: [],
+      };
+
+      mockPrisma.sourceClaim.findMany.mockResolvedValue([]);
+      mockPrisma.sourceClaim.create.mockImplementation(({ data }) => Promise.resolve({ id: 'claim-id', ...data }));
+
+      const result = await service.persistClaims('workspace-1', 'source-1', 'doc-1', understanding);
+
+      expect(result).toHaveLength(1);
+      const provenance = result[0].provenance as Record<string, unknown>;
+      expect(provenance.generatedBy).toBe('unknown');
+      expect(provenance).not.toHaveProperty('aiProvider');
+      expect(provenance).not.toHaveProperty('aiModel');
+    });
+
     it('sets status based on confidence', async () => {
       const understanding: SourceUnderstanding = {
         thesis: 'Test',

@@ -20,6 +20,20 @@ export interface UnderstandingOptions {
   model?: string;
 }
 
+export interface UnderstandingResult {
+  understanding: SourceUnderstandingType | null;
+  error?: string;
+  aiAvailable: boolean;
+  /**
+   * Which provider+model produced the understanding. Present on every
+   * success path so the claim ledger can stamp provenance (WP2: every
+   * claim carries source, evidence, location, confidence, createdAt, and
+   * model/version when AI-generated). Absent when no provider ran.
+   */
+  provider?: AIProviderType;
+  model?: string;
+}
+
 export class SourceUnderstandingService {
   private registry: AIProviderRegistry;
 
@@ -32,7 +46,7 @@ export class SourceUnderstandingService {
     sourceTitle: string | null,
     sourceUrl: string,
     options: UnderstandingOptions = {}
-  ): Promise<{ understanding: SourceUnderstandingType | null; error?: string; aiAvailable: boolean }> {
+  ): Promise<UnderstandingResult> {
     const availableProviders = this.registry.getAvailable();
     if (availableProviders.length === 0) {
       return {
@@ -125,6 +139,8 @@ Extract and return:
         };
       }
 
+      const usedModel = options.model || 'gpt-4o-mini';
+
       const response = await provider.chatCompletion(request);
       const content = response.choices[0]?.message?.content;
 
@@ -157,6 +173,8 @@ Extract and return:
       return {
         understanding: validationResult.data,
         aiAvailable: true,
+        provider: provider.type,
+        model: usedModel,
       };
     } catch (error) {
       if (error instanceof Error && error.name === 'AIProviderUnavailableError') {

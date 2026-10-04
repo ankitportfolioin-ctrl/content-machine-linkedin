@@ -59,7 +59,8 @@ export class ClaimLedgerService {
     workspaceId: string,
     sourceId: string,
     documentId: string,
-    understanding: SourceUnderstanding
+    understanding: SourceUnderstanding,
+    options: { ai?: { provider: string; model: string } } = {}
   ): Promise<ClaimLedgerEntry[]> {
     const entries: ClaimLedgerEntry[] = [];
 
@@ -131,6 +132,14 @@ export class ClaimLedgerService {
             evidence: claim.evidence,
             evidenceLocation: claim.evidenceLocation,
             evidenceStatus: evidence ? 'RECORDED' : 'SOURCE_REVIEW_REQUIRED',
+            // WP2: every claim carries model/version when AI-generated.
+            // The understanding object is always model output, so the
+            // generator is recorded when the caller knows it; otherwise
+            // UNKNOWN — never invented.
+            generatedBy: options.ai ? 'ai' : 'unknown',
+            ...(options.ai
+              ? { aiProvider: options.ai.provider, aiModel: options.ai.model }
+              : {}),
           },
         },
       });

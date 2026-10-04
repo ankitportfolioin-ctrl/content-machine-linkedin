@@ -86,10 +86,11 @@ describe('capability registry invariants', () => {
     expect(attempted).toEqual(['GOOGLE_TRENDS', 'REDDIT', 'YOUTUBE']);
   });
 
-  it('no entry claims live verification without a real run (WP1 baseline)', () => {
-    for (const entry of CAPABILITY_REGISTRY) {
-      expect(entry.liveVerified, entry.id).toBe(false);
-    }
+  it('liveVerified is true only for entries re-probed live in WP2', () => {
+    const verified = CAPABILITY_REGISTRY.filter((e) => e.liveVerified).map((e) => e.id).sort();
+    expect(verified).toEqual(
+      ['research.atom', 'research.github', 'research.hackernews', 'research.rss'].sort(),
+    );
   });
 
   it('platform flags reflect the registry (linkedin research false, all publishing false)', () => {

@@ -100,6 +100,43 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
     will flip registry states with evidence; `endToEndVerified` still false
     everywhere (no human grant — blocked on human, WP5).
 - [ ] WP2 RESEARCH RELIABILITY AND QUALITY
+- [x] WP2 RESEARCH RELIABILITY AND QUALITY — commit `68c9d00`.
+  - Live re-probes executed 2026-10-04 (real classes + direct fetch):
+    Reddit → HTTP 403 on r/programming/hot.json (BLOCKED reconfirmed);
+    Google Trends → CSV HTTP 400 + HTML error page (BLOCKED reconfirmed);
+    HN topstories → HTTP 200, 500 ids, item with title/url/time (AVAILABLE,
+    liveVerified); GitHub react releases.atom → HTTP 200, real
+    extractAtomContent parsed 10 entries with dates — c200f06 fix confirmed
+    on a live payload (UNKNOWN → AVAILABLE, liveVerified); blog RSS →
+    HTTP 200, real extractRssContent parsed 10 items (AVAILABLE,
+    liveVerified); YouTube → no server key, runtime NOT_CONFIGURED
+    (priming path unit-tested; no probe possible without credentials).
+  - Registry flips: research.github UNKNOWN→AVAILABLE; liveVerified true for
+    rss/atom/hackernews/github; reddit/trends verifyNotes carry today's
+    exact errors. Fallback mesh that feeds production today: RSS/Atom/HN/
+    GitHub/websites (all verified live).
+  - Claim provenance now stamps model/version: `SourceUnderstandingService.
+    understand()` returns provider+model; `ClaimLedgerService.persistClaims`
+    writes generatedBy/aiProvider/aiModel into provenance (unknown, never
+    invented, when absent); worker stages.ts passes it through. Tests: 2 new
+    (stamp present / absent→unknown).
+  - Trend labels: kept the TrendStatus enum (no DB rewrite). Justification:
+    the substantive rules are already enforced and tested — single source →
+    INSUFFICIENT_HISTORY, TRENDING needs ≥3 sources + recency/diversity/
+    frequency thresholds, STALE after 60d; STALE/others are excluded from
+    the operator queue by decision collectors (TRENDING/RELEVANT only) and
+    the eligibility gate. A label rename is cosmetic, not a production gap.
+  - Commands run + real results:
+    `LIVE_CONNECTOR_TESTS=1 ... connectorLive.test.ts` → 2 failed as
+    designed (403 + 400 evidence, assertions not weakened);
+    capabilities 7 passed; intelligence 278 passed (276 + 2 new), 2 skipped;
+    api 346 passed, 3 skipped; social 7; web 84; content 95; sales 71;
+    learning 34; decision 102; business 10 (all 0 failed);
+    `pnpm typecheck` → PASS; `pnpm build` → PASS; total 1034 passed, 0 failed.
+  - Lesson: api tsc resolves workspace deps via dist .d.ts — rebuild a
+    package's dist after changing its exported types before api typecheck.
+  - Open: YouTube probe needs a server key (human-provided, none requested
+    yet); LinkedIn research stays UNAVAILABLE (provider permission).
 - [ ] WP3 DECISION ENGINE + OPERATOR QUEUE + "WHY NOT"
 - [ ] WP4 CONTENT MACHINE + CALENDAR
 - [ ] WP5 EXECUTION CONTROL PLANE + LINKEDIN CONNECTION
