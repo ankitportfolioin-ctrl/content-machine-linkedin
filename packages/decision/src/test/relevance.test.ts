@@ -60,6 +60,8 @@ function mockPrisma(overrides: Record<string, unknown> = {}) {
     salesContentSignal: { findMany: vi.fn().mockResolvedValue([]) },
     commentSalesSignal: { findMany: vi.fn().mockResolvedValue([]), findFirst: vi.fn().mockResolvedValue(null) },
     opportunityFeedback: { findMany: vi.fn().mockResolvedValue([]) },
+    feedSource: { findMany: vi.fn().mockResolvedValue([]) },
+    workspaceConnector: { findMany: vi.fn().mockResolvedValue([]) },
     contentOpportunity: { findMany: vi.fn().mockResolvedValue([]) },
     contentGap: { findMany: vi.fn().mockResolvedValue([]) },
     trendSignal: { findMany: vi.fn().mockResolvedValue([]) },

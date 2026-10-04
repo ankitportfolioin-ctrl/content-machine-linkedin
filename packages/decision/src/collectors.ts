@@ -355,6 +355,85 @@ async function commentSignals(prisma: PrismaClient, workspaceId: string, now: nu
   });
 }
 
+interface SourceIssueFeedRow {
+  id: string;
+  url: string;
+  type: string;
+  name: string | null;
+  lastError: string | null;
+  updatedAt: Date;
+}
+
+interface SourceIssueConnectorRow {
+  sourceType: string;
+  lastProbeStatus: string;
+  lastProbeError: string | null;
+  updatedAt: Date;
+}
+
+/**
+ * Source/connector failures that otherwise vanish silently: an active feed
+ * whose last fetch errored, or a connector whose last verification probe
+ * failed or is blocked. Surfacing only — the action points at the failing
+ * input for a fix/retry/probe decision. Never fabricates provider data.
+ */
+async function sourceIssues(prisma: PrismaClient, workspaceId: string, now: number): Promise<Candidate[]> {
+  const [feeds, connectors] = await Promise.all([
+    prisma.feedSource.findMany({
+      where: { workspaceId, active: true, lastError: { not: null } },
+      select: { id: true, url: true, type: true, name: true, lastError: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+    }) as Promise<SourceIssueFeedRow[]>,
+    prisma.workspaceConnector.findMany({
+      where: { workspaceId, lastProbeStatus: { in: ['FAILED', 'BLOCKED'] } },
+      select: { sourceType: true, lastProbeStatus: true, lastProbeError: true, updatedAt: true },
+      orderBy: { updatedAt: 'desc' },
+      take: 20,
+    }) as Promise<SourceIssueConnectorRow[]>,
+  ]);
+  const out: Candidate[] = [];
+  for (const f of feeds) {
+    const err = (f.lastError ?? '').slice(0, 200);
+    out.push({
+      kind: 'source_issue' as const,
+      identityKey: id('source_issue', `feed:${f.id}`),
+      subjectId: f.id,
+      title: `Fix failing feed: ${f.name ?? f.url.slice(0, 80)}`,
+      createdAt: f.updatedAt,
+      facts: {
+        waitingDays: daysSince(f.updatedAt, now),
+        ready: true,
+        evidenceCount: 1,
+        learningDimensions: [],
+        subjectMeta: { issueKind: 'feed', feedId: f.id, feedUrl: f.url, feedType: f.type, lastError: err },
+      },
+      reasons: [`Active ${f.type} feed last failed: ${err || 'unknown error'}. Intelligence from this input is paused until it recovers.`],
+      evidenceLinks: [{ label: 'Feed source', ref: `feedSource:${f.id}` }],
+    });
+  }
+  for (const c of connectors) {
+    const err = (c.lastProbeError ?? '').slice(0, 200);
+    out.push({
+      kind: 'source_issue' as const,
+      identityKey: id('source_issue', `connector:${c.sourceType}`),
+      subjectId: c.sourceType,
+      title: `Investigate ${c.sourceType} connector (${c.lastProbeStatus.toLowerCase()})`,
+      createdAt: c.updatedAt,
+      facts: {
+        waitingDays: daysSince(c.updatedAt, now),
+        ready: true,
+        evidenceCount: 1,
+        learningDimensions: [],
+        subjectMeta: { issueKind: 'connector', sourceType: c.sourceType, probeStatus: c.lastProbeStatus, lastError: err },
+      },
+      reasons: [`Last ${c.sourceType} verification probe ${c.lastProbeStatus.toLowerCase()}${err ? `: ${err}` : ''}. Research from this connector stays off until a probe passes.`],
+      evidenceLinks: [{ label: 'Connector probe', ref: `workspaceConnector:${c.sourceType}` }],
+    });
+  }
+  return out;
+}
+
 export async function collectCandidates(prisma: PrismaClient, workspaceId: string, now = Date.now()): Promise<Candidate[]> {
   const groups = await Promise.all([
     contentOpportunities(prisma, workspaceId, now),
@@ -370,6 +449,7 @@ export async function collectCandidates(prisma: PrismaClient, workspaceId: strin
     prospectRelevance(prisma, workspaceId, now),
     salesContentSignals(prisma, workspaceId, now),
     commentSignals(prisma, workspaceId, now),
+    sourceIssues(prisma, workspaceId, now),
   ]);
   const seen = new Set<string>();
   const out: Candidate[] = [];

@@ -71,7 +71,7 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
 ## WP log
 
 - [x] Phase 0 RECON — baseline above. No code changed.
-- [x] WP1 CAPABILITY REGISTRY — commit `5e5331b`.
+- [x] WP1 CAPABILITY REGISTRY — commit `4a1d92d`.
   - New package `@growth-operator/capabilities` (zero-dep): `CAPABILITY_REGISTRY`
     with 42 entries across RESEARCH (14) / EXECUTION (8) / OBSERVATION (6) /
     SALES (9) / LEARNING (5). Every entry: state (9-state set) + reason +
@@ -100,7 +100,7 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
     will flip registry states with evidence; `endToEndVerified` still false
     everywhere (no human grant — blocked on human, WP5).
 - [ ] WP2 RESEARCH RELIABILITY AND QUALITY
-- [x] WP2 RESEARCH RELIABILITY AND QUALITY — commit `68c9d00`.
+- [x] WP2 RESEARCH RELIABILITY AND QUALITY — commit `1805925`.
   - Live re-probes executed 2026-10-04 (real classes + direct fetch):
     Reddit → HTTP 403 on r/programming/hot.json (BLOCKED reconfirmed);
     Google Trends → CSV HTTP 400 + HTML error page (BLOCKED reconfirmed);
@@ -138,6 +138,44 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
   - Open: YouTube probe needs a server key (human-provided, none requested
     yet); LinkedIn research stays UNAVAILABLE (provider permission).
 - [ ] WP3 DECISION ENGINE + OPERATOR QUEUE + "WHY NOT"
+- [x] WP3 DECISION ENGINE + OPERATOR QUEUE + "WHY NOT" — commit with subject
+  `feat(wp3): source-issue queue candidates plus next-action and authorization in explanations`
+  (own hash recorded in the WP4 entry; convention: no post-commit amends).
+  - First real gaps found by inspection: (a) failing feeds / failed connector
+    probes vanished silently — no queue candidate covered "source failures,
+    connector problems" (WP3 list); (b) recommendations lacked explicit
+    nextAction + requiredAuthorization fields (lifecycle implied them; UI did
+    not render them); (c) prepared_action lifecycle never said WHY execution
+    is unavailable.
+  - Changes: new `source_issue` ActionKind + collector (active feeds with
+    lastError; connectors with FAILED/BLOCKED probe) with eligibility
+    re-check (recovered → ineligible with reason) and urgency scoring;
+    `ActionExplanation.nextAction` + `.requiredAuthorization` (per-kind
+    deterministic maps); prepared_action lifecycle appends the registry
+    execution.dispatch reason (decision→capabilities dep); BrainPage
+    WhyRecommended card renders both new fields; web ActionExplanation type
+    extended (optional, backward compatible).
+  - Tests: collectors +2 (surfaced when failing / silent when healthy),
+    eligibility +1 (persists while failing, drops on recovery for both
+    issue kinds), explain +2 (all 14 kinds carry both fields;
+    prepared_action lifecycle cites unavailability). Updated 5 existing
+    decision mocks with the two new models (no weakening — same assertions).
+  - Commands run + real results: decision 107 passed (102 + 5 new);
+    capabilities 7; intelligence 278; social 7; web 84; content 95; sales 71;
+    learning 34; business 10; `pnpm typecheck` PASS; `pnpm build` PASS.
+    API suite: 345 passed, 3 skipped, 1 FAILED — see pre-existing failure
+    note below (not caused by WP3).
+  - PRE-EXISTING FAILURE (proven, not mine): operatorMachine.test.ts
+    "explains actions deterministically with honest AI state" line 190
+    asserts `aiAvailable === false`, but the ambient .env OPENROUTER key is
+    currently live so the real explainWithAi call succeeds (aiAvailable
+    true). Reproduced on the CLEAN tree via `git stash -u` + single-file run
+    (1 failed, 7 passed) with WP3 changes shelved. External-provider
+    dependence, per R9: test left untouched (weakening it to accept either
+    boolean is forbidden); flagged for WP10/WP12 hermetic-AI test-env work.
+  - Deliberately skipped: experiment queue candidates — no experiment
+    decision workflow exists, and a queue item without a consumer action
+    would repeat the bridges-without-consumers failure (MEMORY.md).
 - [ ] WP4 CONTENT MACHINE + CALENDAR
 - [ ] WP5 EXECUTION CONTROL PLANE + LINKEDIN CONNECTION
 - [ ] WP6 SALES MACHINE + AUTHORIZED MESSAGING

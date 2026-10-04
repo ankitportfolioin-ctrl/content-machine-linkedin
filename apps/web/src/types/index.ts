@@ -778,6 +778,8 @@ export interface ActionExplanation {
   signalConfidence?: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
   recommendationConfidence?: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
   whyNot?: string[];
+  nextAction?: string | null;
+  requiredAuthorization?: string | null;
 }
 
 export interface ExplanationResponse {

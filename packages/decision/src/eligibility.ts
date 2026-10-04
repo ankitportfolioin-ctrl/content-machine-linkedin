@@ -256,6 +256,30 @@ export async function checkEligibility(
       }
       return { eligible: true, reason: null };
     }
+    case 'source_issue': {
+      const meta = candidate.facts.subjectMeta as
+        | { issueKind?: unknown; feedId?: unknown; sourceType?: unknown }
+        | undefined;
+      if (meta?.issueKind === 'feed' && typeof meta.feedId === 'string') {
+        const row = await prisma.feedSource.findFirst({ where: { id: meta.feedId, workspaceId } });
+        if (!row) return missing('Feed source');
+        if (!row.lastError) {
+          return { eligible: false, reason: 'Feed recovered: no recorded error since collection.' };
+        }
+        return { eligible: true, reason: null };
+      }
+      if (meta?.issueKind === 'connector' && typeof meta.sourceType === 'string') {
+        const row = await prisma.workspaceConnector.findFirst({
+          where: { workspaceId, sourceType: meta.sourceType },
+        });
+        if (!row) return missing('Connector configuration');
+        if (row.lastProbeStatus !== 'FAILED' && row.lastProbeStatus !== 'BLOCKED') {
+          return { eligible: false, reason: `Connector probe is now ${row.lastProbeStatus}; the issue cleared.` };
+        }
+        return { eligible: true, reason: null };
+      }
+      return missing('Source issue');
+    }
     default: {
       const exhaustive: never = candidate.kind;
       return { eligible: false, reason: `Unknown candidate kind: ${String(exhaustive)}.` };

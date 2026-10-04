@@ -1,7 +1,8 @@
 import { AIProviderRegistry } from '@growth-operator/ai';
+import { getCapability } from '@growth-operator/capabilities';
 import { z } from 'zod';
 import { DecisionError } from './errors';
-import { ActionExplanation, ScoredAction } from './types';
+import { ActionExplanation, ActionKind, ScoredAction } from './types';
 
 export const AiExplanationSchema = z.object({
   summary: z.string().min(1).max(2000),
@@ -12,8 +13,14 @@ function lifecycleLine(action: ScoredAction): string {
     case 'content_review':
     case 'outreach_review':
       return 'Awaiting human review decision; nothing is approved yet.';
-    case 'prepared_action':
-      return 'Prepared and ready; human authorization is still required and nothing has executed.';
+    case 'prepared_action': {
+      // Capability-aware: say WHY execution is unavailable, not just that
+      // authorization is required. The sentence comes from the registry so
+      // the queue can never drift from capability truth.
+      const dispatch = getCapability('execution.dispatch');
+      const why = dispatch ? ` ${dispatch.reason}` : '';
+      return `Prepared and ready; human authorization is still required and nothing has executed.${why}`;
+    }
     case 'learning_proposal':
       return 'Proposed only; it influences nothing until a human confirms it.';
     case 'follow_up':
@@ -142,7 +149,44 @@ export function explainAction(action: ScoredAction, status: string): ActionExpla
     signalConfidence: action.signalConfidence,
     recommendationConfidence: action.recommendationConfidence,
     whyNot: generateWhyNot(action),
+    nextAction: nextActionFor(action.kind),
+    requiredAuthorization: requiredAuthorizationFor(action.kind),
   };
+}
+
+const NEXT_ACTION: Record<ActionKind, string> = {
+  content_opportunity: 'Review the opportunity and start a content idea.',
+  content_gap: 'Review the gap and start a content idea.',
+  trend_signal: 'Review the trend evidence and start a content idea.',
+  content_review: 'Open the review and approve, request changes, or reject.',
+  outreach_review: 'Open the review and approve, request changes, or reject.',
+  follow_up: 'Record the follow-up outcome or dismiss the recommendation.',
+  prepared_action: 'Authorize preparation of the internal work, or dismiss.',
+  learning_proposal: 'Confirm or reject the learning proposal.',
+  stale_draft: 'Resume the draft or dismiss the action.',
+  objection_pattern: 'Start a content idea from the objection pattern.',
+  prospect_relevance: 'Start sales research or a content idea from the fit signal.',
+  sales_content_signal: 'Start a content idea from the sales signal.',
+  comment_signal: 'Review the signal; creating a prospect stays a separate explicit action.',
+  source_issue: 'Fix the feed URL or re-run the connector probe, then dismiss.',
+};
+
+const NEEDS_DECISION: ReadonlySet<ActionKind> = new Set([
+  'content_review',
+  'outreach_review',
+  'prepared_action',
+  'learning_proposal',
+]);
+
+function nextActionFor(kind: ActionKind): string {
+  return NEXT_ACTION[kind];
+}
+
+function requiredAuthorizationFor(kind: ActionKind): string {
+  if (NEEDS_DECISION.has(kind)) {
+    return 'Human decision required — this item moves only on explicit approval, and approval never executes anything external.';
+  }
+  return 'No authorization needed to review; any resulting outreach, publish, or send still needs its own approval.';
 }
 
 /**

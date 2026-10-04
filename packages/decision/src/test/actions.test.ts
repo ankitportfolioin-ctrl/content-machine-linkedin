@@ -22,6 +22,8 @@ function basePrisma() {
     lead: { findMany: vi.fn().mockResolvedValue([]), findFirst: vi.fn() },
     salesContentSignal: { findMany: vi.fn().mockResolvedValue([]) },
     commentSalesSignal: { findMany: vi.fn().mockResolvedValue([]) },
+    feedSource: { findMany: vi.fn().mockResolvedValue([]) },
+    workspaceConnector: { findMany: vi.fn().mockResolvedValue([]) },
     strategyProfile: { findUnique: vi.fn().mockResolvedValue(null) },
     attributionLink: { findMany: vi.fn().mockResolvedValue([]) },
     qualificationResult: { findMany: vi.fn().mockResolvedValue([]) },

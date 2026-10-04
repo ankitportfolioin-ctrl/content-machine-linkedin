@@ -11,7 +11,8 @@ export type ActionKind =
   | 'objection_pattern'
   | 'prospect_relevance'
   | 'sales_content_signal'
-  | 'comment_signal';
+  | 'comment_signal'
+  | 'source_issue';
 
 // Batch 2 (A): ACCEPTED authorizes preparation of internal work from a
 // recommendation. It is NOT execution approval: accepted actions still need
@@ -99,4 +100,8 @@ export interface ActionExplanation {
   signalConfidence: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
   recommendationConfidence: 'LOW' | 'MEDIUM' | 'HIGH' | 'UNKNOWN';
   whyNot?: string[];
+  /** The single concrete operator step this recommendation asks for. */
+  nextAction: string;
+  /** What authorization acting on it requires (never implied). */
+  requiredAuthorization: string;
 }

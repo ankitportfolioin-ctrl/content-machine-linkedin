@@ -20,6 +20,8 @@ const mockPrisma = {
   outreachStrategy: { findFirst: vi.fn() },
   prospectResearch: { findMany: vi.fn().mockResolvedValue([]) },
   prospectSignal: { findMany: vi.fn().mockResolvedValue([]) },
+  feedSource: { findFirst: vi.fn() },
+  workspaceConnector: { findFirst: vi.fn() },
 } as unknown as PrismaClient;
 
 function candidate(kind: Candidate['kind'], subjectId: string | null): Candidate {
@@ -171,5 +173,43 @@ describe('Eligibility rules', () => {
     expect((await checkEligibility(mockPrisma, 'w', candidate('follow_up', 'f'))).eligible).toBe(false);
     mockPrisma.contentDraft.findFirst.mockResolvedValue({ id: 'd', versions: [{ id: 'v' }], reviews: [] });
     expect((await checkEligibility(mockPrisma, 'w', candidate('stale_draft', 'd'))).eligible).toBe(false);
+  });
+
+  it('keeps source issues while the failure persists, drops them on recovery', async () => {
+    const feedCandidate = () => ({
+      kind: 'source_issue' as const,
+      identityKey: 'source_issue:feed:feed-1',
+      subjectId: 'feed-1',
+      title: 'Test',
+      createdAt: new Date(),
+      facts: { subjectMeta: { issueKind: 'feed', feedId: 'feed-1' } },
+      reasons: [],
+      evidenceLinks: [],
+    });
+    mockPrisma.feedSource.findFirst.mockResolvedValue({ id: 'feed-1', lastError: 'HTTP 500' });
+    expect((await checkEligibility(mockPrisma, 'w', feedCandidate())).eligible).toBe(true);
+    mockPrisma.feedSource.findFirst.mockResolvedValue({ id: 'feed-1', lastError: null });
+    const recovered = await checkEligibility(mockPrisma, 'w', feedCandidate());
+    expect(recovered.eligible).toBe(false);
+    expect(recovered.reason).toMatch(/recovered/i);
+    mockPrisma.feedSource.findFirst.mockResolvedValue(null);
+    expect((await checkEligibility(mockPrisma, 'w', feedCandidate())).eligible).toBe(false);
+
+    const connectorCandidate = () => ({
+      kind: 'source_issue' as const,
+      identityKey: 'source_issue:connector:REDDIT',
+      subjectId: 'REDDIT',
+      title: 'Test',
+      createdAt: new Date(),
+      facts: { subjectMeta: { issueKind: 'connector', sourceType: 'REDDIT' } },
+      reasons: [],
+      evidenceLinks: [],
+    });
+    mockPrisma.workspaceConnector.findFirst.mockResolvedValue({ sourceType: 'REDDIT', lastProbeStatus: 'FAILED' });
+    expect((await checkEligibility(mockPrisma, 'w', connectorCandidate())).eligible).toBe(true);
+    mockPrisma.workspaceConnector.findFirst.mockResolvedValue({ sourceType: 'REDDIT', lastProbeStatus: 'VERIFIED' });
+    const cleared = await checkEligibility(mockPrisma, 'w', connectorCandidate());
+    expect(cleared.eligible).toBe(false);
+    expect(cleared.reason).toMatch(/cleared/i);
   });
 });

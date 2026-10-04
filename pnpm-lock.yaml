@@ -278,6 +278,9 @@ importers:
       '@growth-operator/ai':
         specifier: workspace:*
         version: link:../ai
+      '@growth-operator/capabilities':
+        specifier: workspace:*
+        version: link:../capabilities
       '@growth-operator/db':
         specifier: workspace:*
         version: link:../db

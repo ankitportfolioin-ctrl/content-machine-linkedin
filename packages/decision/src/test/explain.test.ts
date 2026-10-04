@@ -65,8 +65,7 @@ describe('Deterministic explanation', () => {
     );
   });
 
-  it('reports attribution and lead-state caveats honestly', () => {
-    const explanation = explainAction(
+  it('reports attribution and lead-state caveats honestly', () => {    const explanation = explainAction(
       {
         ...scored(),
         facts: {
@@ -91,6 +90,33 @@ describe('Deterministic explanation', () => {
     expect(explanation.whyNot ?? []).toContain(
       'Lead qualification is insufficient-data — research before outreach'
     );
+  });
+
+  it('gives every kind a concrete next action and an authorization requirement', () => {
+    const kinds = [
+      'content_opportunity', 'content_gap', 'trend_signal', 'content_review',
+      'outreach_review', 'follow_up', 'prepared_action', 'learning_proposal',
+      'stale_draft', 'objection_pattern', 'prospect_relevance',
+      'sales_content_signal', 'comment_signal', 'source_issue',
+    ] as const;
+    for (const kind of kinds) {
+      const explanation = explainAction({ ...scored(), kind }, 'PENDING');
+      expect(explanation.nextAction.length, `${kind}.nextAction`).toBeGreaterThan(10);
+      expect(explanation.requiredAuthorization.length, `${kind}.requiredAuthorization`).toBeGreaterThan(10);
+    }
+    // Decision-gated kinds say a human must decide; the rest say review is free.
+    expect(explainAction({ ...scored(), kind: 'content_review' }, 'PENDING').requiredAuthorization).toMatch(
+      /Human decision required/
+    );
+    expect(explainAction({ ...scored(), kind: 'stale_draft' }, 'PENDING').requiredAuthorization).toMatch(
+      /No authorization needed to review/
+    );
+  });
+
+  it('says why execution is unavailable on prepared actions (capability truth, not boilerplate)', () => {
+    const explanation = explainAction({ ...scored(), kind: 'prepared_action' }, 'PENDING');
+    expect(explanation.lifecycle).toMatch(/no authorized integration|always skips|execution.*unavailable/i);
+    expect(explanation.nextAction).toMatch(/Authorize preparation|dismiss/i);
   });
 });
 

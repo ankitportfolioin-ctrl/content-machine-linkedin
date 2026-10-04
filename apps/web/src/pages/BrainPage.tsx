@@ -1135,6 +1135,8 @@ function WhyRecommended({ matchKeys }: { matchKeys: Record<string, string> }) {
   const signalConfidence = explanation?.signalConfidence;
   const recommendationConfidence = explanation?.recommendationConfidence;
   const whyNot = explanation?.whyNot;
+  const nextAction = explanation?.nextAction ?? null;
+  const requiredAuthorization = explanation?.requiredAuthorization ?? null;
 
   const confidenceLabel = (c?: string) => {
     if (!c) return null;
@@ -1205,6 +1207,16 @@ function WhyRecommended({ matchKeys }: { matchKeys: Record<string, string> }) {
       {lifecycle ? (
         <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
           Status: {String(lifecycle)}
+        </p>
+      ) : null}
+      {nextAction ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+          <strong>Next step:</strong> {String(nextAction)}
+        </p>
+      ) : null}
+      {requiredAuthorization ? (
+        <p style={{ fontSize: '0.875rem', color: 'var(--color-text-secondary)', marginBottom: '0.25rem' }}>
+          <strong>Authorization:</strong> {String(requiredAuthorization)}
         </p>
       ) : null}
       {learning.length > 0 ? (

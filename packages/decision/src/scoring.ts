@@ -26,6 +26,10 @@ function urgencyFor(candidate: Candidate, now: number): { points: number; reason
     const points = Math.min(30, 5 + waiting);
     return { points: waiting >= 14 ? points : 0, reason: waiting >= 14 ? `Draft idle ${waiting} days.` : null };
   }
+  if (candidate.kind === 'source_issue') {
+    const points = Math.min(30, 14 + waiting * 2);
+    return { points, reason: 'A research input is failing; intelligence is degraded until it recovers.' };
+  }
   void now;
   return { points: 4, reason: null };
 }

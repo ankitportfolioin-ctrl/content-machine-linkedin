@@ -18,6 +18,7 @@
   },
   "dependencies": {
     "@growth-operator/ai": "workspace:*",
+    "@growth-operator/capabilities": "workspace:*",
     "@growth-operator/db": "workspace:*",
     "@growth-operator/intelligence": "workspace:*",
     "@growth-operator/learning": "workspace:*",
