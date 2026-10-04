@@ -96,8 +96,10 @@ describe('Step E: wired stages A-H', () => {
       where: { workspaceId, dailyRun: { runDate: new Date('2026-09-22T00:00:00.000Z') }, stage: 'CONTENT' },
     });
     const counts = row?.counts as Record<string, number>;
+    // AI is unavailable in test env (keys cleared in setup): ideas are created, plans/drafts deferred
     expect(counts.ideasCreated).toBe(1);
-    expect(counts.plansCreated).toBe(1);
+    expect(counts.plansCreated).toBe(0);
+    expect(counts.draftsComposed).toBe(0);
 
     const idea = await prisma.contentIdea.findFirst({
       where: { workspaceId, title: `Loop opportunity ${stamp}` },
