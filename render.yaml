@@ -1,21 +1,13 @@
-services:
-  # PostgreSQL Database
-  - type: pserv
-    name: growth-operator-db
+databases:
+  - name: growth-operator-db
     plan: starter
     region: oregon
     databaseName: growth_operator
     user: growth_operator
     postgresMajorVersion: "17"
 
-  # Redis
-  - type: redis
-    name: growth-operator-redis
-    plan: starter
-    region: oregon
-    redisVersion: "7"
-
-  # API Service
+services:
+  # API Service (Node.js web service)
   - type: web
     name: growth-operator-api
     runtime: node
@@ -23,9 +15,25 @@ services:
     region: oregon
     repo: https://github.com/ankitportfolioin-ctrl/content-machine-linkedin
     branch: main
-    rootDir: apps/api
-    buildCommand: pnpm install --frozen-lockfile && pnpm db:generate && pnpm build
-    startCommand: pnpm start
+    rootDir: .
+    buildCommand: |
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @growth-operator/schemas build &&
+      pnpm --filter @growth-operator/db db:generate &&
+      pnpm --filter @growth-operator/db build &&
+      pnpm --filter @growth-operator/shared build &&
+      pnpm --filter @growth-operator/ai build &&
+      pnpm --filter @growth-operator/capabilities build &&
+      pnpm --filter @growth-operator/intelligence build &&
+      pnpm --filter @growth-operator/content build &&
+      pnpm --filter @growth-operator/sales build &&
+      pnpm --filter @growth-operator/learning build &&
+      pnpm --filter @growth-operator/decision build &&
+      pnpm --filter @growth-operator/social build &&
+      pnpm --filter @growth-operator/business build &&
+      pnpm --filter @growth-operator/api build
+    preDeployCommand: pnpm --filter @growth-operator/db db:migrate
+    startCommand: pnpm --filter @growth-operator/api start
     envVars:
       - key: NODE_ENV
         value: production
@@ -34,15 +42,6 @@ services:
       - key: DATABASE_URL
         fromDatabase:
           name: growth-operator-db
-          property: connectionString
-      - key: TEST_DATABASE_URL
-        fromDatabase:
-          name: growth-operator-db
-          property: connectionString
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: growth-operator-redis
           property: connectionString
       - key: JWT_SECRET
         generateValue: true
@@ -68,18 +67,85 @@ services:
         sync: false
       - key: LINKEDIN_CLIENT_SECRET
         sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: YOUTUBE_API_KEY
+        sync: false
+      - key: YOUTUBE_ACCESS_TOKEN
+        sync: false
+      - key: X_CLIENT_ID
+        sync: false
+      - key: X_CLIENT_SECRET
+        sync: false
+      - key: INSTAGRAM_CLIENT_ID
+        sync: false
+      - key: INSTAGRAM_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_CLIENT_ID
+        sync: false
+      - key: FACEBOOK_CLIENT_SECRET
+        sync: false
+
+  # Background Worker (pg-boss daily loop worker)
+  - type: worker
+    name: growth-operator-worker
+    runtime: node
+    plan: starter
+    region: oregon
+    repo: https://github.com/ankitportfolioin-ctrl/content-machine-linkedin
+    branch: main
+    rootDir: .
+    buildCommand: |
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @growth-operator/schemas build &&
+      pnpm --filter @growth-operator/db db:generate &&
+      pnpm --filter @growth-operator/db build &&
+      pnpm --filter @growth-operator/shared build &&
+      pnpm --filter @growth-operator/ai build &&
+      pnpm --filter @growth-operator/capabilities build &&
+      pnpm --filter @growth-operator/intelligence build &&
+      pnpm --filter @growth-operator/content build &&
+      pnpm --filter @growth-operator/sales build &&
+      pnpm --filter @growth-operator/learning build &&
+      pnpm --filter @growth-operator/decision build &&
+      pnpm --filter @growth-operator/social build &&
+      pnpm --filter @growth-operator/business build &&
+      pnpm --filter @growth-operator/api build
+    startCommand: pnpm --filter @growth-operator/api worker:start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: growth-operator-db
+          property: connectionString
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: OPENROUTER_MODEL
+        value: "openai/gpt-4o-mini"
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ANTHROPIC_API_KEY
+        sync: false
 
   # Web Frontend (Static Site)
   - type: web
     name: growth-operator-web
     runtime: static
     plan: free
-    region: oregon
     repo: https://github.com/ankitportfolioin-ctrl/content-machine-linkedin
     branch: main
-    rootDir: apps/web
-    buildCommand: pnpm install --frozen-lockfile && pnpm build
-    staticPublishPath: dist
+    rootDir: .
+    buildCommand: |
+      pnpm install --frozen-lockfile &&
+      pnpm --filter @growth-operator/schemas build &&
+      pnpm --filter @growth-operator/db db:generate &&
+      pnpm --filter @growth-operator/db build &&
+      pnpm --filter @growth-operator/shared build &&
+      pnpm --filter @growth-operator/web build
+    staticPublishPath: apps/web/dist
     routes:
       - type: rewrite
         source: /*

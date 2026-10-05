@@ -89,7 +89,10 @@ ReadinessResponse,
 
 export type { HealthResponse, ApiError, ReadinessResponse, ReadinessState };
 
-const API_BASE = '/api/v1';
+const API_BASE =
+  typeof import.meta.env.VITE_API_URL === 'string' && import.meta.env.VITE_API_URL.length > 0
+    ? `${import.meta.env.VITE_API_URL}/api/v1`
+    : '/api/v1';
 
 export const TOKEN_STORAGE_KEY = 'go_token';
 export const WORKSPACE_STORAGE_KEY = 'go_workspace';
