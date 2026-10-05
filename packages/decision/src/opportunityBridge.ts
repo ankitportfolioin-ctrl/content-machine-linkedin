@@ -71,7 +71,11 @@ export function opportunityToCandidate(input: OpportunityCandidateInput): Candid
       relevance01: opportunity.opportunityScore ?? 0.5,
       evidenceCount: totalEvidenceCount,
       ready: opportunity.status === 'NEW' || opportunity.status === 'REVIEWED',
-      learningDimensions: [],
+      // Must match the content_opportunity collector path (collectors.ts):
+      // confirmed learning on these dimensions honestly describes
+      // opportunities. This builder is currently uncalled in production;
+      // the tags keep it consistent if it is ever wired in.
+      learningDimensions: ['relevance', 'evidence_strength'],
       subjectMeta: {
         opportunityId: opportunity.id,
         topicId: opportunity.topicId,

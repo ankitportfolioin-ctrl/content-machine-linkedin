@@ -510,12 +510,18 @@ const decision: StageFn = async (ctx) => {
   const signalOpps = await proposeSignalOpportunities(prisma, ctx.workspaceId);
   const service = new OperatorActionService(prisma);
   const ranked = await service.refreshWorkspace(ctx.workspaceId, 50);
+  // WP9 Phase 3: expose how many ranked actions actually consumed
+  // workspace-confirmed learning (ScoredAction.learningApplied is populated
+  // by scoreCandidate only for CONFIRMED, dimension-matched influences).
+  // Additive audit key only — ranking behavior is unchanged.
+  const learningBoostedActions = ranked.filter((a) => (a.learningApplied ?? []).length > 0).length;
   return {
     status: 'SUCCEEDED',
     counts: {
       rankedActions: ranked.length,
       signalOpportunitiesCreated: signalOpps.created,
       signalOpportunitiesSkipped: signalOpps.skippedExisting + signalOpps.skippedBelowFloor,
+      learningBoostedActions,
     },
     ...(signalOpps.notes.length > 0 ? { note: signalOpps.notes.join(' ') } : {}),
   };
