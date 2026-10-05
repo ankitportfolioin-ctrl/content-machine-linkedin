@@ -1742,6 +1742,36 @@ export async function triggerRun(runDate?: string): Promise<{ result: { runId: s
 }
 
 // ---------------------------------------------------------------------------
+// WP9 Phase 4: autonomous operator cycles (read the persisted cycle the
+// unattended orchestrator already produces; triggering reuses the existing
+// idempotent endpoint — same key returns the same cycle, never duplicates)
+// ---------------------------------------------------------------------------
+
+export async function listOperatorCycles(limit = 10): Promise<import('../types').OperatorCyclesResponse> {
+  const data = await authedRequest<Record<string, unknown>>(`/operator/cycle?limit=${limit}`);
+  return {
+    cycles: (Array.isArray(data['cycles']) ? data['cycles'] : []) as import('../types').OperatorCycle[],
+  };
+}
+
+export async function getOperatorCycle(id: string): Promise<import('../types').OperatorCycleDetailResponse> {
+  return authedRequest<import('../types').OperatorCycleDetailResponse>(`/operator/cycle/${encodeURIComponent(id)}`);
+}
+
+export async function triggerOperatorCycle(input?: {
+  idempotencyKey?: string;
+  correlationId?: string;
+}): Promise<import('../types').OperatorCycleDetailResponse> {
+  return authedRequest<import('../types').OperatorCycleDetailResponse>(`/operator/cycle`, {
+    method: 'POST',
+    body: JSON.stringify({
+      idempotencyKey: input?.idempotencyKey ?? `console-${Date.now()}`,
+      ...(input?.correlationId ? { correlationId: input.correlationId } : {}),
+    }),
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Optional social connectors (Content Brain inspiration, read-only OAuth)
 // ---------------------------------------------------------------------------
 

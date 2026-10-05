@@ -1385,3 +1385,66 @@ export interface TenPostReviewConfig {
   attributesToCompare: Array<'format' | 'angle' | 'objective' | 'topic'>;
   minSamplePerGroup: number;
 }
+
+// ---------------------------------------------------------------------------
+// WP9 Phase 4: operator cycle console (read-only view over the persisted
+// autonomous cycle; shapes mirror OperatorCycleResult from the API verbatim)
+// ---------------------------------------------------------------------------
+
+export interface OperatorCycleStageState {
+  stage: string;
+  status: string;
+  counts?: Record<string, number> | null;
+  durationMs?: number | null;
+  error?: string | null;
+  [key: string]: unknown;
+}
+
+export interface OperatorCycleTotals {
+  opportunities: number;
+  contentIdeas: number;
+  plans: number;
+  drafts: number;
+  salesSignals: number;
+  preparedActions: number;
+  observations: number;
+  learningSignals: number;
+  [key: string]: unknown;
+}
+
+export interface OperatorCycle {
+  cycleId: string;
+  workspaceId: string;
+  status: string;
+  requestedAt: string;
+  startedAt?: string | null;
+  completedAt?: string | null;
+  error?: string | null;
+  errorStage?: string | null;
+  correlationId?: string | null;
+  stages: OperatorCycleStageState[];
+  totals: OperatorCycleTotals;
+  blocked: string[];
+  skipped: string[];
+  failures: string[];
+  approvalsRequired: string[];
+  [key: string]: unknown;
+}
+
+export interface OperatorCyclesResponse {
+  cycles: OperatorCycle[];
+}
+
+export interface OperatorCycleDetailResponse {
+  cycle: OperatorCycle;
+}
+
+// Learning influence as the backend actually returns it (objects, not
+// strings): one entry per CONFIRMED, dimension-matched proposal.
+export interface LearningInfluenceItem {
+  dimension: string;
+  adjustment: number;
+  reason: string;
+  proposalId: string;
+  [key: string]: unknown;
+}

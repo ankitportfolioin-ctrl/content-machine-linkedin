@@ -3,6 +3,14 @@ import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import { SourcesTabSection } from '../components/SourcesTabSection';
+import { OperatorConsole } from '../components/OperatorConsole';
+import {
+  ApprovalQueue,
+  ExecutionHonesty,
+  LearningWhatsNext,
+  ObservationPanel,
+  TopRecommendations,
+} from '../components/OperatorLoopPanels';
 import {
   confirmLearningProposal,
   convertOpportunity,
@@ -49,10 +57,11 @@ import {
   YFPScoreResult,
 } from '../types';
 
-type BrainTab = 'overview' | 'opportunities' | 'trends' | 'gaps' | 'sources' | 'audience-problems' | 'yfp-scoring' | 'content-studio' | 'performance' | 'learning';
+type BrainTab = 'overview' | 'operator' | 'opportunities' | 'trends' | 'gaps' | 'sources' | 'audience-problems' | 'yfp-scoring' | 'content-studio' | 'performance' | 'learning';
 
 const TABS: { id: BrainTab; label: string }[] = [
   { id: 'overview', label: 'Overview' },
+  { id: 'operator', label: 'Operator' },
   { id: 'opportunities', label: 'Opportunities' },
   { id: 'trends', label: 'Trends' },
   { id: 'gaps', label: 'Gaps' },
@@ -131,6 +140,7 @@ export function BrainPage() {
       </div>
 
       {tab === 'overview' ? <OverviewSection /> : null}
+      {tab === 'operator' ? <OperatorSection /> : null}
       {tab === 'opportunities' ? <OpportunitiesSection /> : null}
       {tab === 'trends' ? <TrendsSection /> : null}
       {tab === 'gaps' ? <GapsSection /> : null}
@@ -193,6 +203,44 @@ function AiUnavailableBlock() {
         <p className="empty-state-description">
           AI-powered generation is temporarily unavailable. You can still browse saved items and try again later.
         </p>
+      </div>
+    </div>
+  );
+}
+
+function OperatorSection() {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+      <div className="card">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Operator console</h3>
+        <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem', margin: 0 }}>
+          What the unattended operator found, recommended, prepared, and learned — every value below
+          comes from a persisted backend row. Open a workflow page to act; this console never executes anything.
+        </p>
+      </div>
+      <div className="card" data-testid="operator-section-cycles">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Cycles</h3>
+        <OperatorConsole />
+      </div>
+      <div className="card" data-testid="operator-section-recommendations">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Top recommendations &amp; evidence</h3>
+        <TopRecommendations />
+      </div>
+      <div className="card" data-testid="operator-section-approvals">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Approval queue</h3>
+        <ApprovalQueue />
+      </div>
+      <div className="card" data-testid="operator-section-execution">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Execution status</h3>
+        <ExecutionHonesty />
+      </div>
+      <div className="card" data-testid="operator-section-observations">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Observations</h3>
+        <ObservationPanel />
+      </div>
+      <div className="card" data-testid="operator-section-learning">
+        <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Learning &amp; what changes next</h3>
+        <LearningWhatsNext />
       </div>
     </div>
   );
