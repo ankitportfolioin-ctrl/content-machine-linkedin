@@ -6,8 +6,6 @@ import {
   StageResult,
   StageFn,
   RunBudget,
-  BudgetCaps,
-  BudgetCategory,
 } from '@growth-operator/shared';
 
 export enum OperatorCycleStatus {
@@ -80,6 +78,12 @@ export interface RunOperatorCycleOptions {
   actorId?: string;
 }
 
+export interface OperatorCycleDeps {
+  stages: Record<StageName, StageFn>;
+  getWorkspaceSettings: (workspaceId: string) => Promise<{ dailyLlmCallCap: number; dailyFetchCap: number; dailyPreparationCap: number; dailyExecutionCap?: number }>;
+  assertRunAllowed: (workspaceId: string) => Promise<{ allowed: boolean; reason: string }>;
+}
+
 function mapStageName(stage: StageName): OperatorCycleStageName {
   const mapping: Record<StageName, OperatorCycleStageName> = {
     INTELLIGENCE: OperatorCycleStageName.RESEARCH,
@@ -98,35 +102,13 @@ function mapStageStatus(status: StageResult['status']): OperatorCycleStageStatus
   return status as OperatorCycleStageStatus;
 }
 
-/** Lazy-loaded stage functions to avoid circular dependency with api package. */
-let cachedStages: Record<StageName, StageFn> = {} as Record<StageName, StageFn>;
-let stagesLoaded = false;
-
-async function getStages(): Promise<Record<StageName, StageFn>> {
-  if (!stagesLoaded) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { STAGES } = require('@growth-operator/api/src/worker/stages');
-    Object.assign(cachedStages, STAGES);
-    stagesLoaded = true;
-  }
-  return cachedStages;
-}
-
-async function getWorkspaceSettings(workspaceId: string) {
-  const { getWorkspaceSettings } = await import('@growth-operator/shared');
-  return getWorkspaceSettings(workspaceId);
-}
-
-async function assertRunAllowed(workspaceId: string) {
-  const { assertRunAllowed } = await import('@growth-operator/shared');
-  return assertRunAllowed(workspaceId);
-}
-
 export class OperatorCycleService {
   private prisma: PrismaClient;
+  private deps: OperatorCycleDeps;
 
-  constructor(prisma: PrismaClient) {
+  constructor(prisma: PrismaClient, deps: OperatorCycleDeps) {
     this.prisma = prisma;
+    this.deps = deps;
   }
 
   /**
@@ -155,28 +137,46 @@ export class OperatorCycleService {
     }
 
     // Kill switch / pause honored at the start of the run
-    const gate = await assertRunAllowed(workspaceId);
+    const gate = await this.deps.assertRunAllowed(workspaceId);
     if (!gate.allowed) {
-      const blocked = await this.prisma.operatorCycle.upsert({
-        where: { workspaceId_idempotencyKey: { workspaceId, idempotencyKey } },
-        create: {
-          workspaceId,
-          idempotencyKey,
-          status: OperatorCycleStatus.CANCELLED,
-          error: `Blocked at start: ${gate.reason}`,
-          correlationId,
-        },
-        update: {
-          status: OperatorCycleStatus.CANCELLED,
-          error: `Blocked at start: ${gate.reason}`,
-          correlationId,
-        },
-        include: { stages: true },
-      });
-      return this.buildResult(blocked);
+      let blocked;
+      try {
+        blocked = await this.prisma.operatorCycle.upsert({
+          where: { workspaceId_idempotencyKey: { workspaceId, idempotencyKey } },
+          create: {
+            workspaceId,
+            idempotencyKey,
+            status: OperatorCycleStatus.CANCELLED,
+            error: `Blocked at start: ${gate.reason}`,
+            correlationId,
+          },
+          update: {
+            status: OperatorCycleStatus.CANCELLED,
+            error: `Blocked at start: ${gate.reason}`,
+            correlationId,
+          },
+          include: { stages: true },
+        });
+      } catch (error) {
+        // Handle race condition
+        if (error instanceof Error && 'code' in error && error.code === 'P2002') {
+          const found = await this.prisma.operatorCycle.findUnique({
+            where: { workspaceId_idempotencyKey: { workspaceId, idempotencyKey } },
+            include: { stages: true },
+          });
+          if (found) {
+            blocked = found;
+          } else {
+            throw error;
+          }
+        } else {
+          throw error;
+        }
+      }
+      return this.buildResult(blocked!);
     }
 
-    const settings = await getWorkspaceSettings(workspaceId);
+    const settings = await this.deps.getWorkspaceSettings(workspaceId);
     const budget = new RunBudget({
       llmCalls: settings.dailyLlmCallCap,
       fetches: settings.dailyFetchCap,
@@ -184,20 +184,39 @@ export class OperatorCycleService {
       executions: settings.dailyExecutionCap ?? 0,
     });
 
-    const cycle = existing
-      ?? (await this.prisma.operatorCycle.create({
-        data: {
-          workspaceId,
-          idempotencyKey,
-          status: OperatorCycleStatus.RUNNING,
-          correlationId,
-          startedAt: new Date(),
-        },
-      }));
+    let cycle = existing;
+    if (!cycle) {
+      try {
+        cycle = await this.prisma.operatorCycle.create({
+          data: {
+            workspaceId,
+            idempotencyKey,
+            status: OperatorCycleStatus.RUNNING,
+            correlationId,
+            startedAt: new Date(),
+          },
+        });
+      } catch (error) {
+        // Handle race condition: another request created the cycle concurrently
+        if (error instanceof Error && 'code' in error && error.code === 'P2002') {
+          const found = await this.prisma.operatorCycle.findUnique({
+            where: { workspaceId_idempotencyKey: { workspaceId, idempotencyKey } },
+            include: { stages: true },
+          });
+          if (found) {
+            cycle = found;
+          } else {
+            throw error;
+          }
+        } else {
+          throw error;
+        }
+      }
+    }
 
-    if (existing) {
+    if (existing || (cycle && cycle.id !== existing?.id)) {
       await this.prisma.operatorCycle.update({
-        where: { id: cycle.id },
+        where: { id: cycle!.id },
         data: { status: OperatorCycleStatus.RUNNING, startedAt: new Date(), error: null },
       });
     }
@@ -211,7 +230,7 @@ export class OperatorCycleService {
     let failed = 0;
     const stageSummaries: Record<string, { status: string; counts?: Record<string, number>; error?: string }> = {};
 
-    const stages = await getStages();
+    const stages = this.deps.stages;
 
     for (const stage of STAGE_ORDER) {
       if (doneStages.has(stage)) {

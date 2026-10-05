@@ -1,7 +1,13 @@
 import { prisma } from '@growth-operator/db';
-import { STAGE_ORDER, STAGES, type StageName } from './stages';
+import { STAGES } from './stages';
 import { assertRunAllowed, getWorkspaceSettings } from './settings';
-import { RunBudget } from './budget';
+import {
+  StageName,
+  STAGE_ORDER,
+  StageContext,
+  StageResult,
+  RunBudget,
+} from '@growth-operator/shared';
 
 export interface RunResult {
   runId: string;
@@ -44,7 +50,10 @@ export async function runDailyLoop(
 
   const existing = await prisma.dailyRun.findUnique({
     where: { workspaceId_runDate: { workspaceId, runDate } },
-    include: { stages: true },
+    // Stages must come back in execution order (checkpoints are created
+    // sequentially, one per STAGE_ORDER entry). Without orderBy, Postgres
+    // returns an unspecified order — an auditable run must be deterministic.
+    include: { stages: { orderBy: { createdAt: 'asc' } } },
   });
   if (existing && TERMINAL_RUN.has(existing.status)) {
     return {
@@ -200,7 +209,7 @@ export async function runDailyLoop(
       finishedAt: new Date(),
       summary: { stages: summary, budget: budget.remaining() } as object,
     },
-    include: { stages: true },
+    include: { stages: { orderBy: { createdAt: 'asc' } } },
   });
 
   return {

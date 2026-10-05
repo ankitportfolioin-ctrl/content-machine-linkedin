@@ -3,7 +3,9 @@ import { authMiddleware, workspaceMiddleware, workspaceMembershipMiddleware, Aut
 import { operatorCycleTriggerSchema } from '@growth-operator/schemas';
 import { prisma } from '@growth-operator/db';
 import { NotFoundError } from '../utils/errors';
-import { OperatorCycleService } from '@growth-operator/decision';
+import { OperatorCycleService, OperatorCycleDeps } from '@growth-operator/decision';
+import { STAGES } from '../worker/stages';
+import { getWorkspaceSettings, assertRunAllowed } from '../worker/settings';
 import { forwardDecisionError } from '../utils/decisionErrors';
 
 const router: ExpressRouter = Router();
@@ -12,7 +14,13 @@ router.use(authMiddleware);
 router.use(workspaceMiddleware);
 router.use(workspaceMembershipMiddleware);
 
-const cycleService = new OperatorCycleService(prisma);
+const deps: OperatorCycleDeps = {
+  stages: STAGES,
+  getWorkspaceSettings,
+  assertRunAllowed,
+};
+
+const cycleService = new OperatorCycleService(prisma, deps);
 
 router.post('/cycle', async (req, res, next) => {
   try {

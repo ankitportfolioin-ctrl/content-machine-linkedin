@@ -28,45 +28,14 @@ import { createDefaultRegistry } from '@growth-operator/ai';
 import { getEnv } from '../config/env';
 import { loadWorkspaceConnectorConfigs, buildWorkerFetchConfigs } from '../services/workspaceConnectors';
 import { assertRunAllowed } from './settings';
-import type { RunBudget } from './budget';
-
-export type StageName =
-  | 'INTELLIGENCE'
-  | 'DECISION'
-  | 'CONTENT'
-  | 'SALES'
-  | 'APPROVAL_SNAPSHOT'
-  | 'EXECUTION'
-  | 'OBSERVE_LEARN'
-  | 'DIGEST';
-
-export const STAGE_ORDER: StageName[] = [
-  'INTELLIGENCE',
-  'DECISION',
-  'CONTENT',
-  'SALES',
-  'APPROVAL_SNAPSHOT',
-  'EXECUTION',
-  'OBSERVE_LEARN',
-  'DIGEST',
-];
-
-export interface StageContext {
-  workspaceId: string;
-  /** Calendar day YYYY-MM-DD this run covers (UTC). */
-  runDate: string;
-  budget: RunBudget;
-}
-
-export interface StageResult {
-  status: 'SUCCEEDED' | 'FAILED' | 'SKIPPED';
-  counts?: Record<string, number>;
-  /** Honest machine-readable note (e.g. why skipped, what was deferred). */
-  note?: string;
-  error?: string;
-}
-
-type StageFn = (ctx: StageContext) => Promise<StageResult>;
+import {
+  StageName,
+  STAGE_ORDER,
+  StageContext,
+  StageResult,
+  StageFn,
+  RunBudget,
+} from '@growth-operator/shared';
 
 /** Hard per-run safety caps on top of the user's budget caps. Documented, never silent. */
 const MAX_FEEDS_PER_RUN = 25;
