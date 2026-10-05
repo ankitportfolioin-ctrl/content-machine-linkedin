@@ -188,9 +188,6 @@ importers:
 
   packages/business:
     dependencies:
-      '@growth-operator/api':
-        specifier: workspace:*
-        version: link:../../apps/api
       '@growth-operator/db':
         specifier: workspace:*
         version: link:../db
