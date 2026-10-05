@@ -17,13 +17,56 @@ export function requestIdMiddleware(req: Request, _res: Response, next: NextFunc
   next();
 }
 
+// Query params that must never reach logs. The OAuth callback carries the
+// single-use authorization `code` (and `state`) in the query string; morgan's
+// url token includes the raw query, so without redaction every Connect grant
+// would persist a credential in server logs. All other params stay visible
+// for debuggability (leadId, take, status filters, ...).
+const SENSITIVE_QUERY_PARAMS = new Set([
+  'code',
+  'state',
+  'token',
+  'access_token',
+  'refresh_token',
+  'id_token',
+  'secret',
+  'client_secret',
+  'password',
+  'api_key',
+  'apikey',
+  'authorization',
+]);
+
+export function sanitizeLogUrl(rawUrl: string): string {
+  const queryIndex = rawUrl.indexOf('?');
+  if (queryIndex < 0) return rawUrl;
+  const path = rawUrl.slice(0, queryIndex);
+  let params: URLSearchParams;
+  try {
+    params = new URLSearchParams(rawUrl.slice(queryIndex + 1));
+  } catch {
+    return path;
+  }
+  let redacted = false;
+  for (const name of SENSITIVE_QUERY_PARAMS) {
+    if (params.has(name)) {
+      params.set(name, '[REDACTED]');
+      redacted = true;
+    }
+  }
+  if (!redacted) return rawUrl;
+  const rest = params.toString();
+  return rest ? `${path}?${rest}` : path;
+}
+
 export const requestLogger: RequestHandler = morgan(
   (tokens, req: Request, res: Response) => {
     const request = req;
     const requestId = request.requestId;
     const duration = Date.now() - request.startTime;
     const method = typeof tokens.method === 'function' ? tokens.method(req, res) ?? '-' : '-';
-    const url = typeof tokens.url === 'function' ? tokens.url(req, res) ?? '-' : '-';
+    const rawUrl = typeof tokens.url === 'function' ? tokens.url(req, res) ?? '-' : '-';
+    const url = sanitizeLogUrl(rawUrl);
     const status = typeof tokens.status === 'function' ? tokens.status(req, res) ?? '-' : '-';
     const userAgent = typeof tokens['user-agent'] === 'function' ? tokens['user-agent'](req, res) ?? '-' : '-';
     return JSON.stringify({

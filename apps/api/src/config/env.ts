@@ -58,6 +58,16 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+// The documented example secret from .env.example. Running production with
+// it would sign every session with a publicly known key, so production
+// startup refuses it outright (fail-closed). Compared as an exact string:
+// any operator-chosen secret, however weak, is their explicit decision.
+export const EXAMPLE_JWT_SECRET = 'your-super-secret-jwt-key-min-32-chars-change-in-production';
+
+export function isExampleJwtSecret(secret: unknown): boolean {
+  return secret === EXAMPLE_JWT_SECRET;
+}
+
 let cachedEnv: Env | null = null;
 
 export function getEnv(): Env {
@@ -101,6 +111,11 @@ export function getEnv(): Env {
   }
 
   cachedEnv = result.data;
+  if (cachedEnv.NODE_ENV === 'production' && isExampleJwtSecret(cachedEnv.JWT_SECRET)) {
+    console.error('❌ Refusing to start: JWT_SECRET is the documented .env.example placeholder.');
+    console.error('Generate a unique secret (64 hex chars) and set JWT_SECRET before deploying to production.');
+    process.exit(1);
+  }
   // Production redirect safety: OAuth providers reject callbacks they have
   // not allow-listed. A localhost/loopback API_URL in production guarantees
   // every provider refuses with redirect_uri_mismatch, so warn loudly once
