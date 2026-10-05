@@ -1,0 +1,21 @@
+# Release gate: keep host artifacts out of images. Without this file, COPY . .
+# would bake the developer's node_modules (Windows binaries), local dist/
+# output, git history, and the local .env (dev credentials) into every image.
+# Double-starred directory patterns: exclusion must apply at every nesting
+# level (host node_modules trees contain absolute Windows symlinks that are
+# dangling inside Linux containers and break module resolution).
+**/node_modules
+**/dist
+**/build
+.git
+.env
+.env.*.local
+*.log
+coverage/
+.playwright-mcp
+.opencode
+.qa
+*.tgz
+.cache/
+*.sqlite
+*.db

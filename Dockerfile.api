@@ -1,0 +1,61 @@
+# Production API + worker image (release gate).
+#
+# Build from the repository root so pnpm workspaces resolve:
+#   docker build -f Dockerfile.api -t growth-operator-api:<tag> .
+#
+# The same image runs three roles (see docker-compose.prod.yml):
+#   api     -> node apps/api/dist/index.js
+#   worker  -> node apps/api/dist/worker/index.js
+#   migrate -> pnpm --filter @growth-operator/db db:migrate
+# No dev-only tooling (tsx, vite, vitest) is used at runtime.
+FROM node:20-slim AS base
+# Prisma's engines shell out to `openssl version` for binary-target
+# detection; without the CLI it silently defaults to openssl-1.1.x and both
+# `prisma generate` and the query engine fail at runtime.
+RUN apt-get update -y && apt-get install -y --no-install-recommends openssl ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN corepack enable
+WORKDIR /repo
+
+# Install first (better layer caching): manifests + lockfile, then sources.
+# A full install is deliberate: the migrate role needs the Prisma CLI and
+# TypeScript builds resolve sibling workspace dist output.
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+COPY apps/api/package.json apps/api/package.json
+COPY apps/web/package.json apps/web/package.json
+COPY packages/db/package.json packages/db/package.json
+COPY packages/intelligence/package.json packages/intelligence/package.json
+COPY packages/ai/package.json packages/ai/package.json
+COPY packages/schemas/package.json packages/schemas/package.json
+COPY packages/shared/package.json packages/shared/package.json
+COPY packages/capabilities/package.json packages/capabilities/package.json
+COPY packages/content/package.json packages/content/package.json
+COPY packages/sales/package.json packages/sales/package.json
+COPY packages/learning/package.json packages/learning/package.json
+COPY packages/decision/package.json packages/decision/package.json
+COPY packages/social/package.json packages/social/package.json
+COPY packages/business/package.json packages/business/package.json
+RUN pnpm install --frozen-lockfile
+
+# Build the API and its workspace dependencies in explicit dependency order
+# (db emits the Prisma client; shared needs db types; api needs them all).
+COPY . .
+RUN pnpm --filter @growth-operator/schemas build \
+ && pnpm --filter @growth-operator/db db:generate \
+ && pnpm --filter @growth-operator/db build \
+ && pnpm --filter @growth-operator/shared build \
+ && pnpm --filter @growth-operator/ai build \
+ && pnpm --filter @growth-operator/capabilities build \
+ && pnpm --filter @growth-operator/intelligence build \
+ && pnpm --filter @growth-operator/content build \
+ && pnpm --filter @growth-operator/sales build \
+ && pnpm --filter @growth-operator/learning build \
+ && pnpm --filter @growth-operator/decision build \
+ && pnpm --filter @growth-operator/social build \
+ && pnpm --filter @growth-operator/business build \
+ && pnpm --filter @growth-operator/api build
+
+EXPOSE 3001
+CMD ["node", "apps/api/dist/index.js"]

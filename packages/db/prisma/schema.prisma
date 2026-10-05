@@ -1063,6 +1063,22 @@ model RunStage {
     @@index([workspaceId, dailyRunId])
   }
 
+  // Release gate: worker liveness heartbeat. Intentionally NOT
+  // workspace-scoped: it describes worker PROCESSES (infrastructure), not
+  // tenant data — scoping it per workspace would be fake isolation. Rows are
+  // tiny (one per live worker) and pruned by age on every beat, so the table
+  // stays small by construction. Never stores credentials or payloads.
+  model WorkerHeartbeat {
+    id          String   @id @default(uuid())
+    workerId    String   @unique @db.VarChar(200)
+    startedAt   DateTime
+    lastBeatAt  DateTime
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@index([lastBeatAt])
+  }
+
   // WP9 Phase 1: Autonomous Operator Cycle. Separate from DailyRun to support
   // on-demand execution with explicit idempotency keys. Reuses the same
   // STAGE_ORDER and stage execution logic but with user-controlled triggers.

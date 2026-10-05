@@ -3,6 +3,7 @@ import { prisma } from '@growth-operator/db';
 import { createBoss, TICK_QUEUE, RUN_QUEUE, type RunJobData, type TickJobData } from './queue';
 import { resolveDueRuns } from './tick';
 import { runDailyLoop } from './dailyRun';
+import { recordHeartbeat, workerId } from './heartbeat';
 
 async function main(): Promise<void> {
   getEnv();
@@ -27,8 +28,14 @@ async function main(): Promise<void> {
   // Re-entrant: schedule() upserts the cron entry by (name, key).
   await boss.schedule(TICK_QUEUE, '*/15 * * * *', {}, { key: 'daily-loop-tick', tz: 'UTC' });
 
+  // Liveness proof for GET /api/v1/worker/health: one tiny upserted row per
+  // process, refreshed after every unit of work. A dead worker simply stops
+  // beating (no shutdown hook needed for correctness of the signal).
+  await recordHeartbeat(new Date());
+
   await boss.work<TickJobData>(TICK_QUEUE, async () => {
     const result = await resolveDueRuns(boss, new Date());
+    await recordHeartbeat(new Date());
     console.log(
       `[worker] tick checked=${result.checked} enqueuedToday=${result.enqueuedToday} ` +
         `enqueuedBackfill=${result.enqueuedBackfill} skipped=${result.skipped} errors=${result.errors.length}`
@@ -38,8 +45,9 @@ async function main(): Promise<void> {
   await boss.work<RunJobData>(RUN_QUEUE, async (jobs) => {
     for (const job of jobs) {
       const { workspaceId, runDate } = job.data;
-      console.log(`[worker] daily-run workspace=${workspaceId} date=${runDate}`);
+      console.log(`[worker] id=${workerId()} daily-run workspace=${workspaceId} date=${runDate}`);
       const result = await runDailyLoop(workspaceId, runDate);
+      await recordHeartbeat(new Date());
       console.log(`[worker] daily-run done status=${result.status} resumed=${result.resumed}`);
     }
   });

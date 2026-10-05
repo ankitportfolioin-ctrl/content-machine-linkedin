@@ -104,6 +104,8 @@ pnpm --filter @growth-operator/db exec prisma migrate status
 
 Expected: `20 migrations found` (count grows with releases), `Database schema is up to date!`
 - Schema/client sync check: `pnpm --filter @growth-operator/db db:generate` (regenerates the client; required after any schema change before typecheck).
+  Windows note: stop API/worker dev servers first — a running process holds
+  the Prisma engine DLL and `generate` fails with EPERM on rename.
 - Rollback: Prisma provides NO automatic down migrations. Forward migrations in this repository contain no destructive data operations (the single historical index replacement only re-scoped a unique index per workspace). A schema rollback is a MANUAL, per-release procedure — see §16.
 
 ## 6. API Deployment
@@ -144,21 +146,24 @@ Verified behavior (from `apps/api/src/worker/`):
   unconfigured workspaces (`scheduleConfigured=false`) are never enqueued.
 - `daily-run` jobs carry `singletonKey = workspaceId:runDate` (24h): duplicate
   sends resolve to `null` (deduped); the `DailyRun` unique constraint is the
-  second guard.
+  second guard. Two workers racing one queue process each job exactly once
+  (pg-boss row-level claiming; proven by `workerContention.test.ts`).
 - Job retries: `retryLimit: 3`, `retryDelay: 60s`, backoff enabled.
 - Graceful shutdown: `SIGTERM`/`SIGINT` stop pg-boss, disconnect Prisma, exit 0.
 - After a process restart, non-terminal runs/stages resume on the next
   trigger or tick; terminal runs are never re-executed.
+- Liveness: the worker upserts one `WorkerHeartbeat` row per process
+  (`hostname:pid`) on boot and after every tick/job
+  (`apps/api/src/worker/heartbeat.ts`). Poll
+  `GET /api/v1/worker/health` → `200 healthy` (beat within 20 min) or
+  `503 stale|down`. Rows older than 24h are pruned on every beat.
 
-Explicitly NOT provided by this repository:
-
-- No external process supervisor configuration (systemd unit, container
-  restart policy, or hosted-worker manifest). The operator provides it.
-- No worker health endpoint (`/health` and `/ready` report the API process
-  and database only — never worker liveness).
-- No guaranteed cross-process singleton beyond pg-boss job claiming (two
-  worker processes both poll; pg-boss awards each job once; idempotency keys
-  and unique constraints make double execution safe, not impossible to attempt).
+Production supervision is provided by `docker-compose.prod.yml` (see §9):
+`restart: unless-stopped` on postgres/api/worker/web, health-gated startup
+ordering, and exactly one worker replica by default (never `--scale` the
+worker above 1 — there is no cross-process leader election; safety beyond one
+replica rests on pg-boss claiming plus idempotency keys, which make double
+execution safe but do not prevent a second worker from attempting work).
 
 ## 8. Health / Readiness
 
@@ -166,19 +171,49 @@ Explicitly NOT provided by this repository:
   process answers. Registered BEFORE the rate limiter, so it never 429s.
 - `GET /api/v1/ready` → `{"status":"ready","dependencies":{"database":"connected"},"migrations":{"applied":N,"pending":[...]}}`
   or `503 {"status":"not ready", ...}` when the database is unreachable.
-  It proves API + database + migration state — NOT worker health.
+  It proves API + database + migration state — NOT worker liveness.
+- `GET /api/v1/worker/health` → `200 {"status":"healthy","worker":{workerId, startedAt, lastBeatAt, ageMs}}`
+  or `503 {"status":"stale"|"down", ...}`. It proves a worker process beat
+  within the last 20 minutes (tick cadence is 15 min). It does NOT report
+  queue depth — a healthy worker with a large backlog still reads healthy.
 
 ## 9. Deployment Order
 
+Container path (Compose wires every step; see `docker-compose.prod.yml`).
+Rehearsed 2026-10-05 against this repository (images built from clean tree,
+fresh volume): migrate applied 21 migrations, `/health`→200,
+`/ready`→200 with `pending: []`, `/worker/health`→200, register → workspace
+→ daily run COMPLETED → operator cycle COMPLETED (8 stages), web served 200,
+graceful `stop`, restart back to healthy, full `down -v` teardown clean:
+
+1. Build images from the repo root:
+   `docker build -f Dockerfile.api -t growth-operator-api:<tag> .` and
+   `docker build -f Dockerfile.web -t growth-operator-web:<tag> .`
+   (`.dockerignore` keeps host `node_modules`, `dist/`, `.git`, and `.env`
+   out of the images — verified: a missing ignore once baked dangling host
+   symlinks into an image and broke the build.)
+2. Write the production `.env` beside the compose file (unique `JWT_SECRET`,
+   `POSTGRES_PASSWORD`, `CORS_ORIGIN`, `API_URL`, optional provider keys).
+3. `IMAGE_TAG=<tag> docker compose -f docker-compose.prod.yml up -d`
+   (starts postgres → one-shot `migrate` → api → worker → web, health-gated).
+4. Verify `GET /api/v1/health` → 200, `GET /api/v1/ready` → 200 with
+   `pending: []`, `GET /api/v1/worker/health` → 200 once the worker beats.
+5. Trigger one run (`POST /api/v1/runs/trigger`) and confirm a terminal
+   status; or run one operator cycle (`POST /api/v1/operator/cycle` with an
+   idempotency key).
+6. Open the web origin; sign in through the UI.
+
+Manual (non-container) path:
+
 1. Provision PostgreSQL 17; set `DATABASE_URL`.
-2. Configure environment (unique `JWT_SECRET`, `CORS_ORIGIN`, `API_URL`, optional provider keys).
+2. Configure environment as above.
 3. `pnpm build`.
 4. `pnpm --filter @growth-operator/db db:migrate`, then verify `migrate status`.
-5. Start API (`.../api start`); verify `GET /api/v1/health` → 200.
-6. Verify `GET /api/v1/ready` → 200 with `pending: []`.
-7. Start worker (`.../api worker:start`); verify log line `pg-boss started: tick every 15 min, daily-run queue ready`.
-8. Trigger one run (`POST /api/v1/runs/trigger`) and confirm a terminal status; or run one operator cycle (`POST /api/v1/operator/cycle` with an idempotency key).
-9. Serve `apps/web/dist/` from the static host at `CORS_ORIGIN`; sign in through the UI.
+5. Start API (`pnpm --filter @growth-operator/api start`); verify health → 200.
+6. Verify readiness → 200 with `pending: []`.
+7. Start exactly one worker (`pnpm --filter @growth-operator/api worker:start`);
+   verify the pg-boss started line and `GET /api/v1/worker/health` → 200.
+8. Same verification as container steps 5–6.
 
 ## 10. Release Verification Checklist
 
@@ -305,8 +340,9 @@ blast radius but have never been measured. Do not manufacture capacity numbers.
 
 ## 20. Known Operational Limitations
 
-- No external process supervisor ships in this repository.
-- No worker health endpoint (`/ready` covers API + database only).
+- Process supervision is container restart policies (`docker-compose.prod.yml`);
+  no systemd/host-level supervisor ships in this repository.
+- `GET /api/v1/worker/health` reports liveness only, not queue depth.
 - Database-outage recovery is manual (restart + verify + resume).
 - Mid-flight pause is not observable (gates run at cycle start and stage starts).
 - Schema rollback is manual per migration.
@@ -319,8 +355,9 @@ blast radius but have never been measured. Do not manufacture capacity numbers.
 
 - **API down**: restart API process → `GET /health` → `GET /ready` → if 503,
   go to DB unavailable.
-- **Worker down**: restart worker (`worker:start`) → expect the pg-boss
-  started line → non-terminal runs resume on next tick/trigger.
+- **Worker down** (`GET /api/v1/worker/health` → 503 `stale`/`down`): restart
+  worker (`worker:start`) → expect the pg-boss started line → health returns
+  200 → non-terminal runs resume on next tick/trigger.
 - **DB unavailable**: restore database → `migrate status` clean → restart API
   + worker → verify `/ready` → resume.
 - **AI provider unavailable**: no action — features degrade to honest
@@ -371,6 +408,7 @@ Pre-release:
 Post-release:
 [ ] `GET /api/v1/health` → 200 `healthy`
 [ ] `GET /api/v1/ready` → 200 `ready`, `pending: []`
+[ ] `GET /api/v1/worker/health` → 200 `healthy` once the worker beats
 [ ] login + session expiry observed
 [ ] cross-workspace access denied (spot-check 403)
 [ ] worker log shows pg-boss started; one run/cycle reaches terminal status
