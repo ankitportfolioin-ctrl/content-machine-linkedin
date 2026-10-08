@@ -1,0 +1,20 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content":
+    - /url: "#geist-skip-nav"
+  - main [ref=e3]:
+    - generic [ref=e17]:
+      - generic [ref=e21]:
+        - heading "Production Deployment" [level=3] [ref=e23]
+        - generic [ref=e35]:
+          - paragraph [ref=e38]: Deployment
+          - generic [ref=e41]: Domains
+          - generic [ref=e46]:
+            - paragraph [ref=e48]: Status
+            - paragraph [ref=e51]: Created
+          - paragraph [ref=e54]: Source
+        - button [disabled] [ref=e60] [cursor=pointer]
+      - generic [ref=e71]:
+        - paragraph [ref=e75]
+        - paragraph [ref=e83]
+        - paragraph [ref=e91]
+  - alert [ref=e215]

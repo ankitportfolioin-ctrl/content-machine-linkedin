@@ -1,0 +1,15 @@
+- generic [active] [ref=f21e1]:
+  - main [ref=f21e2]:
+    - region [ref=f21e3]:
+      - heading "This page doesn’t exist" [level=1] [ref=f21e4]
+      - paragraph [ref=f21e5]: It may have been moved, removed, or never existed.
+      - generic "HTTP status, error code, and request ID" [ref=f21e6]:
+        - paragraph [ref=f21e7]: 404 DEPLOYMENT_NOT_FOUND
+        - paragraph [ref=f21e8]: bom1::qxpsn-1791486252020-ab5735cd5f45
+  - generic "Documentation, logs, and debugging actions" [ref=f21e9]:
+    - link "View DEPLOYMENT_NOT_FOUND documentation" [ref=f21e10] [cursor=pointer]:
+      - /url: https://vercel.com/docs/errors/deployment_not_found
+      - generic [ref=f21e11]: View Documentation
+    - button "Copy DEPLOYMENT_NOT_FOUND debugging instructions to clipboard" [ref=f21e14] [cursor=pointer]:
+      - generic [ref=f21e15]: Copy Debug Prompt
+    - status [ref=f21e16]
