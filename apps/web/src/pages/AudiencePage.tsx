@@ -36,7 +36,7 @@ export function AudiencePage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Audience" sub="Sign in to see audience needs." />
+        <PageHead kicker="Your progress" title="Your audience" sub="Sign in to see audience needs." />
         <LoginForm />
       </div>
     );
@@ -44,7 +44,7 @@ export function AudiencePage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Audience" sub="Clustering recurring problems…" />
+        <PageHead kicker="Your progress" title="Your audience" sub="Clustering recurring problems…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -52,7 +52,7 @@ export function AudiencePage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Audience" sub="Recurring problems and needs." />
+        <PageHead kicker="Your progress" title="Your audience" sub="Recurring problems and needs." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -61,8 +61,8 @@ export function AudiencePage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Intelligence"
-        title="Audience"
+        kicker="Your progress"
+        title="Your audience"
         sub={groups.length === 0 ? 'No audience clusters yet.' : `${groups.length} recurring problem${groups.length === 1 ? '' : 's'} across ${analyzed} analyzed signals.`}
       />
       {groups.length === 0 ? (

@@ -64,7 +64,7 @@ export function ExperimentsPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Learning" title="Experiments" sub="Sign in to track experiments." />
+        <PageHead kicker="Your progress" title="Try new things" sub="Sign in to track experiments." />
         <LoginForm />
       </div>
     );
@@ -72,7 +72,7 @@ export function ExperimentsPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Learning" title="Experiments" sub="Loading controlled tests…" />
+        <PageHead kicker="Your progress" title="Try new things" sub="Loading controlled tests…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -80,7 +80,7 @@ export function ExperimentsPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Learning" title="Experiments" sub="Test one variable at a time." />
+        <PageHead kicker="Your progress" title="Try new things" sub="Test one variable at a time." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -89,8 +89,8 @@ export function ExperimentsPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Learning"
-        title="Experiments"
+        kicker="Your progress"
+        title="Try new things"
         sub={experiments.length === 0 ? 'No experiments yet.' : `${experiments.length} controlled test${experiments.length === 1 ? '' : 's'} on record.`}
       />
       <SectionCard title="New experiment">

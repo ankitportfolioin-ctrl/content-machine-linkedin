@@ -96,7 +96,7 @@ export function LearningPage() {
   }
 
   if (authLoading || loading) return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Loading learning...</h2></div></div>;
-  if (!isAuthenticated) return <div className="stack"><div className="card"><h2 className="section-title">Learning</h2><p className="muted">Sign in first.</p></div><LoginForm /></div>;
+  if (!isAuthenticated) return <div className="stack"><div className="card"><h2 className="section-title">Tips</h2><p className="muted">Sign in first.</p></div><LoginForm /></div>;
   if (error) return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Something went wrong</h2><p className="empty-state-description">{error}</p><button className="btn btn-secondary" onClick={() => void fetchAll()} style={{ marginTop: '1rem' }}>Retry</button></div></div>;
 
   return (

@@ -102,7 +102,7 @@ export function BrainPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div className="card">
           <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
-            Brain / Intelligence
+            Deep dive
           </h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Sign in to explore content opportunities, trends, gaps, and sources.
@@ -117,7 +117,7 @@ export function BrainPage() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h2 className="health-card-title">Brain / Intelligence</h2>
+          <h2 className="health-card-title">Deep dive</h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Opportunities, trends, gaps, and sources for your workspace.
           </p>

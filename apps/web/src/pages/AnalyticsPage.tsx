@@ -30,7 +30,7 @@ export function AnalyticsPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div className="card">
           <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
-            Analytics
+            Your results
           </h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Sign in to view recorded results computed from your recorded outcome metrics.
@@ -93,7 +93,7 @@ function AnalyticsDashboard() {
         }}
       >
         <div>
-          <h2 className="health-card-title">Performance</h2>
+          <h2 className="health-card-title">Your results</h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Recorded results computed only from user-recorded outcome metrics. No estimates.
           </p>

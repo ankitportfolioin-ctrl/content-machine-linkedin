@@ -54,7 +54,7 @@ export function OpportunitiesPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Opportunities" sub="Sign in to see scored opportunities." />
+        <PageHead kicker="Start here" title="Post ideas" sub="Sign in to see scored opportunities." />
         <LoginForm />
       </div>
     );
@@ -64,7 +64,7 @@ export function OpportunitiesPage() {
   if (loading && opportunities.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Opportunities" sub="Scoring the evidence…" />
+        <PageHead kicker="Start here" title="Post ideas" sub="Scoring the evidence…" />
         <SkeletonBlock lines={5} />
       </div>
     );
@@ -72,7 +72,7 @@ export function OpportunitiesPage() {
   if (error && opportunities.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Opportunities" sub="Scored content bets." />
+        <PageHead kicker="Start here" title="Post ideas" sub="Scored content bets." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -91,8 +91,8 @@ export function OpportunitiesPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Intelligence"
-        title="Opportunities"
+        kicker="Start here"
+        title="Post ideas"
         sub={opportunities.length === 0 ? 'No scored opportunities yet.' : `${opportunities.length} scored content bet${opportunities.length === 1 ? '' : 's'} — highest impact first.`}
       />
       {opportunities.length === 0 ? (

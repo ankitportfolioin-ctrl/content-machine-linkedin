@@ -68,7 +68,7 @@ export function ContentPage() {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
         <div className="card">
-          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Studio</h2>
+          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Write a post</h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Sign in to create ideas, build content plans, and review drafts.
           </p>
@@ -136,7 +136,7 @@ function IdeasList({ onSelect }: { onSelect: (id: string) => void }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       <div className="card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
         <div>
-          <h2 className="health-card-title">Studio</h2>
+          <h2 className="health-card-title">Write a post</h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Ideas, content plans, drafts, reviews, and finalized versions.
           </p>

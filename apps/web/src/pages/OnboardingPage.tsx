@@ -76,7 +76,7 @@ export function OnboardingPage() {
     return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Loading onboarding...</h2></div></div>;
   }
   if (!isAuthenticated) {
-    return <div className="stack"><div className="card"><h2 className="section-title">Onboarding</h2><p className="muted">Sign in to set up your workspace.</p></div><LoginForm /></div>;
+    return <div className="stack"><div className="card"><h2 className="section-title">Get set up</h2><p className="muted">Sign in to set up your workspace.</p></div><LoginForm /></div>;
   }
   if (!hasWorkspace) {
     return (
@@ -84,7 +84,7 @@ export function OnboardingPage() {
         <div className="card row-between">
           <div>
             <p className="kicker">One-time setup</p>
-            <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Onboarding</h2>
+            <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Get set up</h2>
             <p className="muted">Create a workspace first — onboarding progress is detected from its data.</p>
           </div>
           <WorkspaceSelector />
@@ -98,7 +98,7 @@ export function OnboardingPage() {
         <div className="card row-between">
           <div>
             <p className="kicker">One-time setup</p>
-            <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Onboarding</h2>
+            <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Get set up</h2>
             <p className="muted">Create a workspace first — onboarding progress is detected from its data.</p>
           </div>
           <WorkspaceSelector />
@@ -113,7 +113,7 @@ export function OnboardingPage() {
       <div className="card row-between">
         <div>
           <p className="kicker">One-time setup</p>
-          <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Onboarding</h2>
+          <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Get set up</h2>
           <p className="muted">
             {progress.complete
               ? 'Setup complete. The daily loop can run from these settings.'

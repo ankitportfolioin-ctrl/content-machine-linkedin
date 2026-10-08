@@ -34,6 +34,9 @@ describe('Web Application', () => {
     expect(screen.getByRole('link', { name: /^tips$/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^connected accounts$/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^settings$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^leads$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^inbox$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^pipeline$/i })).toBeInTheDocument();
   });
 
   it('exposes the command palette trigger with shortcut hint', () => {

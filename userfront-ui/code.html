@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{"colors":{"inverse-surface":"#2f3038","on-primary-container":"#dad7ff","primary-fixed-dim":"#c3c0ff","on-primary-fixed":"#0f0069","secondary":"#5f5e60","on-secondary-fixed-variant":"#474649","surface-container-lowest":"#ffffff","on-tertiary-container":"#67f4b7","on-error":"#ffffff","inverse-on-surface":"#f1effa","secondary-container":"#e5e1e4","on-surface-variant":"#464555","error":"#ba1a1a","secondary-fixed":"#e5e1e4","primary-container":"#4f46e5","on-error-container":"#93000a","error-container":"#ffdad6","secondary-fixed-dim":"#c8c6c8","outline":"#777587","on-secondary-container":"#656466","surface-container-highest":"#e3e1ec","on-primary-fixed-variant":"#3323cc","tertiary-container":"#006e4b","on-tertiary-fixed":"#002113","primary":"#3525cd","on-surface":"#1a1b22","surface-container":"#eeedf7","surface-variant":"#e3e1ec","inverse-primary":"#c3c0ff","background":"#fbf8ff","primary-fixed":"#e2dfff","surface-container-low":"#f4f2fd","tertiary-fixed-dim":"#4edea3","surface-dim":"#dad9e3","outline-variant":"#c7c4d8","on-primary":"#ffffff","on-tertiary-fixed-variant":"#005236","surface-tint":"#4d44e3","on-tertiary":"#ffffff","tertiary-fixed":"#6ffbbe","on-background":"#1a1b22","surface-container-high":"#e8e7f1","on-secondary-fixed":"#1c1b1d","on-secondary":"#ffffff","surface":"#fbf8ff","tertiary":"#005338","surface-bright":"#fbf8ff"},"borderRadius":{"DEFAULT":"0.25rem","lg":"0.5rem","xl":"0.75rem","full":"9999px"},"spacing":{"space-xs":"0.25rem","space-xl":"2.5rem","space-md":"1rem","gutter":"1.5rem","margin":"2rem","space-sm":"0.5rem","space-lg":"1.5rem"},"fontFamily":{"body-sm":["Plus Jakarta Sans"],"headline-sm":["Plus Jakarta Sans"],"body-md":["Plus Jakarta Sans"],"headline-lg-mobile":["Plus Jakarta Sans"],"headline-md":["Plus Jakarta Sans"],"headline-lg":["Plus Jakarta Sans"],"body-lg":["Plus Jakarta Sans"],"label-sm":["Plus Jakarta Sans"],"display":["Plus Jakarta Sans"],"label-md":["Plus Jakarta Sans"]},"fontSize":{"body-sm":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"400"}],"headline-sm":["18px",{"lineHeight":"26px","letterSpacing":"-0.015em","fontWeight":"600"}],"body-md":["14px",{"lineHeight":"22px","letterSpacing":"-0.005em","fontWeight":"400"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.02em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.025em","fontWeight":"600"}],"body-lg":["16px",{"lineHeight":"26px","letterSpacing":"-0.01em","fontWeight":"400"}],"label-sm":["11px",{"lineHeight":"14px","letterSpacing":"0.04em","fontWeight":"600"}],"display":["40px",{"lineHeight":"48px","letterSpacing":"-0.03em","fontWeight":"700"}],"label-md":["13px",{"lineHeight":"18px","letterSpacing":"0em","fontWeight":"500"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest z-40 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.03)] border-r border-outline-variant/30"><div class="flex flex-col"><div class="px-space-md pt-space-md pb-space-sm"><div class="flex items-center gap-space-sm"><img alt="Presence OS Logo" class="h-8 w-auto object-contain" src="https://lh3.googleusercontent.com/aida/AEtjO1UIzZINDIFmdW6sjhERDBCHAPG9mxKDqeKvhxVC-htnIY-nQ0ugf_u21FqWSP99Uf0KqrEhlry5wOueBQctzu0NyWqXgd-TqXmDdCHy5dFHYTwE-SkqxZLUnrqRKm_RZ4NwvHJdxp0UhmdgL050rCEfbko2Oav1cfs65tmm24Pr7e4KMYpGuKeNKUAu9y_0WMk-jYz3OX47tYez8a17MiyUs_Xnm0_BgWoFgJXXuPhqVtQhKMvXomeNWpLJ"/><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight">Presence</span><span class="px-space-xs py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant font-medium">Growth OS</span></div><div class="mt-space-md"><button class="w-full flex items-center justify-between px-space-sm py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface text-left transition-colors" type="button"><div class="flex items-center gap-space-sm truncate"><div class="w-5 h-5 rounded bg-primary-container text-on-primary flex items-center justify-center font-label-sm text-label-sm font-bold">A</div><span class="font-label-md text-label-md font-medium text-on-surface truncate">Acme Labs (Main)</span></div><span class="material-symbols-outlined text-[18px] text-on-surface-variant">unfold_more</span></button></div></div><nav class="px-space-sm py-space-xs flex flex-col gap-0.5" data-active-classes="bg-surface-container text-on-surface font-semibold"><a aria-current="page" class="flex items-center justify-between px-space-sm py-2 rounded-lg transition-colors bg-surface-container text-on-surface font-semibold" data-path="home" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">grid_view</span><span class="font-body-md text-body-md">Home</span></div></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="create" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">auto_awesome</span><span class="font-body-md text-body-md">Create</span></div></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="research" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">explore</span><div class="flex flex-col leading-tight"><span class="font-body-md text-body-md">Research</span></div></div><span class="font-label-sm text-label-sm text-outline">Signals</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="content" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">layers</span><span class="font-body-md text-body-md">Content</span></div><span class="px-1.5 py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-on-surface-variant">3</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="engage" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">chat_bubble</span><span class="font-body-md text-body-md">Engage</span></div><span class="px-1.5 py-0.5 rounded-full bg-surface-container-high font-label-sm text-label-sm text-on-surface-variant">2</span></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="leads-and-people" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">group</span><span class="font-body-md text-body-md">Leads &amp; People</span></div></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="analytics" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">bar_chart</span><span class="font-body-md text-body-md">Analytics</span></div></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="what-ai-learned" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">psychology</span><span class="font-body-md text-body-md">What AI Learned</span></div></a><a class="flex items-center justify-between px-space-sm py-2 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="settings" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">settings</span><span class="font-body-md text-body-md">Settings</span></div></a></nav></div><div class="p-space-sm flex flex-col gap-space-sm"><div class="px-space-sm py-2 rounded-lg bg-surface-container-low flex items-center gap-2"><span class="relative flex h-2 w-2"><span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span><span class="relative inline-flex rounded-full h-2 w-2 bg-tertiary"></span></span><span class="font-label-sm text-label-sm text-on-surface-variant font-medium">AI: Prepare &amp; Ask</span></div><a class="flex items-center gap-space-sm px-space-sm py-1.5 rounded-lg text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface transition-colors" data-path="help-and-guides" href="#"><span class="material-symbols-outlined text-[18px]">help_outline</span><span class="font-label-md text-label-md">Help &amp; Guides</span></a><div class="pt-2 border-t border-outline-variant/30 flex items-center gap-space-sm px-space-xs"><div class="relative"><img alt="Alex Morgan" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc5bSegyZZjGUT5HO3xPpwLiOpDl3lDCjy0K1pLii31l7Gb645trEpid4NKbL4XVCHzPup_0uldAFD3fo3QFnafpirN-p90UvDoEnYA1yqUl9EeG03L72Fpz_HU7LbA97fK6lnfl0-RPk6no-jmfoYgChYkeQ19mIqKf3LsnJ49Sun4xpeFPbqHZUn-K4gewtEdgdwdXRK2zEX4i2TAUR1BA3nYhuSU6GPDI-icHytTfe4G9VBKqQJmA"/><span class="absolute bottom-0 right-0 w-2 h-2 rounded-full bg-tertiary ring-2 ring-surface-container-lowest"></span></div><div class="flex flex-col truncate"><span class="font-label-md text-label-md font-semibold text-on-surface truncate">Alex Morgan</span><span class="font-label-sm text-label-sm text-on-surface-variant truncate">Founder &amp; Operator</span></div></div></div></aside><div class="pl-64"><header class="fixed top-0 left-64 right-0 h-16 bg-surface-container-lowest/90 backdrop-blur-md z-30 flex items-center justify-between px-gutter shadow-[0_1px_8px_rgba(0,0,0,0.03)] border-b border-outline-variant/30"><div class="flex items-center gap-space-md"><div class="flex items-center gap-2 font-label-md text-label-md text-on-surface-variant"><span class="hover:text-on-surface cursor-pointer">Acme Labs</span><span class="text-outline-variant">/</span><span class="text-on-surface font-semibold">Overview</span></div><div class="hidden lg:flex items-center gap-2 px-space-sm py-1 rounded-full bg-surface-container-low font-label-sm text-label-sm text-on-surface-variant"><span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span><span>AI Operator: Active · Last checked 12m ago</span></div></div><div class="flex items-center gap-space-sm"><button class="flex items-center gap-space-xs px-space-sm py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors font-label-md text-label-md" type="button"><span class="material-symbols-outlined text-[16px]">refresh</span><span>Run today's check</span></button><button class="hidden sm:flex items-center gap-2 px-space-sm py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" type="button"><span class="material-symbols-outlined text-[18px]">search</span><span>Jump to idea, person, draft...</span><kbd class="px-1.5 py-0.5 rounded bg-surface-container-highest font-label-sm text-label-sm text-on-surface-variant">⌘K</kbd></button><button class="flex items-center gap-1.5 px-space-sm py-1.5 rounded-lg bg-secondary-fixed text-on-secondary-fixed hover:bg-secondary-container transition-colors font-label-md text-label-md font-medium" type="button"><span class="w-2 h-2 rounded-full bg-error"></span><span>Needs approval (2)</span></button><div class="lg:hidden"><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc5bSegyZZjGUT5HO3xPpwLiOpDl3lDCjy0K1pLii31l7Gb645trEpid4NKbL4XVCHzPup_0uldAFD3fo3QFnafpirN-p90UvDoEnYA1yqUl9EeG03L72Fpz_HU7LbA97fK6lnfl0-RPk6no-jmfoYgChYkeQ19mIqKf3LsnJ49Sun4xpeFPbqHZUn-K4gewtEdgdwdXRK2zEX4i2TAUR1BA3nYhuSU6GPDI-icHytTfe4G9VBKqQJmA"/></div></div></header><main class="relative pt-16 w-full min-h-screen bg-surface px-gutter"><div class="flex flex-col w-full pb-16">
+<!-- Top Greeting & Operator Health Banner -->
+<section class="flex flex-col md:flex-row md:items-end justify-between gap-space-md pt-space-md pb-space-lg">
+<div class="flex flex-col gap-1.5">
+<div class="inline-flex items-center gap-2">
+<span class="w-2 h-2 rounded-full bg-tertiary"></span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Today's Briefing</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface font-semibold tracking-tight">Good morning, Alex.</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Your AI growth operator has 4 things worth your attention today.</p>
+</div>
+<!-- Live Operator Status Control -->
+<div class="flex items-center gap-space-sm bg-surface-container-lowest px-space-md py-2.5 rounded-xl shadow-sm border border-outline-variant/30">
+<div class="flex items-center gap-2">
+<span class="relative flex h-2.5 w-2.5">
+<span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-tertiary opacity-75"></span>
+<span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-tertiary"></span>
+</span>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-semibold text-on-surface leading-tight">Operator Status: Active</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">Monitoring 8 research feeds &amp; LinkedIn</span>
+</div>
+</div>
+<button class="ml-2 px-2.5 py-1 rounded-lg bg-surface-container hover:bg-surface-container-high transition-colors font-label-sm text-label-sm font-semibold text-on-surface" type="button">
+        Pause
+      </button>
+</div>
+</section>
+<!-- Quick Pulse Metrics: Crisp Linear-Style Counter Row -->
+<section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-space-md pb-space-xl">
+<!-- Metric 1 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between hover:border-outline-variant transition-all">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md">People reached this week</span>
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">14,820</span>
+<span class="font-label-sm text-label-sm text-tertiary font-semibold flex items-center">
+<span class="material-symbols-outlined text-[14px]">arrow_upward</span>18%
+        </span>
+</div>
+<div class="mt-2 text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1">
+<span class="material-symbols-outlined text-[13px] text-tertiary">verified</span>
+<span>Real impressions, verified</span>
+</div>
+</div>
+<!-- Metric 2 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between hover:border-outline-variant transition-all">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md">Conversations started</span>
+<span class="material-symbols-outlined text-[18px]">forum</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">28</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">replies &amp; DMs</span>
+</div>
+<div class="mt-2 text-on-surface-variant font-label-sm text-label-sm">
+        Zero spam or automated bots
+      </div>
+</div>
+<!-- Metric 3 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between hover:border-outline-variant transition-all">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md">High-intent relationships</span>
+<span class="material-symbols-outlined text-[18px]">person_search</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">6</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">decision makers</span>
+</div>
+<div class="mt-2 text-on-surface-variant font-label-sm text-label-sm">
+        Engineering VPs &amp; Staff Leads
+      </div>
+</div>
+<!-- Metric 4 -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 flex flex-col justify-between hover:border-outline-variant transition-all">
+<div class="flex items-center justify-between text-on-surface-variant mb-2">
+<span class="font-label-md text-label-md">Content pipeline</span>
+<span class="material-symbols-outlined text-[18px]">inventory_2</span>
+</div>
+<div class="flex items-baseline gap-2">
+<span class="font-headline-lg text-headline-lg font-bold text-on-surface tracking-tight">4</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant font-medium">in queue</span>
+</div>
+<div class="mt-2 text-on-surface-variant font-label-sm text-label-sm flex items-center gap-1.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+<span>3 drafts ready · 1 scheduled</span>
+</div>
+</div>
+</section>
+<!-- Main Split Layout: Decisions Feed (Left) & Honest Intelligence (Right) -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- LEFT: Primary Priority Decision Queue (Col 8) -->
+<div class="lg:col-span-8 flex flex-col gap-space-md">
+<div class="flex items-center justify-between px-1">
+<div class="flex items-center gap-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Today: What needs your decision</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-sm text-label-sm font-bold">4</span>
+</div>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Sorted by real audience impact</span>
+</div>
+<!-- Item 1: Amber Priority Review -->
+<article class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-space-sm hover:border-outline-variant transition-all">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex flex-wrap items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#FFFBEB] text-[#D97706] font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#D97706]"></span>
+              Needs approval
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Created 42m ago by AI agent</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight flex items-center gap-2">
+<span>✍️</span> A high-impact draft is ready for your review
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong class="text-on-surface font-semibold">Topic:</strong> How engineering teams are replacing routine code reviews with autonomous AI agents.
+          </p>
+</div>
+<!-- Evidence/Context Pill -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-primary shrink-0 mt-0.5">analytics</span>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong class="font-semibold">Why this matters:</strong> Matches your core audience (<span class="font-semibold text-primary">74% engineering leads</span>). 3 related discussions gained 14k views yesterday across GitHub and LinkedIn.
+          </p>
+</div>
+<!-- Action Row -->
+<div class="pt-2 flex flex-wrap items-center gap-3">
+<button class="px-4 py-2 rounded-lg bg-primary-container text-on-primary hover:bg-primary transition-colors font-label-md text-label-md font-semibold flex items-center gap-1.5" type="button">
+<span>Review draft</span>
+<span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+</button>
+<button class="px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md font-medium" type="button">
+            See why AI chose this
+          </button>
+</div>
+</article>
+<!-- Item 2: Opportunity Badge -->
+<article class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-space-sm hover:border-outline-variant transition-all">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#EEF2FF] text-[#4F46E5] font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#4F46E5]"></span>
+              Opportunity
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Spotted in live developer threads</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight flex items-center gap-2">
+<span>🔥</span> A topic is gaining attention in your domain
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong class="text-on-surface font-semibold">Topic:</strong> “Context windows vs vector search for local development workflows.”
+          </p>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-1">
+<div class="flex items-start gap-2">
+<span class="material-symbols-outlined text-[18px] text-tertiary shrink-0 mt-0.5">track_changes</span>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong class="font-semibold">Why this matters:</strong> 2 of your target customers explicitly asked questions about this on GitHub discussions and LinkedIn today.
+            </p>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant pl-6">
+<strong class="text-on-surface font-medium">Recommended action:</strong> AI suggests creating a concise, practical 3-slide visual breakdown.
+          </p>
+</div>
+<!-- Action Row -->
+<div class="pt-2 flex flex-wrap items-center gap-3">
+<button class="px-4 py-2 rounded-lg bg-inverse-surface text-inverse-on-surface hover:opacity-90 transition-opacity font-label-md text-label-md font-semibold" type="button">
+            Create post from this
+          </button>
+<button class="px-3 py-2 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface transition-colors font-label-md text-label-md font-medium" type="button">
+            Save for later
+          </button>
+</div>
+</article>
+<!-- Item 3: Active Conversations -->
+<article class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-space-sm hover:border-outline-variant transition-all">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#ECFDF5] text-[#059669] font-label-sm text-label-sm font-semibold">
+<span class="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
+              Active conversations
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">High-intent buyer activity</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight flex items-center gap-2">
+<span>👀</span> 3 people who matter responded to your recent post
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+<strong class="text-on-surface font-semibold">Sarah Chen (VP Eng at ScaleFlow)</strong> and 2 others asked how your team handles production edge cases.
+          </p>
+</div>
+<div class="bg-surface-container-low p-space-sm rounded-lg flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-3">
+<div class="relative shrink-0">
+<img class="w-8 h-8 rounded-full object-cover" data-alt="Portrait photo of Sarah Chen, a professional Asian woman engineer wearing a minimal navy crewneck, looking warm and confident in a modern bright office studio with soft natural light." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsKy13HDbZbXWMlgmK--yRqAB6TW32eLagLmmcmiz33-j32URwUCDPPq5cdJayBrlkM534ovxGUHM23LALKgy6br6yjXxgXQknj7BqYWoyU2JxNTY0baV11Ft2d6LEP1h0HiASJgXopq06SV3E3zlemzSU7m-udWeNhXEmmdiX-D4sby74TOmktvwgLeStqBePf2dEgxi6u159dPc9lOC53lZnDyPfFAlqQsJTbBxYAVvF3-Vt9lqpQw"/>
+<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-tertiary border-2 border-surface-container-lowest"></span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong class="font-semibold text-on-surface">Sarah is an active buyer</strong> currently evaluating brand automation workflows for her 40-person team.
+            </p>
+</div>
+<span class="font-label-sm text-label-sm text-tertiary font-bold shrink-0">Tier 1 Target</span>
+</div>
+<!-- Action Row -->
+<div class="pt-2 flex flex-wrap items-center gap-3">
+<button class="px-4 py-2 rounded-lg bg-surface-container-lowest border border-outline-variant/60 hover:bg-surface-container-low text-on-surface transition-colors font-label-md text-label-md font-semibold" type="button">
+            See suggested replies
+          </button>
+<a class="px-3 py-2 rounded-lg text-on-surface-variant hover:text-on-surface hover:bg-surface-container-low transition-colors font-label-md text-label-md font-medium flex items-center gap-1" href="#">
+<span>Open in Engage</span>
+<span class="material-symbols-outlined text-[16px]">arrow_outward</span>
+</a>
+</div>
+</article>
+<!-- Item 4: AI Learning Pattern -->
+<article class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-space-sm hover:border-outline-variant transition-all">
+<div class="flex items-start justify-between gap-space-sm">
+<div class="flex items-center gap-2">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container text-on-surface-variant font-label-sm text-label-sm font-semibold">
+<span class="material-symbols-outlined text-[14px]">psychology</span>
+              AI Learning
+            </span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">Model feedback loop updated</span>
+</div>
+<button class="text-on-surface-variant hover:text-on-surface transition-colors" title="Options" type="button">
+<span class="material-symbols-outlined text-[20px]">more_horiz</span>
+</button>
+</div>
+<div class="flex flex-col gap-1">
+<h2 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight flex items-center gap-2">
+<span>🧠</span> The AI learned a pattern about your readers
+          </h2>
+<p class="font-body-md text-body-md text-on-surface-variant">
+            Posts with <strong class="text-on-surface font-semibold">practical numbered takeaways</strong> get <span class="font-bold text-primary">3.2x more genuine replies</span> than high-level opinion posts.
+          </p>
+</div>
+<div class="pt-1 flex items-center justify-between">
+<span class="font-body-sm text-body-sm text-on-surface-variant">Draft generation settings automatically adjusted to favor clear walkthroughs.</span>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-low hover:bg-surface-container text-on-surface transition-colors font-label-md text-label-md font-medium shrink-0" type="button">
+            See what changed
+          </button>
+</div>
+</article>
+</div>
+<!-- RIGHT: AI's View & Verified Insights (Col 4) -->
+<div class="lg:col-span-4 flex flex-col gap-space-md">
+<div class="px-1">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant font-semibold">Your AI's View: What's working</span>
+</div>
+<!-- Honest Intelligence Card -->
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-space-md">
+<div class="flex flex-col gap-2">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[20px]">insights</span>
+</div>
+<h3 class="font-headline-sm text-headline-sm font-bold text-on-surface tracking-tight">
+            Implementation breakdowns beat hot takes this week.
+          </h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+            Your audience is actively tuning out generic AI buzzwords and looking for direct, reproducible code architecture notes.
+          </p>
+</div>
+<!-- Evidence List (Transparent data) -->
+<div class="flex flex-col gap-3 pt-2">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline font-semibold">Transparent Proof</span>
+<div class="flex items-start gap-2.5">
+<span class="w-1.5 h-1.5 rounded-full bg-primary shrink-0 mt-2"></span>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong class="font-semibold text-on-surface">2 tutorial posts</strong> received 89% more bookmarks and saves than abstract essays.
+            </p>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary shrink-0 mt-2"></span>
+<p class="font-body-sm text-body-sm text-on-surface">
+<strong class="font-semibold text-on-surface">Tech leads and architects</strong> engaged 4x more than general marketers.
+            </p>
+</div>
+<div class="flex items-start gap-2.5">
+<span class="w-1.5 h-1.5 rounded-full bg-on-surface-variant shrink-0 mt-2"></span>
+<p class="font-body-sm text-body-sm text-on-surface">
+              Average dwell time rose to 1m 45s without using clickbait hooks or thread formulas.
+            </p>
+</div>
+</div>
+<!-- Inline Visual Mini-Chart -->
+<div class="bg-surface-container-low p-space-md rounded-lg flex flex-col gap-2">
+<div class="flex items-center justify-between text-on-surface-variant">
+<span class="font-label-sm text-label-sm font-semibold">Engagement Quality Ratio</span>
+<span class="font-label-sm text-label-sm text-tertiary font-bold">88% High Intent</span>
+</div>
+<div class="w-full bg-surface-container-highest h-2 rounded-full overflow-hidden flex">
+<div class="bg-primary h-full" style="width: 65%" title="Engineering Leads"></div>
+<div class="bg-tertiary h-full" style="width: 23%" title="Founders"></div>
+<div class="bg-outline-variant h-full" style="width: 12%" title="Other"></div>
+</div>
+<div class="flex items-center justify-between text-outline text-[11px] font-label-sm">
+<span>Technical Leads (65%)</span>
+<span>Founders (23%)</span>
+<span>Other (12%)</span>
+</div>
+</div>
+<div class="pt-2 border-t border-outline-variant/30 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px] text-tertiary">check_circle</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant leading-tight">
+            Based on 4 published pieces and 142 real interactions over 7 days · Real verified data
+          </span>
+</div>
+</div>
+<!-- Quick AI Working Memory Snapshot -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm border border-outline-variant/30 flex flex-col gap-3">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Audience Pulse Snapshot</span>
+<span class="font-label-sm text-label-sm text-primary font-semibold">Refreshes in 4h</span>
+</div>
+<div class="flex items-center gap-3">
+<div class="relative shrink-0">
+<img class="w-14 h-14 rounded-lg object-cover" data-alt="A clean, minimalist high-tech engineering team meeting with whiteboard sketches in a sleek Silicon Valley studio, natural bright daylight, muted indigo and gray tones." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmZY-2WSRJ7SVn2KgEegAdm2WeK2XQaGhUqEy9-JBk6QNSaPnWEhZjIJ57OjRfUOH6DsavImWNimYLYj7t4hJwqKg_pnivbYDgXgkSMjdOTNCynTPr7zmXBHzahLmATVjtkqEBNIjSsJVOQOgZWszqNK_enPAV6jAYNmFVU8DOONOh6M4Yeog6CYuuHn9y5Cuv9CBNkZW1E0vSHIYbbKxVApUpFZTz0IvYOsYW4s25KPW3Db7eUrtJKw"/>
+</div>
+<div class="flex flex-col">
+<span class="font-label-md text-label-md font-medium text-on-surface">Top Discussion Hub</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Scaling local LLM evaluation pipelines for startup teams</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Section 4: Autonomy Mode Quiet Guarantee Banner -->
+<section class="mt-space-xl">
+<div class="bg-surface-container-lowest p-space-md rounded-xl border border-outline-variant/40 flex flex-col sm:flex-row items-center justify-between gap-space-sm shadow-sm">
+<div class="flex items-center gap-3">
+<div class="w-9 h-9 rounded-lg bg-surface-container flex items-center justify-center text-on-surface">
+<span class="material-symbols-outlined text-[20px]">shield</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<span class="font-label-md text-label-md font-semibold text-on-surface">Autonomy mode: Prepare &amp; Ask</span>
+<span class="px-2 py-0.5 rounded-full bg-[#ECFDF5] text-[#059669] font-label-sm text-label-sm font-semibold">Safe</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">
+            AI will draft, research, and listen, but will never post or message anyone without your explicit approval.
+          </span>
+</div>
+</div>
+<a class="text-primary hover:text-on-primary-fixed-variant font-label-md text-label-md font-semibold shrink-0 transition-colors" href="#">
+        Change in Settings →
+      </a>
+</div>
+</section>
+</div></main></div></body></html>

@@ -35,7 +35,7 @@ export function TrendsPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Trends" sub="Sign in to see trend momentum." />
+        <PageHead kicker="Your progress" title="What's trending" sub="Sign in to see trend momentum." />
         <LoginForm />
       </div>
     );
@@ -43,7 +43,7 @@ export function TrendsPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Trends" sub="Measuring momentum…" />
+        <PageHead kicker="Your progress" title="What's trending" sub="Measuring momentum…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -51,7 +51,7 @@ export function TrendsPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Trends" sub="Momentum across sources." />
+        <PageHead kicker="Your progress" title="What's trending" sub="Momentum across sources." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -60,8 +60,8 @@ export function TrendsPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Intelligence"
-        title="Trends"
+        kicker="Your progress"
+        title="What's trending"
         sub={trends.length === 0 ? 'No trends detected yet.' : `${trends.length} tracked trend${trends.length === 1 ? '' : 's'} by momentum.`}
       />
       {trends.length === 0 ? (

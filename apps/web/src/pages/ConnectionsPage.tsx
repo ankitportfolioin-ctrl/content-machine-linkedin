@@ -42,7 +42,7 @@ export function ConnectionsPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="System" title="Connections" sub="Sign in to manage integrations." />
+        <PageHead kicker="Settings" title="Connected accounts" sub="Sign in to manage integrations." />
         <LoginForm />
       </div>
     );
@@ -50,7 +50,7 @@ export function ConnectionsPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="System" title="Connections" sub="Checking integration states…" />
+        <PageHead kicker="Settings" title="Connected accounts" sub="Checking integration states…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -58,7 +58,7 @@ export function ConnectionsPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="System" title="Connections" sub="Accounts, sources, and research feeds." />
+        <PageHead kicker="Settings" title="Connected accounts" sub="Accounts, sources, and research feeds." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -70,8 +70,8 @@ export function ConnectionsPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="System"
-        title="Connections"
+        kicker="Settings"
+        title="Connected accounts"
         sub={`${social.filter((c) => c.connected).length} connected account${social.filter((c) => c.connected).length === 1 ? '' : 's'} · ${feeds.filter((f) => f.active).length} active feeds.`}
       />
 

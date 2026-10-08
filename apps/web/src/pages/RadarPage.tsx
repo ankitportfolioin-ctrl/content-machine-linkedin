@@ -40,7 +40,7 @@ export function RadarPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Command" title="Radar" sub="Sign in to see ranked recommendations." />
+        <PageHead kicker="Start here" title="Discover" sub="Sign in to see ranked recommendations." />
         <LoginForm />
       </div>
     );
@@ -48,7 +48,7 @@ export function RadarPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Command" title="Radar" sub="Ranked recommendations, live." />
+        <PageHead kicker="Start here" title="Discover" sub="Ranked recommendations, live." />
         <SkeletonBlock lines={5} />
       </div>
     );
@@ -56,7 +56,7 @@ export function RadarPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Command" title="Radar" sub="Ranked recommendations, live." />
+        <PageHead kicker="Start here" title="Discover" sub="Ranked recommendations, live." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -65,8 +65,8 @@ export function RadarPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Command"
-        title="Radar"
+        kicker="Start here"
+        title="Discover"
         sub={total === 0 ? 'Nothing pending — the system is quiet.' : `${total} pending recommendation${total === 1 ? '' : 's'}, ranked by expected impact.`}
       />
       {actions.length === 0 ? (

@@ -45,6 +45,14 @@ export const NAV_SECTIONS: Array<{ title: string; entries: NavEntry[] }> = [
       { to: '/settings', label: 'Settings', section: 'Settings', icon: 'settings' },
     ],
   },
+  {
+    title: 'Follow up',
+    entries: [
+      { to: '/leads', label: 'Leads', section: 'Follow up', icon: 'audience' },
+      { to: '/inbox', label: 'Inbox', section: 'Follow up', icon: 'observe' },
+      { to: '/pipeline', label: 'Pipeline', section: 'Follow up', icon: 'trends' },
+    ],
+  },
 ];
 
 export const NAV_COMMANDS: NavEntry[] = NAV_SECTIONS.flatMap((s) => s.entries);
@@ -66,6 +74,9 @@ export const ROUTE_META: Record<string, { title: string; crumb: string }> = {
   '/learning': { title: 'Tips', crumb: 'Your progress' },
   '/connections': { title: 'Connected accounts', crumb: 'Settings' },
   '/settings': { title: 'Settings', crumb: 'Settings' },
+  '/leads': { title: 'Leads', crumb: 'Follow up' },
+  '/inbox': { title: 'Inbox', crumb: 'Follow up' },
+  '/pipeline': { title: 'Pipeline', crumb: 'Follow up' },
   '/brain': { title: 'Deep dive', crumb: 'Start here' },
   '/dashboard': { title: 'Today', crumb: 'Start here' },
   '/onboarding': { title: 'Get set up', crumb: 'Start here' },

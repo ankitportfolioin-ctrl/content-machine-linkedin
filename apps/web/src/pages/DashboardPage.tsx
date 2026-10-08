@@ -53,7 +53,7 @@ export function DashboardPage() {
     return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Loading today's brain...</h2></div></div>;
   }
   if (!isAuthenticated) {
-    return <div className="stack"><div className="card"><h2 className="section-title">Today's Brain</h2><p className="muted">Sign in to see recommendations.</p></div><LoginForm /></div>;
+    return <div className="stack"><div className="card"><h2 className="section-title">Today</h2><p className="muted">Sign in to see recommendations.</p></div><LoginForm /></div>;
   }
   if (error) {
     return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Something went wrong</h2><p className="empty-state-description">{error}</p><button className="btn btn-secondary" onClick={() => void fetchAll()} style={{ marginTop: '1rem' }}>Retry</button></div></div>;
@@ -73,8 +73,8 @@ export function DashboardPage() {
     <div className="stack">
       <div className="card row-between">
         <div>
-          <p className="kicker">Business Content Intelligence</p>
-          <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Today's Brain</h2>
+          <p className="kicker">Start here</p>
+          <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Today</h2>
           <p className="muted">What to create, why, and what we are learning.</p>
         </div>
         <WorkspaceSelector />

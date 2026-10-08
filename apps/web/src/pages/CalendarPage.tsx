@@ -40,7 +40,7 @@ export function CalendarPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Calendar" sub="Sign in to see scheduled content." />
+        <PageHead kicker="Make posts" title="Schedule" sub="Sign in to see scheduled content." />
         <LoginForm />
       </div>
     );
@@ -48,7 +48,7 @@ export function CalendarPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Calendar" sub="Loading the schedule…" />
+        <PageHead kicker="Make posts" title="Schedule" sub="Loading the schedule…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -56,7 +56,7 @@ export function CalendarPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Calendar" sub="What is planned and what shipped." />
+        <PageHead kicker="Make posts" title="Schedule" sub="What is planned and what shipped." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -65,7 +65,7 @@ export function CalendarPage() {
   if (plans.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Calendar" sub="What is planned and what shipped." />
+        <PageHead kicker="Make posts" title="Schedule" sub="What is planned and what shipped." />
         <EmptyState
           title="Nothing scheduled"
           what="No content plans exist in this workspace yet."
@@ -79,8 +79,8 @@ export function CalendarPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Content"
-        title="Calendar"
+        kicker="Make posts"
+        title="Schedule"
         sub={`${plans.length} plan${plans.length === 1 ? '' : 's'} across the pipeline.`}
       />
       <div className="grid-3">

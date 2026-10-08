@@ -50,7 +50,7 @@ export function ApprovalsPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Approval Queue" sub="Sign in to review drafts." />
+        <PageHead kicker="Make posts" title="Review posts" sub="Sign in to review drafts." />
         <LoginForm />
       </div>
     );
@@ -60,7 +60,7 @@ export function ApprovalsPage() {
   if (loading && reviews.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Approval Queue" sub="Loading items awaiting decision…" />
+        <PageHead kicker="Make posts" title="Review posts" sub="Loading items awaiting decision…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -68,7 +68,7 @@ export function ApprovalsPage() {
   if (error && reviews.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Content" title="Approval Queue" sub="Nothing publishes without you." />
+        <PageHead kicker="Make posts" title="Review posts" sub="Nothing publishes without you." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -77,8 +77,8 @@ export function ApprovalsPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Content"
-        title="Approval Queue"
+        kicker="Make posts"
+        title="Review posts"
         sub={reviews.length === 0 ? 'Queue is empty.' : `${reviews.length} item${reviews.length === 1 ? '' : 's'} awaiting your decision. Nothing publishes without approval.`}
       />
       {message ? (

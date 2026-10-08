@@ -138,7 +138,7 @@ export function OverviewPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Command" title="Growth Command Center" sub="Sign in to see what your growth system discovered." />
+        <PageHead kicker="Start here" title="Growth Command Center" sub="Sign in to see what your growth system discovered." />
         <LoginForm />
       </div>
     );

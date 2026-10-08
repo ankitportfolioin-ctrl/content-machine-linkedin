@@ -51,7 +51,7 @@ export function ObservatoryPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Content Observatory" sub="Sign in to monitor sources." />
+        <PageHead kicker="Start here" title="Explore" sub="Sign in to monitor sources." />
         <LoginForm />
       </div>
     );
@@ -59,7 +59,7 @@ export function ObservatoryPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Content Observatory" sub="Loading the feed…" />
+        <PageHead kicker="Start here" title="Explore" sub="Loading the feed…" />
         <SkeletonBlock lines={5} />
       </div>
     );
@@ -67,7 +67,7 @@ export function ObservatoryPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Intelligence" title="Content Observatory" sub="Live research feed." />
+        <PageHead kicker="Start here" title="Explore" sub="Live research feed." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -84,8 +84,8 @@ export function ObservatoryPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Intelligence"
-        title="Content Observatory"
+        kicker="Start here"
+        title="Explore"
         sub={`Monitoring ${counts.sources} source${counts.sources === 1 ? '' : 's'} · ${counts.trends} trends · ${counts.gaps} gaps`}
         actions={<Link to="/brain" className="btn btn-ghost btn-sm">Open full workbench</Link>}
       />
