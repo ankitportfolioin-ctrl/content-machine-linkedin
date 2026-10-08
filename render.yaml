@@ -1,17 +1,30 @@
+# FREE-TIER blueprint (no card required).
+# What changed vs the paid version and why:
+# - Managed Postgres plan: starter -> free ($0, 1 GB, no card for
+#   free-only blueprints). LIMIT: free Render Postgres EXPIRES 30 days
+#   after creation (14-day grace, then deleted). For a permanent free DB,
+#   use Neon instead and switch DATABASE_URL below to `sync: false`.
+# - API plan: starter -> free (sleeps when idle; first request ~50s cold start).
+# - Background worker REMOVED (paid-only): the automated daily loop does not
+#   run on this path. Manual runs and all API/UI features still work.
+# - Render static web REMOVED: the frontend already lives on Vercel, so
+#   CORS_ORIGIN points at the Vercel URL.
+# NOTE: this file is not yet committed. Commit + push it for Blueprint sync.
+
 databases:
   - name: growth-operator-db
-    plan: starter
+    plan: free
     region: oregon
     databaseName: growth_operator
     user: growth_operator
     postgresMajorVersion: "17"
 
 services:
-  # API Service (Node.js web service)
+  # API Service (Node.js web service, free tier)
   - type: web
     name: growth-operator-api
     runtime: node
-    plan: starter
+    plan: free
     region: oregon
     repo: https://github.com/ankitportfolioin-ctrl/content-machine-linkedin
     branch: main
@@ -39,6 +52,8 @@ services:
         value: production
       - key: PORT
         value: "3001"
+      # Wired to the free managed Postgres above. (Permanent-free
+      # alternative: Neon + `sync: false` + paste the URL at apply time.)
       - key: DATABASE_URL
         fromDatabase:
           name: growth-operator-db
@@ -49,8 +64,6 @@ services:
         value: "7d"
       - key: BCRYPT_ROUNDS
         value: "12"
-      - key: CORS_ORIGIN
-        value: https://growth-operator-web.onrender.com
       - key: RATE_LIMIT_WINDOW_MS
         value: "900000"
       - key: RATE_LIMIT_MAX_REQUESTS
@@ -87,71 +100,5 @@ services:
         sync: false
       - key: FACEBOOK_CLIENT_SECRET
         sync: false
-
-  # Background Worker (pg-boss daily loop worker)
-  - type: worker
-    name: growth-operator-worker
-    runtime: node
-    plan: starter
-    region: oregon
-    repo: https://github.com/ankitportfolioin-ctrl/content-machine-linkedin
-    branch: main
-    rootDir: .
-    buildCommand: |
-      pnpm install --frozen-lockfile &&
-      pnpm --filter @growth-operator/schemas build &&
-      pnpm --filter @growth-operator/db db:generate &&
-      pnpm --filter @growth-operator/db build &&
-      pnpm --filter @growth-operator/shared build &&
-      pnpm --filter @growth-operator/ai build &&
-      pnpm --filter @growth-operator/capabilities build &&
-      pnpm --filter @growth-operator/intelligence build &&
-      pnpm --filter @growth-operator/content build &&
-      pnpm --filter @growth-operator/sales build &&
-      pnpm --filter @growth-operator/learning build &&
-      pnpm --filter @growth-operator/decision build &&
-      pnpm --filter @growth-operator/social build &&
-      pnpm --filter @growth-operator/business build &&
-      pnpm --filter @growth-operator/api build
-    startCommand: pnpm --filter @growth-operator/api worker:start
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: DATABASE_URL
-        fromDatabase:
-          name: growth-operator-db
-          property: connectionString
-      - key: OPENROUTER_API_KEY
-        sync: false
-      - key: OPENROUTER_MODEL
-        value: "openai/gpt-4o-mini"
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: ANTHROPIC_API_KEY
-        sync: false
-
-  # Web Frontend (Static Site)
-  - type: web
-    name: growth-operator-web
-    runtime: static
-    plan: free
-    repo: https://github.com/ankitportfolioin-ctrl/content-machine-linkedin
-    branch: main
-    rootDir: .
-    buildCommand: |
-      pnpm install --frozen-lockfile &&
-      pnpm --filter @growth-operator/schemas build &&
-      pnpm --filter @growth-operator/db db:generate &&
-      pnpm --filter @growth-operator/db build &&
-      pnpm --filter @growth-operator/shared build &&
-      pnpm --filter @growth-operator/web build
-    staticPublishPath: apps/web/dist
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
-    envVars:
-      - key: VITE_API_URL
-        value: https://growth-operator-api.onrender.com
-      - key: VITE_WEB_URL
-        value: https://growth-operator-web.onrender.com
+      - key: CORS_ORIGIN
+        value: https://growth-operator-web-lovat.vercel.app
