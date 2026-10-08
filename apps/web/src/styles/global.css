@@ -589,7 +589,7 @@ select.field {
 }
 
 .nav-section {
-  margin-bottom: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .nav-section-title {
@@ -606,16 +606,16 @@ select.field {
   display: flex;
   align-items: center;
   gap: 0.65rem;
-  padding: 0.45rem 0.65rem;
+  padding: 0.55rem 0.65rem;
   border-radius: 8px;
   color: var(--color-text-secondary);
-  font-size: 0.84rem;
+  font-size: 0.88rem;
   font-weight: 550;
   transition: background-color var(--transition), color var(--transition);
   width: 100%;
   text-align: left;
   border: 1px solid transparent;
-  min-height: 34px;
+  min-height: 40px;
 }
 
 .nav-item:hover {

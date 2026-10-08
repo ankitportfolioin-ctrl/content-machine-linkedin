@@ -98,12 +98,12 @@ function renderShell() {
 describe('Command-center shell', () => {
   it('shows breadcrumb title and opens the palette to navigate', async () => {
     renderShell();
-    expect(await screen.findByText('Overview', { selector: '.topbar-title' })).toBeInTheDocument();
+    expect(await screen.findByText('Home', { selector: '.topbar-title' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /open command palette/i }));
     expect(await screen.findByRole('dialog', { name: /command palette/i })).toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText(/type a command/i), { target: { value: 'rad' } });
-    fireEvent.click(screen.getByRole('button', { name: /radar/i }));
+    fireEvent.change(screen.getByPlaceholderText(/type a command/i), { target: { value: 'dis' } });
+    fireEvent.click(screen.getByRole('button', { name: /discover/i }));
     expect(await screen.findByText('Radar page')).toBeInTheDocument();
   });
 });

@@ -1,6 +1,7 @@
 /* Single source of truth for command-center navigation.
-   Labels follow the product IA; `to` values are existing stable routes
-   plus the new intelligence screens. */
+   Labels use plain everyday words so a first-time user can guess what
+   each page does. `to` values are the existing stable routes — only
+   labels, sections and crumbs changed. */
 
 export interface NavEntry {
   to: string;
@@ -11,42 +12,37 @@ export interface NavEntry {
 
 export const NAV_SECTIONS: Array<{ title: string; entries: NavEntry[] }> = [
   {
-    title: 'Command',
+    title: 'Start here',
     entries: [
-      { to: '/', label: 'Overview', section: 'Command', icon: 'command' },
-      { to: '/radar', label: 'Radar', section: 'Command', icon: 'radar' },
+      { to: '/', label: 'Home', section: 'Start here', icon: 'command' },
+      { to: '/radar', label: 'Discover', section: 'Start here', icon: 'radar' },
+      { to: '/observatory', label: 'Explore', section: 'Start here', icon: 'observe' },
+      { to: '/opportunities', label: 'Post ideas', section: 'Start here', icon: 'target' },
     ],
   },
   {
-    title: 'Intelligence',
+    title: 'Make posts',
     entries: [
-      { to: '/observatory', label: 'Observatory', section: 'Intelligence', icon: 'observe' },
-      { to: '/audience', label: 'Audience', section: 'Intelligence', icon: 'audience' },
-      { to: '/trends', label: 'Trends', section: 'Intelligence', icon: 'trends' },
-      { to: '/opportunities', label: 'Opportunities', section: 'Intelligence', icon: 'target' },
+      { to: '/content', label: 'Write a post', section: 'Make posts', icon: 'studio' },
+      { to: '/calendar', label: 'Schedule', section: 'Make posts', icon: 'calendar' },
+      { to: '/approvals', label: 'Review posts', section: 'Make posts', icon: 'approve' },
     ],
   },
   {
-    title: 'Content',
+    title: 'Your progress',
     entries: [
-      { to: '/content', label: 'Studio', section: 'Content', icon: 'studio' },
-      { to: '/calendar', label: 'Calendar', section: 'Content', icon: 'calendar' },
-      { to: '/approvals', label: 'Approval Queue', section: 'Content', icon: 'approve' },
+      { to: '/trends', label: "What's trending", section: 'Your progress', icon: 'trends' },
+      { to: '/audience', label: 'Your audience', section: 'Your progress', icon: 'audience' },
+      { to: '/analytics', label: 'Your results', section: 'Your progress', icon: 'performance' },
+      { to: '/experiments', label: 'Try new things', section: 'Your progress', icon: 'flask' },
+      { to: '/learning', label: 'Tips', section: 'Your progress', icon: 'insights' },
     ],
   },
   {
-    title: 'Learning',
+    title: 'Settings',
     entries: [
-      { to: '/analytics', label: 'Performance', section: 'Learning', icon: 'performance' },
-      { to: '/experiments', label: 'Experiments', section: 'Learning', icon: 'flask' },
-      { to: '/learning', label: 'Insights', section: 'Learning', icon: 'insights' },
-    ],
-  },
-  {
-    title: 'System',
-    entries: [
-      { to: '/connections', label: 'Connections', section: 'System', icon: 'plugs' },
-      { to: '/settings', label: 'Settings', section: 'System', icon: 'settings' },
+      { to: '/connections', label: 'Connected accounts', section: 'Settings', icon: 'plugs' },
+      { to: '/settings', label: 'Settings', section: 'Settings', icon: 'settings' },
     ],
   },
 ];
@@ -56,21 +52,21 @@ export const NAV_COMMANDS: NavEntry[] = NAV_SECTIONS.flatMap((s) => s.entries);
 /* Breadcrumb + title metadata for the top bar. Unlisted legacy routes
    keep working; they resolve to a generic title. */
 export const ROUTE_META: Record<string, { title: string; crumb: string }> = {
-  '/': { title: 'Overview', crumb: 'Command' },
-  '/radar': { title: 'Radar', crumb: 'Command' },
-  '/observatory': { title: 'Observatory', crumb: 'Intelligence' },
-  '/audience': { title: 'Audience', crumb: 'Intelligence' },
-  '/trends': { title: 'Trends', crumb: 'Intelligence' },
-  '/opportunities': { title: 'Opportunities', crumb: 'Intelligence' },
-  '/content': { title: 'Studio', crumb: 'Content' },
-  '/calendar': { title: 'Calendar', crumb: 'Content' },
-  '/approvals': { title: 'Approval Queue', crumb: 'Content' },
-  '/analytics': { title: 'Performance', crumb: 'Learning' },
-  '/experiments': { title: 'Experiments', crumb: 'Learning' },
-  '/learning': { title: 'Insights', crumb: 'Learning' },
-  '/connections': { title: 'Connections', crumb: 'System' },
-  '/settings': { title: 'Settings', crumb: 'System' },
-  '/brain': { title: 'Workbench', crumb: 'Intelligence' },
-  '/dashboard': { title: "Today's Brain", crumb: 'Command' },
-  '/onboarding': { title: 'Onboarding', crumb: 'System' },
+  '/': { title: 'Home', crumb: 'Start here' },
+  '/radar': { title: 'Discover', crumb: 'Start here' },
+  '/observatory': { title: 'Explore', crumb: 'Start here' },
+  '/audience': { title: 'Your audience', crumb: 'Your progress' },
+  '/trends': { title: "What's trending", crumb: 'Your progress' },
+  '/opportunities': { title: 'Post ideas', crumb: 'Start here' },
+  '/content': { title: 'Write a post', crumb: 'Make posts' },
+  '/calendar': { title: 'Schedule', crumb: 'Make posts' },
+  '/approvals': { title: 'Review posts', crumb: 'Make posts' },
+  '/analytics': { title: 'Your results', crumb: 'Your progress' },
+  '/experiments': { title: 'Try new things', crumb: 'Your progress' },
+  '/learning': { title: 'Tips', crumb: 'Your progress' },
+  '/connections': { title: 'Connected accounts', crumb: 'Settings' },
+  '/settings': { title: 'Settings', crumb: 'Settings' },
+  '/brain': { title: 'Deep dive', crumb: 'Start here' },
+  '/dashboard': { title: 'Today', crumb: 'Start here' },
+  '/onboarding': { title: 'Get set up', crumb: 'Start here' },
 };

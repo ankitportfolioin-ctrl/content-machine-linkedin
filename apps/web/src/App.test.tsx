@@ -20,19 +20,19 @@ describe('Web Application', () => {
 
   it('renders command-center navigation', () => {
     renderApp();
-    expect(screen.getByRole('link', { name: /^overview$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^radar$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^observatory$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^audience$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^trends$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^opportunities$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^studio$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^calendar$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /approval queue/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^performance$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^experiments$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^insights$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^connections$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^home$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^discover$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^explore$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^your audience$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /what's trending/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^post ideas$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^write a post$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^schedule$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^review posts$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^your results$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^try new things$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^tips$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^connected accounts$/i })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /^settings$/i })).toBeInTheDocument();
   });
 
