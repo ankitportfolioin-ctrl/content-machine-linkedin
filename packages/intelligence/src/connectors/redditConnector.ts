@@ -74,27 +74,74 @@ export class RedditConnector extends BaseResearchConnector {
     config: Record<string, unknown>
   ): Promise<any[]> {
     const subreddits = (config.subreddits as string[]) || ['programming', 'MachineLearning', 'artificial', 'OpenAI', 'ClaudeAI', 'LocalLLaMA', 'singularity', 'Futurology', 'technology', 'startups', 'Entrepreneur', 'SaaS', 'webdev', 'learnprogramming', 'coding', 'devops', 'sysadmin', 'kubernetes', 'aws', 'googlecloud', 'azure'];
-    const timeFilter = (config.timeFilter as string) || 'day'; // hour, day, week, month, year, all
-    const sortBy = (config.sortBy as string) || 'hot'; // hot, new, top, rising, controversial
+    const timeFilter = (config.timeFilter as string) || 'day';
+    const sortBy = (config.sortBy as string) || 'hot';
 
     const targets = subreddits.slice(0, Math.min(subreddits.length, 20));
     const capped = Math.min(Math.max(1, limit), 100);
-    // Gate 1 honesty (§4): provider rejections must surface instead of
-    // dissolving into a silent empty result. Partial failures stay isolated
-    // per subreddit; total failure throws so the registry records it.
     const failures: string[] = [];
+    const successful: any[] = [];
 
-    // Bounded concurrency (Gate 1 perf): subreddits fetch in chunks of 5 so
-    // one slow/refusing provider does not serialize the whole run. Results
-    // merge back in config order, so capping stays deterministic.
+    // Improved: use old.reddit.com which is more permissive, add retry with backoff
+    const REDDIT_API_ALT = 'https://old.reddit.com';
+    
+    async function fetchWithRetry(url: string, retries = 3): Promise<any> {
+      for (let attempt = 0; attempt <= retries; attempt++) {
+        try {
+          const response = await fetch(url, {
+            signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+            headers: {
+              'User-Agent': 'GrowthOperator/1.0 (+https://growth-operator.dev/bot)',
+              'Accept': 'application/json',
+            },
+          });
+          
+          if (response.status === 429) {
+            // Rate limited - wait and retry
+            const retryAfter = response.headers.get('retry-after');
+            const waitMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(2000 * Math.pow(2, attempt), 10000);
+            if (attempt < retries) {
+              await new Promise(r => setTimeout(r, waitMs));
+              continue;
+            }
+            throw new Error('RATE_LIMITED');
+          }
+          
+          if (response.status === 403) {
+            // Try alternative domain
+            if (url.includes('www.reddit.com') && attempt === 0) {
+              const altUrl = url.replace('www.reddit.com', 'old.reddit.com');
+              await new Promise(r => setTimeout(r, 1000));
+              return fetchWithRetry(altUrl, retries);
+            }
+            if (attempt < retries) {
+              await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt)));
+              continue;
+            }
+            throw new Error(`Reddit API responded 403 (forbidden) - subreddit may be private, quarantined, or blocking`);
+          }
+          
+          if (!response.ok) {
+            throw new Error(`Reddit API responded ${response.status}`);
+          }
+          
+          return await response.json();
+        } catch (error) {
+          if (attempt === retries) throw error;
+          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+        }
+      }
+      throw new Error('Max retries exceeded');
+    }
+
     const fetchOne = async (subreddit: string): Promise<any[]> => {
       const url = `${REDDIT_API}/r/${subreddit}/${sortBy}.json?t=${timeFilter}&limit=25`;
-      const data = await fetchJson(url);
+      const data = await fetchWithRetry(url);
       const posts = data?.data?.children || [];
       const out: any[] = [];
       for (const post of posts) {
         const p = post.data;
-        if (!p.title || p.is_self === false) continue; // Skip link posts without selftext for problem discovery
+        if (!p.title || p.is_self === false) continue;
         out.push({
           externalId: p.id,
           url: `https://reddit.com${p.permalink}`,
@@ -118,18 +165,23 @@ export class RedditConnector extends BaseResearchConnector {
     };
 
     const perSubreddit: any[][] = targets.map(() => []);
-    const SUBREDDIT_CONCURRENCY = 5;
+    const SUBREDDIT_CONCURRENCY = 3; // Reduced to be more polite
     for (let start = 0; start < targets.length; start += SUBREDDIT_CONCURRENCY) {
       const batch = targets.slice(start, start + SUBREDDIT_CONCURRENCY);
       const settled = await Promise.allSettled(batch.map((s) => fetchOne(s)));
       settled.forEach((outcome, i) => {
         if (outcome.status === 'fulfilled') {
           perSubreddit[start + i] = outcome.value;
+          successful.push(...outcome.value);
         } else {
           const message = outcome.reason instanceof Error ? outcome.reason.message : 'Unknown error';
           failures.push(`r/${batch[i]}: ${message}`);
         }
       });
+      // Small delay between batches to avoid rate limiting
+      if (start + SUBREDDIT_CONCURRENCY < targets.length) {
+        await new Promise(r => setTimeout(r, 1500));
+      }
     }
 
     const items = perSubreddit.flat().slice(0, capped);

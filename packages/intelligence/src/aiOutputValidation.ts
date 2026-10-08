@@ -298,6 +298,77 @@ function getZodTypeDescription(zodType: z.ZodTypeAny): string {
   }
 }
 
+// Pattern extraction schemas
+// Pattern extraction schemas
+type ContentFormatSecondary = string[];
+
+const ContentFormatSchema = z.object({
+  primary: z.enum([
+    'SHORT_VIDEO', 'LONG_VIDEO', 'TEXT_POST', 'CAROUSEL', 'THREAD', 'TUTORIAL',
+    'HOW_TO', 'LISTICLE', 'CASE_STUDY', 'NEWS_ANALYSIS', 'OPINION', 'REACTION',
+    'COMPARISON', 'BEFORE_AFTER', 'BUILD_IN_PUBLIC', 'PRODUCT_DEMO', 'SCREEN_RECORDING',
+    'STORY', 'Q_AND_A', 'CHECKLIST', 'EXPLAINER', 'OTHER', 'UNKNOWN'
+  ]),
+  secondary: z.array(z.enum([
+    'SHORT_VIDEO', 'LONG_VIDEO', 'TEXT_POST', 'CAROUSEL', 'THREAD', 'TUTORIAL',
+    'HOW_TO', 'LISTICLE', 'CASE_STUDY', 'NEWS_ANALYSIS', 'OPINION', 'REACTION',
+    'COMPARISON', 'BEFORE_AFTER', 'BUILD_IN_PUBLIC', 'PRODUCT_DEMO', 'SCREEN_RECORDING',
+    'STORY', 'Q_AND_A', 'CHECKLIST', 'EXPLAINER', 'OTHER', 'UNKNOWN'
+  ])).max(3).optional(),
+  confidence: z.number().min(0).max(1),
+  evidence: z.array(z.string().max(500)).max(5).optional(),
+});
+
+const HookSchema = z.object({
+  type: z.enum([
+    'CURIOSITY', 'CONTRARIAN', 'PROBLEM_FIRST', 'QUESTION', 'WARNING', 'MISTAKE',
+    'LIST', 'RESULT_FIRST', 'STORY', 'PREDICTION', 'NEWS', 'STATISTIC', 'CHALLENGE',
+    'PROMISE', 'HOW_TO', 'COMPARISON', 'IDENTITY', 'PAIN_POINT', 'DIRECT_STATEMENT', 'UNKNOWN'
+  ]),
+  text: z.string().max(500).optional(),
+  confidence: z.number().min(0).max(1),
+  evidence: z.array(z.string().max(500)).max(5).optional(),
+});
+
+const StructureBlockSchema = z.enum([
+  'HOOK', 'QUESTION', 'CONTEXT', 'PROBLEM', 'PAIN_POINT', 'PROMISE', 'CLAIM',
+  'EXPLANATION', 'EXAMPLE', 'STORY', 'DATA', 'COMPARISON', 'DEMONSTRATION',
+  'STEPS', 'SOLUTION', 'RESULT', 'TAKEAWAY', 'CTA', 'CONCLUSION'
+]);
+
+const StructureSchema = z.object({
+  sequence: z.array(StructureBlockSchema).max(15).optional(),
+  confidence: z.number().min(0).max(1),
+  evidence: z.array(z.string().max(500)).max(5).optional(),
+});
+
+const CTASchema = z.object({
+  type: z.enum([
+    'COMMENT', 'SHARE', 'FOLLOW', 'DOWNLOAD', 'SIGNUP', 'BUY', 'LEARN_MORE', 'DM', 'SAVE',
+    'SUBSCRIBE', 'VISIT_LINK', 'CONTACT', 'UNKNOWN'
+  ]).optional(),
+  confidence: z.number().min(0).max(1).optional(),
+  evidence: z.array(z.string().max(500)).max(3).optional(),
+}).optional();
+
+const ContentPatternSchema = z.object({
+  format: ContentFormatSchema,
+  hook: HookSchema,
+  structure: StructureSchema,
+  cta: CTASchema,
+  metadata: z.object({
+    extractionMethod: z.enum(['ai', 'rule', 'hybrid']),
+    extractedAt: z.string().datetime({ offset: true }),
+    model: z.string().optional(),
+  }),
+}).transform((val) => ({
+  ...val,
+  metadata: val.metadata ? {
+    ...val.metadata,
+    extractionMethod: val.metadata.extractionMethod ?? 'ai',
+  } : undefined,
+}));
+
 export const AI_OUTPUT_SCHEMAS = {
   sourceUnderstanding: z.object({
     thesis: z.string().max(2000),
@@ -322,6 +393,7 @@ export const AI_OUTPUT_SCHEMAS = {
     })).max(20),
     audienceRelevance: z.array(z.string().max(500)).max(10),
     possibleAngles: z.array(z.string().max(500)).max(10),
+    contentPattern: ContentPatternSchema.optional(),
   }),
   
   topicClustering: z.array(z.object({
@@ -383,3 +455,8 @@ export type TopicClusteringOutput = z.infer<typeof AI_OUTPUT_SCHEMAS.topicCluste
 export type ContentOpportunityOutput = z.infer<typeof AI_OUTPUT_SCHEMAS.contentOpportunity>;
 export type ContentGapOutput = z.infer<typeof AI_OUTPUT_SCHEMAS.contentGap>;
 export type AudienceProblemsOutput = z.infer<typeof AI_OUTPUT_SCHEMAS.audienceProblems>;
+export type ContentPattern = z.infer<typeof ContentPatternSchema>;
+export type ContentFormat = z.infer<typeof ContentFormatSchema>;
+export type Hook = z.infer<typeof HookSchema>;
+export type Structure = z.infer<typeof StructureSchema>;
+export type CTA = z.infer<typeof CTASchema>;

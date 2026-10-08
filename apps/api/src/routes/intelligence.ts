@@ -17,13 +17,13 @@ import { SourceIngestionService } from '@growth-operator/intelligence';
 import { SourceUnderstandingService } from '@growth-operator/intelligence';
 import { ClaimLedgerService } from '@growth-operator/intelligence';
 import { TopicClusteringService } from '@growth-operator/intelligence';
-import { TrendSignalService } from '@growth-operator/intelligence';
+import { TrendSignalService, loadTopicTrendEvidence } from '@growth-operator/intelligence';
 import { AudienceProblemService } from '@growth-operator/intelligence';
 import { connectorRegistry, primeConnectorRegistry } from '@growth-operator/intelligence';
 import { buildFactCheckList, getSourceReliability, listSourceReliabilities } from '@growth-operator/intelligence';
 import { ContentOpportunityService, toOpportunityLearningView,
   ContentOpportunityInput, validateOpportunityTriage } from '@growth-operator/intelligence';
-import { fetchFeedbackSummary, applyFeedbackDemotion } from '@growth-operator/intelligence';
+import { ContentPatternService, fetchFeedbackSummary, applyFeedbackDemotion } from '@growth-operator/intelligence';
 import { ContentGapService } from '@growth-operator/intelligence';
 import { LearningDerivationService, applyLearningInfluence } from '@growth-operator/learning';
 import { AIProviderRegistry, createDefaultRegistry } from '@growth-operator/ai';
@@ -284,12 +284,24 @@ router.post('/topics/research', async (req, res, next) => {
         where: { workspaceId_canonicalName: { workspaceId: authReq.workspaceId, canonicalName: mention.topicCanonicalName } },
       });
       if (topic) {
-        await trendService.updateTrendSignal(authReq.workspaceId, topic.id, [{
-          sourceId: source.id,
-          mentionStrength: mention.mentionStrength,
-          relevanceScore: mention.relevanceScore,
-          createdAt: new Date(),
-        }]);
+        // G3: same historical-evidence wiring as the worker stage — persisted
+        // mentions for this workspace+topic plus the current mention, so the
+        // unchanged service decides from real history, not one data point.
+        const history = await loadTopicTrendEvidence(
+          prisma,
+          authReq.workspaceId,
+          topic.id,
+          source.id,
+        );
+        await trendService.updateTrendSignal(authReq.workspaceId, topic.id, [
+          ...history,
+          {
+            sourceId: source.id,
+            mentionStrength: mention.mentionStrength,
+            relevanceScore: mention.relevanceScore,
+            createdAt: new Date(),
+          },
+        ]);
       }
     }
 
@@ -1022,6 +1034,47 @@ router.get('/research/status', async (req, res, next) => {
       select: { createdAt: true },
     });
     res.json({ connectors, feedSources, recentRuns, latestSourceAt: latestSource?.createdAt ?? null });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Content Patterns endpoints
+const patternsService = new ContentPatternService(prisma);
+
+router.get('/patterns', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const { limit, offset, formatPrimary, hookType } = req.query;
+    const [patterns, total] = await Promise.all([
+      patternsService.getPatternsByWorkspace(authReq.workspaceId, {
+        formatPrimary: formatPrimary as string,
+        hookType: hookType as string,
+        limit: parseInt(limit as string) || 50,
+        offset: parseInt(offset as string) || 0,
+      }),
+      prisma.contentPattern.count({ where: { workspaceId: authReq.workspaceId } }),
+    ]);
+    res.json({ patterns, pagination: { limit: parseInt(limit as string) || 50, offset: parseInt(offset as string) || 0, total } });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/patterns/counts', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    res.json(await patternsService.getPatternCountsByWorkspace(authReq.workspaceId));
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.get('/patterns/growth', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const days = parseInt(req.query.days as string) || 7;
+    res.json(await patternsService.getPatternGrowth(authReq.workspaceId, days));
   } catch (error) {
     next(error);
   }

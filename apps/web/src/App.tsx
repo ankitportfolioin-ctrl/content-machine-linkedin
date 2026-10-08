@@ -1,7 +1,16 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { Layout } from './components/Layout';
-import { HomePage } from './pages/HomePage';
+import { OverviewPage } from './pages/OverviewPage';
+import { RadarPage } from './pages/RadarPage';
+import { ObservatoryPage } from './pages/ObservatoryPage';
+import { AudiencePage } from './pages/AudiencePage';
+import { TrendsPage } from './pages/TrendsPage';
+import { OpportunitiesPage } from './pages/OpportunitiesPage';
+import { CalendarPage } from './pages/CalendarPage';
+import { ApprovalsPage } from './pages/ApprovalsPage';
+import { ExperimentsPage } from './pages/ExperimentsPage';
+import { ConnectionsPage } from './pages/ConnectionsPage';
 import { ContentPage } from './pages/ContentPage';
 import { BrainPage } from './pages/BrainPage';
 import { DashboardPage } from './pages/DashboardPage';
@@ -19,7 +28,16 @@ export function App() {
       <AuthProvider>
         <Routes>
           <Route path="/" element={<Layout />}>
-            <Route index element={<HomePage />} />
+            <Route index element={<OverviewPage />} />
+            <Route path="radar" element={<RadarPage />} />
+            <Route path="observatory" element={<ObservatoryPage />} />
+            <Route path="audience" element={<AudiencePage />} />
+            <Route path="trends" element={<TrendsPage />} />
+            <Route path="opportunities" element={<OpportunitiesPage />} />
+            <Route path="calendar" element={<CalendarPage />} />
+            <Route path="approvals" element={<ApprovalsPage />} />
+            <Route path="experiments" element={<ExperimentsPage />} />
+            <Route path="connections" element={<ConnectionsPage />} />
             <Route path="dashboard" element={<DashboardPage />} />
             <Route path="learning" element={<LearningPage />} />
             <Route path="onboarding" element={<OnboardingPage />} />

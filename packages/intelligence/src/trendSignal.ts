@@ -24,6 +24,48 @@ export interface TrendSignalResult {
   evidenceSummary: string;
 }
 
+export interface TopicTrendMentionEvidence {
+  sourceId: string;
+  mentionStrength: number;
+  relevanceScore: number;
+  createdAt: Date;
+}
+
+/**
+ * G3 production evidence loader for trend calculation. Reads the persisted
+ * historical TopicMentions for exactly one workspace+topic (never across
+ * workspaces or topics), oldest first. Read-only: creates, updates, and
+ * deletes nothing. Callers append the current cycle's mention; the service
+ * keeps counting genuinely independent sourceIds and applying its own
+ * freshness, diversity, frequency, and threshold rules unchanged.
+ */
+export async function loadTopicTrendEvidence(
+  prisma: PrismaClient,
+  workspaceId: string,
+  topicId: string,
+  excludeSourceId?: string,
+): Promise<TopicTrendMentionEvidence[]> {
+  const where: { workspaceId: string; topicId: string; sourceId?: { not: string } } = {
+    workspaceId,
+    topicId,
+  };
+  if (excludeSourceId) {
+    where.sourceId = { not: excludeSourceId };
+  }
+  const rows = await prisma.topicMention.findMany({
+    where,
+    orderBy: { createdAt: 'asc' },
+  });
+  return rows.map(
+    (m: { sourceId: string; mentionStrength: number; relevanceScore: number; createdAt: Date }) => ({
+      sourceId: m.sourceId,
+      mentionStrength: m.mentionStrength,
+      relevanceScore: m.relevanceScore,
+      createdAt: m.createdAt,
+    }),
+  );
+}
+
 export class TrendSignalService {
   private prisma: PrismaClient;
 

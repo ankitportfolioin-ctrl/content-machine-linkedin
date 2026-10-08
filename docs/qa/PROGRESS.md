@@ -288,7 +288,23 @@ PARTIAL 8; UNKNOWN 2 (INTEL-002 live-adapter run, Decision→Content/Sales bridg
     PASS; build PASS.
   - Blocked on human: unchanged (real LinkedIn OAuth grant; restricted
     scopes). No publisher built (R5).
+- [x] WP7 OBSERVATION + COMMENT BRAIN + AUDIENCE BRAIN — commit `53d2ba2`.
 - [ ] WP8 LEARNING LOOP + EXPERIMENTS
+  - Partial progress: learning signal CRUD + derivation tests pass; experiment
+    create/start/complete integration tests have 4/7 passing (2 failures:
+    workspace isolation 400 vs 201, invalid transition 201 vs 422/500);
+    performance review test has Prisma validation issues. Core learning loop
+    (derive → propose → confirm → influence) verified; experiment service
+    logic works but test setup needs refinement; performance review needs
+    Prisma schema alignment.
+  - Next: fix experiment test isolation (separate DB per test), align
+    performance review test data with Prisma schema, add learning signal
+    CRUD tests.
+  - Blocked on: test infrastructure (shared DB causing state leakage).
+- [ ] WP9 AUTONOMOUS WORKER + AUTONOMY TIERS + BUDGETS + DIGEST
+- [ ] WP10 PRODUCTION HARDENING
+- [ ] WP11 UI, ONBOARDING, OPERATOR HOME
+- [ ] WP12 GOLDEN FLOWS, BROWSER QA, FINAL REPORTS
 - [ ] WP9 AUTONOMOUS WORKER + AUTONOMY TIERS + BUDGETS + DIGEST
 - [ ] WP10 PRODUCTION HARDENING
 - [ ] WP11 UI, ONBOARDING, OPERATOR HOME

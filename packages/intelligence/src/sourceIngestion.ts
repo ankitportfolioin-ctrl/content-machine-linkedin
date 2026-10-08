@@ -92,37 +92,72 @@ export class SourceIngestionService {
 
     const finalUrl = ssrfCheck.finalUrl || canonicalUrl;
 
-    let response: Response;
-    try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), options.timeout || DEFAULT_TIMEOUT);
+    // Retry with different user agents for 403/429 handling
+    const userAgents: string[] = [
+      'GrowthOperator/1.0 (+https://growth-operator.dev/bot)',
+      'Mozilla/5.0 (compatible; GrowthOperator/1.0; +https://growth-operator.dev/bot)',
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    ];
+    
+    let lastError: Error | null = null;
+    let response: Response | null = null;
+    
+    for (let uaIndex = 0; uaIndex < userAgents.length; uaIndex++) {
+      const userAgent = userAgents[uaIndex]!;
+      try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), options.timeout || DEFAULT_TIMEOUT);
 
-      response = await fetch(finalUrl, {
-        method: 'GET',
-        headers: {
-          'User-Agent': 'GrowthOperator/1.0 (+https://growth-operator.dev/bot)',
-          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-        },
-        signal: controller.signal,
-        redirect: 'follow',
-      });
+        response = await fetch(finalUrl, {
+          method: 'GET',
+          headers: {
+            'User-Agent': userAgent,
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Cache-Control': 'no-cache',
+          },
+          signal: controller.signal,
+          redirect: 'follow',
+        });
 
-      clearTimeout(timeoutId);
-    } catch (error) {
-      if (error instanceof Error && error.name === 'AbortError') {
-        const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', 'Request timeout');
-        return {
-          sourceId: failedSource.id,
-          documentId: null,
-          status: 'FAILED',
-          sourceType: options.sourceType || 'USER_URL',
-          extractedContent: null,
-          feedItems: [],
-          sitemapUrls: [],
-          error: 'Request timeout',
-        };
+        clearTimeout(timeoutId);
+        
+        if (response.ok || response.status === 403) {
+          // Accept 403 as response to process (some sites return content with 403)
+          break;
+        }
+        
+        if (response.status === 429 && uaIndex < userAgents.length - 1) {
+          // Rate limited - try next user agent after delay
+          await new Promise(r => setTimeout(r, 2000 * (uaIndex + 1)));
+          continue;
+        }
+        
+        // For other errors, break and handle below
+        break;
+      } catch (error) {
+        lastError = error instanceof Error ? error : new Error(String(error));
+        if (uaIndex === userAgents.length - 1) {
+          const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', `Fetch failed: ${lastError.message}`);
+          return {
+            sourceId: failedSource.id,
+            documentId: null,
+            status: 'FAILED',
+            sourceType: options.sourceType || 'USER_URL',
+            extractedContent: null,
+            feedItems: [],
+            sitemapUrls: [],
+            error: `Fetch failed: ${lastError.message}`,
+          };
+        }
+        // Try next user agent
+        await new Promise(r => setTimeout(r, 1000));
       }
-      const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', `Fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+
+    if (!response) {
+      const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', `Fetch failed: ${lastError?.message || 'Unknown error'}`);
       return {
         sourceId: failedSource.id,
         documentId: null,
@@ -131,11 +166,11 @@ export class SourceIngestionService {
         extractedContent: null,
         feedItems: [],
         sitemapUrls: [],
-        error: `Fetch failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        error: `Fetch failed: ${lastError?.message || 'Unknown error'}`,
       };
     }
 
-    if (!response.ok) {
+    if (!response.ok && response.status !== 403) {
       const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', `HTTP ${response.status}: ${response.statusText}`);
       return {
         sourceId: failedSource.id,

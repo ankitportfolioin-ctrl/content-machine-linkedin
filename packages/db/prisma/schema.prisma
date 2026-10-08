@@ -1245,6 +1245,7 @@ model Workspace {
   intelligenceSources      IntelligenceSource[]
   sourceDocuments          SourceDocument[]
   sourceClaims             SourceClaim[]
+  contentPatterns          ContentPattern[]
   topics                   Topic[]
   topicMentions            TopicMention[]
   trendSignals             TrendSignal[]
@@ -1626,6 +1627,7 @@ model IntelligenceSource {
   workspace             Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   documents             SourceDocument[]
   claims                SourceClaim[]
+  patterns              ContentPattern[]
   topicMentions         TopicMention[]
 
   @@unique([workspaceId, canonicalUrl])
@@ -1655,6 +1657,7 @@ model SourceDocument {
   workspace           Workspace         @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   source              IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
   claims              SourceClaim[]
+  patterns            ContentPattern[]
 
   @@index([workspaceId])
   @@index([sourceId])
@@ -1686,6 +1689,47 @@ model SourceClaim {
   @@index([documentId])
   @@index([workspaceId, claimType])
   @@index([workspaceId, status])
+}
+
+model ContentPattern {
+  id                  String        @id @default(uuid())
+  workspaceId         String
+  documentId          String
+  sourceId            String
+  
+  formatPrimary       String?       @db.VarChar(100)
+  formatSecondary     String[]
+  formatConfidence    Float?
+  formatEvidence      String[]
+  
+  hookType            String?       @db.VarChar(100)
+  hookText            String?       @db.Text
+  hookConfidence      Float?
+  hookEvidence        String[]
+  
+  structureSequence   String[]
+  structureConfidence Float?
+  structureEvidence   String[]
+  
+  ctaType             String?       @db.VarChar(100)
+  ctaConfidence       Float?
+  ctaEvidence         String[]
+  
+  extractionMethod    String        @default("ai")
+  extractionModel     String?
+  confidence          Float
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  workspace           Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  document            SourceDocument @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  source              IntelligenceSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@index([documentId])
+  @@index([sourceId])
+  @@index([workspaceId, formatPrimary])
+  @@index([workspaceId, hookType])
 }
 
 model Topic {

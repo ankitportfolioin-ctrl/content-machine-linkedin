@@ -24,6 +24,36 @@ function isZodError(err: unknown): err is ZodError {
   );
 }
 
+/**
+ * express.json() rejects malformed payloads with a SyntaxError carrying an
+ * HTTP status (400 entity.parse.failed, 413 entity.too.large). Without this
+ * branch those client mistakes fall through to 500 INTERNAL_ERROR, which
+ * mislabels a bad request as a server failure.
+ *
+ * Matched two ways: the numeric status body-parser attaches, and the
+ * body-parser `type` marker. The marker covers runtimes/bundles where the
+ * status field does not survive error propagation but the marker does.
+ */
+function malformedBodyStatus(err: unknown): number | null {
+  // Vercel's Node bridge pre-reads request bodies: malformed JSON never
+  // reaches body-parser — the runtime throws a plain `Error: Invalid JSON`
+  // from its IncomingMessage body getter (no status/type markers). This
+  // exact message can only be triggered by an unparseable request body.
+  if (err instanceof Error && err.message === 'Invalid JSON') return 400;
+  if (err === null || typeof err !== 'object') return null;
+  const rec = err as Record<string, unknown>;
+  if (rec.type === 'entity.parse.failed' || rec.type === 'entity.too.large') {
+    return typeof rec.status === 'number' && rec.status >= 400 && rec.status < 500
+      ? rec.status
+      : 400;
+  }
+  if (err instanceof SyntaxError) {
+    const status = rec.status;
+    if (typeof status === 'number' && status >= 400 && status < 500) return status;
+  }
+  return null;
+}
+
 export function errorHandler(
   err: Error,
   req: Request,
@@ -62,13 +92,20 @@ export function errorHandler(
     code = 'AUTHENTICATION_ERROR';
     message = 'Token expired';
   } else {
-    console.error('Unhandled error:', {
-      error: err.message,
-      stack: err.stack,
-      path,
-      method: req.method,
-      requestId,
-    });
+    const malformedStatus = malformedBodyStatus(err);
+    if (malformedStatus !== null) {
+      statusCode = malformedStatus;
+      code = 'INVALID_JSON';
+      message = 'Malformed JSON in request body';
+    } else {
+      console.error('Unhandled error:', {
+        error: err.message,
+        stack: err.stack,
+        path,
+        method: req.method,
+        requestId,
+      });
+    }
   }
 
   const response: ApiErrorResponse = {

@@ -4,10 +4,12 @@ import {
   ClaimLedgerService,
   ContentGapService,
   ContentOpportunityService,
+  ContentPatternService,
   SourceIngestionService,
   SourceUnderstandingService,
   TopicClusteringService,
   TrendSignalService,
+  loadTopicTrendEvidence,
   expandHackerNewsFeed,
   resolveReleaseFeedUrl,
   connectorRegistry,
@@ -67,6 +69,32 @@ async function workspaceOwnerId(workspaceId: string): Promise<string | null> {
   return membership?.userId ?? null;
 }
 
+export type UnderstandingSkipKind =
+  | 'AI_UNAVAILABLE'
+  | 'UNDERSTANDING_CALL_FAILED'
+  | 'VALIDATION_ERROR'
+  | 'UNDERSTANDING_FAILED';
+
+/**
+ * G2: structured, secret-free skip note for SourceUnderstanding failures.
+ * Persisted via stage notes → runStage.error, so operators can distinguish
+ * no-content / no-provider / call-failure / validation-failure per document.
+ * Only ids, failure kind, provider type, and a truncated reason are recorded —
+ * never keys, prompts, or raw provider responses.
+ */
+export function buildUnderstandingSkipNote(input: {
+  kind: UnderstandingSkipKind;
+  documentId: string;
+  sourceId: string;
+  reason: string;
+  provider?: string;
+}): string {
+  const reason =
+    input.reason.length > 200 ? `${input.reason.slice(0, 200)}...` : input.reason;
+  const provider = input.provider ? ` provider=${input.provider}` : '';
+  return `${input.kind} document=${input.documentId} source=${input.sourceId}${provider}: ${reason}`;
+}
+
 const intelligence: StageFn = async (ctx) => {
   const blocked = await gate(ctx);
   if (blocked) return blocked;
@@ -86,6 +114,8 @@ const intelligence: StageFn = async (ctx) => {
     claimsPersisted: 0,
     topicsNormalized: 0,
     opportunitiesCreated: 0,
+    understandingFailed: 0,
+    understandingValidationFailed: 0,
   };
   // Workspace connector configuration is the ONLY source of connector
   // selection. A missing row means DISABLED; nothing is ever inferred as
@@ -101,6 +131,12 @@ const intelligence: StageFn = async (ctx) => {
 
   const registry = aiRegistry();
   const aiAvailable = registry.getAvailable().length > 0;
+  // G2: non-secret provider attribution for understanding-failure notes.
+  // A single available provider is unambiguous; several/zero stay omitted
+  // rather than guessed.
+  const availableProviders = registry.getAvailable();
+  const singleProviderType =
+    availableProviders.length === 1 ? availableProviders[0]?.type : undefined;
   const ingestion = new SourceIngestionService(prisma);
   const understanding = new SourceUnderstandingService(registry);
   const claims = new ClaimLedgerService(prisma);
@@ -108,6 +144,7 @@ const intelligence: StageFn = async (ctx) => {
   const trends = new TrendSignalService(prisma);
   const gaps = new ContentGapService(prisma, registry);
   const opportunities = new ContentOpportunityService(prisma, registry, topics, trends);
+  const patterns = new ContentPatternService(prisma);
   const notes: string[] = [];
   if (!aiAvailable) {
     notes.push('AI unavailable: fetch-only path; understanding, topics, gaps and opportunities deferred (no output invented).');
@@ -338,10 +375,57 @@ const intelligence: StageFn = async (ctx) => {
       let u;
       try {
         u = await understanding.understand(document.cleanContent, source.title, source.url);
-      } catch {
+      } catch (error) {
+        // G2: an AI call that throws must stay observable per document.
+        counts.understandingFailed += 1;
+        notes.push(
+          buildUnderstandingSkipNote({
+            kind: 'UNDERSTANDING_CALL_FAILED',
+            documentId: document.id,
+            sourceId: source.id,
+            reason: error instanceof Error ? error.message : 'Unknown AI call error',
+            provider: singleProviderType,
+          }),
+        );
         continue;
       }
-      if (!u.understanding) continue;
+      if (!u.understanding) {
+        // G2: a null understanding must not vanish silently. Classify so
+        // operators can tell no-provider / validation / other failures apart.
+        counts.understandingFailed += 1;
+        if (!u.aiAvailable) {
+          notes.push(
+            buildUnderstandingSkipNote({
+              kind: 'AI_UNAVAILABLE',
+              documentId: document.id,
+              sourceId: source.id,
+              reason: u.error ?? 'No AI provider available',
+            }),
+          );
+        } else if (u.error && u.error.startsWith('AI output validation failed')) {
+          counts.understandingValidationFailed += 1;
+          notes.push(
+            buildUnderstandingSkipNote({
+              kind: 'VALIDATION_ERROR',
+              documentId: document.id,
+              sourceId: source.id,
+              reason: u.error,
+              provider: u.provider ?? singleProviderType,
+            }),
+          );
+        } else {
+          notes.push(
+            buildUnderstandingSkipNote({
+              kind: 'UNDERSTANDING_FAILED',
+              documentId: document.id,
+              sourceId: source.id,
+              reason: u.error ?? 'Unknown understanding failure',
+              provider: u.provider ?? singleProviderType,
+            }),
+          );
+        }
+        continue;
+      }
       docsProcessed += 1;
       counts.documentsNew += 1;
 
@@ -353,6 +437,20 @@ const intelligence: StageFn = async (ctx) => {
         counts.claimsPersisted += entries.length;
       } catch {
         continue;
+      }
+
+      // Persist content pattern if extracted
+      if (u.understanding.contentPattern) {
+        try {
+          await patterns.persistPattern({
+            workspaceId,
+            documentId: document.id,
+            sourceId: source.id,
+            pattern: u.understanding.contentPattern,
+          });
+        } catch {
+          notes.push('Pattern persistence failed for document ' + document.id);
+        }
       }
 
       let topicResult;
@@ -372,12 +470,21 @@ const intelligence: StageFn = async (ctx) => {
         if (!topic) continue;
         resolvedTopics.push({ id: topic.id });
         try {
-          await trends.updateTrendSignal(workspaceId, topic.id, [{
-            sourceId: source.id,
-            mentionStrength: mention.mentionStrength,
-            relevanceScore: mention.relevanceScore,
-            createdAt: new Date(),
-          }]);
+          // G3: supply the service its designed historical evidence — all
+          // persisted mentions for this workspace+topic (excluding the
+          // current source, appended fresh below so no source is doubled) —
+          // instead of the current mention alone. Single-source topics still
+          // resolve to INSUFFICIENT_HISTORY inside the unchanged service.
+          const history = await loadTopicTrendEvidence(prisma, workspaceId, topic.id, source.id);
+          await trends.updateTrendSignal(workspaceId, topic.id, [
+            ...history,
+            {
+              sourceId: source.id,
+              mentionStrength: mention.mentionStrength,
+              relevanceScore: mention.relevanceScore,
+              createdAt: new Date(),
+            },
+          ]);
           const trend = await prisma.trendSignal.findUnique({
             where: { workspaceId_topicId: { workspaceId, topicId: topic.id } },
           });

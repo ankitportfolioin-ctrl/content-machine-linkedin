@@ -2,9 +2,13 @@ import { AIProviderRegistry, AIProviderType, ChatCompletionRequest } from '@grow
 import { z } from 'zod';
 import {
   validateAndNormalize,
+  extractJsonFromMarkdown,
+  parseJsonSafely,
   createStrictPrompt,
   AI_OUTPUT_SCHEMAS,
   AIValidationContext,
+  AIValidationError,
+  AIValidationResult,
   SourceUnderstanding as SourceUnderstandingBase,
 } from './aiOutputValidation';
 
@@ -12,6 +16,50 @@ export const SourceUnderstandingSchema = AI_OUTPUT_SCHEMAS.sourceUnderstanding;
 
 export type SourceUnderstanding = SourceUnderstandingBase;
 export type SourceUnderstandingType = SourceUnderstanding;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/**
+ * G1 salvage: `contentPattern` is an optional decoration — the prompt permits
+ * `null` when no pattern is discernible — so a validation failure confined to
+ * the `contentPattern` subtree must not discard valid core fields (thesis,
+ * claims, angles, ...). Drops only the decoration and re-validates the core.
+ * Returns the validated success, or null when the failure touches core fields
+ * or the payload is not salvageable. Pure: no I/O, nothing fabricated — the
+ * core fields come from the model response unchanged.
+ */
+export function salvageUnderstandingWithoutContentPattern(
+  rawResponse: string,
+  context: AIValidationContext,
+): AIValidationResult<SourceUnderstandingType> | null {
+  const { json } = extractJsonFromMarkdown(rawResponse);
+  const parsed = parseJsonSafely(json);
+  if (parsed.error || !isRecord(parsed.data) || !('contentPattern' in parsed.data)) {
+    return null;
+  }
+  const core: Record<string, unknown> = { ...parsed.data };
+  delete core.contentPattern;
+  const retry = validateAndNormalize(SourceUnderstandingSchema, JSON.stringify(core), context);
+  if (!retry.ok) {
+    return null;
+  }
+  return retry;
+}
+
+function validationFailureIsContentPatternOnly(failure: AIValidationError): boolean {
+  const details = failure.details as { issues?: Array<{ path?: unknown }> } | undefined;
+  const issues = details?.issues;
+  if (!issues || issues.length === 0) {
+    return false;
+  }
+  return issues.every(
+    (issue) =>
+      issue.path === 'contentPattern' ||
+      (typeof issue.path === 'string' && issue.path.startsWith('contentPattern.')),
+  );
+}
 
 export interface UnderstandingOptions {
   workspaceProfile?: string;
@@ -87,7 +135,19 @@ Extract and return:
 7. uncertainties - What is unclear or not well-supported (array of strings, max 20 items, each max 1000 chars) - MUST BE ARRAY
 8. contradictions - Any internal contradictions in the source (array of objects with claim1, claim2, evidence1, evidence2, severity) (max 20 items)
 9. audienceRelevance - Why this matters to the target audience (array of strings, max 10 items, each max 500 chars) - MUST BE ARRAY
-10. possibleAngles - Content angles that could be derived from this source (array of strings, max 10 items, each max 500 chars)`;
+10. possibleAngles - Content angles that could be derived from this source (array of strings, max 10 items, each max 500 chars)
+11. contentPattern - (OPTIONAL) Content pattern analysis:
+   - format: { primary, secondary[], confidence (0-1), evidence[] }
+     primary: SHORT_VIDEO | LONG_VIDEO | TEXT_POST | CAROUSEL | THREAD | TUTORIAL | HOW_TO | LISTICLE | CASE_STUDY | NEWS_ANALYSIS | OPINION | REACTION | COMPARISON | BEFORE_AFTER | BUILD_IN_PUBLIC | PRODUCT_DEMO | SCREEN_RECORDING | STORY | Q_AND_A | CHECKLIST | EXPLAINER | OTHER | UNKNOWN
+   - hook: { type, text?, confidence (0-1), evidence[] }
+     type: CURIOSITY | CONTRARIAN | PROBLEM_FIRST | QUESTION | WARNING | MISTAKE | LIST | RESULT_FIRST | STORY | PREDICTION | NEWS | STATISTIC | CHALLENGE | PROMISE | HOW_TO | COMPARISON | IDENTITY | PAIN_POINT | DIRECT_STATEMENT | UNKNOWN
+   - structure: { sequence[], confidence (0-1), evidence[] }
+     sequence items: HOOK | QUESTION | CONTEXT | PROBLEM | PAIN_POINT | PROMISE | CLAIM | EXPLANATION | EXAMPLE | STORY | DATA | COMPARISON | DEMONSTRATION | STEPS | SOLUTION | RESULT | TAKEAWAY | CTA | CONCLUSION
+   - cta: { type?, confidence?, evidence[] } (optional)
+     type: COMMENT | SHARE | FOLLOW | DOWNLOAD | SIGNUP | BUY | LEARN_MORE | DM | SAVE | SUBSCRIBE | VISIT_LINK | CONTACT | UNKNOWN
+   - metadata: { extractionMethod: "ai" | "rule" | "hybrid", extractedAt, model? }
+
+IMPORTANT: If the source content is too short or lacks clear structure/format/hooks, return contentPattern as null or with low confidence. Do not invent patterns. Use UNKNOWN for unclear fields.`;
 
     const systemPrompt = createStrictPrompt(SourceUnderstandingSchema, baseSystemPrompt, {
       thesis: 'Main argument or central message',
@@ -100,6 +160,7 @@ Extract and return:
       contradictions: 'Internal contradictions with claim1, claim2, evidence1, evidence2, severity',
       audienceRelevance: 'Why this matters to the target audience - MUST BE ARRAY OF STRINGS',
       possibleAngles: 'Content angles that could be derived',
+      contentPattern: 'Optional content pattern analysis with format, hook, structure, cta',
     });
 
     const userPrompt = createStrictPrompt(SourceUnderstandingSchema, baseUserPrompt, {
@@ -113,6 +174,7 @@ Extract and return:
       contradictions: 'Internal contradictions with claim1, claim2, evidence1, evidence2, severity',
       audienceRelevance: 'Why this matters to the target audience - MUST BE ARRAY OF STRINGS',
       possibleAngles: 'Content angles that could be derived',
+      contentPattern: 'Optional content pattern analysis with format, hook, structure, cta',
     });
 
     const request: ChatCompletionRequest = {
@@ -160,7 +222,25 @@ Extract and return:
         schemaName: 'SourceUnderstanding',
       };
 
-      const validationResult = validateAndNormalize(SourceUnderstandingSchema, content, validationContext);
+      const firstPass = validateAndNormalize(SourceUnderstandingSchema, content, validationContext);
+
+      // G1: the prompt permits `contentPattern: null` and the decoration is
+      // optional — a failure confined to it salvages the valid core instead
+      // of discarding the whole understanding. Core-field failures still reject.
+      let validationResult: AIValidationResult<SourceUnderstandingType> = firstPass;
+      if (
+        !firstPass.ok &&
+        firstPass.errorType === 'SCHEMA_VALIDATION' &&
+        validationFailureIsContentPatternOnly(firstPass)
+      ) {
+        const salvaged = salvageUnderstandingWithoutContentPattern(content, validationContext);
+        if (salvaged && salvaged.ok) {
+          validationResult = {
+            ...salvaged,
+            normalizedFields: [...(salvaged.normalizedFields ?? []), 'contentPattern:dropped-invalid'],
+          };
+        }
+      }
 
       if (!validationResult.ok) {
         return {
@@ -170,8 +250,39 @@ Extract and return:
         };
       }
 
+      // Apply defaults to contentPattern fields
+      const understanding = validationResult.data;
+      if (understanding.contentPattern) {
+        const pattern = understanding.contentPattern;
+        understanding.contentPattern = {
+          format: {
+            primary: pattern.format?.primary,
+            secondary: pattern.format?.secondary ?? [],
+            confidence: pattern.format?.confidence,
+            evidence: pattern.format?.evidence ?? [],
+          } as any,
+          hook: {
+            type: pattern.hook?.type,
+            text: pattern.hook?.text,
+            confidence: pattern.hook?.confidence,
+            evidence: pattern.hook?.evidence ?? [],
+          } as any,
+          structure: {
+            sequence: pattern.structure?.sequence ?? [],
+            confidence: pattern.structure?.confidence,
+            evidence: pattern.structure?.evidence ?? [],
+          } as any,
+          cta: pattern.cta ? {
+            type: pattern.cta.type,
+            confidence: pattern.cta.confidence,
+            evidence: pattern.cta.evidence ?? [],
+          } : undefined,
+          metadata: pattern.metadata,
+        };
+      }
+
       return {
-        understanding: validationResult.data,
+        understanding,
         aiAvailable: true,
         provider: provider.type,
         model: usedModel,

@@ -7,10 +7,10 @@ function renderApp() {
 }
 
 describe('Web Application', () => {
-  it('renders home page with health check', async () => {
+  it('renders the command-center shell with brand', async () => {
     renderApp();
-    expect(screen.getByRole('heading', { name: 'Growth Operator' })).toBeInTheDocument();
-    expect(screen.getByText('Human-guided AI operating system for LinkedIn growth')).toBeInTheDocument();
+    expect(screen.getByText('Growth Operator')).toBeInTheDocument();
+    expect(screen.getByText('AI Growth OS')).toBeInTheDocument();
   });
 
   it('shows loading state initially', () => {
@@ -18,16 +18,26 @@ describe('Web Application', () => {
     expect(screen.getByText('Checking connection...')).toBeInTheDocument();
   });
 
-  it('renders navigation links', () => {
+  it('renders command-center navigation', () => {
     renderApp();
-    expect(screen.getByRole('link', { name: /^content$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /brain \/ intelligence/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /today's brain/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^learning$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /leads/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /inbox/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /pipeline/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /analytics/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /settings/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^overview$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^radar$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^observatory$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^audience$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^trends$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^opportunities$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^studio$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^calendar$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /approval queue/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^performance$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^experiments$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^insights$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^connections$/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^settings$/i })).toBeInTheDocument();
+  });
+
+  it('exposes the command palette trigger with shortcut hint', () => {
+    renderApp();
+    expect(screen.getByRole('button', { name: /open command palette/i })).toBeInTheDocument();
   });
 });

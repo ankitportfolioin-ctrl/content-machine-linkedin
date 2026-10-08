@@ -93,7 +93,7 @@ function AnalyticsDashboard() {
         }}
       >
         <div>
-          <h2 className="health-card-title">Analytics</h2>
+          <h2 className="health-card-title">Performance</h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Recorded results computed only from user-recorded outcome metrics. No estimates.
           </p>

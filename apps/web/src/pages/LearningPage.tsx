@@ -103,7 +103,7 @@ export function LearningPage() {
     <div className="stack">
       <div className="card row-between">
         <div>
-          <p className="kicker">Learning Brain</p>
+          <p className="kicker">Insights</p>
           <h2 className="section-title" style={{ fontSize: '1.25rem' }}>What the business knows</h2>
           <p className="muted">What we know, think, test, and don't know — with evidence, never magic numbers.</p>
         </div>

@@ -13,3 +13,4 @@ export * from './sourceReliability';
 export * from './ssrfProtection';
 export * from './connectors';
 export * from './connectorCatalogue';
+export * from './contentPattern';

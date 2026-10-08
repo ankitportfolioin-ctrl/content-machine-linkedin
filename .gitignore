@@ -46,3 +46,4 @@ packages/db/prisma/migrations/.migration_lock.toml
 
 # opencode config (contains secrets)
 .opencode/mcp.json
+.vercel

@@ -1,22 +1,36 @@
-import { Outlet, NavLink } from 'react-router-dom';
-import { Sidebar } from './Sidebar';
+import { useState } from 'react';
+import { Outlet } from 'react-router-dom';
+import { Sidebar, SidebarBody } from './Sidebar';
+import { TopBar } from './TopBar';
 import { useAuth } from '../context/AuthContext';
 
 export function Layout() {
   const { workspaceId } = useAuth();
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
   return (
     <div className="layout">
       <Sidebar />
+      {drawerOpen ? (
+        <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} role="presentation">
+          <div
+            className="drawer"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Navigation"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <SidebarBody onNavigate={() => setDrawerOpen(false)} />
+          </div>
+        </div>
+      ) : null}
       <main className="main-content" role="main">
-        <header className="page-header">
-          <NavLink to="/" className="page-title-link" style={{ textDecoration: 'none' }}>
-            <h1 className="page-title">Growth Operator</h1>
-          </NavLink>
-          <p className="page-description">Human-guided AI operating system for LinkedIn growth</p>
-        </header>
-        {/* Remount routed pages on workspace switch so no section can keep
-            showing the previous workspace's data (stale-list isolation bug). */}
-        <Outlet key={workspaceId ?? 'no-workspace'} />
+        <TopBar onMenu={() => setDrawerOpen(true)} />
+        <div className="main-body">
+          {/* Remount routed pages on workspace switch so no section can keep
+              showing the previous workspace's data (stale-list isolation bug). */}
+          <Outlet key={workspaceId ?? 'no-workspace'} />
+        </div>
       </main>
     </div>
   );
