@@ -1,0 +1,121 @@
+- generic [ref=f12e3]:
+  - navigation "Main navigation" [ref=f12e4]:
+    - generic [ref=f12e12]:
+      - text: Growth Operator
+      - generic [ref=f12e13]: Content Brain
+    - navigation [ref=f12e14]:
+      - generic [ref=f12e15]:
+        - generic [ref=f12e16]: Core
+        - link "Home" [ref=f12e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f12e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f12e29]:
+        - generic [ref=f12e30]: Intelligence
+        - link "Learning" [ref=f12e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f12e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f12e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f12e46]:
+        - generic [ref=f12e47]: Sales
+        - link "Leads" [ref=f12e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f12e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f12e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f12e65]:
+        - generic [ref=f12e66]: System
+        - link "Analytics" [ref=f12e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f12e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f12e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f12e89]:
+      - paragraph [ref=f12e90]: qabrowser+1790961529223@example.com
+      - button "Sign out" [ref=f12e91] [cursor=pointer]
+  - main [ref=f12e80]:
+    - generic [ref=f12e81]:
+      - link [ref=f12e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f12e83]
+      - paragraph [ref=f12e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f12e85]:
+      - generic [ref=f12e86]:
+        - generic [ref=f12e92]:
+          - heading "Settings" [level=2] [ref=f12e93]
+          - paragraph [ref=f12e94]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f12e95]:
+          - generic [ref=f12e96]:
+            - generic [ref=f12e97]: Workspace
+            - combobox "Workspace" [ref=f12e98]:
+              - option "Select a workspace" [disabled]
+              - option "QA Workspace B" [selected]
+              - option "QA Workspace A"
+          - button "New workspace" [ref=f12e99] [cursor=pointer]
+      - generic [ref=f12e100]:
+        - heading "Profile" [level=3] [ref=f12e101]
+        - paragraph [ref=f12e102]: Signed in as qabrowser+1790961529223@example.com — the fields below are your workspace profile facts.
+        - generic [ref=f12e103]:
+          - textbox "Headline" [ref=f12e104]:
+            - /placeholder: Headline (e.g. Founder at Acme)
+          - textbox "Role" [ref=f12e105]:
+            - /placeholder: Role (e.g. Founder)
+          - textbox "Summary" [ref=f12e106]
+          - textbox "Professional context" [ref=f12e107]
+          - textbox "Industry" [ref=f12e108]
+          - textbox "Location" [ref=f12e109]
+          - textbox "LinkedIn URL" [ref=f12e110]:
+            - /placeholder: LinkedIn URL (optional)
+          - button "Save profile" [ref=f12e111] [cursor=pointer]
+      - generic [ref=f12e112]:
+        - heading "Ideal audiences" [level=3] [ref=f12e113]
+        - paragraph [ref=f12e114]: Define who your content is for.
+        - generic [ref=f12e115]:
+          - generic [ref=f12e116]:
+            - textbox "Name *" [ref=f12e117]
+            - textbox "Target roles (comma-separated)" [ref=f12e118]
+            - textbox "Industries (comma-separated)" [ref=f12e119]
+            - textbox "Company size" [ref=f12e120]
+          - textbox "Description" [ref=f12e121]
+          - textbox "Problems they face" [ref=f12e122]
+          - textbox "Who this is not for" [ref=f12e123]
+          - button "Add audience" [disabled] [ref=f12e124]
+        - paragraph [ref=f12e125]: No audiences yet.
+      - generic [ref=f12e126]:
+        - heading "Your voice" [level=3] [ref=f12e127]
+        - generic [ref=f12e128]:
+          - generic [ref=f12e129]:
+            - textbox "Role" [ref=f12e130]
+            - textbox "Headline" [ref=f12e131]
+            - textbox "Tone (e.g. direct, warm)" [ref=f12e132]
+            - textbox "Writing style" [ref=f12e133]
+          - textbox "Professional context" [ref=f12e134]
+          - textbox "Words to avoid (comma-separated)" [ref=f12e135]
+          - textbox "Preferred words (comma-separated)" [ref=f12e136]
+          - textbox "Content pillars (comma-separated)" [ref=f12e137]
+          - button "Save voice" [ref=f12e138] [cursor=pointer]
+      - generic [ref=f12e139]:
+        - heading "Proof points" [level=3] [ref=f12e140]
+        - paragraph [ref=f12e141]: Facts and results your content can reference.
+        - generic [ref=f12e142]:
+          - textbox "Fact or result *" [ref=f12e143]: Reduced customer response time by 85% using AI automation for D2C brands
+          - textbox "Context (optional)" [ref=f12e144]: Implemented at 12 Indian D2C brands over 6 months, measured via support ticket analytics
+          - button "Add" [disabled] [ref=f12e145]
+        - paragraph [ref=f12e146]: No proof points yet.
+      - generic [ref=f12e147]:
+        - heading "Writing samples" [level=3] [ref=f12e148]
+        - paragraph [ref=f12e149]: Examples that show your style.
+        - generic [ref=f12e150]:
+          - textbox "Title (optional)" [ref=f12e151]
+          - textbox "Paste a writing sample *" [ref=f12e152]
+          - button "Add sample" [disabled] [ref=f12e153]
+        - paragraph [ref=f12e154]: No samples yet.
+      - generic [ref=f12e155]:
+        - heading "Connected platforms & research sources" [level=3] [ref=f12e156]
+        - paragraph [ref=f12e157]: "All connectors live in one place: Brain → Sources → Research catalogue and Connected platforms. Connect accounts, configure Reddit and Google Trends, and review health there � per workspace, with honest states."
+        - link "Open connector center" [ref=f12e158] [cursor=pointer]:
+          - /url: /brain

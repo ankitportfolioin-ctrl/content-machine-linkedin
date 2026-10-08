@@ -1,0 +1,105 @@
+- generic [ref=f75e3]:
+  - navigation "Main navigation" [ref=f75e4]:
+    - generic [ref=f75e12]:
+      - text: Growth Operator
+      - generic [ref=f75e13]: Content Brain
+    - navigation [ref=f75e14]:
+      - generic [ref=f75e15]:
+        - generic [ref=f75e16]: Core
+        - link "Home" [ref=f75e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f75e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f75e29]:
+        - generic [ref=f75e30]: Intelligence
+        - link "Learning" [ref=f75e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f75e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f75e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f75e46]:
+        - generic [ref=f75e47]: Sales
+        - link "Leads" [ref=f75e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f75e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f75e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f75e65]:
+        - generic [ref=f75e66]: System
+        - link "Analytics" [ref=f75e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f75e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f75e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f75e89]:
+      - paragraph [ref=f75e90]: test@gmail.com
+      - button "Sign out" [ref=f75e91] [cursor=pointer]
+  - main [ref=f75e80]:
+    - generic [ref=f75e81]:
+      - link [ref=f75e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f75e83]
+      - paragraph [ref=f75e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f75e85]:
+      - generic [ref=f75e86]:
+        - generic [ref=f75e92]:
+          - heading "Brain / Intelligence" [level=2] [ref=f75e93]
+          - paragraph [ref=f75e94]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f75e95]:
+          - generic [ref=f75e96]:
+            - generic [ref=f75e97]: Workspace
+            - combobox "Workspace" [ref=f75e98]:
+              - option "Select a workspace" [disabled]
+              - option "test" [selected]
+              - option "Demo Workspace"
+          - button "New workspace" [ref=f75e99] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f75e100]:
+        - tab "Overview" [ref=f75e101] [cursor=pointer]
+        - tab "Operator" [ref=f75e102] [cursor=pointer]
+        - tab "Opportunities" [ref=f75e103] [cursor=pointer]
+        - tab "Trends" [active] [selected] [ref=f75e104] [cursor=pointer]
+        - tab "Gaps" [ref=f75e105] [cursor=pointer]
+        - tab "Sources" [ref=f75e106] [cursor=pointer]
+        - tab "Audience Problems" [ref=f75e107] [cursor=pointer]
+        - tab "YFP Scoring" [ref=f75e108] [cursor=pointer]
+        - tab "Content Studio" [ref=f75e109] [cursor=pointer]
+        - tab "Performance" [ref=f75e110] [cursor=pointer]
+        - tab "Learning" [ref=f75e111] [cursor=pointer]
+      - generic [ref=f75e163]:
+        - heading "Trends (8)" [level=3] [ref=f75e164]
+        - list [ref=f75e165]:
+          - listitem [ref=f75e166]:
+            - paragraph [ref=f75e167]: b18de5ac-1f8b-430e-8ccd-2bc31c9725a1
+            - group [ref=f75e168]:
+              - generic "Why recommended" [ref=f75e169] [cursor=pointer]
+          - listitem [ref=f75e170]:
+            - paragraph [ref=f75e171]: 6f1b1af7-5b95-4374-b7fb-b8e6bd2fa346
+            - group [ref=f75e172]:
+              - generic "Why recommended" [ref=f75e173] [cursor=pointer]
+          - listitem [ref=f75e174]:
+            - paragraph [ref=f75e175]: fe776dab-65b2-4364-a541-687299969e36
+            - group [ref=f75e176]:
+              - generic "Why recommended" [ref=f75e177] [cursor=pointer]
+          - listitem [ref=f75e178]:
+            - paragraph [ref=f75e179]: 9b514b60-e470-4753-939d-2607fe9d0fc6
+            - group [ref=f75e180]:
+              - generic "Why recommended" [ref=f75e181] [cursor=pointer]
+          - listitem [ref=f75e182]:
+            - paragraph [ref=f75e183]: b09c419a-87ca-483f-9ddd-958e89155d55
+            - group [ref=f75e184]:
+              - generic "Why recommended" [ref=f75e185] [cursor=pointer]
+          - listitem [ref=f75e186]:
+            - paragraph [ref=f75e187]: 55438cb8-ea7e-4ede-85dc-ba51e4fae9da
+            - group [ref=f75e188]:
+              - generic "Why recommended" [ref=f75e189] [cursor=pointer]
+          - listitem [ref=f75e190]:
+            - paragraph [ref=f75e191]: 407a1f11-cf87-4b7f-904b-f045e7f5c416
+            - group [ref=f75e192]:
+              - generic "Why recommended" [ref=f75e193] [cursor=pointer]
+          - listitem [ref=f75e194]:
+            - paragraph [ref=f75e195]: a2db6711-f3ef-492c-bf10-8ace8a878388
+            - group [ref=f75e196]:
+              - generic "Why recommended" [ref=f75e197] [cursor=pointer]

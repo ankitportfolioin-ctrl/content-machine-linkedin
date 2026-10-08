@@ -1,0 +1,72 @@
+- generic [ref=f6e3]:
+  - navigation "Main navigation" [ref=f6e4]:
+    - generic [ref=f6e12]:
+      - text: Growth Operator
+      - generic [ref=f6e13]: Content Brain
+    - navigation [ref=f6e14]:
+      - generic [ref=f6e15]:
+        - generic [ref=f6e16]: Core
+        - link "Home" [ref=f6e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f6e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f6e29]:
+        - generic [ref=f6e30]: Intelligence
+        - link "Learning" [ref=f6e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f6e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f6e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f6e46]:
+        - generic [ref=f6e47]: Sales
+        - link "Leads" [ref=f6e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f6e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f6e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f6e65]:
+        - generic [ref=f6e66]: System
+        - link "Analytics" [ref=f6e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f6e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f6e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f6e80]:
+      - paragraph [ref=f6e81]: qabrowser+1790961529223@example.com
+      - button "Sign out" [ref=f6e82] [cursor=pointer]
+  - main [ref=f6e83]:
+    - generic [ref=f6e84]:
+      - link [ref=f6e85] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f6e86]
+      - paragraph [ref=f6e87]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f6e88]:
+      - generic [ref=f6e89]:
+        - generic [ref=f6e90]:
+          - heading "Brain / Intelligence" [level=2] [ref=f6e91]
+          - paragraph [ref=f6e92]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f6e93]:
+          - generic [ref=f6e94]:
+            - generic [ref=f6e95]: Workspace
+            - combobox "Workspace" [ref=f6e96]:
+              - option "Select a workspace" [disabled]
+              - option "QA Workspace B" [selected]
+              - option "QA Workspace A"
+          - button "New workspace" [ref=f6e97] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f6e98]:
+        - tab "Overview" [selected] [ref=f6e99] [cursor=pointer]
+        - tab "Opportunities" [ref=f6e100] [cursor=pointer]
+        - tab "Trends" [ref=f6e101] [cursor=pointer]
+        - tab "Gaps" [ref=f6e102] [cursor=pointer]
+        - tab "Sources" [ref=f6e103] [cursor=pointer]
+        - tab "Audience Problems" [ref=f6e104] [cursor=pointer]
+        - tab "YFP Scoring" [ref=f6e105] [cursor=pointer]
+        - tab "Content Studio" [ref=f6e106] [cursor=pointer]
+        - tab "Performance" [ref=f6e107] [cursor=pointer]
+        - tab "Learning" [ref=f6e108] [cursor=pointer]
+      - generic [ref=f6e111]:
+        - heading "No counts yet" [level=2] [ref=f6e112]
+        - paragraph [ref=f6e113]: Overview data exists but has no counts to show.

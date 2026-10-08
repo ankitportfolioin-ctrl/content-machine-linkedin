@@ -1,0 +1,26 @@
+- generic [ref=f20e2]:
+  - banner
+  - main [ref=f20e3]:
+    - generic [ref=f20e4]:
+      - generic [ref=f20e16]:
+        - heading "Welcome Back" [level=1] [ref=f20e17]
+        - paragraph [ref=f20e18]: Don’t miss your next opportunity. Sign in to stay updated on your professional world.
+      - generic [ref=f20e19]:
+        - generic [ref=f20e20]:
+          - textbox "Email or Phone" [active] [ref=f20e21]:
+            - /placeholder: " "
+          - generic [aria-hidden] [ref=f20e22]: Email or Phone
+        - generic [ref=f20e23]:
+          - textbox "Password" [ref=f20e24]
+          - generic [ref=f20e25]: Password
+          - button "Show" [ref=f20e26] [cursor=pointer]
+        - generic [ref=f20e27]:
+          - button "Cancel" [ref=f20e28] [cursor=pointer]
+          - button "Sign in" [ref=f20e29] [cursor=pointer]
+      - generic [ref=f20e30]:
+        - link "Forgot password?" [ref=f20e32] [cursor=pointer]:
+          - /url: /checkpoint/rp/request-password-reset?session_redirect=%2Foauth%2Fv2%2Flogin-success%3Fapp_id%3D263875341%26auth_type%3DAC%26flow%3D%257B%2522state%2522%253A%252267c03ac18399bee85b0f4b30696bc9e8%2522%252C%2522creationTime%2522%253A1791057347254%252C%2522authorizationType%2522%253A%2522OAUTH2_AUTHORIZATION_CODE%2522%252C%2522appId%2522%253A263875341%252C%2522scope%2522%253A%2522openid%2Bprofile%2Bemail%2522%252C%2522currentStage%2522%253A%2522LOGIN_SUCCESS%2522%252C%2522currentSubStage%2522%253A0%252C%2522authFlowName%2522%253A%2522generic-permission-list%2522%252C%2522redirectUri%2522%253A%2522http%253A%252F%252Flocalhost%253A3001%252Fapi%252Fv1%252Fsocial%252Fcallback%252Flinkedin%2522%257D&trk=oauth
+        - paragraph [ref=f20e33]:
+          - text: New to LinkedIn?
+          - link "Join now" [ref=f20e34] [cursor=pointer]:
+            - /url: /signup/cold-join?session_redirect=%2Foauth%2Fv2%2Flogin-success%3Fapp_id%3D263875341%26auth_type%3DAC%26flow%3D%257B%2522state%2522%253A%252267c03ac18399bee85b0f4b30696bc9e8%2522%252C%2522creationTime%2522%253A1791057347254%252C%2522authorizationType%2522%253A%2522OAUTH2_AUTHORIZATION_CODE%2522%252C%2522appId%2522%253A263875341%252C%2522scope%2522%253A%2522openid%2Bprofile%2Bemail%2522%252C%2522currentStage%2522%253A%2522LOGIN_SUCCESS%2522%252C%2522currentSubStage%2522%253A0%252C%2522authFlowName%2522%253A%2522generic-permission-list%2522%252C%2522redirectUri%2522%253A%2522http%253A%252F%252Flocalhost%253A3001%252Fapi%252Fv1%252Fsocial%252Fcallback%252Flinkedin%2522%257D&source=oauth

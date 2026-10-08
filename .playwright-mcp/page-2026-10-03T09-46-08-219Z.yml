@@ -1,0 +1,168 @@
+- generic [ref=f25e3]:
+  - navigation "Main navigation" [ref=f25e4]:
+    - generic [ref=f25e12]:
+      - text: Growth Operator
+      - generic [ref=f25e13]: Content Brain
+    - navigation [ref=f25e14]:
+      - generic [ref=f25e15]:
+        - generic [ref=f25e16]: Core
+        - link "Home" [ref=f25e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f25e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f25e29]:
+        - generic [ref=f25e30]: Intelligence
+        - link "Learning" [ref=f25e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f25e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f25e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f25e46]:
+        - generic [ref=f25e47]: Sales
+        - link "Leads" [ref=f25e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f25e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f25e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f25e65]:
+        - generic [ref=f25e66]: System
+        - link "Analytics" [ref=f25e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f25e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f25e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f25e89]:
+      - paragraph [ref=f25e90]: test@gmail.com
+      - button "Sign out" [ref=f25e91] [cursor=pointer]
+  - main [ref=f25e80]:
+    - generic [ref=f25e81]:
+      - link [ref=f25e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f25e83]
+      - paragraph [ref=f25e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f25e181]:
+      - generic [ref=f25e182]:
+        - generic [ref=f25e183]:
+          - heading "Settings" [level=2] [ref=f25e184]
+          - paragraph [ref=f25e185]: Profile, ideal audiences, voice, proof points, and writing samples.
+        - generic [ref=f25e186]:
+          - generic [ref=f25e187]:
+            - generic [ref=f25e188]: Workspace
+            - combobox "Workspace" [ref=f25e189]:
+              - option "Select a workspace" [disabled]
+              - option "test" [selected]
+              - option "Demo Workspace"
+          - button "New workspace" [ref=f25e190] [cursor=pointer]
+      - generic [ref=f25e191]:
+        - heading "Profile" [level=3] [ref=f25e192]
+        - paragraph [ref=f25e193]: Signed in as test@gmail.com — the fields below are your workspace profile facts.
+        - generic [ref=f25e194]:
+          - textbox "Headline" [ref=f25e195]:
+            - /placeholder: Headline (e.g. Founder at Acme)
+            - text: Founder at YourFirstProject
+          - textbox "Role" [ref=f25e196]:
+            - /placeholder: Role (e.g. Founder)
+            - text: Founder
+          - textbox "Summary" [ref=f25e197]: "I'm building YourFirstProject (YFP), a platform that helps beginners understand, learn, and apply digital and technology skills. My focus is making AI, coding, automation, and other practical tech skills easier to learn and use in real-world projects. Through YFP, I create educational resources, practical skill guides, and e-books that help people understand what to learn, how to get started, and how to turn their skills into opportunities. I also share AI news, useful tools, emerging technologies, practical tutorials, and insights on why continuously learning digital skills matters. My goal is simple: make technology more accessible and help more people move from just exploring tools to actually building something useful."
+          - textbox "Professional context" [ref=f25e198]: Founder of YourFirstProject (YFP), a digital learning platform focused on practical technology skills, AI tools, beginner-friendly education, and digital skill guides and e-books. I focus on researching emerging technologies, identifying useful tools and skills, explaining complex concepts simply, and creating educational content that helps beginners take action. My content combines AI and tech news, practical tips, skill-building advice, and real-world applications.
+          - textbox "Industry" [ref=f25e199]: E-Learning / Digital Education
+          - textbox "Location" [ref=f25e200]: Kota, Rajasthan, India
+          - textbox "LinkedIn URL" [ref=f25e201]:
+            - /placeholder: LinkedIn URL (optional)
+          - button "Save profile" [ref=f25e202] [cursor=pointer]
+      - generic [ref=f25e203]:
+        - heading "Ideal audiences" [level=3] [ref=f25e204]
+        - paragraph [ref=f25e205]: Define who your content is for.
+        - generic [ref=f25e206]:
+          - generic [ref=f25e207]:
+            - textbox "Name *" [ref=f25e208]
+            - textbox "Target roles (comma-separated)" [ref=f25e209]
+            - textbox "Industries (comma-separated)" [ref=f25e210]
+            - textbox "Company size" [ref=f25e211]
+          - textbox "Description" [ref=f25e212]
+          - textbox "Problems they face" [ref=f25e213]
+          - textbox "Who this is not for" [ref=f25e214]
+          - button "Add audience" [disabled] [ref=f25e215]
+        - list [ref=f25e216]:
+          - listitem [ref=f25e217]:
+            - generic [ref=f25e218]:
+              - generic [ref=f25e219]:
+                - paragraph [ref=f25e220]: Tech-Curious Students & Early-Career Professionals
+                - paragraph [ref=f25e221]: Students and early-career professionals who want to stay updated on AI and technology, discover useful digital tools, and understand which emerging skills may be relevant to their future.
+                - paragraph [ref=f25e222]: "Roles: College Student, Graduate, Junior Developer, Early-Career Professional, Tech Enthusiast, Career Explorer"
+                - paragraph [ref=f25e223]: "Industries: Education, Technology, IT, Software, Digital Business"
+                - paragraph [ref=f25e224]: "Company size: Individual, Student, 1-50 employees"
+              - button "Edit" [ref=f25e225] [cursor=pointer]
+          - listitem [ref=f25e226]:
+            - generic [ref=f25e227]:
+              - generic [ref=f25e228]:
+                - paragraph [ref=f25e229]: Aspiring Freelancers & Digital Entrepreneurs
+                - paragraph [ref=f25e230]: People who want to use digital skills, AI tools, and practical projects to explore freelancing, offer services, or start a small digital business.
+                - paragraph [ref=f25e231]: "Roles: Aspiring Freelancer, Beginner Freelancer, Solopreneur, Student Entrepreneur, Digital Entrepreneur, Independent Creator"
+                - paragraph [ref=f25e232]: "Industries: Freelancing, Digital Services, Technology, Marketing, Startups"
+                - paragraph [ref=f25e233]: "Company size: Individual, 1-10 employees"
+              - button "Edit" [ref=f25e234] [cursor=pointer]
+          - listitem [ref=f25e235]:
+            - generic [ref=f25e236]:
+              - generic [ref=f25e237]:
+                - paragraph [ref=f25e238]: Beginner Developers & AI Learners
+                - paragraph [ref=f25e239]: People who are new to coding, AI, and digital technology. They want to learn practical skills, understand new tools, build their first projects, and explore career or income opportunities using technology.
+                - paragraph [ref=f25e240]: "Roles: Student, Beginner Developer, Aspiring Developer, Self-Taught Programmer, AI Learner, Career Switcher"
+                - paragraph [ref=f25e241]: "Industries: Technology, Software Development, IT, Education, Startups"
+                - paragraph [ref=f25e242]: "Company size: Individual, Student, Not applicable"
+              - button "Edit" [ref=f25e243] [cursor=pointer]
+      - generic [ref=f25e244]:
+        - heading "Your voice" [level=3] [ref=f25e245]
+        - generic [ref=f25e246]:
+          - generic [ref=f25e247]:
+            - textbox "Role" [ref=f25e248]: Founder & Technology Educator
+            - textbox "Headline" [ref=f25e249]: Making AI and Digital Skills Practical for Beginners
+            - textbox "Tone (e.g. direct, warm)" [ref=f25e250]: Clear, curious, practical, friendly, educational, honest
+            - textbox "Writing style" [ref=f25e251]: Beginner-friendly, conversational, no-hype, evidence-first, actionable, short paragraphs, strong but natural hooks
+          - textbox "Professional context" [ref=f25e252]: I run YourFirstProject, a digital learning platform focused on practical technology skills, AI education, and beginner-friendly digital guides. I share useful technology updates, emerging AI tools, practical tutorials, and lessons about building real projects and exploring opportunities through digital skills. My content should educate first and promote products only when genuinely relevant.
+          - textbox "Words to avoid (comma-separated)" [ref=f25e253]: Game-changing, revolutionary, guaranteed income, get rich quick, effortless money, secret hack, insane results, overnight success, life-changing (when unsupported), unlock unlimited potential
+          - textbox "Preferred words (comma-separated)" [ref=f25e254]: Learn, build, explore, practical, useful, beginner-friendly, skills, tools, experiment, create, project, opportunity, understand, step by step
+          - textbox "Content pillars (comma-separated)" [ref=f25e255]: AI news and updates, practical AI tools, beginner tech tutorials, digital skills education, vibe coding, web development, freelancing basics, real-world projects, technology trends, digital entrepreneurship
+          - button "Save voice" [ref=f25e256] [cursor=pointer]
+      - generic [ref=f25e257]:
+        - heading "Proof points" [level=3] [ref=f25e258]
+        - paragraph [ref=f25e259]: Facts and results your content can reference.
+        - generic [ref=f25e260]:
+          - textbox "Fact or result *" [ref=f25e261]
+          - textbox "Context (optional)" [ref=f25e262]
+          - button "Add" [disabled] [ref=f25e263]
+        - list [ref=f25e264]:
+          - listitem [ref=f25e265]:
+            - generic [ref=f25e266]:
+              - generic [ref=f25e267]:
+                - paragraph [ref=f25e268]: YFP develops digital skill guides and e-books structured around learning skills and applying them to practical projects.
+                - paragraph [ref=f25e269]: Existing product and educational content.
+              - button "Remove" [ref=f25e270] [cursor=pointer]
+          - listitem [ref=f25e271]:
+            - generic [ref=f25e272]:
+              - generic [ref=f25e273]:
+                - paragraph [ref=f25e274]: YourFirstProject is a digital education platform focused on helping beginners learn practical technology skills and understand how to apply them.
+                - paragraph [ref=f25e275]: Brand mission and educational focus.
+              - button "Remove" [ref=f25e276] [cursor=pointer]
+      - generic [ref=f25e277]:
+        - heading "Writing samples" [level=3] [ref=f25e278]
+        - paragraph [ref=f25e279]: Examples that show your style.
+        - generic [ref=f25e280]:
+          - textbox "Title (optional)" [ref=f25e281]
+          - textbox "Paste a writing sample *" [ref=f25e282]
+          - button "Add sample" [disabled] [ref=f25e283]
+        - list [ref=f25e284]:
+          - listitem [ref=f25e285]:
+            - generic [ref=f25e286]:
+              - generic [ref=f25e287]:
+                - paragraph [ref=f25e288]: Practical AI and Digital Skills - YFP Founder Voice
+                - paragraph [ref=f25e289]: Most beginners don't have an AI tool problem. They have a direction problem. Every week, there's a new AI tool promising to change how we work. One tool writes code. Another builds websites. Another automates tasks. It's easy to spend hours exploring tools without actually learning how to use th
+              - button "Remove" [ref=f25e290] [cursor=pointer]
+      - generic [ref=f25e291]:
+        - heading "Connected platforms & research sources" [level=3] [ref=f25e292]
+        - paragraph [ref=f25e293]: "All connectors live in one place: Brain → Sources → Research catalogue and Connected platforms. Connect accounts, configure Reddit and Google Trends, and review health there � per workspace, with honest states."
+        - link "Open connector center" [ref=f25e294] [cursor=pointer]:
+          - /url: /brain

@@ -1,0 +1,83 @@
+- generic [active] [ref=f4e1]:
+  - status [ref=f4e2]
+  - iframe [ref=f4e3]:
+    - generic [ref=f5e2]:
+      - heading "0 notifications" [level=2] [ref=f5e3]
+      - main [ref=f5e8]:
+        - generic [ref=f5e9]:
+          - link "LinkedIn" [ref=f5e13] [cursor=pointer]:
+            - /url: /
+          - generic [ref=f5e26]:
+            - heading "Sign in" [level=1] [ref=f5e27]
+            - generic [ref=f5e28]:
+              - paragraph [ref=f5e29]: New to LinkedIn?
+              - link "Join now" [ref=f5e30] [cursor=pointer]:
+                - /url: /signup/cold-join/?fromLogin=true
+            - generic [ref=f5e34]:
+              - generic [ref=f5e35]:
+                - generic [ref=f5e38]:
+                  - button
+                - button "Sign in with Microsoft" [ref=f5e40] [cursor=pointer]:
+                  - generic [ref=f5e41]:
+                    - figure [aria-hidden] [ref=f5e42]
+                    - generic [ref=f5e43]: Sign in with Microsoft
+                - button "Sign in with Apple" [ref=f5e45] [cursor=pointer]:
+                  - generic [ref=f5e46]:
+                    - figure [aria-hidden] [ref=f5e47]
+                    - generic [ref=f5e48]: Sign in with Apple
+                - paragraph [ref=f5e50]:
+                  - text: By continuing, you agree to LinkedIn’s
+                  - link [ref=f5e52] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/legal/user-agreement/
+                    - strong [ref=f5e53]: User Agreement
+                  - text: ","
+                  - link [ref=f5e55] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/legal/privacy-policy/
+                    - strong [ref=f5e56]: Privacy Policy
+                  - text: ", and"
+                  - link [ref=f5e58] [cursor=pointer]:
+                    - /url: https://www.linkedin.com/legal/cookie-policy/
+                    - strong [ref=f5e59]: Cookie Policy
+                  - text: .
+              - paragraph [ref=f5e61]: or
+              - generic [ref=f5e62]:
+                - generic [ref=f5e65]:
+                  - generic [ref=f5e66]: Email or phone
+                  - textbox "Email or phone" [ref=f5e69]
+                - generic [ref=f5e71]:
+                  - generic [ref=f5e72]: Password
+                  - generic [ref=f5e74]:
+                    - textbox "Password" [ref=f5e75]
+                    - button "Show password" [ref=f5e77] [cursor=pointer]
+                - generic [ref=f5e80]:
+                  - link "Forgot password?" [ref=f5e81] [cursor=pointer]:
+                    - /url: /passwordReset/?session_redirect=%2Fdevelopers%2FloginRedirect.html
+                  - generic [ref=f5e87]:
+                    - generic [ref=f5e89]:
+                      - checkbox "Keep me signed in" [checked]
+                    - paragraph [ref=f5e92]: Keep me signed in
+                - button "Sign in" [ref=f5e93] [cursor=pointer]
+          - generic [ref=f5e98]:
+            - paragraph [ref=f5e99]: LinkedIn Corporation © 2026
+            - generic [ref=f5e100]:
+              - link [ref=f5e101] [cursor=pointer]:
+                - /url: https://www.linkedin.com/legal/user-agreement/
+                - paragraph [ref=f5e102]: User Agreement
+              - link [ref=f5e103] [cursor=pointer]:
+                - /url: https://www.linkedin.com/legal/privacy-policy/
+                - paragraph [ref=f5e104]: Privacy Policy
+              - link [ref=f5e105] [cursor=pointer]:
+                - /url: https://www.linkedin.com/help/linkedin/answer/a403269/
+                - paragraph [ref=f5e106]: Community Guidelines
+              - link [ref=f5e107] [cursor=pointer]:
+                - /url: https://www.linkedin.com/legal/cookie-policy/
+                - paragraph [ref=f5e108]: Cookie Policy
+              - link [ref=f5e109] [cursor=pointer]:
+                - /url: https://www.linkedin.com/legal/copyright-policy/
+                - paragraph [ref=f5e110]: Copyright Policy
+              - link [ref=f5e111] [cursor=pointer]:
+                - /url: https://www.linkedin.com/help/linkedin/
+                - paragraph [ref=f5e112]: Send Feedback
+              - button [ref=f5e113] [cursor=pointer]:
+                - paragraph [ref=f5e115]: Language
+  - heading "0 notifications total" [level=2] [ref=f4e5]

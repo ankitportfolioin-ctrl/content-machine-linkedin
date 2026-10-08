@@ -1,0 +1,72 @@
+- generic [ref=f1e3]:
+  - navigation "Main navigation" [ref=f1e4]:
+    - generic [ref=f1e12]:
+      - text: Growth Operator
+      - generic [ref=f1e13]: Content Brain
+    - navigation [ref=f1e14]:
+      - generic [ref=f1e15]:
+        - generic [ref=f1e16]: Core
+        - link "Home" [ref=f1e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f1e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f1e29]:
+        - generic [ref=f1e30]: Intelligence
+        - link "Learning" [ref=f1e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f1e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f1e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f1e46]:
+        - generic [ref=f1e47]: Sales
+        - link "Leads" [ref=f1e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f1e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f1e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f1e65]:
+        - generic [ref=f1e66]: System
+        - link "Analytics" [ref=f1e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f1e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f1e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f1e89]:
+      - paragraph [ref=f1e90]: test@gmail.com
+      - button "Sign out" [ref=f1e91] [cursor=pointer]
+  - main [ref=f1e80]:
+    - generic [ref=f1e81]:
+      - link [ref=f1e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f1e83]
+      - paragraph [ref=f1e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f1e85]:
+      - generic [ref=f1e86]:
+        - generic [ref=f1e92]:
+          - heading "Brain / Intelligence" [level=2] [ref=f1e93]
+          - paragraph [ref=f1e94]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f1e95]:
+          - generic [ref=f1e96]:
+            - generic [ref=f1e97]: Workspace
+            - combobox "Workspace" [ref=f1e98]:
+              - option "Select a workspace" [disabled]
+              - option "YourFirstProject" [selected]
+          - button "New workspace" [ref=f1e99] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f1e100]:
+        - tab "Overview" [ref=f1e101] [cursor=pointer]
+        - tab "Operator" [ref=f1e102] [cursor=pointer]
+        - tab "Opportunities" [ref=f1e103] [cursor=pointer]
+        - tab "Trends" [ref=f1e104] [cursor=pointer]
+        - tab "Gaps" [ref=f1e105] [cursor=pointer]
+        - tab "Sources" [ref=f1e106] [cursor=pointer]
+        - tab "Audience Problems" [active] [selected] [ref=f1e107] [cursor=pointer]
+        - tab "YFP Scoring" [ref=f1e108] [cursor=pointer]
+        - tab "Content Studio" [ref=f1e109] [cursor=pointer]
+        - tab "Performance" [ref=f1e110] [cursor=pointer]
+        - tab "Learning" [ref=f1e111] [cursor=pointer]
+      - generic [ref=f1e392]:
+        - heading "No audience problems yet" [level=2] [ref=f1e393]
+        - paragraph [ref=f1e394]: No sources found for problem discovery

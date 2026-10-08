@@ -1,0 +1,204 @@
+- generic [ref=f11e3]:
+  - navigation "Main navigation" [ref=f11e4]:
+    - generic [ref=f11e12]:
+      - text: Growth Operator
+      - generic [ref=f11e13]: Content Brain
+    - navigation [ref=f11e14]:
+      - generic [ref=f11e15]:
+        - generic [ref=f11e16]: Core
+        - link "Home" [ref=f11e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f11e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f11e29]:
+        - generic [ref=f11e30]: Intelligence
+        - link "Learning" [ref=f11e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f11e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f11e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f11e46]:
+        - generic [ref=f11e47]: Sales
+        - link "Leads" [ref=f11e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f11e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f11e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f11e65]:
+        - generic [ref=f11e66]: System
+        - link "Analytics" [ref=f11e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f11e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f11e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f11e88]:
+      - paragraph [ref=f11e89]: qabrowser+1790961529223@example.com
+      - button "Sign out" [ref=f11e90] [cursor=pointer]
+  - main [ref=f11e80]:
+    - generic [ref=f11e81]:
+      - link [ref=f11e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f11e83]
+      - paragraph [ref=f11e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f11e85]:
+      - generic [ref=f11e86]:
+        - generic [ref=f11e91]:
+          - paragraph [ref=f11e92]: One-time setup
+          - heading "Onboarding" [level=2] [ref=f11e93]
+          - paragraph [ref=f11e94]: "Next: profile. Progress is detected from your real data, never ticked manually."
+        - generic [ref=f11e95]:
+          - generic [ref=f11e96]:
+            - generic [ref=f11e97]: Workspace
+            - combobox "Workspace" [ref=f11e98]:
+              - option "Select a workspace" [disabled]
+              - option "QA Workspace B" [selected]
+              - option "QA Workspace A"
+          - button "New workspace" [ref=f11e99] [cursor=pointer]
+      - generic [ref=f11e100]:
+        - generic [ref=f11e101]:
+          - heading "1. Profile & voice" [level=3] [ref=f11e102]
+          - generic [ref=f11e103]: current
+        - paragraph [ref=f11e104]: Role, positioning, writing samples. Managed in Settings; progress is detected automatically.
+        - generic [ref=f11e105]:
+          - generic [ref=f11e106]: "writing samples: 0"
+          - button "Create profile" [ref=f11e107] [cursor=pointer]
+          - link "Open Settings" [ref=f11e108] [cursor=pointer]:
+            - /url: /settings
+      - generic [ref=f11e109]:
+        - generic [ref=f11e110]:
+          - heading "2. Audience & ICP" [level=3] [ref=f11e111]
+          - generic [ref=f11e112]: todo
+        - paragraph [ref=f11e113]: Target roles, industries, audience segments. Managed in Settings and the Dashboard.
+        - generic [ref=f11e114]:
+          - generic [ref=f11e115]: "ICPs: 0"
+          - generic [ref=f11e116]: "segments: 0"
+          - link "Open Settings" [ref=f11e117] [cursor=pointer]:
+            - /url: /settings
+          - link "Seed segments" [ref=f11e118] [cursor=pointer]:
+            - /url: /dashboard
+      - generic [ref=f11e119]:
+        - generic [ref=f11e120]:
+          - heading "3. Pillars & objectives" [level=3] [ref=f11e121]
+          - generic [ref=f11e122]: todo
+        - paragraph [ref=f11e123]: What the business talks about and what content must achieve.
+        - generic [ref=f11e124]:
+          - textbox "Pillars, comma-separated (e.g. AI tutorials, developer tools)" [ref=f11e125]
+          - textbox "One content objective (e.g. authority with beginner developers)" [ref=f11e126]
+          - button "Save pillars" [ref=f11e128] [cursor=pointer]
+          - paragraph [ref=f11e129]: Saved. Badges refresh from your real data.
+      - generic [ref=f11e130]:
+        - generic [ref=f11e131]:
+          - heading "4. Offers" [level=3] [ref=f11e132]
+          - generic [ref=f11e133]: todo
+        - paragraph [ref=f11e134]: Products, services, guides — and what you are willing to talk about.
+        - generic [ref=f11e135]:
+          - textbox "Business name (required once)" [ref=f11e136]
+          - generic [ref=f11e137]:
+            - textbox "Offer title *" [ref=f11e138]
+            - combobox "Offer type" [ref=f11e139]:
+              - option "guide" [selected]
+              - option "ebook"
+              - option "product"
+              - option "service"
+          - textbox "What outcome does it deliver?" [ref=f11e140]
+          - button "Save offer" [disabled] [ref=f11e142]
+      - generic [ref=f11e143]:
+        - generic [ref=f11e144]:
+          - heading "5. Signal sources" [level=3] [ref=f11e145]
+          - generic [ref=f11e146]: done
+        - paragraph [ref=f11e147]: Free, public, ToS-respecting feeds. No LinkedIn scraping — ever.
+        - generic [ref=f11e148]:
+          - paragraph [ref=f11e149]:
+            - text: Registry research sources (Reddit, Google Trends) are configured per workspace in the
+            - link "Brain → Sources → Research catalogue" [ref=f11e150] [cursor=pointer]:
+              - /url: /brain
+            - text: . They count toward this step once enabled.
+          - generic [ref=f11e151]:
+            - textbox "https://example.com/feed" [ref=f11e152]
+            - combobox "Source type" [ref=f11e153]:
+              - option "RSS" [selected]
+              - option "Atom"
+              - option "Hacker News"
+              - option "GitHub releases"
+              - option "Blog"
+              - option "Site"
+            - button "Add" [disabled] [ref=f11e154]
+          - paragraph [ref=f11e155]: No feed sources yet.
+      - generic [ref=f11e156]:
+        - generic [ref=f11e157]:
+          - heading "6. Lead import" [level=3] [ref=f11e158]
+          - generic [ref=f11e159]: todo
+        - paragraph [ref=f11e160]: Your own CSV or LinkedIn’s official export of your data. Never scraped.
+        - generic [ref=f11e161]:
+          - paragraph [ref=f11e162]:
+            - text: "Header row required:"
+            - generic [ref=f11e163]: name, linkedinUrl, headline, company, location
+            - text: — only your own data.
+          - generic [ref=f11e164]:
+            - generic [ref=f11e165]:
+              - text: Choose a CSV file (read locally, never uploaded anywhere)
+              - button "Choose a CSV file" [ref=f11e166]
+            - textbox "Filename label (optional)" [ref=f11e167]
+            - textbox "name,linkedinUrl,headline,company Jane Doe,https://linkedin.com/in/jane,CTO at Acme,Acme" [ref=f11e168]:
+              - /placeholder: "name,linkedinUrl,headline,company\nJane Doe,https://linkedin.com/in/jane,CTO at Acme,Acme"
+            - button "Import leads" [disabled] [ref=f11e170]
+      - generic [ref=f11e171]:
+        - generic [ref=f11e172]:
+          - heading "7. Autonomy policy" [level=3] [ref=f11e173]
+          - generic [ref=f11e174]: todo
+        - paragraph [ref=f11e175]: Tier 0 is automatic. Tier 1 stays disabled until the LinkedIn integration exists.
+        - generic [ref=f11e176]:
+          - list [ref=f11e177]:
+            - listitem [ref=f11e178]: "Tier 0 (automatic): research, scoring, drafting, analytics, learning, digest."
+            - listitem [ref=f11e179]: "Tier 1 (standing policy only): publishing your own posts — currently impossible, no integration exists."
+            - listitem [ref=f11e180]: "Tier 2 (human every time): DMs, connections, comments, anything contacting another person."
+            - listitem [ref=f11e181]: "Tier 3 (never): scraping, automation, mass messaging — not built, never will be."
+          - generic [ref=f11e182]:
+            - checkbox "Allow Tier-1 auto-posting when an integration exists (stored preference only)" [ref=f11e183]
+            - text: Allow Tier-1 auto-posting when an integration exists (stored preference only)
+          - generic [ref=f11e184]:
+            - textbox "Tier-1 daily cap" [ref=f11e185]: "1"
+            - generic [ref=f11e186]:
+              - checkbox "Only approved posts" [checked] [ref=f11e187]
+              - text: Only approved posts
+          - generic [ref=f11e188]:
+            - checkbox "I understand Tier 2 always needs my approval (required to finish setup)" [ref=f11e189]
+            - text: I understand Tier 2 always needs my approval (required to finish setup)
+          - generic [ref=f11e190]:
+            - paragraph [ref=f11e191]: Auto-preparation (internal drafts only — never sends or publishes)
+            - generic [ref=f11e192]:
+              - checkbox "Auto-prepare work justified by prior human judgment (imported leads, triaged opportunities, approved strategies/plans)" [checked] [ref=f11e193]
+              - text: Auto-prepare work justified by prior human judgment (imported leads, triaged opportunities, approved strategies/plans)
+            - generic [ref=f11e194]:
+              - checkbox "Also auto-prepare untouched opportunities/prospects (cold — off by default)" [ref=f11e195]
+              - text: Also auto-prepare untouched opportunities/prospects (cold — off by default)
+            - generic [ref=f11e196]:
+              - textbox "Daily auto-preparation quota" [ref=f11e197]: "10"
+              - generic [ref=f11e198]: max automatic preparations per day (quota exhaustion preserves backlog)
+          - button "Save policy" [ref=f11e200] [cursor=pointer]
+      - generic [ref=f11e201]:
+        - generic [ref=f11e202]:
+          - heading "8. Schedule & controls" [level=3] [ref=f11e203]
+          - generic [ref=f11e204]: todo
+        - paragraph [ref=f11e205]: Daily time, timezone, budget caps, pause and kill switch.
+        - generic [ref=f11e206]:
+          - generic [ref=f11e207]:
+            - generic [ref=f11e208]:
+              - textbox "Timezone" [ref=f11e209]:
+                - /placeholder: Timezone (e.g. UTC)
+                - text: UTC
+              - textbox "Daily run time" [ref=f11e210]:
+                - /placeholder: 06:00
+                - text: 06:00
+            - generic [ref=f11e211]:
+              - textbox "LLM cap" [ref=f11e212]: "50"
+              - textbox "Fetch cap" [ref=f11e213]: "100"
+              - textbox "Preparation cap" [ref=f11e214]: "20"
+              - button "Save schedule" [ref=f11e215] [cursor=pointer]
+          - generic [ref=f11e216]:
+            - button "Pause loop" [ref=f11e217] [cursor=pointer]
+            - button "Kill switch" [ref=f11e218] [cursor=pointer]
+            - generic [ref=f11e219]: running

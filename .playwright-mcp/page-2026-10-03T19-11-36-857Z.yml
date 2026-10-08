@@ -1,0 +1,7 @@
+- generic [active] [ref=f14e1]:
+  - generic [ref=f14e3]:
+    - heading "Bummer, something went wrong." [level=3] [ref=f14e5]
+    - generic [ref=f14e6]:
+      - text: "In five seconds, you will be redirected to:"
+      - strong [ref=f14e7]: localhost
+  - paragraph [ref=f14e8]: © LinkedIn

@@ -1,0 +1,333 @@
+- generic [ref=f5e3]:
+  - navigation "Main navigation" [ref=f5e4]:
+    - generic [ref=f5e12]:
+      - text: Growth Operator
+      - generic [ref=f5e13]: Content Brain
+    - navigation [ref=f5e14]:
+      - generic [ref=f5e15]:
+        - generic [ref=f5e16]: Core
+        - link "Home" [ref=f5e17] [cursor=pointer]:
+          - /url: /
+        - link "Today's Brain" [ref=f5e22] [cursor=pointer]:
+          - /url: /dashboard
+      - generic [ref=f5e29]:
+        - generic [ref=f5e30]: Intelligence
+        - link "Learning" [ref=f5e31] [cursor=pointer]:
+          - /url: /learning
+        - link "Content" [ref=f5e34] [cursor=pointer]:
+          - /url: /content
+        - link "Brain / Intelligence" [ref=f5e39] [cursor=pointer]:
+          - /url: /brain
+      - generic [ref=f5e46]:
+        - generic [ref=f5e47]: Sales
+        - link "Leads" [ref=f5e48] [cursor=pointer]:
+          - /url: /leads
+        - link "Inbox" [ref=f5e55] [cursor=pointer]:
+          - /url: /inbox
+        - link "Pipeline" [ref=f5e60] [cursor=pointer]:
+          - /url: /pipeline
+      - generic [ref=f5e65]:
+        - generic [ref=f5e66]: System
+        - link "Analytics" [ref=f5e67] [cursor=pointer]:
+          - /url: /analytics
+        - link "Settings" [ref=f5e70] [cursor=pointer]:
+          - /url: /settings
+        - link "Onboarding" [ref=f5e75] [cursor=pointer]:
+          - /url: /onboarding
+    - generic [ref=f5e89]:
+      - paragraph [ref=f5e90]: test@gmail.com
+      - button "Sign out" [ref=f5e91] [cursor=pointer]
+  - main [ref=f5e80]:
+    - generic [ref=f5e81]:
+      - link [ref=f5e82] [cursor=pointer]:
+        - /url: /
+        - heading "Growth Operator" [level=1] [ref=f5e83]
+      - paragraph [ref=f5e84]: Human-guided AI operating system for LinkedIn growth
+    - generic [ref=f5e407]:
+      - generic [ref=f5e408]:
+        - generic [ref=f5e409]:
+          - heading "Brain / Intelligence" [level=2] [ref=f5e410]
+          - paragraph [ref=f5e411]: Opportunities, trends, gaps, and sources for your workspace.
+        - generic [ref=f5e412]:
+          - generic [ref=f5e413]:
+            - generic [ref=f5e414]: Workspace
+            - combobox "Workspace" [ref=f5e415]:
+              - option "Select a workspace" [disabled]
+              - option "test"
+              - option "Demo Workspace" [selected]
+          - button "New workspace" [ref=f5e416] [cursor=pointer]
+      - tablist "Intelligence sections" [ref=f5e417]:
+        - tab "Overview" [ref=f5e418] [cursor=pointer]
+        - tab "Opportunities" [ref=f5e419] [cursor=pointer]
+        - tab "Trends" [ref=f5e420] [cursor=pointer]
+        - tab "Gaps" [ref=f5e421] [cursor=pointer]
+        - tab "Sources" [active] [selected] [ref=f5e422] [cursor=pointer]
+        - tab "Audience Problems" [ref=f5e423] [cursor=pointer]
+        - tab "YFP Scoring" [ref=f5e424] [cursor=pointer]
+        - tab "Content Studio" [ref=f5e425] [cursor=pointer]
+        - tab "Performance" [ref=f5e426] [cursor=pointer]
+        - tab "Learning" [ref=f5e427] [cursor=pointer]
+      - generic [ref=f5e438]:
+        - generic [ref=f5e439]:
+          - heading "Sources & Connections" [level=2] [ref=f5e440]
+          - paragraph [ref=f5e441]: Connect your accounts and choose the information sources Growth Operator can use for research, content and authorized actions.
+        - region "Connect your platforms" [ref=f5e442]:
+          - heading "Connect your platforms" [level=3] [ref=f5e443]
+          - paragraph [ref=f5e444]: Connect the accounts you want Growth Operator to work with. You control which capabilities are enabled. Connecting an account never automatically enables research, publishing, or analytics.
+          - list [ref=f5e445]:
+            - listitem [ref=f5e446]:
+              - generic [ref=f5e447]:
+                - generic [aria-hidden] [ref=f5e448]: L
+                - paragraph [ref=f5e449]: LinkedIn
+                - generic [ref=f5e450]: Not connected
+              - paragraph [ref=f5e451]: Read your own LinkedIn posts for inspiration. Post reads need an approved product on the provider app.
+              - generic [ref=f5e452]:
+                - generic [ref=f5e453]:
+                  - term [ref=f5e454]: Account
+                  - definition [ref=f5e455]: Not connected
+                - generic [ref=f5e456]:
+                  - term [ref=f5e457]: Research
+                  - definition [ref=f5e458]: Not available — Account connection does not enable research. Registry research is not wired to workspace tokens in this version.
+                - generic [ref=f5e459]:
+                  - term [ref=f5e460]: Publishing
+                  - definition [ref=f5e461]: Not available — Publishing is not implemented for any platform.
+                - generic [ref=f5e462]:
+                  - term [ref=f5e463]: Analytics
+                  - definition [ref=f5e464]: Not available
+              - button "Connect LinkedIn" [ref=f5e466] [cursor=pointer]
+              - group [ref=f5e467]:
+                - generic "What this connection can read" [ref=f5e468] [cursor=pointer]
+              - group [ref=f5e469]:
+                - generic "Technical status" [ref=f5e470] [cursor=pointer]
+            - listitem [ref=f5e471]:
+              - generic [ref=f5e472]:
+                - generic [aria-hidden] [ref=f5e473]: "Y"
+                - paragraph [ref=f5e474]: YouTube
+                - generic [ref=f5e475]: Setup required
+              - paragraph [ref=f5e476]: Pull uploads from your own YouTube channel. Research search is a separate server-side capability.
+              - generic [ref=f5e477]:
+                - generic [ref=f5e478]:
+                  - term [ref=f5e479]: Account
+                  - definition [ref=f5e480]: Setup required
+                - generic [ref=f5e481]:
+                  - term [ref=f5e482]: Research
+                  - definition [ref=f5e483]: Not available — Server credentials are missing — administrator setup is required before research can run.
+                - generic [ref=f5e484]:
+                  - term [ref=f5e485]: Publishing
+                  - definition [ref=f5e486]: Not available — Publishing is not implemented for any platform.
+                - generic [ref=f5e487]:
+                  - term [ref=f5e488]: Analytics
+                  - definition [ref=f5e489]: Not available
+              - button "Configure YouTube" [ref=f5e491] [cursor=pointer]
+              - group [ref=f5e492]:
+                - generic "What this connection can read" [ref=f5e493] [cursor=pointer]
+              - group [ref=f5e494]:
+                - generic "Technical status" [ref=f5e495] [cursor=pointer]
+            - listitem [ref=f5e496]:
+              - generic [ref=f5e497]:
+                - generic [aria-hidden] [ref=f5e498]: I
+                - paragraph [ref=f5e499]: Instagram
+                - generic [ref=f5e500]: Setup required
+              - paragraph [ref=f5e501]: Read media from your Instagram business or creator account. Personal accounts are not readable via the API.
+              - generic [ref=f5e502]:
+                - generic [ref=f5e503]:
+                  - term [ref=f5e504]: Account
+                  - definition [ref=f5e505]: Setup required
+                - generic [ref=f5e506]:
+                  - term [ref=f5e507]: Research
+                  - definition [ref=f5e508]: Not available — Account connection does not enable research. Registry research is not wired to workspace tokens in this version.
+                - generic [ref=f5e509]:
+                  - term [ref=f5e510]: Publishing
+                  - definition [ref=f5e511]: Not available — Publishing is not implemented for any platform.
+                - generic [ref=f5e512]:
+                  - term [ref=f5e513]: Analytics
+                  - definition [ref=f5e514]: Not available
+              - button "Configure Instagram" [ref=f5e516] [cursor=pointer]
+              - group [ref=f5e517]:
+                - generic "What this connection can read" [ref=f5e518] [cursor=pointer]
+              - group [ref=f5e519]:
+                - generic "Technical status" [ref=f5e520] [cursor=pointer]
+            - listitem [ref=f5e521]:
+              - generic [ref=f5e522]:
+                - generic [aria-hidden] [ref=f5e523]: F
+                - paragraph [ref=f5e524]: Facebook
+                - generic [ref=f5e525]: Setup required
+              - paragraph [ref=f5e526]: Read posts from Facebook Pages you administer. Personal timelines are not readable.
+              - generic [ref=f5e527]:
+                - generic [ref=f5e528]:
+                  - term [ref=f5e529]: Account
+                  - definition [ref=f5e530]: Setup required
+                - generic [ref=f5e531]:
+                  - term [ref=f5e532]: Research
+                  - definition [ref=f5e533]: Not available — No runnable research path exists for Facebook in this version.
+                - generic [ref=f5e534]:
+                  - term [ref=f5e535]: Publishing
+                  - definition [ref=f5e536]: Not available — Publishing is not implemented for any platform.
+                - generic [ref=f5e537]:
+                  - term [ref=f5e538]: Analytics
+                  - definition [ref=f5e539]: Not available
+              - button "Configure Facebook" [ref=f5e541] [cursor=pointer]
+              - group [ref=f5e542]:
+                - generic "What this connection can read" [ref=f5e543] [cursor=pointer]
+              - group [ref=f5e544]:
+                - generic "Technical status" [ref=f5e545] [cursor=pointer]
+            - listitem [ref=f5e546]:
+              - generic [ref=f5e547]:
+                - generic [aria-hidden] [ref=f5e548]: X
+                - paragraph [ref=f5e549]: X
+                - generic [ref=f5e550]: Setup required
+              - paragraph [ref=f5e551]: Read your own recent X posts. The free API tier is narrow; rate limits are reported honestly.
+              - generic [ref=f5e552]:
+                - generic [ref=f5e553]:
+                  - term [ref=f5e554]: Account
+                  - definition [ref=f5e555]: Setup required
+                - generic [ref=f5e556]:
+                  - term [ref=f5e557]: Research
+                  - definition [ref=f5e558]: Not available — Account connection does not enable research. Registry research is not wired to workspace tokens in this version.
+                - generic [ref=f5e559]:
+                  - term [ref=f5e560]: Publishing
+                  - definition [ref=f5e561]: Not available — Publishing is not implemented for any platform.
+                - generic [ref=f5e562]:
+                  - term [ref=f5e563]: Analytics
+                  - definition [ref=f5e564]: Not available
+              - button "Configure X" [ref=f5e566] [cursor=pointer]
+              - group [ref=f5e567]:
+                - generic "What this connection can read" [ref=f5e568] [cursor=pointer]
+              - group [ref=f5e569]:
+                - generic "Technical status" [ref=f5e570] [cursor=pointer]
+            - listitem [ref=f5e571]:
+              - generic [ref=f5e572]:
+                - generic [aria-hidden] [ref=f5e573]: T
+                - paragraph [ref=f5e574]: TikTok
+                - generic [ref=f5e575]: Coming soon
+              - paragraph [ref=f5e576]: Coming later. Connection is not available in this version.
+              - generic [ref=f5e577]:
+                - generic [ref=f5e578]:
+                  - term [ref=f5e579]: Account
+                  - definition [ref=f5e580]: Not available
+                - generic [ref=f5e581]:
+                  - term [ref=f5e582]: Research
+                  - definition [ref=f5e583]: Not available
+                - generic [ref=f5e584]:
+                  - term [ref=f5e585]: Publishing
+                  - definition [ref=f5e586]: Not available
+                - generic [ref=f5e587]:
+                  - term [ref=f5e588]: Analytics
+                  - definition [ref=f5e589]: Not available
+              - group [ref=f5e590]:
+                - generic "Technical status" [ref=f5e591] [cursor=pointer]
+        - region "Research sources" [ref=f5e592]:
+          - heading "Research sources" [level=3] [ref=f5e593]
+          - paragraph [ref=f5e594]: Choose public sources Growth Operator can read to discover trends, topics, problems and opportunities. Only sources you enable here run — nothing is fetched silently. A passing test proves one probe request worked just now, never future data.
+          - generic [ref=f5e595]:
+            - list [ref=f5e596]:
+              - listitem [ref=f5e597]:
+                - generic [ref=f5e598]:
+                  - paragraph [ref=f5e599]: Reddit
+                  - generic [ref=f5e600]: Disabled
+                  - generic "Result of the last manual test, if any" [ref=f5e601]: Not tested yet
+                - paragraph [ref=f5e602]: Discover questions, discussions and problems from selected public subreddits (self-posts with problem-discovery signal).
+                - generic [ref=f5e603]:
+                  - button "Enable source" [ref=f5e604] [cursor=pointer]
+                  - button "Test source" [ref=f5e605] [cursor=pointer]
+                - group [ref=f5e606]:
+                  - generic "Technical status" [ref=f5e607] [cursor=pointer]
+              - listitem [ref=f5e608]:
+                - generic [ref=f5e609]:
+                  - paragraph [ref=f5e610]: Google Trends
+                  - generic [ref=f5e611]: Disabled
+                  - generic "Result of the last manual test, if any" [ref=f5e612]: Not tested yet
+                - paragraph [ref=f5e613]: Rising and top related queries plus relative interest (0–100, never absolute volume) for chosen topics. Uses unofficial public Google Trends endpoints — not an official Google API.
+                - generic [ref=f5e614]:
+                  - button "Enable source" [ref=f5e615] [cursor=pointer]
+                  - button "Test source" [ref=f5e616] [cursor=pointer]
+                - group [ref=f5e617]:
+                  - generic "Technical status" [ref=f5e618] [cursor=pointer]
+            - paragraph [ref=f5e620]:
+              - strong [ref=f5e621]: RSS / Atom, Hacker News, GitHub releases, blogs, sites and saved URLs
+              - text: are managed as feed sources —
+              - link "see Feeds & websites below" [ref=f5e622] [cursor=pointer]:
+                - /url: "#sources-feeds"
+              - text: . They are not toggled here.
+            - list [ref=f5e623]:
+              - listitem [ref=f5e624]:
+                - generic [ref=f5e625]:
+                  - paragraph [ref=f5e626]: Quora
+                  - generic [ref=f5e627]: Unavailable
+                - paragraph [ref=f5e628]: Quora provides no official public API for content retrieval, and scraping would violate its Terms of Service. This source cannot be enabled.
+                - paragraph [ref=f5e629]: No action available. Shown for transparency only.
+                - group [ref=f5e630]:
+                  - generic "Technical status" [ref=f5e631] [cursor=pointer]
+        - region "Feeds and websites" [ref=f5e632]:
+          - heading "Feeds & websites" [level=3] [ref=f5e633]
+          - paragraph [ref=f5e634]: Add RSS feeds, blogs, websites and other public sources.
+          - generic [ref=f5e635]:
+            - textbox "Source URL" [ref=f5e636]:
+              - /placeholder: Paste a public article, blog, RSS feed or website URL
+            - combobox "Source type" [ref=f5e637]:
+              - option "RSS" [selected]
+              - option "Atom"
+              - option "Hacker News"
+              - option "GitHub releases"
+              - option "Blog"
+              - option "Site"
+            - button "Add source" [disabled] [ref=f5e638]
+          - generic [ref=f5e640]:
+            - paragraph [ref=f5e641]: Your sources
+            - list [ref=f5e642]:
+              - listitem [ref=f5e643]:
+                - generic [ref=f5e644]:
+                  - paragraph [ref=f5e645]: https://vercel.com/blog
+                  - generic [ref=f5e646]: RSS
+                  - generic [ref=f5e647]: Active
+                - generic [ref=f5e648]:
+                  - button "Pause" [ref=f5e649] [cursor=pointer]
+                  - button "Remove" [ref=f5e650] [cursor=pointer]
+              - listitem [ref=f5e651]:
+                - generic [ref=f5e652]:
+                  - paragraph [ref=f5e653]: https://huggingface.co/blog
+                  - generic [ref=f5e654]: RSS
+                  - generic [ref=f5e655]: Active
+                - generic [ref=f5e656]:
+                  - button "Pause" [ref=f5e657] [cursor=pointer]
+                  - button "Remove" [ref=f5e658] [cursor=pointer]
+              - listitem [ref=f5e659]:
+                - generic [ref=f5e660]:
+                  - paragraph [ref=f5e661]: http://github.blog/
+                  - generic [ref=f5e662]: RSS
+                  - generic [ref=f5e663]: Active
+                - generic [ref=f5e664]:
+                  - button "Pause" [ref=f5e665] [cursor=pointer]
+                  - button "Remove" [ref=f5e666] [cursor=pointer]
+              - listitem [ref=f5e667]:
+                - generic [ref=f5e668]:
+                  - paragraph [ref=f5e669]: https://openai.com/news/
+                  - generic [ref=f5e670]: RSS
+                  - generic [ref=f5e671]: Active
+                - generic [ref=f5e672]:
+                  - button "Pause" [ref=f5e673] [cursor=pointer]
+                  - button "Remove" [ref=f5e674] [cursor=pointer]
+              - listitem [ref=f5e675]:
+                - generic [ref=f5e676]:
+                  - paragraph [ref=f5e677]: https://blog.google/innovation-and-ai/technology/ai/
+                  - generic [ref=f5e678]: RSS
+                  - generic [ref=f5e679]: Active
+                - generic [ref=f5e680]:
+                  - button "Pause" [ref=f5e681] [cursor=pointer]
+                  - button "Remove" [ref=f5e682] [cursor=pointer]
+          - generic [ref=f5e683]:
+            - heading "Single articles & links" [level=4] [ref=f5e684]
+            - paragraph [ref=f5e685]: Save an individual article or page for the Brain to read. For recurring feeds, blogs and sites, use the feed form above.
+            - generic [ref=f5e686]:
+              - textbox "Article URL" [ref=f5e687]:
+                - /placeholder: Paste a single article or page URL to save it
+              - button "Save article" [disabled] [ref=f5e688]
+            - list [ref=f5e689]:
+              - listitem [ref=f5e690]:
+                - paragraph [ref=f5e691]: "DEMO: SaaS onboarding guide (synthetic)"
+                - paragraph [ref=f5e692]: https://example.com/demo/saas-onboarding-guide
+                - generic [ref=f5e693]: ACTIVE
+              - listitem [ref=f5e694]:
+                - paragraph [ref=f5e695]: "DEMO: Founder-led sales notes (synthetic)"
+                - paragraph [ref=f5e696]: https://example.com/demo/founder-led-sales-notes
+                - generic [ref=f5e697]: ACTIVE
