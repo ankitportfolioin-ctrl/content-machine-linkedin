@@ -171,7 +171,7 @@ export function OverviewPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Command"
+        kicker="Today's Briefing"
         title={`${greeting()}`}
         sub="Your growth system is active. Here is what it found and what needs you."
         actions={
@@ -217,17 +217,12 @@ export function OverviewPage() {
         </div>
       </div>
 
+      <div className="brief-grid">
+        <div className="stack" style={{ minWidth: 0 }}>
       {rec ? (
         <section className="recommend" aria-label="Today's signal">
           <div className="kicker">Today's signal</div>
           <p className="recommend-text">{rec.text}</p>
-          {rec.why.length > 0 ? (
-            <ul className="recommend-why">
-              {rec.why.slice(0, 3).map((w, i) => (
-                <li key={i}>{w}</li>
-              ))}
-            </ul>
-          ) : null}
           <div className="row-between" style={{ marginTop: '1rem' }}>
             <div className="actions" aria-label="Signal facts">
               <span className="badge badge-accent">Confidence {rec.confidence}</span>
@@ -261,11 +256,10 @@ export function OverviewPage() {
         />
       )}
 
-      <div className="grid-2">
-        <SectionCard
-          title="Top opportunities"
-          action={<Link to="/opportunities" className="btn btn-ghost btn-sm">View all</Link>}
-        >
+          <SectionCard
+            title="Top opportunities"
+            action={<Link to="/opportunities" className="btn btn-ghost btn-sm">View all</Link>}
+          >
           {topOpps.length === 0 ? (
             <>
               <p className="muted" style={{ margin: 0 }}>
@@ -295,12 +289,36 @@ export function OverviewPage() {
               ))}
             </ul>
           )}
-        </SectionCard>
+          </SectionCard>
+        </div>
 
-        <SectionCard
-          title="AI activity"
-          action={<Link to="/radar" className="btn btn-ghost btn-sm">Open Radar</Link>}
-        >
+        <div className="brief-rail">
+          <SectionCard title="Your AI's view: what's working">
+            {rec && rec.why.length > 0 ? (
+              <ul className="evidence-list">
+                {rec.why.slice(0, 3).map((w, i) => (
+                  <li key={i}>
+                    <span className="evidence-dot" aria-hidden="true" />
+                    <span>{w}</span>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="muted" style={{ margin: 0 }}>
+                No evidence yet — run a scan and the reasoning behind each suggestion will show up here.
+              </p>
+            )}
+            {typeof today?.newLearnedPatterns === 'number' && today.newLearnedPatterns > 0 ? (
+              <p style={{ margin: '0.75rem 0 0' }}>
+                <Link to="/learning">{today.newLearnedPatterns} patterns learned from your posts</Link>
+              </p>
+            ) : null}
+          </SectionCard>
+
+          <SectionCard
+            title="AI activity"
+            action={<Link to="/radar" className="btn btn-ghost btn-sm">Open Radar</Link>}
+          >
           {activity.length === 0 ? (
             <p className="muted" style={{ margin: 0 }}>
               No recorded activity yet. Runs, digests, and decisions will stream in here.
@@ -320,7 +338,15 @@ export function OverviewPage() {
               ))}
             </ul>
           )}
-        </SectionCard>
+          </SectionCard>
+        </div>
+      </div>
+
+      <div className="card safety-banner">
+        <p className="muted" style={{ margin: 0 }}>
+          Nothing publishes without your review. Approve or dismiss every post in{' '}
+          <Link to="/approvals">Review posts</Link>.
+        </p>
       </div>
 
       <p className="tiny">
