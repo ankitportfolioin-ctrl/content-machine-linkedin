@@ -1,4 +1,5 @@
 import { Router, Router as ExpressRouter } from 'express';
+import crypto from 'crypto';
 import {
   authMiddleware,
   workspaceMiddleware,
@@ -10,6 +11,7 @@ import { prisma } from '@growth-operator/db';
 import { ConflictError, NotFoundError, ValidationError } from '../utils/errors';
 import { getEnv } from '../config/env';
 import { decryptToken } from '../utils/tokenVault';
+import { storeOAuthState } from '../utils/oauthState';
 import {
   CONNECTOR_CATALOGUE,
   getCatalogueEntry,
@@ -324,6 +326,55 @@ router.post('/:sourceType/verify', async (req, res, next) => {
     }
 
     throw new NotFoundError('Connector');
+  } catch (error) {
+    next(error);
+  }
+});
+
+// ---------------------------------------------------------------------------
+// POST /api/v1/connectors/:sourceType/connect — initiate OAuth for research connectors
+// that support app-only OAuth (e.g., Reddit). Returns { authorizationUrl, state }.
+// ---------------------------------------------------------------------------
+
+router.post('/:sourceType/connect', async (req, res, next) => {
+  try {
+    const authReq = req as unknown as AuthenticatedRequest;
+    const raw = String(req.params.sourceType ?? '').toUpperCase();
+    const catalogue = getCatalogueEntry(raw);
+    if (!catalogue) {
+      try {
+        assertResearchConnectorType(raw);
+      } catch {
+        throw new NotFoundError('Connector');
+      }
+    }
+    // catalogue is guaranteed to be defined here
+    const cat = catalogue!;
+    if (!cat.accountConnectable) {
+      throw new ConflictError(`${raw} is not connectable: no authorized OAuth flow exists for research.`);
+    }
+    if (raw === 'REDDIT') {
+      if (!serverCredsPresent(raw)) {
+        throw new ConflictError('Reddit research OAuth requires REDDIT_CLIENT_ID and REDDIT_CLIENT_SECRET on the server. Nothing was connected.');
+      }
+      const state = crypto.randomBytes(16).toString('hex');
+      await storeOAuthState({
+        state,
+        workspaceId: authReq.workspaceId,
+        userId: authReq.user.id,
+        platform: raw as 'INSTAGRAM' | 'FACEBOOK' | 'LINKEDIN' | 'YOUTUBE' | 'X' | 'REDDIT',
+      });
+      const authUrl = `https://www.reddit.com/api/v1/authorize?${new URLSearchParams({
+        client_id: (process.env.REDDIT_CLIENT_ID ?? '').trim(),
+        response_type: 'code',
+        state,
+        redirect_uri: (process.env.SOCIAL_REDIRECT_URI ?? `${process.env.API_URL}/api/v1/social/callback/${raw}`).trim(),
+        duration: 'permanent',
+        scope: 'read',
+      }).toString()}`;
+      return res.json({ authorizationUrl: authUrl, state });
+    }
+    throw new ConflictError(`${raw} does not support a connect flow.`);
   } catch (error) {
     next(error);
   }

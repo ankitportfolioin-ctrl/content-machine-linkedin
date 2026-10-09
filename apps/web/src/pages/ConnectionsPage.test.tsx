@@ -119,7 +119,7 @@ describe('ConnectionsPage', () => {
     expect(await screen.findByText('LinkedIn')).toBeInTheDocument();
     expect(screen.getByText('Ada Operator')).toBeInTheDocument();
     expect(screen.getByText('Reddit')).toBeInTheDocument();
-    expect(screen.getByText('Idle')).toBeInTheDocument();
+    expect(screen.getByText('Connected')).toBeInTheDocument();
   });
 
   it('shows a Connect button for connectable platforms that calls the real OAuth endpoint', async () => {

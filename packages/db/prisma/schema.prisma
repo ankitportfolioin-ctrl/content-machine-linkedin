@@ -941,6 +941,7 @@ enum SocialPlatform {
   LINKEDIN
   YOUTUBE
   X
+  REDDIT
 }
 
 enum SocialConnectionStatus {
