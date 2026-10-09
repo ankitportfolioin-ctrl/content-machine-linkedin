@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, StatusDot, TimeAgo } from '../components/ui';
-import { friendlyErrorMessage, listConnectors, listFeeds, listSocialConnections } from '../services/api';
+import { connectSocial, friendlyErrorMessage, listConnectors, listFeeds, listSocialConnections } from '../services/api';
 import type { FeedSource, SocialConnection, WorkspaceConnectorEntry } from '../types';
 
 export function ConnectionsPage() {
@@ -13,6 +13,8 @@ export function ConnectionsPage() {
   const [feeds, setFeeds] = useState<FeedSource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [connecting, setConnecting] = useState<string | null>(null);
+  const [connectMsg, setConnectMsg] = useState<string | null>(null);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -37,6 +39,20 @@ export function ConnectionsPage() {
     if (isAuthenticated) void fetchAll();
     else setLoading(false);
   }, [isAuthenticated, fetchAll]);
+
+  async function handleConnect(sourceType: string) {
+    setConnecting(sourceType);
+    setConnectMsg(null);
+    try {
+      // Existing backend OAuth initiation (same as Research Sources) — the
+      // provider page opens only after the user explicitly clicks Connect.
+      const res = await connectSocial(sourceType.toLowerCase());
+      window.location.href = res.authorizationUrl;
+    } catch (err) {
+      setConnectMsg(friendlyErrorMessage(err));
+      setConnecting(null);
+    }
+  }
 
   if (authLoading) return <SkeletonBlock lines={4} />;
   if (!isAuthenticated) {
@@ -132,6 +148,11 @@ export function ConnectionsPage() {
         </SectionCard>
 
         <SectionCard title={`Platforms (${platforms.length})`} action={<Link to="/brain" className="btn btn-ghost btn-sm">Workbench</Link>}>
+          {connectMsg ? (
+            <p role="alert" className="alert-error" style={{ marginTop: 0 }}>
+              {connectMsg}
+            </p>
+          ) : null}
           {platforms.length === 0 ? (
             <p className="muted" style={{ margin: 0 }}>No platform connectors reported.</p>
           ) : (
@@ -145,6 +166,23 @@ export function ConnectionsPage() {
                     </div>
                     <StatusDot tone={c.accountState === 'CONNECTED' ? 'ok' : 'idle'} label={c.accountState === 'CONNECTED' ? 'Connected' : 'Disconnected'} />
                   </div>
+                  {c.accountState !== 'CONNECTED' && c.accountConnectable ? (
+                    <div className="actions" style={{ marginTop: '0.5rem' }}>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={connecting === c.sourceType}
+                        onClick={() => void handleConnect(c.sourceType)}
+                      >
+                        {connecting === c.sourceType ? 'Opening provider…' : `Connect ${c.displayName}`}
+                      </button>
+                    </div>
+                  ) : null}
+                  {c.accountState !== 'CONNECTED' && !c.accountConnectable ? (
+                    <p className="tiny" style={{ marginTop: '0.35rem' }}>
+                      {c.notWiredReason ?? 'Connection is not available in this version.'}
+                    </p>
+                  ) : null}
                 </li>
               ))}
             </ul>

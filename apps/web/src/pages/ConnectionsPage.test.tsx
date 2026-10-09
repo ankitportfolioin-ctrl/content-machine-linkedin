@@ -20,7 +20,7 @@ vi.mock('../context/AuthContext', () => ({
 }));
 
 const { apiMocks } = vi.hoisted(() => ({
-  apiMocks: { listSocialConnections: vi.fn(), listConnectors: vi.fn(), listFeeds: vi.fn() },
+  apiMocks: { listSocialConnections: vi.fn(), listConnectors: vi.fn(), listFeeds: vi.fn(), connectSocial: vi.fn() },
 }));
 
 vi.mock('../services/api', async (importOriginal) => {
@@ -30,8 +30,34 @@ vi.mock('../services/api', async (importOriginal) => {
     listSocialConnections: apiMocks.listSocialConnections,
     listConnectors: apiMocks.listConnectors,
     listFeeds: apiMocks.listFeeds,
+    connectSocial: apiMocks.connectSocial,
   };
 });
+
+function platformEntry(overrides: Record<string, unknown> = {}) {
+  return {
+    sourceType: 'LINKEDIN',
+    displayName: 'LinkedIn',
+    group: 'CONNECTED_PLATFORM',
+    description: 'd',
+    authKind: 'OAUTH',
+    sourceOfTruth: 's',
+    workerEligible: false,
+    notWiredReason: null,
+    accountConnectable: true,
+    requiresAccountNote: null,
+    userAction: 'u',
+    enabled: false,
+    enabledState: 'DISABLED',
+    configState: 'NOT_CONFIGURED',
+    config: {},
+    accountState: 'NOT_CONNECTED',
+    serverCredsPresent: true,
+    workerWillRun: false,
+    probe: { status: 'NEVER_PROBED', checkedAt: null, error: null },
+    ...overrides,
+  };
+}
 
 describe('ConnectionsPage', () => {
   it('shows connected accounts, connector states, and feeds honestly', async () => {
@@ -94,5 +120,52 @@ describe('ConnectionsPage', () => {
     expect(screen.getByText('Ada Operator')).toBeInTheDocument();
     expect(screen.getByText('Reddit')).toBeInTheDocument();
     expect(screen.getByText('Idle')).toBeInTheDocument();
+  });
+
+  it('shows a Connect button for connectable platforms that calls the real OAuth endpoint', async () => {
+    const { fireEvent } = await import('@testing-library/react');
+    apiMocks.listSocialConnections.mockResolvedValue({ connections: [] });
+    apiMocks.listConnectors.mockResolvedValue({ connectors: [platformEntry()] });
+    apiMocks.listFeeds.mockResolvedValue({ feeds: [] });
+    apiMocks.connectSocial.mockResolvedValue({ authorizationUrl: 'https://provider.example/auth', state: 's' });
+
+    render(
+      <MemoryRouter initialEntries={['/connections']}>
+        <Routes>
+          <Route path="/connections" element={<ConnectionsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    const connectButton = await screen.findByRole('button', { name: 'Connect LinkedIn' });
+    expect(connectButton).toBeEnabled();
+    fireEvent.click(connectButton);
+    expect(apiMocks.connectSocial).toHaveBeenCalledWith('linkedin');
+  });
+
+  it('shows honest unavailable text instead of a dead button for non-connectable platforms', async () => {
+    apiMocks.listSocialConnections.mockResolvedValue({ connections: [] });
+    apiMocks.listConnectors.mockResolvedValue({
+      connectors: [
+        platformEntry({
+          sourceType: 'TIKTOK',
+          displayName: 'TikTok',
+          accountConnectable: false,
+          notWiredReason: 'TikTok is not yet connectable in this version.',
+        }),
+      ],
+    });
+    apiMocks.listFeeds.mockResolvedValue({ feeds: [] });
+
+    render(
+      <MemoryRouter initialEntries={['/connections']}>
+        <Routes>
+          <Route path="/connections" element={<ConnectionsPage />} />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText('TikTok is not yet connectable in this version.')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Connect TikTok/ })).not.toBeInTheDocument();
   });
 });
