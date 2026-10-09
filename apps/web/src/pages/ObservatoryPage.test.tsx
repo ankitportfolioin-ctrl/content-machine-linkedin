@@ -20,7 +20,7 @@ vi.mock('../context/AuthContext', () => ({
 }));
 
 const { apiMocks } = vi.hoisted(() => ({
-  apiMocks: { listSources: vi.fn(), listTrends: vi.fn(), listGaps: vi.fn() },
+  apiMocks: { listSources: vi.fn(), listTrends: vi.fn(), listGaps: vi.fn(), listOpportunities: vi.fn() },
 }));
 
 vi.mock('../services/api', async (importOriginal) => {
@@ -30,6 +30,7 @@ vi.mock('../services/api', async (importOriginal) => {
     listSources: apiMocks.listSources,
     listTrends: apiMocks.listTrends,
     listGaps: apiMocks.listGaps,
+    listOpportunities: apiMocks.listOpportunities,
   };
 });
 
@@ -41,6 +42,7 @@ function renderObservatory() {
     trends: [{ id: 't-1', title: 'AI agents accelerate', description: 'Rising fast', strength: 82, status: 'TRENDING' }],
   });
   apiMocks.listGaps.mockResolvedValue({ gaps: [] });
+  apiMocks.listOpportunities.mockResolvedValue({ opportunities: [] });
   return render(
     <MemoryRouter initialEntries={['/observatory']}>
       <Routes>
@@ -51,12 +53,12 @@ function renderObservatory() {
 }
 
 describe('ObservatoryPage', () => {
-  it('shows live counts and filters the feed', async () => {
+  it('shows honest counts and filters the feed', async () => {
     renderObservatory();
-    expect(await screen.findByText(/Monitoring 1 source · 1 trends · 0 gaps/)).toBeInTheDocument();
+    expect(await screen.findByText(/Monitoring 1 saved item · 0 opportunities · 0 gaps/)).toBeInTheDocument();
     expect(screen.getByText('AI agents accelerate')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Gaps' }));
-    expect(await screen.findByText('No signals under this filter')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('tab', { name: 'Content gaps' }));
+    expect(await screen.findByText('No content gaps yet')).toBeInTheDocument();
   });
 });

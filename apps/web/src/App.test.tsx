@@ -10,33 +10,34 @@ describe('Web Application', () => {
   it('renders the command-center shell with brand', async () => {
     renderApp();
     expect(screen.getByText('Growth Operator')).toBeInTheDocument();
-    expect(screen.getByText('AI Growth OS')).toBeInTheDocument();
+    expect(screen.getByText('One helpful AI operator')).toBeInTheDocument();
   });
 
-  it('shows loading state initially', () => {
+  it('shows the Home command center immediately', () => {
     renderApp();
-    expect(screen.getByText('Checking connection...')).toBeInTheDocument();
+    // Auth resolves to signed-out in tests (no stored token): Home answers
+    // “Where am I?” right away instead of a spinner storm.
+    expect(screen.getByText('Your brand, today.')).toBeInTheDocument();
   });
 
-  it('renders command-center navigation', () => {
+  it('renders plain-language navigation with descriptions', () => {
     renderApp();
-    expect(screen.getByRole('link', { name: /^home$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^discover$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^explore$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^your audience$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /what's trending/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^post ideas$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^write a post$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^schedule$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^review posts$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^your results$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^try new things$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^tips$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^connected accounts$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^settings$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^leads$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^inbox$/i })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /^pipeline$/i })).toBeInTheDocument();
+    // 8 primary items in workflow order — each link exposes its description
+    // to assistive tech via the accessible name (label + description).
+    expect(screen.getByRole('link', { name: /home.*your brand, today/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /research.*things worth talking about/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /create.*start something new/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /content.*ideas, drafts/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /engage.*replies/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /people & opportunities/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /analytics/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /learning.*what ai has learned/i })).toBeInTheDocument();
+    // Setup & connections
+    expect(screen.getByRole('link', { name: /connections.*connect an account/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /research sources.*where ideas come from/i })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: /^settings.*business, audience/i })).toBeInTheDocument();
+    // Help appears in sidebar + top bar — both must exist and both go somewhere real.
+    expect(screen.getAllByRole('link', { name: /help.*what goes where/i }).length).toBeGreaterThanOrEqual(1);
   });
 
   it('exposes the command palette trigger with shortcut hint', () => {

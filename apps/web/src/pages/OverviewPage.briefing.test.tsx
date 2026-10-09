@@ -31,6 +31,10 @@ const { apiMocks } = vi.hoisted(() => ({
     listRuns: vi.fn(),
     getOnboarding: vi.fn(),
     triggerRun: vi.fn(),
+    listReviews: vi.fn(),
+    listContentIdeas: vi.fn(),
+    listPublishRecords: vi.fn(),
+    listLearningProposals: vi.fn(),
   },
 }));
 
@@ -48,6 +52,10 @@ vi.mock('../services/api', async (importOriginal) => {
     listRuns: apiMocks.listRuns,
     getOnboarding: apiMocks.getOnboarding,
     triggerRun: apiMocks.triggerRun,
+    listReviews: apiMocks.listReviews,
+    listContentIdeas: apiMocks.listContentIdeas,
+    listPublishRecords: apiMocks.listPublishRecords,
+    listLearningProposals: apiMocks.listLearningProposals,
   };
 });
 
@@ -88,6 +96,17 @@ function mockBaseline() {
   apiMocks.listReports.mockResolvedValue({ reports: [] });
   apiMocks.listRuns.mockResolvedValue({ runs: [] });
   apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: true } });
+  apiMocks.listReviews.mockResolvedValue({
+    reviews: [
+      { id: 'r1', status: 'SUBMITTED' },
+      { id: 'r2', status: 'SUBMITTED' },
+      { id: 'r3', status: 'SUBMITTED' },
+      { id: 'r4', status: 'SUBMITTED' },
+    ],
+  });
+  apiMocks.listContentIdeas.mockResolvedValue({ contentIdeas: [{ id: 'i1' }] });
+  apiMocks.listPublishRecords.mockResolvedValue({ publishRecords: [] });
+  apiMocks.listLearningProposals.mockResolvedValue({ proposals: [{ id: 'p1' }] });
   apiMocks.triggerRun.mockResolvedValue({
     result: { runId: 'run-1', status: 'COMPLETED', stages: [], resumed: false },
   });
@@ -106,31 +125,33 @@ function renderOverview() {
 }
 
 describe('OverviewPage briefing', () => {
-  it('renders greeting, statuses, signal, and top opportunities', async () => {
+  it('renders brand-today header, real counts, signal, and priorities', async () => {
     mockBaseline();
     renderOverview();
 
-    expect(await screen.findByText(/Good (morning|afternoon|evening)/)).toBeInTheDocument();
+    expect(await screen.findByText('Your brand, today.')).toBeInTheDocument();
     expect(screen.getByText('Connected')).toBeInTheDocument();
-    expect(screen.getByText('Monitoring')).toBeInTheDocument();
-    expect(screen.getByText('4 awaiting approval')).toBeInTheDocument();
+    // Needs-your-decision count comes from real review rows (4 SUBMITTED).
+    expect(screen.getByText(/4.*wait.*review/i)).toBeInTheDocument();
     expect(
       screen.getByText('AI workflow automation content is accelerating among beginner developers.'),
     ).toBeInTheDocument();
-    expect(screen.getByText('Confidence HIGH')).toBeInTheDocument();
-    expect(screen.getByText('AI workflow automation for beginners')).toBeInTheDocument();
-    expect(screen.getAllByText('Create Draft').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getByText(/Confidence HIGH/)).toBeInTheDocument();
+    // The same real opportunity appears in Today's priorities and in
+    // New in research — both must render from the same record.
+    expect(screen.getAllByText('AI workflow automation for beginners').length).toBeGreaterThanOrEqual(1);
+    expect(screen.getAllByText('Create content').length).toBeGreaterThanOrEqual(1);
 
-    fireEvent.click(screen.getByText('Explore Signal'));
+    fireEvent.click(screen.getAllByText('Explore')[0]!);
     expect(await screen.findByText('Observatory page')).toBeInTheDocument();
   });
 
-  it('runs an intelligence scan and reports the result', async () => {
+  it('checks for new ideas and reports the result', async () => {
     mockBaseline();
     renderOverview();
-    await screen.findByText('Run Intelligence Scan');
+    await screen.findByText('Check for new ideas');
 
-    fireEvent.click(screen.getAllByText('Run Intelligence Scan')[0]!);
+    fireEvent.click(screen.getAllByText('Check for new ideas')[0]!);
     expect(apiMocks.triggerRun).toHaveBeenCalled();
     expect(await screen.findByText(/Scan completed/)).toBeInTheDocument();
   });
@@ -150,11 +171,15 @@ describe('OverviewPage briefing', () => {
       },
     });
     apiMocks.listOpportunities.mockResolvedValue({ opportunities: [] });
-    apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: false } });
+    apiMocks.listReviews.mockResolvedValue({ reviews: [] });
+    apiMocks.listLearningProposals.mockResolvedValue({ proposals: [] });
+    apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: false, currentStep: 'offers' } });
     renderOverview();
 
-    expect(await screen.findByText('No signal yet')).toBeInTheDocument();
-    expect(screen.getByText('No new opportunities yet.')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Continue onboarding' })).toHaveAttribute('href', '/onboarding');
+    expect(await screen.findByText('Nothing urgent today')).toBeInTheDocument();
+    expect(screen.getByText(/No new source items yet/)).toBeInTheDocument();
+    const setupLinks = screen.getAllByRole('link', { name: 'Continue setup' });
+    expect(setupLinks.length).toBeGreaterThanOrEqual(1);
+    setupLinks.forEach((l) => expect(l).toHaveAttribute('href', '/onboarding'));
   });
 });

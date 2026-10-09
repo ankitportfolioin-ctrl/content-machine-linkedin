@@ -65,16 +65,20 @@ export function RadarPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Start here"
+        kicker="Research · Older view"
         title="Discover"
-        sub={total === 0 ? 'Nothing pending — the system is quiet.' : `${total} pending recommendation${total === 1 ? '' : 's'}, ranked by expected impact.`}
+        sub={total === 0 ? 'Nothing pending — the system is quiet. This older list now lives inside Research.' : `${total} pending recommendation${total === 1 ? '' : 's'}, ranked by expected impact. For daily work, use Research.`}
+        nextStep="Go to Research for the simpler view with evidence."
+        helpHref="/help#research"
+        actions={<Link to="/observatory" className="btn btn-primary btn-sm">Open Research</Link>}
       />
       {actions.length === 0 ? (
         <EmptyState
           title="Radar is clear"
           what="No pending recommendations right now."
           why="New suggestions appear here when the system completes a run or detects fresh signals."
-          action={<Link to="/observatory" className="btn btn-secondary btn-sm">Inspect signals</Link>}
+          nextStep="Open Research to browse with “Why it matters” on each item."
+          action={<Link to="/observatory" className="btn btn-secondary btn-sm">Open Research</Link>}
         />
       ) : (
         <SectionCard title={`Live queue (${actions.length} shown)`}>

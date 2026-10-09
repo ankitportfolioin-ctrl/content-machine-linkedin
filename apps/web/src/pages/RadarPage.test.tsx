@@ -57,7 +57,7 @@ describe('RadarPage', () => {
     });
     renderRadar();
     expect(await screen.findByText('Publish the ViewTransition guide')).toBeInTheDocument();
-    expect(screen.getByText('1 pending recommendation, ranked by expected impact.')).toBeInTheDocument();
+    expect(screen.getByText(/1 pending recommendation/)).toBeInTheDocument();
   });
 
   it('shows an honest empty state when the queue is clear', async () => {

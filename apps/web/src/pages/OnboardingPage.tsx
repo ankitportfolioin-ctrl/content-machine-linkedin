@@ -2,7 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
-import { NavLink } from 'react-router-dom';
+import { PageHead, Stepper } from '../components/ui';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   createFeed,
   createProfile,
@@ -23,25 +24,85 @@ import {
 } from '../services/api';
 import { AutonomyPolicy, FeedSource, OnboardingProgress, WorkspaceSettings } from '../types';
 
-const STEP_META: Array<{ id: string; title: string; hint: string }> = [
-  { id: 'profile', title: '1. Profile & voice', hint: 'Role, positioning, writing samples. Managed in Settings; progress is detected automatically.' },
-  { id: 'audience', title: '2. Audience & ICP', hint: 'Target roles, industries, audience segments. Managed in Settings and the Dashboard.' },
-  { id: 'pillars', title: '3. Pillars & objectives', hint: 'What the business talks about and what content must achieve.' },
-  { id: 'offers', title: '4. Offers', hint: 'Products, services, guides — and what you are willing to talk about.' },
-  { id: 'sources', title: '5. Signal sources', hint: 'Free, public, ToS-respecting feeds. No LinkedIn scraping — ever.' },
-  { id: 'leads', title: '6. Lead import', hint: 'Your own CSV or LinkedIn’s official export of your data. Never scraped.' },
-  { id: 'policy', title: '7. Autonomy policy', hint: 'Tier 0 is automatic. Tier 1 stays disabled until LinkedIn posting is available.' },
-  { id: 'schedule', title: '8. Schedule & controls', hint: 'Daily time, timezone, budget caps, pause and kill switch.' },
+/* 6-step wizard (UX) mapped onto the 8 real backend steps.
+   Backend remains source of truth — progress is detected from real data,
+   never ticked manually. Mapping:
+   1 Business → backend `offers`
+   2 Audience → backend `audience`
+   3 Topics → backend `pillars`
+   4 Voice → backend `profile`
+   5 Presence → backend `sources` (+ optional `leads`, + connections)
+   6 How AI works → backend `policy` + `schedule` */
+const WIZARD: Array<{
+  id: string;
+  title: string;
+  question: string;
+  hint: string;
+  backendIds: string[];
+}> = [
+  {
+    id: 'business',
+    title: 'Your business',
+    question: 'What is your business or personal brand called? What do you do and offer?',
+    hint: 'Name, what you do, one offer, and what people should know you for. Website if you have one — we never fetch it without asking.',
+    backendIds: ['offers'],
+  },
+  {
+    id: 'audience',
+    title: 'Your audience',
+    question: 'Who do you want to reach — and who is not a fit?',
+    hint: 'Roles, types of people, their problems. Add one audience; remove anytime (with confirmation if it has saved info).',
+    backendIds: ['audience'],
+  },
+  {
+    id: 'topics',
+    title: 'Your content topics',
+    question: 'What subjects do you want to talk about — and what should you avoid?',
+    hint: 'Add, edit, reorder and remove topics. These become your content pillars in Settings.',
+    backendIds: ['pillars'],
+  },
+  {
+    id: 'voice',
+    title: 'Your voice',
+    question: 'How should AI sound when it drafts for you?',
+    hint: 'Professional or conversational? Educational or opinionated? Short or detailed? Words to avoid, plus one optional writing sample. We never invent your experiences.',
+    backendIds: ['profile'],
+  },
+  {
+    id: 'presence',
+    title: 'Where you want to build presence',
+    question: 'Connect an account and choose 1–2 public sources to start.',
+    hint: 'LinkedIn via official flow; research from RSS, blogs, Reddit, Google Trends. Each shows Connected / Not connected / Needs attention / Requires setup / Not available yet. Skip for now is always ok.',
+    backendIds: ['sources', 'leads'],
+  },
+  {
+    id: 'autonomy',
+    title: 'How AI should work',
+    question: 'AI researches and prepares. You review important actions before they happen.',
+    hint: 'Default: AI can research and prepare recommendations. Tier 1 posting stays off until a real integration exists — stored preference only. Tier 2 (DMs, connections) always needs you.',
+    backendIds: ['policy', 'schedule'],
+  },
 ];
+
+function wizardIndexForBackendStep(currentStep: string | null): number {
+  if (!currentStep) return 0;
+  const idx = WIZARD.findIndex((w) => w.backendIds.includes(currentStep));
+  return idx === -1 ? 0 : idx;
+}
+
+/* Backend step ids (8) are mapped onto the 6 UX wizard steps above.
+   Kept here for reference; progress Badges read progress.steps directly. */
 
 export function OnboardingPage() {
   const { isAuthenticated, loading: authLoading, workspaceId } = useAuth();
+  const navigate = useNavigate();
   const hasWorkspace = workspaceId !== null;
   const [progress, setProgress] = useState<OnboardingProgress | null>(null);
   const [settings, setSettings] = useState<WorkspaceSettings | null>(null);
   const [policy, setPolicy] = useState<AutonomyPolicy | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [stepIndex, setStepIndex] = useState(0);
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
@@ -71,6 +132,16 @@ export function OnboardingPage() {
     if (!authLoading && isAuthenticated && hasWorkspace) void fetchAll();
     if (!authLoading && (!isAuthenticated || !hasWorkspace)) setLoading(false);
   }, [authLoading, isAuthenticated, workspaceId, fetchAll]);
+
+  useEffect(() => {
+    if (progress && !progress.complete) {
+      setStepIndex((prev) => {
+        const fromBackend = wizardIndexForBackendStep(progress.currentStep);
+        // Keep user's manual navigation unless backend moved forward.
+        return Math.max(prev, fromBackend);
+      });
+    }
+  }, [progress]);
 
   if (authLoading || loading) {
     return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Loading onboarding...</h2></div></div>;
@@ -108,50 +179,152 @@ export function OnboardingPage() {
     );
   }
 
-  return (
-    <div className="stack">
-      <div className="card row-between">
-        <div>
-          <p className="kicker">One-time setup</p>
-          <h2 className="section-title" style={{ fontSize: '1.25rem' }}>Get set up</h2>
-          <p className="muted">
-            {progress.complete
-              ? 'Setup complete. The daily loop can run from these settings.'
-              : `Next: ${progress.currentStep ?? '—'}. Progress is detected from your real data, never ticked manually.`}
+  if (progress.complete) {
+    return (
+      <div className="stack">
+        <PageHead
+          kicker="Welcome — 6 quick steps"
+          title="Your workspace is ready."
+          sub="Setup complete. The daily loop can run from these settings."
+          nextStep="Go to Home, review your business profile, or find your first opportunity."
+          helpHref="/help#get-started"
+          actions={<WorkspaceSelector />}
+        />
+        <Stepper steps={WIZARD.map((w) => w.title)} current={WIZARD.length} />
+        <div className="card">
+          <div className="actions">
+            <Link to="/" className="btn btn-primary">Go to Home</Link>
+            <Link to="/settings" className="btn btn-secondary">Review business profile</Link>
+            <Link to="/observatory" className="btn btn-secondary">Find your first opportunity</Link>
+          </div>
+          <p className="muted" style={{ marginBottom: 0 }}>
+            Progress was detected from your real data — never ticked manually. No fake metrics were added.
           </p>
         </div>
-        <WorkspaceSelector />
       </div>
+    );
+  }
 
-      {STEP_META.map((meta) => (
-        <StepCard key={meta.id} meta={meta} done={!!progress.steps[meta.id]} current={progress.currentStep === meta.id}>
-          {meta.id === 'profile' ? <ProfileStep counts={progress.counts} onSaved={() => void refresh()} /> : null}
-          {meta.id === 'audience' ? <AudienceStep counts={progress.counts} /> : null}
-          {meta.id === 'pillars' ? <PillarsStep onSaved={() => void refresh()} /> : null}
-          {meta.id === 'offers' ? <OffersStep onSaved={() => void refresh()} /> : null}
-          {meta.id === 'sources' ? <SourcesStep onChanged={() => void refresh()} /> : null}
-          {meta.id === 'leads' ? <LeadsStep onChanged={() => void refresh()} /> : null}
-          {meta.id === 'policy' ? <PolicyStep policy={policy} onSaved={(p) => { setPolicy(p); void refresh(); }} /> : null}
-          {meta.id === 'schedule' ? <ScheduleStep settings={settings} onSaved={(s) => { setSettings(s); void refresh(); }} /> : null}
-        </StepCard>
-      ))}
-    </div>
-  );
-}
+  const step = WIZARD[Math.min(stepIndex, WIZARD.length - 1)] ?? WIZARD[0]!;
+  const backendDone = (ids: string[]) => ids.every((id) => !!progress.steps[id]);
+  const isLast = stepIndex >= WIZARD.length - 1;
+  const isFirst = stepIndex <= 0;
 
-function StepCard({ meta, done, current, children }: { meta: { id: string; title: string; hint: string }; done: boolean; current: boolean; children: React.ReactNode }) {
+  function goNext() {
+    void refresh();
+    setStepIndex((i) => Math.min(i + 1, WIZARD.length - 1));
+  }
+
+  function goBack() {
+    setStepIndex((i) => Math.max(i - 1, 0));
+  }
+
+  function saveAndExit() {
+    void refresh();
+    navigate('/');
+  }
+
   return (
-    <div className="card stack-sm">
-      <div className="row-between">
-        <h3 className="section-title">{meta.title}</h3>
-        {done
-          ? <span className="badge badge-success">done</span>
-          : current
-            ? <span className="badge badge-info">current</span>
-            : <span className="badge badge-neutral">todo</span>}
+    <div className="stack wizard-shell">
+      <PageHead
+        kicker={`Welcome — step ${stepIndex + 1} of ${WIZARD.length}`}
+        title={step.title}
+        sub={step.question}
+        nextStep={step.hint}
+        helpHref="/help#get-started"
+        actions={<WorkspaceSelector />}
+      />
+      <Stepper steps={WIZARD.map((w) => w.title)} current={stepIndex} />
+
+      <div className="card stack-sm">
+        <div className="row-between">
+          <h3 className="section-title">{step.question}</h3>
+          {backendDone(step.backendIds) ? (
+            <span className="badge badge-success">done</span>
+          ) : (
+            <span className="badge badge-info">current</span>
+          )}
+        </div>
+        <p className="muted">{step.hint}</p>
+
+        {step.id === 'business' ? <OffersStep onSaved={() => void refresh()} /> : null}
+        {step.id === 'audience' ? <AudienceStep counts={progress.counts} /> : null}
+        {step.id === 'topics' ? <PillarsStep onSaved={() => void refresh()} /> : null}
+        {step.id === 'voice' ? <ProfileStep counts={progress.counts} onSaved={() => void refresh()} /> : null}
+        {step.id === 'presence' ? (
+          <div className="stack-sm">
+            <p className="muted" style={{ fontWeight: 600 }}>1) Connect an account (official flow)</p>
+            <div className="actions">
+              <NavLink to="/connections" className="btn btn-secondary">Connect an account</NavLink>
+              <NavLink to="/sources" className="btn btn-secondary">Open Research Sources</NavLink>
+            </div>
+            <p className="muted" style={{ fontWeight: 600 }}>2) Add 1–2 public sources</p>
+            <SourcesStep onChanged={() => void refresh()} />
+            <details>
+              <summary className="muted" style={{ cursor: 'pointer' }}>Optional: import your own people (CSV)</summary>
+              <div style={{ marginTop: '0.5rem' }}>
+                <LeadsStep onChanged={() => void refresh()} />
+              </div>
+            </details>
+            <p className="tiny">
+              Each platform shows Connected / Not connected / Needs attention / Requires setup / Not available yet.
+              Showing “Skip for now” is fine — continue without connecting.
+            </p>
+          </div>
+        ) : null}
+        {step.id === 'autonomy' ? (
+          <div className="stack-sm">
+            <div className="card-row">
+              <p style={{ fontWeight: 700, margin: 0 }}>Default: AI researches and prepares. You review important actions before they happen.</p>
+              <p className="muted" style={{ margin: '0.25rem 0 0' }}>
+                Tier 0 automatic (research, scoring, drafting). Tier 1 posting stays off until a real integration exists.
+                Tier 2 (messages to people) always needs you. Tier 3 (scraping, mass messaging) is never built.
+              </p>
+              <div className="actions" style={{ marginTop: '0.5rem' }}>
+                <button type="button" className="btn btn-ghost btn-sm" onClick={() => alert('Tier 0: research, scoring, drafting, analytics, learning. Tier 1: your own posts only when an integration exists. Tier 2: anything contacting another person — always you. Tier 3: never built.')}>
+                  Learn more
+                </button>
+              </div>
+            </div>
+            <PolicyStep policy={policy} onSaved={(p) => { setPolicy(p); void refresh(); }} />
+            <details>
+              <summary className="muted" style={{ cursor: 'pointer' }}>Schedule & limits (advanced, optional)</summary>
+              <div style={{ marginTop: '0.5rem' }}>
+                <ScheduleStep settings={settings} onSaved={(s) => { setSettings(s); void refresh(); }} />
+              </div>
+            </details>
+          </div>
+        ) : null}
+
+        <div className="wizard-actions">
+          {!isFirst ? <button type="button" className="btn btn-secondary" onClick={goBack}>Back</button> : null}
+          <button type="button" className="btn btn-ghost" onClick={saveAndExit}>Save and exit</button>
+          {!isLast ? (
+            <button type="button" className="btn btn-primary" onClick={goNext}>Continue</button>
+          ) : (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                void refresh();
+                navigate('/');
+              }}
+            >
+              Finish setup
+            </button>
+          )}
+          {step.id === 'presence' ? (
+            <button type="button" className="btn btn-secondary" onClick={goNext}>Skip for now</button>
+          ) : null}
+        </div>
       </div>
-      <p className="muted">{meta.hint}</p>
-      {children}
+
+      <div className="card">
+        <p className="muted" style={{ margin: 0 }}>
+          Progress saves automatically from your real data. Detailed technical settings stay in{' '}
+          <NavLink to="/settings">Settings</NavLink> and <NavLink to="/brain">Deep dive</NavLink> — out of the way until you need them.
+        </p>
+      </div>
     </div>
   );
 }

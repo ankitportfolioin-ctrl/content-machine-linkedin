@@ -4,18 +4,22 @@ interface NavItemProps {
   to: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+  description?: string;
+  tooltip?: string;
 }
 
-export function NavItem({ to, icon, children }: NavItemProps) {
+export function NavItem({ to, icon, children, description, tooltip }: NavItemProps) {
   return (
     <NavLink
       to={to}
-      className={({ isActive }) =>
-        `nav-item ${isActive ? 'active' : ''}`
-      }
+      title={tooltip ?? (typeof children === 'string' ? children : undefined)}
+      className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
     >
       <span className="nav-item-icon">{icon}</span>
-      {children}
+      <span className="nav-item-text">
+        <span className="nav-item-label">{children}</span>
+        {description ? <span className="nav-item-desc">{description}</span> : null}
+      </span>
     </NavLink>
   );
 }

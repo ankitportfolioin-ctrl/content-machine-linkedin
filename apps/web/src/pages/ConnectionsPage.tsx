@@ -70,9 +70,11 @@ export function ConnectionsPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Settings"
-        title="Connected accounts"
-        sub={`${social.filter((c) => c.connected).length} connected account${social.filter((c) => c.connected).length === 1 ? '' : 's'} · ${feeds.filter((f) => f.active).length} active feeds.`}
+        kicker="Connect an account"
+        title="Connections"
+        sub={`${social.filter((c) => c.connected).length} connected account${social.filter((c) => c.connected).length === 1 ? '' : 's'} · ${feeds.filter((f) => f.active).length} active feeds. Official connections only — status is verified, never assumed.`}
+        nextStep="Connect LinkedIn first, then enable research sources."
+        helpHref="/help#connections"
       />
 
       <SectionCard title={`Accounts (${social.length})`}>

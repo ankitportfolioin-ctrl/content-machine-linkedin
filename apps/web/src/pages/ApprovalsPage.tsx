@@ -77,9 +77,11 @@ export function ApprovalsPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Make posts"
-        title="Review posts"
-        sub={reviews.length === 0 ? 'Queue is empty.' : `${reviews.length} item${reviews.length === 1 ? '' : 's'} awaiting your decision. Nothing publishes without approval.`}
+        kicker="Content · Review"
+        title="Needs your decision."
+        sub={reviews.length === 0 ? 'Queue is empty. Approval never means it already happened.' : `${reviews.length} item${reviews.length === 1 ? '' : 's'} awaiting your decision. Approve, edit, or reject — nothing moves without you.`}
+        nextStep="Review → Approve, Edit, or Reject with a reason."
+        helpHref="/help#approvals"
       />
       {message ? (
         <div className="card" role="status" style={{ padding: '0.75rem 1rem' }}>

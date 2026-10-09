@@ -33,6 +33,10 @@ const { apiMocks } = vi.hoisted(() => ({
     getOnboarding: vi.fn(),
     triggerRun: vi.fn(),
     listWorkspaces: vi.fn(),
+    listReviews: vi.fn(),
+    listContentIdeas: vi.fn(),
+    listPublishRecords: vi.fn(),
+    listLearningProposals: vi.fn(),
   },
 }));
 
@@ -51,6 +55,10 @@ vi.mock('../services/api', async (importOriginal) => {
     getOnboarding: apiMocks.getOnboarding,
     triggerRun: apiMocks.triggerRun,
     listWorkspaces: apiMocks.listWorkspaces,
+    listReviews: apiMocks.listReviews,
+    listContentIdeas: apiMocks.listContentIdeas,
+    listPublishRecords: apiMocks.listPublishRecords,
+    listLearningProposals: apiMocks.listLearningProposals,
   };
 });
 
@@ -82,6 +90,10 @@ function renderShell() {
   apiMocks.listReports.mockResolvedValue({ reports: [] });
   apiMocks.listRuns.mockResolvedValue({ runs: [] });
   apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: true } });
+  apiMocks.listReviews.mockResolvedValue({ reviews: [] });
+  apiMocks.listContentIdeas.mockResolvedValue({ contentIdeas: [] });
+  apiMocks.listPublishRecords.mockResolvedValue({ publishRecords: [] });
+  apiMocks.listLearningProposals.mockResolvedValue({ proposals: [] });
   apiMocks.listWorkspaces.mockResolvedValue({ workspaces: [{ id: 'ws-1', name: 'WS' }] });
   return render(
     <MemoryRouter initialEntries={['/']}>
@@ -89,6 +101,7 @@ function renderShell() {
         <Route path="/" element={<Layout />}>
           <Route index element={<OverviewPage />} />
           <Route path="radar" element={<div>Radar page</div>} />
+          <Route path="observatory" element={<div>Research page</div>} />
         </Route>
       </Routes>
     </MemoryRouter>,
@@ -102,8 +115,8 @@ describe('Command-center shell', () => {
 
     fireEvent.click(screen.getByRole('button', { name: /open command palette/i }));
     expect(await screen.findByRole('dialog', { name: /command palette/i })).toBeInTheDocument();
-    fireEvent.change(screen.getByPlaceholderText(/type a command/i), { target: { value: 'dis' } });
-    fireEvent.click(screen.getByRole('button', { name: /discover/i }));
-    expect(await screen.findByText('Radar page')).toBeInTheDocument();
+    fireEvent.change(screen.getByPlaceholderText(/search pages/i), { target: { value: 'things worth talking' } });
+    fireEvent.click(screen.getByRole('button', { name: /research.*things worth talking about/i }));
+    expect(await screen.findByText('Research page')).toBeInTheDocument();
   });
 });

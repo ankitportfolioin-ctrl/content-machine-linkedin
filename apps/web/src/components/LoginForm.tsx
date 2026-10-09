@@ -8,6 +8,7 @@ export function LoginForm() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -87,13 +88,24 @@ export function LoginForm() {
         </label>
         <label style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', fontSize: '0.875rem' }}>
           Password
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="Your password"
-            style={inputStyle}
-          />
+          <span style={{ display: 'flex', gap: '0.5rem' }}>
+            <input
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Your password"
+              autoComplete={isRegister ? 'new-password' : 'current-password'}
+              style={{ ...inputStyle, flex: '1 1 auto' }}
+            />
+            <button
+              type="button"
+              className="btn btn-secondary btn-sm"
+              onClick={() => setShowPassword((v) => !v)}
+              aria-pressed={showPassword}
+            >
+              {showPassword ? 'Hide' : 'Show'}
+            </button>
+          </span>
         </label>
         {authError && !error ? (
           <p role="alert" style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
@@ -106,7 +118,7 @@ export function LoginForm() {
           </p>
         ) : null}
         <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? (isRegister ? 'Creating...' : 'Signing in...') : isRegister ? 'Create account' : 'Sign in'}
+          {submitting ? (isRegister ? 'Creating…' : 'Signing in…') : isRegister ? 'Create account' : 'Sign in'}
         </button>
         <button
           type="button"
@@ -119,7 +131,18 @@ export function LoginForm() {
         >
           {isRegister ? 'Have an account? Sign in' : 'New here? Create an account'}
         </button>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm"
+          onClick={() => setMode(isRegister ? 'signin' : 'register')}
+        >
+          Back to sign in
+        </button>
       </form>
+      <p className="tiny" style={{ marginTop: '0.75rem' }}>
+        Password recovery by email is not available in this version — ask your workspace owner to reset access.
+        Sessions expire for safety; if you see “session expired”, just sign in again.
+      </p>
     </div>
   );
 }

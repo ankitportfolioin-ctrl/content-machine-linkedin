@@ -21,6 +21,9 @@ import { InboxPage } from './pages/InboxPage';
 import { PipelinePage } from './pages/PipelinePage';
 import { AnalyticsPage } from './pages/AnalyticsPage';
 import { SettingsPage } from './pages/SettingsPage';
+import { CreatePage } from './pages/CreatePage';
+import { SourcesPage } from './pages/SourcesPage';
+import { HelpPage } from './pages/HelpPage';
 
 export function App() {
   return (
@@ -29,6 +32,14 @@ export function App() {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route index element={<OverviewPage />} />
+            {/* Primary redesign routes (plain language) */}
+            <Route path="research" element={<ObservatoryPage />} />
+            <Route path="create" element={<CreatePage />} />
+            <Route path="engage" element={<InboxPage />} />
+            <Route path="people" element={<LeadsPage />} />
+            <Route path="sources" element={<SourcesPage />} />
+            <Route path="help" element={<HelpPage />} />
+            {/* Stable legacy routes — all keep working */}
             <Route path="radar" element={<RadarPage />} />
             <Route path="observatory" element={<ObservatoryPage />} />
             <Route path="audience" element={<AudiencePage />} />

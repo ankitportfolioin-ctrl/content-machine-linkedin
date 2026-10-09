@@ -1281,3 +1281,239 @@ select.field {
 .login-card {
   width: min(400px, 100%);
 }
+
+/* ============================================================
+   Redesign additions — calm, minimal, plain-language helpers.
+   Legacy classes above are preserved. New classes only add:
+   guide cards, steppers, nav descriptions, wizard, help.
+   ============================================================ */
+
+.guide-next {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin-top: 0.4rem;
+}
+
+.guide-next-label {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.guide-next-help {
+  margin-left: 0.35rem;
+  font-size: 0.8rem;
+}
+
+.guide-card {
+  border-left: 3px solid var(--color-primary-border);
+}
+
+.guide-list {
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.guide-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.guide-row dt {
+  color: var(--color-text-muted);
+  font-weight: 600;
+}
+
+.guide-row dd {
+  margin: 0;
+  color: var(--color-text);
+}
+
+.nav-item-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+
+.nav-item-label {
+  font-weight: 600;
+  font-size: 0.88rem;
+}
+
+.nav-item-desc {
+  font-size: 0.72rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.nav-item.active .nav-item-desc {
+  color: var(--color-text-secondary);
+}
+
+.sidebar-tagline {
+  font-size: 0.7rem;
+  color: var(--color-text-muted);
+  margin: 0.5rem 0 0;
+  line-height: 1.4;
+}
+
+.sidebar-user {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0 0.25rem;
+}
+
+.sidebar-collapsed {
+  width: 76px;
+}
+
+.sidebar-collapsed .nav-item {
+  justify-content: center;
+}
+
+.sidebar-collapsed .nav-item-text {
+  display: none;
+}
+
+.sidebar-collapse {
+  margin: 0.5rem;
+}
+
+.stepper {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding: 0;
+  margin: 0 0 1rem;
+}
+
+.stepper-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+  border-radius: 9999px;
+  padding: 0.3rem 0.7rem 0.3rem 0.35rem;
+  background: var(--color-bg-secondary);
+}
+
+.stepper-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  display: grid;
+  place-items: center;
+  background: var(--color-bg-tertiary);
+  font-weight: 700;
+  font-size: 0.72rem;
+}
+
+.stepper-current {
+  color: var(--color-text);
+  border-color: var(--color-primary-border);
+}
+
+.stepper-current .stepper-dot {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.stepper-done {
+  color: var(--color-text-secondary);
+}
+
+.stepper-done .stepper-dot {
+  background: #ecfdf5;
+  color: var(--color-success);
+  border: 1px solid #a7f3d0;
+}
+
+.wizard-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.wizard-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 1rem;
+}
+
+.user-menu {
+  position: absolute;
+  right: 0;
+  top: 40px;
+  min-width: 200px;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 60;
+}
+
+.user-menu-email {
+  padding: 0.35rem 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-menu-item {
+  text-align: left;
+  padding: 0.45rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  color: var(--color-text);
+  text-decoration: none;
+  display: block;
+  width: 100%;
+}
+
+.user-menu-item:hover {
+  background: var(--color-bg-tertiary);
+  text-decoration: none;
+}
+
+.help-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.75rem;
+}
+
+.priority-card {
+  border: 1px solid var(--color-primary-border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.1rem;
+  background: var(--color-bg-secondary);
+}
+
+.priority-why {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+  margin: 0.35rem 0 0;
+}
+
+@media (max-width: 640px) {
+  .guide-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.15rem;
+  }
+  .sidebar-tagline {
+    display: none;
+  }
+}

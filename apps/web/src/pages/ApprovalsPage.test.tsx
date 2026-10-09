@@ -42,7 +42,7 @@ describe('ApprovalsPage', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText('1 item awaiting your decision. Nothing publishes without approval.')).toBeInTheDocument();
+    expect(await screen.findByText(/1 item awaiting your decision/)).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /approve review/i }));
     expect(apiMocks.decideReview).toHaveBeenCalledWith('rev-1', 'approve');
     expect(await screen.findByText('Approved. It leaves the queue.')).toBeInTheDocument();

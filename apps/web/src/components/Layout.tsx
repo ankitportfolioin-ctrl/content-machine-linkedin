@@ -7,10 +7,11 @@ import { useAuth } from '../context/AuthContext';
 export function Layout() {
   const { workspaceId } = useAuth();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="layout">
-      <Sidebar />
+      <Sidebar collapsed={collapsed} onToggle={() => setCollapsed((v) => !v)} />
       {drawerOpen ? (
         <div className="drawer-overlay" onClick={() => setDrawerOpen(false)} role="presentation">
           <div

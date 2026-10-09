@@ -100,7 +100,7 @@ function SidebarIcon({ name }: { name: string }) {
   );
 }
 
-export function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
+export function SidebarBody({ onNavigate, collapsed }: { onNavigate?: () => void; collapsed?: boolean }) {
   const { user, isAuthenticated, logout } = useAuth();
   const { health } = useHealth();
   const healthy = !health || health.status === 'healthy';
@@ -115,18 +115,29 @@ export function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
               <polyline points="16 7 22 7 22 13" />
             </svg>
           </span>
-          <span>
-            Growth Operator
-            <span className="sidebar-brand-sub">AI Growth OS</span>
-          </span>
+          {collapsed ? null : (
+            <span>
+              Growth Operator
+              <span className="sidebar-brand-sub">One helpful AI operator</span>
+            </span>
+          )}
         </div>
+        {collapsed ? null : (
+          <p className="sidebar-tagline">Business → Research → Content → Review → Learning</p>
+        )}
       </header>
       <nav className="sidebar-nav" aria-label="Primary" onClick={onNavigate}>
         {NAV_SECTIONS.map((section) => (
           <div className="nav-section" key={section.title}>
-            <div className="nav-section-title">{section.title}</div>
+            {collapsed ? null : <div className="nav-section-title">{section.title}</div>}
             {section.entries.map((item) => (
-              <NavItem key={item.to} to={item.to} icon={<SidebarIcon name={item.icon} />}>
+              <NavItem
+                key={item.to}
+                to={item.to}
+                icon={<SidebarIcon name={item.icon} />}
+                description={collapsed ? undefined : item.description}
+                tooltip={`${item.label} — ${item.description}. Why: ${item.why} What to do: ${item.whatToDo}`}
+              >
                 {item.label}
               </NavItem>
             ))}
@@ -136,18 +147,20 @@ export function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
       <footer className="sidebar-footer">
         <div className="system-health" role="status" aria-label={healthy ? 'System healthy' : 'System status unknown'}>
           <span className={`health-dot${healthy ? '' : ' degraded'}`} aria-hidden="true" />
-          {healthy ? 'System healthy' : 'System checking'}
+          {collapsed ? null : healthy ? 'System healthy' : 'System checking'}
         </div>
         {isAuthenticated ? (
           <>
-            {user?.email ? (
-              <p className="tiny" style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 0.25rem' }} title={user.email}>
-                {user.email}
+            {user?.email && !collapsed ? (
+              <p className="tiny sidebar-user" title={user.email}>
+                {user?.name ? `${user.name} · ` : ''}{user.email}
               </p>
             ) : null}
-            <button type="button" className="btn btn-secondary btn-sm" onClick={logout}>
-              Sign out
-            </button>
+            {collapsed ? null : (
+              <button type="button" className="btn btn-secondary btn-sm" onClick={logout}>
+                Sign out
+              </button>
+            )}
           </>
         ) : null}
       </footer>
@@ -155,10 +168,15 @@ export function SidebarBody({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-export function Sidebar() {
+export function Sidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
   return (
-    <aside className="sidebar sidebar-desktop" role="navigation" aria-label="Main navigation">
-      <SidebarBody />
+    <aside className={`sidebar sidebar-desktop${collapsed ? ' sidebar-collapsed' : ''}`} role="navigation" aria-label="Main navigation">
+      <SidebarBody collapsed={collapsed} />
+      {onToggle ? (
+        <button type="button" className="btn btn-ghost btn-sm sidebar-collapse" onClick={onToggle} aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}>
+          {collapsed ? '→' : '← Hide labels'}
+        </button>
+      ) : null}
     </aside>
   );
 }

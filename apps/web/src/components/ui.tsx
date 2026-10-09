@@ -13,24 +13,157 @@ export function PageHead({
   title,
   sub,
   actions,
+  nextStep,
+  helpHref,
 }: {
   kicker?: string;
   title: string;
   sub?: string;
   actions?: React.ReactNode;
+  nextStep?: string;
+  helpHref?: string;
 }) {
   return (
     <div className="page-header">
       {kicker ? <Kicker>{kicker}</Kicker> : null}
       <div className="row-between">
-        <div>
+        <div style={{ minWidth: 0 }}>
           <h1 className="display-title">{title}</h1>
           {sub ? <p className="display-sub">{sub}</p> : null}
+          {nextStep ? (
+            <p className="guide-next" role="note">
+              <span className="guide-next-label">What to do next: </span>
+              {nextStep}{' '}
+              {helpHref ? (
+                <Link to={helpHref} className="guide-next-help">
+                  Learn why
+                </Link>
+              ) : null}
+            </p>
+          ) : null}
         </div>
         {actions ? <div className="actions">{actions}</div> : null}
       </div>
     </div>
   );
+}
+
+/* Every screen must answer: Where am I? What am I looking at?
+   Why does this matter? What can I do here? What happens on click?
+   What should I do next? — in plain language a 16-year-old can follow. */
+export function GuideCard({
+  whereAmI,
+  whatIsThis,
+  whyItMatters,
+  whatYouCanDo,
+  whatNext,
+  action,
+}: {
+  whereAmI: string;
+  whatIsThis: string;
+  whyItMatters: string;
+  whatYouCanDo: string;
+  whatNext: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <section className="card guide-card" aria-label={`${whereAmI} guide`}>
+      <p className="kicker">How this page works</p>
+      <dl className="guide-list">
+        <div className="guide-row">
+          <dt>Where am I?</dt>
+          <dd>{whereAmI}</dd>
+        </div>
+        <div className="guide-row">
+          <dt>What am I looking at?</dt>
+          <dd>{whatIsThis}</dd>
+        </div>
+        <div className="guide-row">
+          <dt>Why does this matter?</dt>
+          <dd>{whyItMatters}</dd>
+        </div>
+        <div className="guide-row">
+          <dt>What can I do here?</dt>
+          <dd>{whatYouCanDo}</dd>
+        </div>
+        <div className="guide-row">
+          <dt>What should I do next?</dt>
+          <dd>{whatNext}</dd>
+        </div>
+      </dl>
+      {action ? <div className="actions" style={{ marginTop: '0.75rem' }}>{action}</div> : null}
+    </section>
+  );
+}
+
+export function Stepper({ steps, current }: { steps: string[]; current: number }) {
+  return (
+    <ol className="stepper" aria-label="Progress">
+      {steps.map((label, i) => {
+        const state = i < current ? 'done' : i === current ? 'current' : 'todo';
+        return (
+          <li key={label} className={`stepper-item stepper-${state}`} aria-current={i === current ? 'step' : undefined}>
+            <span className="stepper-dot" aria-hidden="true">
+              {i < current ? '✓' : i + 1}
+            </span>
+            <span className="stepper-label">{label}</span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+export function ConfirmButton({
+  label,
+  confirmLabel,
+  onConfirm,
+  disabled,
+}: {
+  label: string;
+  confirmLabel: string;
+  onConfirm: () => void | Promise<void>;
+  disabled?: boolean;
+}) {
+  const [armed, setArmed] = React.useState(false);
+  const [working, setWorking] = React.useState(false);
+  async function handle() {
+    if (!armed) {
+      setArmed(true);
+      return;
+    }
+    setWorking(true);
+    try {
+      await onConfirm();
+    } finally {
+      setWorking(false);
+      setArmed(false);
+    }
+  }
+  return (
+    <button
+      type="button"
+      className={armed ? 'btn btn-danger btn-sm' : 'btn btn-secondary btn-sm'}
+      disabled={disabled || working}
+      onClick={() => void handle()}
+      onBlur={() => setArmed(false)}
+    >
+      {working ? 'Working…' : armed ? confirmLabel : label}
+    </button>
+  );
+}
+
+export function HonestValue({
+  value,
+  fallback = 'Not available from the connected sources.',
+}: {
+  value: string | number | null | undefined;
+  fallback?: string;
+}) {
+  if (value === null || value === undefined || value === '') {
+    return <span className="muted">{fallback}</span>;
+  }
+  return <span>{value}</span>;
 }
 
 export function StatusDot({ tone, label }: { tone: 'ok' | 'warn' | 'bad' | 'live' | 'idle'; label: string }) {
@@ -77,11 +210,13 @@ export function EmptyState({
   what,
   why,
   action,
+  nextStep,
 }: {
   title: string;
   what: string;
   why: string;
   action?: React.ReactNode;
+  nextStep?: string;
 }) {
   return (
     <div className="card">
@@ -89,7 +224,35 @@ export function EmptyState({
         <h2 className="empty-state-title">{title}</h2>
         <p className="empty-state-description">{what}</p>
         <p className="empty-state-description" style={{ marginTop: '0.35rem' }}>{why}</p>
+        {nextStep ? (
+          <p className="empty-state-description guide-next" style={{ marginTop: '0.5rem' }}>
+            What to do next: {nextStep}
+          </p>
+        ) : null}
         {action ? <div style={{ marginTop: '1rem' }}>{action}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+export function AuthGate({
+  title,
+  sub,
+  children,
+}: {
+  title: string;
+  sub: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="stack">
+      <PageHead title={title} sub={sub} />
+      <div className="card">
+        <h2 className="section-title">Sign in to continue</h2>
+        <p className="muted" style={{ margin: '0.25rem 0 1rem' }}>
+          {sub} Your work is saved per workspace after you sign in.
+        </p>
+        {children}
       </div>
     </div>
   );

@@ -29,8 +29,8 @@ describe('OverviewPage signed-out gate', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText('Growth Command Center')).toBeInTheDocument();
+    expect(await screen.findByText('Your brand, today.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^sign in$/i })).toBeInTheDocument();
-    expect(screen.queryByText(/Today's signal/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/Today's priorities/)).not.toBeInTheDocument();
   });
 });

@@ -11,7 +11,9 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
   const results = useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return NAV_COMMANDS;
-    return NAV_COMMANDS.filter((c) => `${c.section} ${c.label}`.toLowerCase().includes(q));
+    return NAV_COMMANDS.filter((c) =>
+      `${c.section} ${c.label} ${c.description} ${c.why} ${c.whatToDo}`.toLowerCase().includes(q),
+    );
   }, [query]);
 
   useEffect(() => {
@@ -45,7 +47,7 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
         <input
           ref={inputRef}
           className="palette-input"
-          placeholder="Type a command or search pages…"
+          placeholder="Search pages, people, content… try “things worth talking about”"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={(e) => {
@@ -74,9 +76,13 @@ export function CommandPalette({ open, onClose }: { open: boolean; onClose: () =
                   className={`palette-item${i === active ? ' active' : ''}`}
                   onMouseEnter={() => setActive(i)}
                   onClick={() => go(c.to)}
+                  title={`${c.description}. ${c.whatToDo}`}
                 >
                   <span className="tiny" style={{ minWidth: 92 }}>{c.section}</span>
-                  {c.label}
+                  <span style={{ minWidth: 0 }}>
+                    <span style={{ display: 'block', fontWeight: 600 }}>{c.label}</span>
+                    <span className="tiny" style={{ display: 'block' }}>{c.description}</span>
+                  </span>
                 </button>
               </li>
             ))

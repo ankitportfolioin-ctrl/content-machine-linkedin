@@ -27,10 +27,12 @@ const { apiMocks } = vi.hoisted(() => ({
     getReadiness: vi.fn(),
     listOpportunities: vi.fn(),
     listNextActions: vi.fn(),
-    listReports: vi.fn(),
-    listRuns: vi.fn(),
     getOnboarding: vi.fn(),
     triggerRun: vi.fn(),
+    listReviews: vi.fn(),
+    listContentIdeas: vi.fn(),
+    listPublishRecords: vi.fn(),
+    listLearningProposals: vi.fn(),
   },
 }));
 
@@ -44,17 +46,27 @@ vi.mock('../services/api', async (importOriginal) => {
     getReadiness: apiMocks.getReadiness,
     listOpportunities: apiMocks.listOpportunities,
     listNextActions: apiMocks.listNextActions,
-    listReports: apiMocks.listReports,
-    listRuns: apiMocks.listRuns,
     getOnboarding: apiMocks.getOnboarding,
     triggerRun: apiMocks.triggerRun,
+    listReviews: apiMocks.listReviews,
+    listContentIdeas: apiMocks.listContentIdeas,
+    listPublishRecords: apiMocks.listPublishRecords,
+    listLearningProposals: apiMocks.listLearningProposals,
   };
 });
 
-describe('OverviewPage activity stream', () => {
-  it('streams real runs, digests, and decisions in recency order', async () => {
-    apiMocks.checkHealth.mockResolvedValue({ status: 'healthy' });
-    apiMocks.checkReady.mockResolvedValue({ status: 'ready' });
+function mockCommon() {
+  apiMocks.checkHealth.mockResolvedValue({ status: 'healthy' });
+  apiMocks.checkReady.mockResolvedValue({ status: 'ready' });
+  apiMocks.listReviews.mockResolvedValue({ reviews: [] });
+  apiMocks.listContentIdeas.mockResolvedValue({ contentIdeas: [] });
+  apiMocks.listPublishRecords.mockResolvedValue({ publishRecords: [] });
+  apiMocks.listLearningProposals.mockResolvedValue({ proposals: [] });
+}
+
+describe('OverviewPage priorities', () => {
+  it('streams real pending priorities with evidence', async () => {
+    mockCommon();
     apiMocks.getTodayBrain.mockResolvedValue({
       brain: {
         newSignals: 1,
@@ -88,17 +100,11 @@ describe('OverviewPage activity stream', () => {
           reasons: ['Confirmed pattern'],
           evidenceLinks: [],
           subjectMeta: {},
-          status: 'COMPLETED',
+          status: 'PENDING',
           completedAt: new Date(Date.now() - 21 * 60000).toISOString(),
         },
       ],
       total: 1,
-    });
-    apiMocks.listReports.mockResolvedValue({
-      reports: [{ id: 'r-1', frequency: 'DAILY', createdAt: new Date(Date.now() - 38 * 60000).toISOString() }],
-    });
-    apiMocks.listRuns.mockResolvedValue({
-      runs: [{ id: 'run-9', runDate: new Date(Date.now() - 120 * 60000).toISOString(), status: 'COMPLETED' }],
     });
     apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: true } });
 
@@ -111,13 +117,12 @@ describe('OverviewPage activity stream', () => {
     );
 
     expect(await screen.findByText(/Draft generated from confirmed pattern/)).toBeInTheDocument();
-    expect(screen.getByText(/Intelligence run completed/)).toBeInTheDocument();
-    expect(screen.getByText(/Daily digest/)).toBeInTheDocument();
+    expect(screen.getByText(/Confirmed pattern/)).toBeInTheDocument();
+    expect(screen.getByText("Today's priorities")).toBeInTheDocument();
   });
 
-  it('shows an honest empty message when nothing has happened yet', async () => {
-    apiMocks.checkHealth.mockResolvedValue({ status: 'healthy' });
-    apiMocks.checkReady.mockResolvedValue({ status: 'ready' });
+  it('shows honest empty states when nothing has happened yet', async () => {
+    mockCommon();
     apiMocks.getTodayBrain.mockResolvedValue({
       brain: {
         newSignals: 0,
@@ -140,8 +145,6 @@ describe('OverviewPage activity stream', () => {
     });
     apiMocks.listOpportunities.mockResolvedValue({ opportunities: [] });
     apiMocks.listNextActions.mockResolvedValue({ actions: [], total: 0 });
-    apiMocks.listReports.mockResolvedValue({ reports: [] });
-    apiMocks.listRuns.mockResolvedValue({ runs: [] });
     apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: true } });
 
     render(
@@ -152,7 +155,7 @@ describe('OverviewPage activity stream', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText(/No recorded activity yet/)).toBeInTheDocument();
-    expect(screen.getByText('Not configured')).toBeInTheDocument();
+    expect(await screen.findByText(/Nothing urgent today/)).toBeInTheDocument();
+    expect(screen.getByText(/Not enough evidence yet/)).toBeInTheDocument();
   });
 });
