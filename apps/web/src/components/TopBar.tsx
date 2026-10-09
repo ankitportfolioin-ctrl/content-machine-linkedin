@@ -131,7 +131,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
         </Link>
         {isAuthenticated ? (
           <>
-            <div style={{ maxWidth: 220 }}>
+            <div className="topbar-workspace">
               <WorkspaceSelector />
             </div>
             <div style={{ position: 'relative' }} ref={menuRef}>

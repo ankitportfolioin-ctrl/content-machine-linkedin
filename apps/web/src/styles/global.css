@@ -710,6 +710,48 @@ select.field {
   flex: 1;
 }
 
+/* Workspace cluster in the top bar: must shrink instead of spilling past
+   the viewport edge on medium screens. Long workspace names truncate. */
+.topbar-workspace {
+  display: flex;
+  min-width: 0;
+  max-width: 250px;
+  flex-shrink: 1;
+}
+
+.topbar-workspace select {
+  min-width: 0;
+  max-width: 150px;
+  text-overflow: ellipsis;
+}
+
+@media (max-width: 1150px) {
+  .topbar-search {
+    min-width: 140px;
+  }
+  .topbar-search .kbd {
+    display: none;
+  }
+  .topbar-workspace .ws-label {
+    display: none;
+  }
+  /* Workspace creation stays available in Settings/Onboarding and every
+     page-level selector — the top-bar shortcut hides on smaller screens
+     so the cluster always fits on one row. */
+  .topbar-workspace .ws-create {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .topbar-workspace {
+    max-width: 150px;
+  }
+  .topbar-workspace select {
+    max-width: 130px;
+  }
+}
+
 .topbar-search {
   display: flex;
   align-items: center;

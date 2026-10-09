@@ -75,7 +75,7 @@ export function WorkspaceSelector() {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
       <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-        <span style={{ color: 'var(--color-text-secondary)' }}>Workspace</span>
+        <span className="ws-label" style={{ color: 'var(--color-text-secondary)' }}>Workspace</span>
         <select
           value={workspaceId ?? ''}
           onChange={(e) => selectWorkspace(e.target.value)}
@@ -121,7 +121,7 @@ export function WorkspaceSelector() {
           </button>
         </form>
       ) : (
-        <button type="button" className="btn btn-secondary" onClick={() => setShowCreate(true)}>
+        <button type="button" className="btn btn-secondary ws-create" onClick={() => setShowCreate(true)}>
           New workspace
         </button>
       )}
