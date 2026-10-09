@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, StatusDot, TimeAgo } from '../components/ui';
+import { ResearchSourceCard } from '../components/SourcesTabSection';
 import { connectSocial, friendlyErrorMessage, listConnectors, listFeeds, listSocialConnections } from '../services/api';
 import type { FeedSource, SocialConnection, WorkspaceConnectorEntry } from '../types';
 
@@ -127,21 +128,16 @@ export function ConnectionsPage() {
       </SectionCard>
 
       <div className="grid-2">
-        <SectionCard title={`Research sources (${research.length})`}>
+        <SectionCard
+          title={`Research sources (${research.length})`}
+          action={<Link to="/sources" className="btn btn-ghost btn-sm">Manage sources</Link>}
+        >
           {research.length === 0 ? (
             <p className="muted" style={{ margin: 0 }}>No research connectors reported.</p>
           ) : (
             <ul className="plain-list">
               {research.map((c) => (
-                <li key={c.sourceType} className="card-row">
-                  <div className="row-between">
-                    <div style={{ minWidth: 0 }}>
-                      <p style={{ fontWeight: 650, fontSize: '0.87rem' }}>{c.displayName}</p>
-                      <p className="tiny">{c.enabled ? 'Enabled' : 'Disabled'} · {c.probe.status}</p>
-                    </div>
-                    <StatusDot tone={c.workerWillRun ? 'live' : 'idle'} label={c.workerWillRun ? 'Will run' : 'Idle'} />
-                  </div>
-                </li>
+                <ResearchSourceCard key={c.sourceType} entry={c} onChanged={() => void fetchAll()} />
               ))}
             </ul>
           )}

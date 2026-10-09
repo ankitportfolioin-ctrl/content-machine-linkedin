@@ -783,7 +783,7 @@ function ResearchSection() {
   );
 }
 
-function ResearchSourceCard({ entry, onChanged }: { entry: WorkspaceConnectorEntry; onChanged: () => void }) {
+export function ResearchSourceCard({ entry, onChanged }: { entry: WorkspaceConnectorEntry; onChanged: () => void }) {
   const [working, setWorking] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isError, setIsError] = useState(false);
