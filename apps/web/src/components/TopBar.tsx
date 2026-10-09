@@ -122,13 +122,13 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
             <span className="kbd">{shortcutLabel()}</span>
           </button>
         </div>
-        <a href="/help" className="icon-btn" aria-label="Help — what goes where?" title="Help — what goes where?">
+        <Link to="/help" className="icon-btn" aria-label="Help — what goes where?" title="Help — what goes where?">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" aria-hidden="true">
             <circle cx="12" cy="12" r="9" />
             <path d="M9.5 9.5a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.1.9-1.1 1.8" />
             <circle cx="12" cy="17" r="0.5" fill="currentColor" />
           </svg>
-        </a>
+        </Link>
         {isAuthenticated ? (
           <>
             <div style={{ maxWidth: 220 }}>
@@ -151,8 +151,8 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
               {menuOpen && (
                 <div className="user-menu" role="menu" aria-label="Account">
                   <p className="tiny user-menu-email" title={user?.email ?? ''}>{user?.email ?? 'Signed in'}</p>
-                  <a href="/settings" role="menuitem" className="user-menu-item">Profile & settings</a>
-                  <a href="/help" role="menuitem" className="user-menu-item">Help</a>
+                  <Link to="/settings" role="menuitem" className="user-menu-item">Profile & settings</Link>
+                  <Link to="/help" role="menuitem" className="user-menu-item">Help</Link>
                   <button
                     type="button"
                     role="menuitem"

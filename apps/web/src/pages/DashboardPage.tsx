@@ -102,7 +102,7 @@ export function DashboardPage() {
           </p>
           <div className="actions" style={{ marginTop: '0.9rem' }}>
             <NavLink to="/brain" className="btn btn-primary">Review opportunity</NavLink>
-            <NavLink to="/content" className="btn btn-secondary">Open Content Studio</NavLink>
+            <NavLink to="/content" className="btn btn-secondary">Open Content</NavLink>
           </div>
         </div>
       ) : null}

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
-import { WorkspaceSelector } from '../components/WorkspaceSelector';
+import { PageHead, SkeletonBlock } from '../components/ui';
 import {
   friendlyErrorMessage,
   getAnalyticsSummary,
@@ -16,26 +16,17 @@ export function AnalyticsPage() {
 
   if (authLoading) {
     return (
-      <div className="card">
-        <div className="empty-state">
-          <h2 className="empty-state-title">Loading...</h2>
-          <p className="empty-state-description">Checking your session</p>
-        </div>
+      <div className="stack">
+        <PageHead kicker="How is your presence growing?" title="Analytics" sub="Checking your session…" />
+        <SkeletonBlock lines={3} />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div className="card">
-          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
-            Your results
-          </h2>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-            Sign in to view recorded results computed from your recorded outcome metrics.
-          </p>
-        </div>
+      <div className="stack">
+        <PageHead kicker="How is your presence growing?" title="Analytics" sub="Sign in to view recorded results computed from your recorded outcome metrics." />
         <LoginForm />
       </div>
     );
@@ -82,24 +73,13 @@ function AnalyticsDashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <div
-        className="card"
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          flexWrap: 'wrap',
-          gap: '0.75rem',
-        }}
-      >
-        <div>
-          <h2 className="health-card-title">Your results</h2>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-            Recorded results computed only from user-recorded outcome metrics. No estimates.
-          </p>
-        </div>
-        <WorkspaceSelector />
-      </div>
+      <PageHead
+        kicker="How is your presence growing?"
+        title="Analytics"
+        sub="Recorded results computed only from user-recorded outcome metrics. No estimates."
+        nextStep="Change the period or open related content for evidence."
+        helpHref="/help#analytics"
+      />
 
       <div className="card">
         <h3 className="health-card-title" style={{ marginBottom: '0.5rem' }}>

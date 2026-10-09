@@ -40,7 +40,7 @@ export function CalendarPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Sign in to see plans by status." />
+        <PageHead kicker="Content · Pipeline" title="Content Pipeline" sub="Sign in to see plans by status." />
         <LoginForm />
       </div>
     );
@@ -48,7 +48,7 @@ export function CalendarPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Loading plans…" />
+        <PageHead kicker="Content · Pipeline" title="Content Pipeline" sub="Loading plans…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -56,7 +56,7 @@ export function CalendarPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Plans grouped by status." />
+        <PageHead kicker="Content · Pipeline" title="Content Pipeline" sub="Plans grouped by status." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -65,7 +65,7 @@ export function CalendarPage() {
   if (plans.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Plans grouped by status." />
+        <PageHead kicker="Content · Pipeline" title="Content Pipeline" sub="Plans grouped by status." />
         <EmptyState
           title="No plans yet"
           what="No content plans exist in this workspace yet."
@@ -81,7 +81,7 @@ export function CalendarPage() {
     <div className="stack">
       <PageHead
         kicker="Content · Pipeline"
-        title="Pipeline"
+        title="Content Pipeline"
         sub={`${plans.length} plan${plans.length === 1 ? '' : 's'} by status. Time-based scheduling is not available — nothing here carries a date.`}
       />
       <div className="grid-3">
@@ -97,6 +97,15 @@ export function CalendarPage() {
                     <li key={p.id} className="card-row">
                       <p style={{ fontWeight: 650, fontSize: '0.85rem' }}>{p.thesis || `Plan ${p.id.slice(0, 8)}`}</p>
                       {p.audience ? <p className="tiny" style={{ marginTop: '0.2rem' }}>{p.audience}</p> : null}
+                      {p.contentIdeaId ? (
+                        <div className="actions" style={{ marginTop: '0.5rem' }}>
+                          <Link to={`/content?idea=${encodeURIComponent(p.contentIdeaId)}`} className="btn btn-secondary btn-sm">
+                            Open in Content
+                          </Link>
+                        </div>
+                      ) : (
+                        <p className="tiny" style={{ marginTop: '0.35rem' }}>No linked content yet.</p>
+                      )}
                     </li>
                   ))}
                 </ul>

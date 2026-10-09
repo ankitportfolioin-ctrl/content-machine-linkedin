@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
+import { PageHead, SkeletonBlock } from '../components/ui';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import { confirmLearningProposal, friendlyErrorMessage, getLearningDashboard, listExperiments, listLearningProposals, rejectLearningProposal } from '../services/api';
 import { ExperimentItem, LearningDashboard, LearningProposal } from '../types';
@@ -95,8 +96,22 @@ export function LearningPage() {
     }
   }
 
-  if (authLoading || loading) return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Loading learning...</h2></div></div>;
-  if (!isAuthenticated) return <div className="stack"><div className="card"><h2 className="section-title">Tips</h2><p className="muted">Sign in first.</p></div><LoginForm /></div>;
+  if (authLoading || loading) {
+    return (
+      <div className="stack">
+        <PageHead kicker="What AI has learned" title="Learning" sub="Checking your session…" />
+        <SkeletonBlock lines={3} />
+      </div>
+    );
+  }
+  if (!isAuthenticated) {
+    return (
+      <div className="stack">
+        <PageHead kicker="What AI has learned" title="Learning" sub="Sign in to see early signals, repeated observations, and supported conclusions." />
+        <LoginForm />
+      </div>
+    );
+  }
   if (error) return <div className="card"><div className="empty-state"><h2 className="empty-state-title">Something went wrong</h2><p className="empty-state-description">{error}</p><button className="btn btn-secondary" onClick={() => void fetchAll()} style={{ marginTop: '1rem' }}>Retry</button></div></div>;
 
   return (

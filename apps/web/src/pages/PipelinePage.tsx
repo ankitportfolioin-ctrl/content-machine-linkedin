@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
+import { PageHead, SkeletonBlock } from '../components/ui';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
   createOutcome,
@@ -33,26 +34,17 @@ export function PipelinePage() {
 
   if (authLoading) {
     return (
-      <div className="card">
-        <div className="empty-state">
-          <h2 className="empty-state-title">Loading...</h2>
-          <p className="empty-state-description">Checking your session</p>
-        </div>
+      <div className="stack">
+        <PageHead kicker="People · Pipeline" title="People Pipeline" sub="Checking your session…" />
+        <SkeletonBlock lines={3} />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div className="card">
-          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>
-            Pipeline
-          </h2>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-            Sign in to track deal stages and next actions.
-          </p>
-        </div>
+      <div className="stack">
+        <PageHead kicker="People · Pipeline" title="People Pipeline" sub="Sign in to track deal stages and next actions." />
         <LoginForm />
       </div>
     );
@@ -75,7 +67,7 @@ export function PipelinePage() {
         }}
       >
         <div>
-          <h2 className="health-card-title">Pipeline</h2>
+          <h2 className="health-card-title">People Pipeline</h2>
           <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
             Track open deals by stage. Stages only move forward through valid steps.
           </p>

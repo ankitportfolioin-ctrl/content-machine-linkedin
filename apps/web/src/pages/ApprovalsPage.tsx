@@ -107,8 +107,8 @@ export function ApprovalsPage() {
         <EmptyState
           title="Queue is empty"
           what="No drafts are waiting for approval."
-          why="When the studio submits a draft for review, it lands here with scores and evidence."
-          action={<Link to="/content" className="btn btn-secondary btn-sm">Open Studio</Link>}
+          why="When Content submits a draft for review, it lands here with scores and evidence."
+          action={<Link to="/content" className="btn btn-secondary btn-sm">Open Content</Link>}
         />
       ) : (
         <SectionCard title={`Awaiting decision (${reviews.length})`}>

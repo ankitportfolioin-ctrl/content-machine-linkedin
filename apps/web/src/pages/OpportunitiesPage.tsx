@@ -184,7 +184,7 @@ function OpportunityDetail({
     setCreatedIdeaId(null);
     try {
       const result = await convertOpportunity(opportunityId);
-      setMessage(`Draft idea “${result.contentIdea.title}” created. Find it under Studio.`);
+      setMessage(`Draft idea “${result.contentIdea.title}” created. Find it under Content.`);
       setCreatedIdeaId(result.contentIdea.id);
       onChanged();
     } catch (err) {
@@ -267,7 +267,7 @@ function OpportunityDetail({
             {createdIdeaId ? (
               <Link to={`/content?idea=${encodeURIComponent(createdIdeaId)}`}>Open idea in Content</Link>
             ) : (
-              <Link to="/content">Open Studio</Link>
+              <Link to="/content">Open Content</Link>
             )}
           </p>
         ) : null}

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
+import { PageHead, SkeletonBlock } from '../components/ui';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
 import {
   ApiRequestError,
@@ -72,24 +73,17 @@ export function ContentPage() {
 
   if (authLoading) {
     return (
-      <div className="card">
-        <div className="empty-state">
-          <h2 className="empty-state-title">Loading...</h2>
-          <p className="empty-state-description">Checking your session</p>
-        </div>
+      <div className="stack">
+        <PageHead kicker="Ideas, drafts & schedule" title="Content" sub="Checking your session…" />
+        <SkeletonBlock lines={3} />
       </div>
     );
   }
 
   if (!isAuthenticated) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div className="card">
-          <h2 className="health-card-title" style={{ marginBottom: '0.5rem' }}>Write a post</h2>
-          <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>
-            Sign in to create ideas, build content plans, and review drafts.
-          </p>
-        </div>
+      <div className="stack">
+        <PageHead kicker="Ideas, drafts & schedule" title="Content" sub="Sign in to create ideas, build content plans, and review drafts." />
         <LoginForm />
       </div>
     );
