@@ -9,17 +9,25 @@ import type { ContentReview, ReviewDecision } from '../types';
 export function ApprovalsPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [reviews, setReviews] = useState<ContentReview[]>([]);
+  const [history, setHistory] = useState<ContentReview[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [workingId, setWorkingId] = useState<string | null>(null);
+  const [notes, setNotes] = useState<Record<string, string>>({});
 
   const fetchAll = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const data = await listReviews();
-      setReviews((data.reviews ?? []).filter((r) => (r.status ?? '').toUpperCase() === 'SUBMITTED'));
+      const all = data.reviews ?? [];
+      setReviews(all.filter((r) => (r.status ?? '').toUpperCase() === 'SUBMITTED'));
+      setHistory(
+        all
+          .filter((r) => (r.status ?? '').toUpperCase() !== 'SUBMITTED')
+          .slice(0, 10),
+      );
     } catch (err) {
       setError(friendlyErrorMessage(err));
     } finally {
@@ -36,7 +44,14 @@ export function ApprovalsPage() {
     setWorkingId(id);
     setMessage(null);
     try {
-      await decideReview(id, action);
+      // Keep the original two-argument call when no reason was typed so the
+      // recorded request shape never changes for reason-less decisions.
+      const note = (notes[id] ?? '').trim() || undefined;
+      if (note === undefined) {
+        await decideReview(id, action);
+      } else {
+        await decideReview(id, action, note);
+      }
       setMessage(action === 'approve' ? 'Approved. It leaves the queue.' : action === 'reject' ? 'Rejected.' : 'Changes requested.');
       await fetchAll();
     } catch (err) {
@@ -80,7 +95,7 @@ export function ApprovalsPage() {
         kicker="Content · Review"
         title="Needs your decision."
         sub={reviews.length === 0 ? 'Queue is empty. Approval never means it already happened.' : `${reviews.length} item${reviews.length === 1 ? '' : 's'} awaiting your decision. Approve, edit, or reject — nothing moves without you.`}
-        nextStep="Review → Approve, Edit, or Reject with a reason."
+        nextStep="Review each item → Approve, Request changes, or Reject. An optional reason is recorded with your decision."
         helpHref="/help#approvals"
       />
       {message ? (
@@ -110,32 +125,42 @@ export function ApprovalsPage() {
                       Draft {String(r.draftId).slice(0, 8)} · <TimeAgo value={r.createdAt} />
                     </p>
                   </div>
-                  <div className="actions">
-                    <button
-                      type="button"
-                      className="btn btn-primary btn-sm"
+                  <div className="actions" style={{ flexDirection: 'column', alignItems: 'stretch', minWidth: 200 }}>
+                    <input
+                      className="field"
+                      value={notes[r.id] ?? ''}
+                      onChange={(e) => setNotes((prev) => ({ ...prev, [r.id]: e.target.value }))}
+                      placeholder="Reason (optional, recorded)"
+                      aria-label={`Decision reason for review ${r.id.slice(0, 8)}`}
                       disabled={workingId === r.id}
-                      onClick={() => void decide(r.id, 'approve')}
-                      aria-label={`Approve review ${r.id.slice(0, 8)}`}
-                    >
-                      {workingId === r.id ? 'Saving…' : 'Approve'}
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-secondary btn-sm"
-                      disabled={workingId === r.id}
-                      onClick={() => void decide(r.id, 'request_changes')}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      disabled={workingId === r.id}
-                      onClick={() => void decide(r.id, 'reject')}
-                    >
-                      Reject
-                    </button>
+                    />
+                    <div className="actions">
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        disabled={workingId === r.id}
+                        onClick={() => void decide(r.id, 'approve')}
+                        aria-label={`Approve review ${r.id.slice(0, 8)}`}
+                      >
+                        {workingId === r.id ? 'Saving…' : 'Approve'}
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-secondary btn-sm"
+                        disabled={workingId === r.id}
+                        onClick={() => void decide(r.id, 'request_changes')}
+                      >
+                        Request changes
+                      </button>
+                      <button
+                        type="button"
+                        className="btn btn-ghost btn-sm"
+                        disabled={workingId === r.id}
+                        onClick={() => void decide(r.id, 'reject')}
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
                 </div>
               </li>
@@ -143,6 +168,31 @@ export function ApprovalsPage() {
           </ul>
         </SectionCard>
       )}
+      {history.length > 0 ? (
+        <SectionCard title={`Decision history (${history.length})`}>
+          <p className="muted" style={{ marginTop: 0 }}>
+            Decided items stay here for the audit trail. Approval never meant the action already happened.
+          </p>
+          <ul className="plain-list">
+            {history.map((r) => (
+              <li key={r.id} className="card-row">
+                <div className="row-between">
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 650, fontSize: '0.9rem' }}>
+                      Review {r.id.slice(0, 8)} ·{' '}
+                      <span className="badge badge-neutral">{String(r.decision ?? r.status ?? 'decided')}</span>
+                    </p>
+                    {r.note ? <p className="muted" style={{ margin: '0.25rem 0 0' }}>{r.note}</p> : null}
+                    <p className="tiny" style={{ marginTop: '0.25rem' }}>
+                      Draft {String(r.draftId).slice(0, 8)} · <TimeAgo value={r.createdAt} />
+                    </p>
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </SectionCard>
+      ) : null}
     </div>
   );
 }

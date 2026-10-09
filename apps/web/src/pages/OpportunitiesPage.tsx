@@ -154,6 +154,7 @@ function OpportunityDetail({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
+  const [createdIdeaId, setCreatedIdeaId] = useState<string | null>(null);
   const [working, setWorking] = useState(false);
 
   const fetchDetail = useCallback(async () => {
@@ -180,9 +181,11 @@ function OpportunityDetail({
   async function handleConvert() {
     setWorking(true);
     setMessage(null);
+    setCreatedIdeaId(null);
     try {
       const result = await convertOpportunity(opportunityId);
       setMessage(`Draft idea “${result.contentIdea.title}” created. Find it under Studio.`);
+      setCreatedIdeaId(result.contentIdea.id);
       onChanged();
     } catch (err) {
       setMessage(friendlyErrorMessage(err));
@@ -260,7 +263,12 @@ function OpportunityDetail({
         <p className="recommend-text" style={{ marginTop: '0.6rem' }}>{opportunity.title}</p>
         {message ? (
           <p className="muted" role="status" style={{ marginTop: '0.5rem' }}>
-            {message} <Link to="/content">Open Studio</Link>
+            {message}{' '}
+            {createdIdeaId ? (
+              <Link to={`/content?idea=${encodeURIComponent(createdIdeaId)}`}>Open idea in Content</Link>
+            ) : (
+              <Link to="/content">Open Studio</Link>
+            )}
           </p>
         ) : null}
       </section>

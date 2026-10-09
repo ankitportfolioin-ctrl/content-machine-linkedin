@@ -2,18 +2,21 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
-import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, GuideCard, TimeAgo } from '../components/ui';
+import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, GuideCard, TimeAgo, Badge } from '../components/ui';
 import {
   convertOpportunity,
   friendlyErrorMessage,
   getOpportunity,
   listOpportunities,
+  listReports,
+  listRuns,
   listSources,
   listTrends,
   listGaps,
   triageOpportunity,
 } from '../services/api';
-import type { Source, TrendSignal, ContentGap, Opportunity } from '../types';
+import type { Source, TrendSignal, ContentGap, Opportunity, DailyRunSummary, IntelligenceReport } from '../types';
+import { EvidenceView } from './LeadsPage';
 
 const FILTERS = ['All', 'New', 'Saved', 'Opportunities', 'Content gaps'] as const;
 type Filter = (typeof FILTERS)[number];
@@ -30,6 +33,23 @@ function isRecent(ts: string | undefined): boolean {
   return ms < 7 * 24 * 60 * 60 * 1000;
 }
 
+function recordUpdatedAt(record: { [key: string]: unknown }): string | null {
+  if (typeof record.updatedAt === 'string') return record.updatedAt;
+  if (typeof record.createdAt === 'string') return record.createdAt;
+  return null;
+}
+
+function opportunityTone(status: string): 'info' | 'success' | 'neutral' {
+  const s = status.toUpperCase();
+  if (s === 'NEW') return 'info';
+  if (s === 'CONVERTED' || s === 'REVIEWED') return 'success';
+  return 'neutral';
+}
+
+function runStatusLabel(status: unknown): string {
+  return typeof status === 'string' && status ? status.toLowerCase().replace(/_/g, ' ') : 'recorded';
+}
+
 export function ObservatoryPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -38,6 +58,9 @@ export function ObservatoryPage() {
   const [trends, setTrends] = useState<TrendSignal[]>([]);
   const [gaps, setGaps] = useState<ContentGap[]>([]);
   const [opportunities, setOpportunities] = useState<Opportunity[]>([]);
+  const [lastRun, setLastRun] = useState<DailyRunSummary | null>(null);
+  const [latestReport, setLatestReport] = useState<IntelligenceReport | null>(null);
+  const [historyUnavailable, setHistoryUnavailable] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [detailId, setDetailId] = useState<string | null>(null);
@@ -50,16 +73,21 @@ export function ObservatoryPage() {
     setLoading(true);
     setError(null);
     try {
-      const [s, t, g, o] = await Promise.all([
+      const [s, t, g, o, r, rep] = await Promise.all([
         listSources().catch(() => ({ sources: [] as Source[] })),
         listTrends().catch(() => ({ trends: [] as TrendSignal[] })),
         listGaps().catch(() => ({ gaps: [] as ContentGap[] })),
         listOpportunities().catch(() => ({ opportunities: [] as Opportunity[] })),
+        listRuns({ take: 3 }).catch(() => null),
+        listReports({ frequency: 'DAILY', limit: 1 }).catch(() => null),
       ]);
       setSources(s.sources ?? []);
       setTrends(t.trends ?? []);
       setGaps(g.gaps ?? []);
       setOpportunities(o.opportunities ?? []);
+      setLastRun(r?.runs?.[0] ?? null);
+      setLatestReport(rep?.reports?.[0] ?? null);
+      setHistoryUnavailable(r === null && rep === null);
     } catch (err) {
       setError(friendlyErrorMessage(err));
     } finally {
@@ -231,11 +259,14 @@ export function ObservatoryPage() {
                   <li key={o.id} className="card-row">
                     <p style={{ fontWeight: 650, margin: 0 }}>{o.title}</p>
                     {o.description ? <p className="muted" style={{ margin: '0.25rem 0 0' }}>{String(o.description).slice(0, 220)}</p> : null}
-                    <p className="tiny" style={{ marginTop: '0.25rem' }}>
-                      {typeof o.score === 'number' ? `Score ${Math.round(o.score)} · ` : ''}
-                      {typeof o.topic === 'string' && o.topic ? `Topic: ${o.topic} · ` : ''}
-                      {typeof o.status === 'string' && o.status ? String(o.status) : 'Recorded'}
-                    </p>
+                    <div className="actions" style={{ marginTop: '0.4rem', alignItems: 'center' }}>
+                      <Badge tone={opportunityTone(typeof o.status === 'string' ? o.status : '')}>
+                        {typeof o.status === 'string' && o.status ? String(o.status) : 'Recorded'}
+                      </Badge>
+                      {typeof o.score === 'number' ? <span className="tiny">Score {Math.round(o.score)}</span> : null}
+                      {typeof o.topic === 'string' && o.topic ? <span className="tiny">Topic: {o.topic}</span> : null}
+                      <TimeAgo value={recordUpdatedAt(o)} />
+                    </div>
                     <div className="actions" style={{ marginTop: '0.5rem' }}>
                       <button type="button" className="btn btn-secondary btn-sm" onClick={() => void openDetail(o.id)}>Why it matters</button>
                       <button type="button" className="btn btn-primary btn-sm" onClick={() => void handleCreate(o.id, o.title)}>Create content</button>
@@ -250,12 +281,12 @@ export function ObservatoryPage() {
                           <>
                             <p style={{ fontWeight: 700, margin: '0 0 0.25rem' }}>{detail.title ?? o.title}</p>
                             {detail.description ? <p className="muted" style={{ margin: 0 }}>{detail.description}</p> : <p className="muted" style={{ margin: 0 }}>No extra description recorded. Evidence below is what the source stated — the rest is AI interpretation.</p>}
-                            {detail.evidence ? (
-                              <details style={{ marginTop: '0.4rem' }}>
-                                <summary>Evidence & limitations</summary>
-                                <pre className="tiny" style={{ whiteSpace: 'pre-wrap', margin: '0.3rem 0 0' }}>{JSON.stringify(detail.evidence, null, 2).slice(0, 2000)}</pre>
-                              </details>
-                            ) : null}
+                            <details style={{ marginTop: '0.4rem' }}>
+                              <summary>Evidence & limitations</summary>
+                              <div style={{ marginTop: '0.3rem' }}>
+                                <EvidenceView value={detail.evidence} />
+                              </div>
+                            </details>
                             <div className="actions" style={{ marginTop: '0.5rem' }}>
                               <button type="button" className="btn btn-ghost btn-sm" onClick={() => navigate('/content')}>Open in Content</button>
                               <button type="button" className="btn btn-ghost btn-sm" onClick={() => setDetailId(null)}>Back to research</button>
@@ -280,6 +311,10 @@ export function ObservatoryPage() {
                   <li key={t.id} className="card-row">
                     <p style={{ fontWeight: 650, margin: 0 }}>{t.title ?? 'Untitled'}</p>
                     {t.description ? <p className="muted" style={{ margin: '0.25rem 0 0' }}>{t.description}</p> : null}
+                    <div className="actions" style={{ marginTop: '0.3rem', alignItems: 'center' }}>
+                      <Badge>{String(t.status ?? 'recorded')}</Badge>
+                      <TimeAgo value={recordUpdatedAt(t)} />
+                    </div>
                     <div className="actions" style={{ marginTop: '0.5rem' }}>
                       <button
                         type="button"
@@ -345,6 +380,56 @@ export function ObservatoryPage() {
           ) : null}
         </>
       )}
+
+      <SectionCard
+        title="Research activity"
+        action={<button type="button" className="btn btn-ghost btn-sm" onClick={() => void fetchAll()}>Refresh</button>}
+      >
+        {historyUnavailable ? (
+          <p className="muted" style={{ margin: 0 }}>
+            Research history is unavailable right now. Your saved items above are unaffected — try refreshing.
+          </p>
+        ) : !lastRun && !latestReport ? (
+          <p className="muted" style={{ margin: 0 }}>
+            No research checks recorded yet. They appear here after your first check for new ideas on{' '}
+            <Link to="/">Home</Link>.
+          </p>
+        ) : (
+          <ul className="plain-list">
+            {lastRun ? (
+              <li className="card-row">
+                <div className="row-between">
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 650, margin: 0 }}>
+                      Last check {runStatusLabel(lastRun.status)}
+                    </p>
+                    <p className="tiny" style={{ margin: '0.2rem 0 0' }}>
+                      Processing status comes from the recorded run — never assumed.
+                    </p>
+                  </div>
+                  <TimeAgo
+                    value={lastRun.runDate ?? lastRun.finishedAt ?? lastRun.startedAt ?? null}
+                  />
+                </div>
+              </li>
+            ) : null}
+            {latestReport ? (
+              <li className="card-row">
+                <div className="row-between">
+                  <div style={{ minWidth: 0 }}>
+                    <p style={{ fontWeight: 650, margin: 0 }}>Latest daily digest</p>
+                    <p className="tiny" style={{ margin: '0.2rem 0 0' }}>
+                      {Array.isArray(latestReport.emergingTopics) ? `${latestReport.emergingTopics.length} topics · ` : ''}
+                      {Array.isArray(latestReport.strongSignals) ? `${latestReport.strongSignals.length} strong signals` : 'recorded digest'}
+                    </p>
+                  </div>
+                  <TimeAgo value={latestReport.generatedAt ?? null} />
+                </div>
+              </li>
+            ) : null}
+          </ul>
+        )}
+      </SectionCard>
 
       <GuideCard
         whereAmI="Research — things worth talking about."

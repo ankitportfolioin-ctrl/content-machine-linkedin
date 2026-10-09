@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useRef, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { WorkspaceSelector } from './WorkspaceSelector';
 import { CommandPalette } from './CommandPalette';
@@ -10,10 +10,57 @@ function shortcutLabel(): string {
   return 'Ctrl K';
 }
 
+function BreadcrumbTrail({ pathnames }: { pathnames: Array<{ label: string; href: string; current?: boolean }> }) {
+  return (
+    <nav className="breadcrumb" aria-label="Breadcrumb" style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+      {pathnames.map((item, idx) => (
+        <span key={item.href} style={{ display: 'flex', alignItems: 'center', gap: '0.35rem' }}>
+          {idx > 0 && (
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true" style={{ flexShrink: 0 }}>
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          )}
+          {item.current ? (
+            <span aria-current="page" style={{ color: 'var(--color-text)', fontWeight: 500 }}>{item.label}</span>
+          ) : (
+            <Link to={item.href} style={{ color: 'var(--color-text-muted)', textDecoration: 'none' }}>
+              {item.label}
+            </Link>
+          )}
+        </span>
+      ))}
+    </nav>
+  );
+}
+
+function buildBreadcrumbs(pathname: string): Array<{ label: string; href: string; current?: boolean }> {
+  const segments = pathname.split('/').filter(Boolean);
+  if (segments.length === 0) return [{ label: 'Home', href: '/', current: true }];
+
+  const crumbs: Array<{ label: string; href: string; current?: boolean }> = [{ label: 'Home', href: '/' }];
+  let currentPath = '';
+
+  for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i] ?? '';
+    currentPath += '/' + segment;
+    const meta = ROUTE_META[currentPath];
+    const isLast = i === segments.length - 1;
+    crumbs.push({
+      label: meta?.title ?? segment.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      href: currentPath,
+      current: isLast,
+    });
+  }
+  return crumbs;
+}
+
 export function TopBar({ onMenu }: { onMenu: () => void }) {
   const location = useLocation();
   const { user, isAuthenticated } = useAuth();
   const [paletteOpen, setPaletteOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { logout } = useAuth();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -21,16 +68,29 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
         e.preventDefault();
         setPaletteOpen((v) => !v);
       }
+      if (e.key === 'Escape') {
+        setMenuOpen(false);
+        setPaletteOpen(false);
+      }
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, []);
 
+  useEffect(() => {
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const meta =
     ROUTE_META[location.pathname] ??
     ({ title: 'Growth Operator', crumb: 'System', subtitle: '', nextStep: '', helpHref: '/help' } as const);
-  const [menuOpen, setMenuOpen] = useState(false);
-  const { logout } = useAuth();
+  const breadcrumbs = buildBreadcrumbs(location.pathname);
 
   return (
     <>
@@ -47,9 +107,9 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
             <line x1="4" y1="17" x2="20" y2="17" />
           </svg>
         </button>
-        <div style={{ minWidth: 0 }}>
-          <div className="topbar-crumb">{meta.crumb}</div>
-          <div className="topbar-title">{meta.title}</div>
+        <div style={{ minWidth: 0, flex: 1, maxWidth: 600 }}>
+          <BreadcrumbTrail pathnames={breadcrumbs} />
+          <div className="topbar-title" style={{ marginTop: '0.15rem' }}>{meta.title}</div>
         </div>
         <div className="topbar-spacer" />
         <div className="topbar-search-wrap">
@@ -74,7 +134,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
             <div style={{ maxWidth: 220 }}>
               <WorkspaceSelector />
             </div>
-            <div style={{ position: 'relative' }}>
+            <div style={{ position: 'relative' }} ref={menuRef}>
               <button
                 type="button"
                 className="icon-btn"
@@ -88,7 +148,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
                   <path d="M4 21c0-4 3.5-6.5 8-6.5s8 2.5 8 6.5" />
                 </svg>
               </button>
-              {menuOpen ? (
+              {menuOpen && (
                 <div className="user-menu" role="menu" aria-label="Account">
                   <p className="tiny user-menu-email" title={user?.email ?? ''}>{user?.email ?? 'Signed in'}</p>
                   <a href="/settings" role="menuitem" className="user-menu-item">Profile & settings</a>
@@ -105,7 +165,7 @@ export function TopBar({ onMenu }: { onMenu: () => void }) {
                     Sign out
                   </button>
                 </div>
-              ) : null}
+              )}
             </div>
           </>
         ) : null}

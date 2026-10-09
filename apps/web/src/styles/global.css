@@ -1508,6 +1508,87 @@ select.field {
   margin: 0.35rem 0 0;
 }
 
+/* Skip link — visible only on keyboard focus */
+.skip-link {
+  position: absolute;
+  left: 0.75rem;
+  top: -3rem;
+  z-index: 200;
+  background: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.75rem;
+  font-size: 0.83rem;
+  font-weight: 600;
+  transition: top var(--transition);
+}
+
+.skip-link:focus {
+  top: 0.75rem;
+  text-decoration: none;
+}
+
+/* Breadcrumb */
+.breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+/* Shared form rows */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+
+.form-label {
+  font-size: 0.8rem;
+  font-weight: 650;
+  color: var(--color-text);
+}
+
+.form-hint {
+  margin: 0;
+}
+
+.form-error {
+  margin: 0;
+}
+
+/* Shared dialog */
+.dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  background: rgb(0 0 0 / 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 12vh 1rem 1rem;
+}
+
+.dialog {
+  width: min(520px, 100%);
+  background-color: var(--color-bg-secondary);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  padding: 1.1rem 1.2rem;
+}
+
+/* Responsive search hide */
+@media (max-width: 900px) {
+  .topbar-search-wrap { display: none; }
+}
+
+/* Ensure dropdowns respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .user-menu,
+  .dialog-overlay {
+    animation: none;
+  }
+}
+
 @media (max-width: 640px) {
   .guide-row {
     grid-template-columns: minmax(0, 1fr);

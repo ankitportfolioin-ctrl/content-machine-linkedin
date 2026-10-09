@@ -150,7 +150,7 @@ export const LEGACY_LINKS: Array<{ to: string; label: string; parent: string }> 
   { to: '/opportunities', label: 'Post ideas (inside Research → Opportunities)', parent: '/observatory' },
   { to: '/trends', label: "What's trending (inside Research)", parent: '/observatory' },
   { to: '/audience', label: 'Your audience (inside Settings → Audience)', parent: '/settings' },
-  { to: '/calendar', label: 'Schedule (inside Content → Calendar)', parent: '/content' },
+  { to: '/calendar', label: 'Pipeline (inside Content)', parent: '/content' },
   { to: '/approvals', label: 'Needs your decision (inside Content → Review)', parent: '/content' },
   { to: '/experiments', label: 'Try new things (inside Learning)', parent: '/learning' },
   { to: '/pipeline', label: 'Pipeline (inside People)', parent: '/leads' },
@@ -207,10 +207,10 @@ export const ROUTE_META: Record<string, RouteMeta> = {
     helpHref: '/help#content',
   },
   '/calendar': {
-    title: 'Schedule',
-    crumb: 'Content · Calendar',
-    subtitle: 'Week and month view in your timezone. Only confirmed times are shown.',
-    nextStep: 'Click an item to see details or change its schedule.',
+    title: 'Pipeline',
+    crumb: 'Content · Pipeline',
+    subtitle: 'Plans grouped by status. Time-based scheduling is not available.',
+    nextStep: 'Open a plan in Content to continue writing, or record publication manually.',
     helpHref: '/help#content',
   },
   '/approvals': {

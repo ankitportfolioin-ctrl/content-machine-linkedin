@@ -4,12 +4,13 @@ import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, ScoreBar, TimeAgo } from '../components/ui';
 import { friendlyErrorMessage, listNextActions, listRuns } from '../services/api';
-import type { OperatorAction } from '../types';
+import type { DailyRunSummary, OperatorAction } from '../types';
 
 export function RadarPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [actions, setActions] = useState<OperatorAction[]>([]);
   const [total, setTotal] = useState(0);
+  const [lastRun, setLastRun] = useState<DailyRunSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -19,11 +20,11 @@ export function RadarPage() {
     try {
       const [pending, runs] = await Promise.all([
         listNextActions({ status: 'pending' }),
-        listRuns({ take: 3 }).catch(() => ({ runs: [] as Array<{ id: string }> })),
+        listRuns({ take: 3 }).catch(() => ({ runs: [] as DailyRunSummary[] })),
       ]);
       setActions(pending.actions ?? []);
       setTotal(pending.total ?? (pending.actions ?? []).length);
-      void runs;
+      setLastRun(runs.runs?.[0] ?? null);
     } catch (err) {
       setError(friendlyErrorMessage(err));
     } finally {
@@ -72,6 +73,12 @@ export function RadarPage() {
         helpHref="/help#research"
         actions={<Link to="/observatory" className="btn btn-primary btn-sm">Open Research</Link>}
       />
+      {lastRun ? (
+        <p className="muted" style={{ margin: 0 }}>
+          Last research check {String(lastRun.status).toLowerCase().replace(/_/g, ' ')}{' '}
+          <TimeAgo value={lastRun.runDate ?? lastRun.finishedAt ?? lastRun.startedAt ?? null} />.
+        </p>
+      ) : null}
       {actions.length === 0 ? (
         <EmptyState
           title="Radar is clear"

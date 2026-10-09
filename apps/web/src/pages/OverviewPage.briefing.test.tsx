@@ -130,13 +130,20 @@ describe('OverviewPage briefing', () => {
     renderOverview();
 
     expect(await screen.findByText('Your brand, today.')).toBeInTheDocument();
-    expect(screen.getByText('Connected')).toBeInTheDocument();
+    // Single obvious next action: decisions pending → "Review now" is primary
+    // (header + section both link to approvals).
+    const reviewLinks = screen.getAllByRole('link', { name: 'Review now' });
+    expect(reviewLinks.length).toBeGreaterThanOrEqual(1);
+    reviewLinks.forEach((l) => expect(l).toHaveAttribute('href', '/approvals'));
+    // LinkedIn state lives in System status now; connected workspaces see "All good".
+    expect(screen.getByText(/All good/)).toBeInTheDocument();
     // Needs-your-decision count comes from real review rows (4 SUBMITTED).
     expect(screen.getByText(/4.*wait.*review/i)).toBeInTheDocument();
     expect(
       screen.getByText('AI workflow automation content is accelerating among beginner developers.'),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Confidence HIGH/)).toBeInTheDocument();
+    // Confidence is shown in plain words (HIGH → "Strong evidence").
+    expect(screen.getByText(/Strong evidence/)).toBeInTheDocument();
     // The same real opportunity appears in Today's priorities and in
     // New in research — both must render from the same record.
     expect(screen.getAllByText('AI workflow automation for beginners').length).toBeGreaterThanOrEqual(1);
@@ -148,6 +155,8 @@ describe('OverviewPage briefing', () => {
 
   it('checks for new ideas and reports the result', async () => {
     mockBaseline();
+    // No pending decisions → the research check is the primary header action.
+    apiMocks.listReviews.mockResolvedValue({ reviews: [] });
     renderOverview();
     await screen.findByText('Check for new ideas');
 

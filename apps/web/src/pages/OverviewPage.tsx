@@ -23,7 +23,9 @@ import {
   listNextActions,
   listOpportunities,
   listPublishRecords,
+  listReports,
   listReviews,
+  listRuns,
   triggerRun,
 } from '../services/api';
 import type {
@@ -33,6 +35,19 @@ import type {
   ReadinessState,
   TodayBrain,
 } from '../types';
+
+function plainConfidence(confidence: string): string {
+  if (confidence === 'HIGH') return 'Strong evidence';
+  if (confidence === 'MEDIUM') return 'Some evidence';
+  if (confidence === 'LOW') return 'Early signal';
+  return 'Not enough evidence yet';
+}
+
+interface ActivityEvent {
+  id: string;
+  text: string;
+  at: string | null;
+}
 
 /* Home — command center. Title: “Your brand, today.”
    Subtitle: “Here is what is happening and what you can do next.”
@@ -57,6 +72,7 @@ export function OverviewPage() {
   const [ideasCount, setIdeasCount] = useState<number | null>(null);
   const [publishedCount, setPublishedCount] = useState<number | null>(null);
   const [learningCount, setLearningCount] = useState<number | null>(null);
+  const [activity, setActivity] = useState<ActivityEvent[]>([]);
   const [onboarding, setOnboarding] = useState<OnboardingProgress | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -85,11 +101,13 @@ export function OverviewPage() {
       setOpportunities((oppsRes?.opportunities ?? []).slice(0, 3));
       setOnboarding(onboardingRes?.onboarding ?? null);
 
-      const [reviewsRes, ideasRes, pubsRes, learnRes] = await Promise.all([
+      const [reviewsRes, ideasRes, pubsRes, learnRes, reportsRes, runsRes] = await Promise.all([
         listReviews().catch(() => null),
         listContentIdeas().catch(() => null),
         listPublishRecords().catch(() => null),
         listLearningProposals({ status: 'PROPOSED' }).catch(() => null),
+        listReports({ frequency: 'DAILY', limit: 3 }).catch(() => null),
+        listRuns({ take: 5 }).catch(() => null),
       ]);
       setNeedsDecision(
         reviewsRes ? reviewsRes.reviews.filter((r) => (r.status ?? '').toUpperCase() === 'SUBMITTED').length : null,
@@ -97,6 +115,33 @@ export function OverviewPage() {
       setIdeasCount(ideasRes ? ideasRes.contentIdeas.length : null);
       setPublishedCount(pubsRes ? pubsRes.publishRecords.length : null);
       setLearningCount(learnRes ? learnRes.proposals.length : todayRes?.brain.newLearnedPatterns ?? null);
+
+      // Recent activity — genuine runs and digests only, newest first.
+      const events: ActivityEvent[] = [];
+      for (const r of reportsRes?.reports ?? []) {
+        const created = (r as unknown as { createdAt?: string }).createdAt ?? null;
+        if (created) events.push({ id: `report-${r.id}`, text: 'Daily research digest ready', at: created });
+      }
+      for (const run of runsRes?.runs ?? []) {
+        const date =
+          (run as unknown as { runDate?: string }).runDate ??
+          (run as unknown as { finishedAt?: string }).finishedAt ??
+          (run as unknown as { startedAt?: string }).startedAt ??
+          null;
+        if (date) {
+          events.push({
+            id: `run-${run.id}`,
+            text: `Research check ${String(run.status).toLowerCase().replace(/_/g, ' ')}`,
+            at: date,
+          });
+        }
+      }
+      events.sort((a, b) => {
+        if (!a.at) return 1;
+        if (!b.at) return -1;
+        return new Date(b.at).getTime() - new Date(a.at).getTime();
+      });
+      setActivity(events.slice(0, 5));
     } catch (err) {
       setError(friendlyErrorMessage(err));
     } finally {
@@ -171,22 +216,41 @@ export function OverviewPage() {
   const rec = today?.recommendation ?? null;
   const linkedIn = readiness?.platformExecution?.find((p) => p.platform === 'linkedin');
 
+  // One obvious next action: setup first, then decisions, then fresh research.
+  // The research check stays reachable as the secondary action whenever it
+  // is not primary, so no state ever hides it.
+  const scanIsPrimary = !onboarding?.complete
+    ? false
+    : (needsDecision ?? 0) <= 0;
+  const primaryAction =
+    onboarding && !onboarding.complete ? (
+      <Link to="/onboarding" className="btn btn-primary btn-sm">Continue setup</Link>
+    ) : (needsDecision ?? 0) > 0 ? (
+      <Link to="/approvals" className="btn btn-primary btn-sm">Review now</Link>
+    ) : (
+      <button type="button" className="btn btn-primary btn-sm" disabled={scanning} onClick={() => void handleScan()}>
+        {scanning ? 'Checking sources…' : 'Check for new ideas'}
+      </button>
+    );
+
   return (
     <div className="stack">
       <PageHead
         kicker="Your brand, today"
         title="Your brand, today."
         sub="Here is what is happening and what you can do next."
-        nextStep="Work through Today’s priorities top to bottom, then check what needs your decision."
+        nextStep="Start with the highlighted action, then work through Today’s priorities top to bottom."
         helpHref="/help"
         actions={
           <>
-            {onboarding && !onboarding.complete ? (
-              <Link to="/onboarding" className="btn btn-secondary btn-sm">Continue setup</Link>
-            ) : null}
-            <button type="button" className="btn btn-primary btn-sm" disabled={scanning} onClick={() => void handleScan()}>
-              {scanning ? 'Checking sources…' : 'Check for new ideas'}
-            </button>
+            {primaryAction}
+            {scanIsPrimary ? (
+              <Link to="/observatory" className="btn btn-ghost btn-sm">Open Research</Link>
+            ) : (
+              <button type="button" className="btn btn-ghost btn-sm" disabled={scanning} onClick={() => void handleScan()}>
+                {scanning ? 'Checking…' : 'Check for new ideas'}
+              </button>
+            )}
           </>
         }
       />
@@ -231,15 +295,27 @@ export function OverviewPage() {
             {rec ? (
               <li className="priority-card">
                 <p style={{ fontWeight: 700, margin: 0 }}>{rec.text}</p>
-                <p className="priority-why">Why it matters: {(rec.why ?? []).slice(0, 2).join(' ') || 'This matches your audience and topics.'}</p>
+                <p className="priority-why">Why this matters: {(rec.why ?? []).slice(0, 2).join(' ') || 'This matches your audience and topics.'}</p>
                 <p className="tiny" style={{ margin: '0.35rem 0 0' }}>
-                  Confidence {rec.confidence}
-                  {typeof today?.newSignals === 'number' ? ` · ${today.newSignals} new signals` : ''}
-                  {typeof today?.highPotentialOpportunities === 'number' ? ` · ${today.highPotentialOpportunities} worth a look` : ''}
+                  {plainConfidence(rec.confidence)}
+                  {typeof today?.newSignals === 'number' && today.newSignals > 0 ? ` · ${today.newSignals} new signals` : ''}
+                  {typeof today?.highPotentialOpportunities === 'number' && today.highPotentialOpportunities > 0 ? ` · ${today.highPotentialOpportunities} worth a look` : ''}
                 </p>
                 <div className="actions" style={{ marginTop: '0.6rem' }}>
                   <button type="button" className="btn btn-secondary btn-sm" onClick={() => navigate('/observatory')}>Explore</button>
-                  <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate('/opportunities')}>Create content</button>
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm"
+                    onClick={() =>
+                      navigate(
+                        opportunities[0]
+                          ? `/opportunities?selected=${encodeURIComponent(opportunities[0].id)}`
+                          : '/opportunities',
+                      )
+                    }
+                  >
+                    Create content
+                  </button>
                 </div>
               </li>
             ) : null}
@@ -262,13 +338,26 @@ export function OverviewPage() {
                   <div style={{ minWidth: 0 }}>
                     <p style={{ fontWeight: 650, margin: 0 }}>{o.title}</p>
                     <p className="tiny" style={{ margin: '0.2rem 0 0' }}>
-                      Why it matters: {typeof o.topic === 'string' && o.topic ? `matches “${o.topic}”` : 'matches your topics'}
+                      Why this matters: {typeof o.topic === 'string' && o.topic ? `matches “${o.topic}”` : 'matches your topics'}
                       {typeof o.score === 'number' ? ` · score ${Math.round(o.score)}` : ''}
                     </p>
                   </div>
-                  <button type="button" className="btn btn-primary btn-sm" onClick={() => navigate(`/opportunities`)}>
-                    Create content
-                  </button>
+                  <div className="actions">
+                    <button
+                      type="button"
+                      className="btn btn-secondary btn-sm"
+                      onClick={() => navigate(`/opportunities?selected=${encodeURIComponent(o.id)}`)}
+                    >
+                      Review
+                    </button>
+                    <button
+                      type="button"
+                      className="btn btn-primary btn-sm"
+                      onClick={() => navigate(`/opportunities?selected=${encodeURIComponent(o.id)}`)}
+                    >
+                      Create content
+                    </button>
+                  </div>
                 </div>
               </li>
             ))}
@@ -312,32 +401,32 @@ export function OverviewPage() {
       >
         <div className="stat-grid">
           <div className="stat-card">
-            <div className="stat-card-label">Ideas & drafts</div>
+            <div className="stat-card-label">Ideas</div>
             <p className="stat-card-value" style={{ fontSize: '1.2rem' }}>
               <HonestValue value={ideasCount} />
             </p>
             <Link to="/content" className="tiny">Open drafts</Link>
           </div>
           <div className="stat-card">
-            <div className="stat-card-label">Needs your decision</div>
+            <div className="stat-card-label">Waiting for review</div>
             <p className="stat-card-value" style={{ fontSize: '1.2rem' }}>
               <HonestValue value={needsDecision} />
             </p>
             <Link to="/approvals" className="tiny">Review</Link>
           </div>
           <div className="stat-card">
-            <div className="stat-card-label">Published (recorded)</div>
+            <div className="stat-card-label">Published — you recorded</div>
             <p className="stat-card-value" style={{ fontSize: '1.2rem' }}>
               <HonestValue value={publishedCount} />
             </p>
             <Link to="/analytics" className="tiny">See results</Link>
           </div>
           <div className="stat-card">
-            <div className="stat-card-label">LinkedIn</div>
+            <div className="stat-card-label">Scheduled</div>
             <p className="stat-card-value" style={{ fontSize: '1rem' }}>
-              {linkedIn?.connected ? 'Connected' : 'Not connected'}
+              <span className="muted">See calendar</span>
             </p>
-            <Link to="/connections" className="tiny">Connect an account</Link>
+            <Link to="/calendar" className="tiny">View calendar</Link>
           </div>
         </div>
         <div className="actions" style={{ marginTop: '0.75rem' }}>
@@ -360,8 +449,14 @@ export function OverviewPage() {
                   <li key={o.id} className="card-row">
                     <p style={{ fontWeight: 600, margin: 0 }}>{o.title}</p>
                     <div className="actions" style={{ marginTop: '0.5rem' }}>
-                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => navigate('/observatory')}>Why it matters</button>
-                      <button type="button" className="btn btn-ghost btn-sm" onClick={() => navigate('/opportunities')}>Create content</button>
+                      <button type="button" className="btn btn-secondary btn-sm" onClick={() => navigate('/observatory')}>Explore</button>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-sm"
+                        onClick={() => navigate(`/opportunities?selected=${encodeURIComponent(o.id)}`)}
+                      >
+                        Create content
+                      </button>
                     </div>
                   </li>
                 ))}
@@ -384,7 +479,27 @@ export function OverviewPage() {
             </div>
           </SectionCard>
 
-          {/* F. Honest system status */}
+          {/* Recent activity — genuine runs and digests only */}
+          <SectionCard title="Recent activity" action={<Link to="/observatory" className="btn btn-ghost btn-sm">View all research</Link>}>
+            {activity.length === 0 ? (
+              <p className="muted" style={{ margin: 0 }}>
+                No research checks recorded yet. They appear here after your first check for new ideas.
+              </p>
+            ) : (
+              <ul className="plain-list">
+                {activity.map((e) => (
+                  <li key={e.id} className="card-row">
+                    <div className="row-between">
+                      <p style={{ fontWeight: 600, margin: 0 }}>{e.text}</p>
+                      <span className="tiny">{e.at ? new Date(e.at).toLocaleDateString() : 'Unknown'}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </SectionCard>
+
+          {/* F. Honest system status — only what affects the user's work */}
           <SectionCard title="System status">
             {aiDown ? (
               <p className="muted" style={{ margin: 0 }}>
@@ -399,6 +514,12 @@ export function OverviewPage() {
                 Connect LinkedIn to use supported account features.
                 <br />
                 <Link to="/connections" className="btn btn-secondary btn-sm" style={{ marginTop: '0.5rem' }}>Fix connection</Link>
+              </p>
+            ) : readiness && !readiness.workspaceIntelligenceReady.ready ? (
+              <p className="muted" style={{ margin: 0 }}>
+                Research is not set up yet: {readiness.workspaceIntelligenceReady.reason}
+                <br />
+                <Link to="/sources" className="btn btn-secondary btn-sm" style={{ marginTop: '0.5rem' }}>Add a source</Link>
               </p>
             ) : (
               <p className="muted" style={{ margin: 0 }}>

@@ -170,10 +170,20 @@ export function SidebarBody({ onNavigate, collapsed }: { onNavigate?: () => void
 
 export function Sidebar({ collapsed, onToggle }: { collapsed?: boolean; onToggle?: () => void }) {
   return (
-    <aside className={`sidebar sidebar-desktop${collapsed ? ' sidebar-collapsed' : ''}`} role="navigation" aria-label="Main navigation">
+    <aside
+      className={`sidebar sidebar-desktop${collapsed ? ' sidebar-collapsed' : ''}`}
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <SidebarBody collapsed={collapsed} />
       {onToggle ? (
-        <button type="button" className="btn btn-ghost btn-sm sidebar-collapse" onClick={onToggle} aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}>
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm sidebar-collapse"
+          onClick={onToggle}
+          aria-label={collapsed ? 'Expand navigation' : 'Collapse navigation'}
+          aria-expanded={!collapsed}
+        >
           {collapsed ? '→' : '← Hide labels'}
         </button>
       ) : null}

@@ -88,7 +88,7 @@ export function LearningPage() {
       setVariable('');
       setControl('');
       setVariant('');
-      setFormMsg('Experiment designed. Start it from the API or extend the UI to run it.');
+      setFormMsg('Experiment recorded. It stays proposed until measured results arrive.');
       await fetchAll();
     } catch (err) {
       setFormMsg(friendlyErrorMessage(err));

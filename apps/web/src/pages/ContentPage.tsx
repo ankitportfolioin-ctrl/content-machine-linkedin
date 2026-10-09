@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
 import { WorkspaceSelector } from '../components/WorkspaceSelector';
@@ -51,7 +52,23 @@ import {
 
 export function ContentPage() {
   const { isAuthenticated, loading: authLoading } = useAuth();
+  // Deep link (?idea=…) so an opportunity detail can open the exact idea it
+  // created — the round trip Research → Content never loses context.
+  const [params, setParams] = useSearchParams();
+  const ideaParam = params.get('idea');
   const [selectedIdeaId, setSelectedIdeaId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setSelectedIdeaId(ideaParam && ideaParam.trim() ? ideaParam : null);
+  }, [ideaParam]);
+
+  function openIdea(id: string) {
+    setParams({ idea: id });
+  }
+
+  function closeIdea() {
+    setParams({});
+  }
 
   if (authLoading) {
     return (
@@ -79,10 +96,10 @@ export function ContentPage() {
   }
 
   if (selectedIdeaId) {
-    return <IdeaWorkspace ideaId={selectedIdeaId} onBack={() => setSelectedIdeaId(null)} />;
+    return <IdeaWorkspace ideaId={selectedIdeaId} onBack={closeIdea} />;
   }
 
-  return <IdeasList onSelect={(id) => setSelectedIdeaId(id)} />;
+  return <IdeasList onSelect={openIdea} />;
 }
 
 function IdeasList({ onSelect }: { onSelect: (id: string) => void }) {
@@ -168,7 +185,8 @@ function IdeasList({ onSelect }: { onSelect: (id: string) => void }) {
           <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--color-text-secondary)' }}>{formMessage}</p>
         ) : null}
         <p style={{ marginTop: '0.5rem', fontSize: '0.75rem', color: 'var(--color-text-muted)' }}>
-          Tip: ideas converted from Brain → Opportunities also appear in the list below.
+          Tip: ideas converted from Research → Opportunities also appear in the list below.
+          Drafts follow your saved voice in <Link to="/settings">Settings</Link>.
         </p>
       </div>
 
@@ -195,7 +213,7 @@ function IdeasList({ onSelect }: { onSelect: (id: string) => void }) {
         <div className="card">
           <div className="empty-state">
             <h2 className="empty-state-title">No ideas yet</h2>
-            <p className="empty-state-description">Create your first idea above or convert an opportunity from the Brain page.</p>
+            <p className="empty-state-description">Create your first idea above or convert an opportunity from Research.</p>
           </div>
         </div>
       ) : null}
@@ -386,6 +404,14 @@ function IdeaWorkspace({ ideaId, onBack }: { ideaId: string; onBack: () => void 
           <h2 className="health-card-title">{idea?.title ?? 'Idea'}</h2>
           {idea?.description ? (
             <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.875rem' }}>{String(idea.description)}</p>
+          ) : null}
+          {typeof idea?.opportunityId === 'string' && idea.opportunityId ? (
+            <p style={{ color: 'var(--color-text-secondary)', fontSize: '0.8rem', marginTop: '0.25rem' }}>
+              Created from an opportunity —{' '}
+              <Link to={`/opportunities?selected=${encodeURIComponent(idea.opportunityId)}`}>
+                view the evidence
+              </Link>.
+            </p>
           ) : null}
         </div>
         <WorkspaceSelector />

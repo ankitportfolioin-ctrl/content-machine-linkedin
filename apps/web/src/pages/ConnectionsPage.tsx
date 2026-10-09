@@ -80,7 +80,7 @@ export function ConnectionsPage() {
       <SectionCard title={`Accounts (${social.length})`}>
         {social.length === 0 ? (
           <EmptyState
-            title="No LinkedIn connection yet"
+            title="No accounts connected yet"
             what="No platform accounts are connected to this workspace."
             why="Connect LinkedIn to begin observing performance and enable personalized learning."
             action={<Link to="/settings" className="btn btn-secondary btn-sm">Open settings</Link>}

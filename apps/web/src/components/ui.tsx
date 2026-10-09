@@ -320,3 +320,145 @@ export function ViewLink({ to, children }: { to: string; children: React.ReactNo
     </Link>
   );
 }
+
+export function Badge({ tone = 'neutral', children }: { tone?: 'success' | 'warning' | 'error' | 'neutral' | 'info' | 'accent'; children: React.ReactNode }) {
+  return <span className={`badge badge-${tone}`}>{children}</span>;
+}
+
+export function LoadingState({ label = 'Loading…' }: { label?: string }) {
+  return (
+    <div className="card" role="status" aria-live="polite" aria-label={label}>
+      <div className="stack-sm">
+        <div className="skeleton" style={{ height: '0.9rem', width: '60%' }} />
+        <div className="skeleton" style={{ height: '0.9rem', width: '85%' }} />
+        <div className="skeleton" style={{ height: '0.9rem', width: '70%' }} />
+        <span className="tiny">{label}</span>
+      </div>
+    </div>
+  );
+}
+
+export function PermissionState({
+  title = 'Permission required',
+  what = 'You are signed in, but this workspace item is not shared with you.',
+  nextStep = 'Ask a workspace admin for access, or switch workspaces from the top bar.',
+}: {
+  title?: string;
+  what?: string;
+  nextStep?: string;
+}) {
+  return (
+    <div className="card">
+      <div className="empty-state">
+        <h2 className="empty-state-title">{title}</h2>
+        <p className="empty-state-description">{what}</p>
+        <p className="empty-state-description guide-next" style={{ marginTop: '0.5rem' }}>
+          What to do next: {nextStep}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+export function FeatureUnavailable({
+  title = 'Not available yet',
+  what = 'This capability is not connected in your workspace.',
+  nextStep,
+  action,
+}: {
+  title?: string;
+  what?: string;
+  nextStep?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="card">
+      <div className="empty-state">
+        <h2 className="empty-state-title">{title}</h2>
+        <p className="empty-state-description">{what}</p>
+        {nextStep ? (
+          <p className="empty-state-description guide-next" style={{ marginTop: '0.5rem' }}>
+            What to do next: {nextStep}
+          </p>
+        ) : null}
+        {action ? <div style={{ marginTop: '1rem' }}>{action}</div> : null}
+      </div>
+    </div>
+  );
+}
+
+export function LabeledField({
+  id,
+  label,
+  hint,
+  error,
+  children,
+}: {
+  id: string;
+  label: string;
+  hint?: string;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="form-field">
+      <label className="form-label" htmlFor={id}>
+        {label}
+      </label>
+      {children}
+      {hint && !error ? <p className="tiny form-hint">{hint}</p> : null}
+      {error ? (
+        <p className="alert-error form-error" role="alert">
+          {error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+export function Dialog({
+  title,
+  description,
+  onClose,
+  children,
+  actions,
+}: {
+  title: string;
+  description?: string;
+  onClose: () => void;
+  children?: React.ReactNode;
+  actions?: React.ReactNode;
+}) {
+  React.useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose();
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div className="dialog-overlay" onClick={onClose} role="presentation">
+      <div
+        className="dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="row-between" style={{ marginBottom: '0.5rem' }}>
+          <h2 className="section-title">{title}</h2>
+          <button type="button" className="icon-btn" aria-label="Close dialog" onClick={onClose}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+              <line x1="6" y1="6" x2="18" y2="18" />
+              <line x1="18" y1="6" x2="6" y2="18" />
+            </svg>
+          </button>
+        </div>
+        {description ? <p className="muted" style={{ margin: '0 0 0.75rem' }}>{description}</p> : null}
+        {children}
+        {actions ? <div className="actions" style={{ marginTop: '1rem', justifyContent: 'flex-end' }}>{actions}</div> : null}
+      </div>
+    </div>
+  );
+}

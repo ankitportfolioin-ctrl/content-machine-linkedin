@@ -29,6 +29,24 @@ import {
   Source,
   WorkspaceConnectorEntry,
 } from '../types';
+import { TimeAgo } from './ui';
+
+/* Freshness for a single feed row. Pure and honest: a missing timestamp
+   renders as "never fetched", never as a fabricated date. */
+export function FeedFreshnessLine({ lastFetchedAt }: { lastFetchedAt?: string | null }) {
+  if (!lastFetchedAt) {
+    return (
+      <p className="tiny" style={{ margin: '0.25rem 0 0' }}>
+        Never fetched yet — new items appear after the next research check.
+      </p>
+    );
+  }
+  return (
+    <p className="tiny" style={{ margin: '0.25rem 0 0' }}>
+      Last fetched <TimeAgo value={lastFetchedAt} />
+    </p>
+  );
+}
 
 /**
  * Brain → Sources, redesigned as a friendly "Connections & Sources" control
@@ -1081,6 +1099,7 @@ function FeedsSection() {
             {String(feed.url)}
           </p>
         ) : null}
+        <FeedFreshnessLine lastFetchedAt={feed.lastFetchedAt} />
         {feed.lastError ? (
           <p role="alert" style={{ fontSize: '0.75rem', color: 'var(--color-error)', margin: '0.25rem 0 0' }}>
             Last error: {String(feed.lastError).slice(0, 200)}

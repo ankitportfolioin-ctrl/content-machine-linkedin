@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LoginForm } from '../components/LoginForm';
-import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, ScoreBar, TimeAgo } from '../components/ui';
+import { PageHead, SectionCard, EmptyState, ErrorState, SkeletonBlock, ScoreBar, TimeAgo, Badge } from '../components/ui';
 import { friendlyErrorMessage, listTrends } from '../services/api';
 import type { TrendSignal } from '../types';
 
@@ -80,7 +80,7 @@ export function TrendsPage() {
                   <div style={{ minWidth: 0, flex: '1 1 220px' }}>
                     <p style={{ fontWeight: 650, fontSize: '0.9rem' }}>{t.title ?? 'Untitled trend'}</p>
                     {t.description ? <p className="muted" style={{ margin: '0.25rem 0 0' }}>{t.description}</p> : null}
-                    <p className="tiny" style={{ marginTop: '0.25rem' }}>{String(t.status ?? 'recorded')}</p>
+                    <p style={{ margin: '0.35rem 0 0' }}><Badge>{String(t.status ?? 'recorded')}</Badge></p>
                   </div>
                   <div className="actions" style={{ alignItems: 'center' }}>
                     {typeof t.strength === 'number' ? (

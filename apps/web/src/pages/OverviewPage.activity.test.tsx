@@ -33,6 +33,8 @@ const { apiMocks } = vi.hoisted(() => ({
     listContentIdeas: vi.fn(),
     listPublishRecords: vi.fn(),
     listLearningProposals: vi.fn(),
+    listReports: vi.fn(),
+    listRuns: vi.fn(),
   },
 }));
 
@@ -52,6 +54,8 @@ vi.mock('../services/api', async (importOriginal) => {
     listContentIdeas: apiMocks.listContentIdeas,
     listPublishRecords: apiMocks.listPublishRecords,
     listLearningProposals: apiMocks.listLearningProposals,
+    listReports: apiMocks.listReports,
+    listRuns: apiMocks.listRuns,
   };
 });
 
@@ -62,6 +66,8 @@ function mockCommon() {
   apiMocks.listContentIdeas.mockResolvedValue({ contentIdeas: [] });
   apiMocks.listPublishRecords.mockResolvedValue({ publishRecords: [] });
   apiMocks.listLearningProposals.mockResolvedValue({ proposals: [] });
+  apiMocks.listReports.mockResolvedValue({ reports: [] });
+  apiMocks.listRuns.mockResolvedValue({ runs: [] });
 }
 
 describe('OverviewPage priorities', () => {
@@ -106,6 +112,12 @@ describe('OverviewPage priorities', () => {
       ],
       total: 1,
     });
+    apiMocks.listReports.mockResolvedValue({
+      reports: [{ id: 'r-1', frequency: 'DAILY', createdAt: new Date(Date.now() - 38 * 60000).toISOString() }],
+    });
+    apiMocks.listRuns.mockResolvedValue({
+      runs: [{ id: 'run-9', runDate: new Date(Date.now() - 120 * 60000).toISOString(), status: 'COMPLETED' }],
+    });
     apiMocks.getOnboarding.mockResolvedValue({ onboarding: { complete: true } });
 
     render(
@@ -119,6 +131,10 @@ describe('OverviewPage priorities', () => {
     expect(await screen.findByText(/Draft generated from confirmed pattern/)).toBeInTheDocument();
     expect(screen.getByText(/Confirmed pattern/)).toBeInTheDocument();
     expect(screen.getByText("Today's priorities")).toBeInTheDocument();
+    // Recent activity shows genuine runs and digests, newest first.
+    expect(screen.getByText('Recent activity')).toBeInTheDocument();
+    expect(screen.getByText('Daily research digest ready')).toBeInTheDocument();
+    expect(screen.getByText('Research check completed')).toBeInTheDocument();
   });
 
   it('shows honest empty states when nothing has happened yet', async () => {
@@ -157,5 +173,6 @@ describe('OverviewPage priorities', () => {
 
     expect(await screen.findByText(/Nothing urgent today/)).toBeInTheDocument();
     expect(screen.getByText(/Not enough evidence yet/)).toBeInTheDocument();
+    expect(screen.getByText(/No research checks recorded yet/)).toBeInTheDocument();
   });
 });

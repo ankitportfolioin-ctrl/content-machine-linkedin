@@ -40,7 +40,7 @@ export function CalendarPage() {
   if (!isAuthenticated) {
     return (
       <div className="stack">
-        <PageHead kicker="Make posts" title="Schedule" sub="Sign in to see scheduled content." />
+        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Sign in to see plans by status." />
         <LoginForm />
       </div>
     );
@@ -48,7 +48,7 @@ export function CalendarPage() {
   if (loading) {
     return (
       <div className="stack">
-        <PageHead kicker="Make posts" title="Schedule" sub="Loading the schedule…" />
+        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Loading plans…" />
         <SkeletonBlock lines={4} />
       </div>
     );
@@ -56,7 +56,7 @@ export function CalendarPage() {
   if (error) {
     return (
       <div className="stack">
-        <PageHead kicker="Make posts" title="Schedule" sub="What is planned and what shipped." />
+        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Plans grouped by status." />
         <ErrorState message={error} onRetry={() => void fetchAll()} />
       </div>
     );
@@ -65,11 +65,12 @@ export function CalendarPage() {
   if (plans.length === 0) {
     return (
       <div className="stack">
-        <PageHead kicker="Make posts" title="Schedule" sub="What is planned and what shipped." />
+        <PageHead kicker="Content · Pipeline" title="Pipeline" sub="Plans grouped by status." />
         <EmptyState
-          title="Nothing scheduled"
+          title="No plans yet"
           what="No content plans exist in this workspace yet."
           why="Convert an opportunity into an idea, then generate a plan — it will appear here by status."
+          nextStep="Time-based scheduling is not available, so nothing here carries a date."
           action={<Link to="/opportunities" className="btn btn-secondary btn-sm">Find opportunities</Link>}
         />
       </div>
@@ -79,9 +80,9 @@ export function CalendarPage() {
   return (
     <div className="stack">
       <PageHead
-        kicker="Make posts"
-        title="Schedule"
-        sub={`${plans.length} plan${plans.length === 1 ? '' : 's'} across the pipeline.`}
+        kicker="Content · Pipeline"
+        title="Pipeline"
+        sub={`${plans.length} plan${plans.length === 1 ? '' : 's'} by status. Time-based scheduling is not available — nothing here carries a date.`}
       />
       <div className="grid-3">
         {GROUPS.map((g) => {
@@ -103,6 +104,12 @@ export function CalendarPage() {
             </SectionCard>
           );
         })}
+      </div>
+      <div className="card">
+        <p className="muted" style={{ margin: 0 }}>
+          Scheduling is not available: plans have no dates and nothing publishes from here.
+          Publication is recorded manually under <Link to="/content">Content</Link> → draft → version history.
+        </p>
       </div>
     </div>
   );
