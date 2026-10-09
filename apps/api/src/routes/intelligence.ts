@@ -1106,6 +1106,8 @@ router.post('/research/trigger', async (req, res, next) => {
     primeConnectorRegistry(connectorRegistry, {
       YOUTUBE_API_KEY: env.YOUTUBE_API_KEY,
       YOUTUBE_ACCESS_TOKEN: env.YOUTUBE_ACCESS_TOKEN,
+      REDDIT_CLIENT_ID: env.REDDIT_CLIENT_ID,
+      REDDIT_CLIENT_SECRET: env.REDDIT_CLIENT_SECRET,
     });
     const fetchConfigs: Record<string, Record<string, unknown>> = {};
     for (const [key, value] of Object.entries(merged)) {

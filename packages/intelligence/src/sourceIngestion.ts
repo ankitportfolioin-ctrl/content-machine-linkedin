@@ -22,6 +22,14 @@ export interface IngestionOptions {
 const DEFAULT_MAX_RESPONSE_SIZE = 10 * 1024 * 1024;
 const DEFAULT_TIMEOUT = 30000;
 
+// Dashboard-facing fetch-failure wording. An aborted fetch is a timeout,
+// not a generic failure: the Sources dashboard shows this string verbatim,
+// so timeouts stay distinguishable from DNS/refused/reset errors.
+export function fetchFailureMessage(error: Error | null): string {
+  if (error && error.name === 'AbortError') return 'Request timeout';
+  return `Fetch failed: ${error?.message || 'Unknown error'}`;
+}
+
 export class SourceIngestionService {
   private prisma: PrismaClient;
 
@@ -139,7 +147,7 @@ export class SourceIngestionService {
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
         if (uaIndex === userAgents.length - 1) {
-          const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', `Fetch failed: ${lastError.message}`);
+          const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', fetchFailureMessage(lastError));
           return {
             sourceId: failedSource.id,
             documentId: null,
@@ -148,7 +156,7 @@ export class SourceIngestionService {
             extractedContent: null,
             feedItems: [],
             sitemapUrls: [],
-            error: `Fetch failed: ${lastError.message}`,
+            error: fetchFailureMessage(lastError),
           };
         }
         // Try next user agent
@@ -157,7 +165,7 @@ export class SourceIngestionService {
     }
 
     if (!response) {
-      const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', `Fetch failed: ${lastError?.message || 'Unknown error'}`);
+      const failedSource = await this.createFailedSource(workspaceId, canonicalUrl, url, options.sourceType || 'USER_URL', fetchFailureMessage(lastError));
       return {
         sourceId: failedSource.id,
         documentId: null,
@@ -166,7 +174,7 @@ export class SourceIngestionService {
         extractedContent: null,
         feedItems: [],
         sitemapUrls: [],
-        error: `Fetch failed: ${lastError?.message || 'Unknown error'}`,
+        error: fetchFailureMessage(lastError),
       };
     }
 

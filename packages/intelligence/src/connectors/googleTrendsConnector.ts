@@ -110,11 +110,11 @@ export class GoogleTrendsConnector extends BaseResearchConnector {
           }
           
           if (res.status === 403 || res.status === 400) {
-            // Try with different user agent or referer
-            if (attempt === 0) {
-              await new Promise(r => setTimeout(r, 2000));
-              continue;
-            }
+            // Definitive refusal: this unofficial CSV endpoint requires a
+            // widget token/session this client cannot obtain without user
+            // interaction. Retrying the identical request only burns time
+            // (and the provider's patience), so fail fast with the exact
+            // status instead of backing off and retrying.
             throw new Error(`Google Trends responded ${res.status} - may need valid session/cookies`);
           }
           
@@ -124,7 +124,13 @@ export class GoogleTrendsConnector extends BaseResearchConnector {
           
           return await res.text();
         } catch (error) {
-          if (attempt === retries) throw error;
+          // Only transient network failures are retried. HTTP errors thrown
+          // above (429 handled with its own backoff, 403/400 fail fast) must
+          // surface immediately instead of burning the backoff budget.
+          const transient =
+            error instanceof TypeError ||
+            (error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError'));
+          if (!transient || attempt === retries) throw error;
           await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt)));
         }
       }
@@ -151,7 +157,10 @@ export class GoogleTrendsConnector extends BaseResearchConnector {
             title: query,
             content: `Google Trends: ${type} query for "${topic}"`,
             author: null,
-            publishedAt: new Date(),
+            // The related-searches CSV carries no per-query timestamp.
+            // Fetch time is NOT a publication time: null keeps the
+            // freshness bucket honest (UNKNOWN) instead of fake-FRESH.
+            publishedAt: null,
             metadata: {
               topic,
               queryType: type,

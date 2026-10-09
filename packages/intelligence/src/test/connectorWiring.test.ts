@@ -269,5 +269,8 @@ describe('Gate 1: Google Trends failure isolation (stubbed network)', () => {
     expect(result.signals.map((s) => s.sourceType)).toEqual(['GOOD']);
     expect(result.errors.length).toBeGreaterThanOrEqual(1);
     expect(result.errors.join(' ')).toMatch(/Google Trends/);
-  });
+    // The Trends 429 path intentionally backs off (~3s + ~6s per endpoint)
+    // before reporting RATE_LIMITED, so this test needs a longer budget.
+    // Assertions above are unchanged.
+  }, 60000);
 });

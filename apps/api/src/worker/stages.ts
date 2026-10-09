@@ -288,6 +288,8 @@ const intelligence: StageFn = async (ctx) => {
     const { primed, skippedAuthRequired } = primeConnectorRegistry(connectorRegistry, {
       YOUTUBE_API_KEY: env.YOUTUBE_API_KEY,
       YOUTUBE_ACCESS_TOKEN: env.YOUTUBE_ACCESS_TOKEN,
+      REDDIT_CLIENT_ID: env.REDDIT_CLIENT_ID,
+      REDDIT_CLIENT_SECRET: env.REDDIT_CLIENT_SECRET,
     });
     notes.push(
       `Connector registry primed (${primed.length > 0 ? primed.join(', ') : 'none'}); ` +

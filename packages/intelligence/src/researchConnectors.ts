@@ -539,6 +539,8 @@ export const connectorRegistry = new ConnectorRegistry();
 export interface PublicConnectorEnv {
   YOUTUBE_API_KEY?: string | undefined;
   YOUTUBE_ACCESS_TOKEN?: string | undefined;
+  REDDIT_CLIENT_ID?: string | undefined;
+  REDDIT_CLIENT_SECRET?: string | undefined;
 }
 
 export interface PrimeResult {
@@ -559,6 +561,19 @@ export function primeConnectorRegistry(
   for (const sourceType of NO_AUTH_CONNECTORS) {
     registry.setCredentials(sourceType, { credentials: {}, valid: true });
     primed.push(sourceType);
+  }
+
+  // Reddit app-only OAuth (script-type app credentials): when the server
+  // holds them, the Reddit connector reads via oauth.reddit.com with a
+  // bearer token instead of the blocked public endpoints. Values stay in
+  // the credential record; only source-type names are ever reported.
+  const redditId = env.REDDIT_CLIENT_ID?.trim() || '';
+  const redditSecret = env.REDDIT_CLIENT_SECRET?.trim() || '';
+  if (redditId && redditSecret) {
+    registry.setCredentials('REDDIT', {
+      credentials: { clientId: redditId, clientSecret: redditSecret },
+      valid: true,
+    });
   }
 
   const apiKey = env.YOUTUBE_API_KEY?.trim() || '';

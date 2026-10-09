@@ -50,6 +50,10 @@ const envSchema = z.object({
   YOUTUBE_ACCESS_TOKEN: z.string().optional(),
   X_CLIENT_ID: z.string().optional(),
   X_CLIENT_SECRET: z.string().optional(),
+  // Reddit research app-only OAuth (script-type app). Absent = Reddit stays
+  // on the honest public fail-fast path; values never leave the server.
+  REDDIT_CLIENT_ID: z.string().optional(),
+  REDDIT_CLIENT_SECRET: z.string().optional(),
 
   CORS_ORIGIN: z.string().url().default('http://localhost:5173'),
   RATE_LIMIT_WINDOW_MS: z.coerce.number().int().positive().default(900000),

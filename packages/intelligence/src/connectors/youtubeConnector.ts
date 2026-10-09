@@ -130,6 +130,7 @@ export class YouTubeConnector extends BaseResearchConnector {
     const queries = (config.queries as string[]) || this.generateQueriesFromConfig(config);
     const capped = Math.min(Math.max(1, limit), 50);
     const items: any[] = [];
+    const failures: string[] = [];
 
     for (const query of queries) {
       if (items.length >= limit) break;
@@ -151,7 +152,6 @@ export class YouTubeConnector extends BaseResearchConnector {
           if (items.length >= limit) break;
           const snippet = video.snippet;
           const contentDetails = video.contentDetails;
-          const stats = video.statistics;
 
           items.push({
             externalId: video.id,
@@ -164,9 +164,6 @@ export class YouTubeConnector extends BaseResearchConnector {
               channelId: snippet.channelId,
               channelTitle: snippet.channelTitle,
               duration: contentDetails.duration,
-              viewCount: stats?.viewCount ? parseInt(stats.viewCount) : null,
-              likeCount: stats?.likeCount ? parseInt(stats.likeCount) : null,
-              commentCount: stats?.commentCount ? parseInt(stats.commentCount) : null,
               tags: snippet.tags,
               categoryId: snippet.categoryId,
               defaultLanguage: snippet.defaultLanguage,
@@ -177,11 +174,16 @@ export class YouTubeConnector extends BaseResearchConnector {
           });
         }
       } catch (error) {
-        console.error(`YouTube search failed for "${query}":`, error);
+        // Never swallow a failed query: a run where every query fails must
+        // report the provider's reason, not a silent empty success.
+        failures.push(`"${query}": ${error instanceof Error ? error.message : 'Unknown error'}`);
         continue;
       }
     }
 
+    if (items.length === 0 && failures.length > 0) {
+      throw new Error(failures.join('; '));
+    }
     return items.slice(0, limit);
   }
 

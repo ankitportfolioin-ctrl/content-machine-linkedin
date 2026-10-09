@@ -27,7 +27,7 @@ describe.skipIf(!LIVE)('Live connector probes (explicit opt-in only)', () => {
     const normalized = normalizeSignal({ workspaceId: 'live-probe', signal: signals[0] });
     expect(normalized.dedupeHash).toBeTruthy();
     expect(normalized.raw.url).toContain('reddit.com');
-  });
+  }, 60000);
 
   it('Google Trends CSV endpoints return rows (unofficial API, best-effort)', async () => {
     const registry = new ConnectorRegistry();
@@ -42,5 +42,5 @@ describe.skipIf(!LIVE)('Live connector probes (explicit opt-in only)', () => {
     // a failure here means "endpoint refused this network", not a code bug.
     expect(errors).toEqual([]);
     expect(signals.length).toBeGreaterThan(0);
-  });
+  }, 60000);
 });

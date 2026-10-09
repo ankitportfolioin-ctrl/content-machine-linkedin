@@ -8,7 +8,83 @@
 import { ResearchConnector, BaseResearchConnector, ConnectorCapabilities, ConnectorCredentials, RawSignal } from '../researchConnectors';
 
 const REDDIT_API = 'https://www.reddit.com';
+const REDDIT_OAUTH_API = 'https://oauth.reddit.com';
+const REDDIT_TOKEN_URL = 'https://www.reddit.com/api/v1/access_token';
+const REDDIT_UA = 'GrowthOperator/1.0 (+https://growth-operator.dev/bot)';
 const FETCH_TIMEOUT_MS = 15000;
+
+// App-only OAuth token cache (server identity, not workspace data).
+// Tokens live ~1 hour; refresh 60s early. Never logged or persisted.
+interface RedditAppToken {
+  token: string;
+  expiresAt: number;
+}
+
+let cachedAppToken: RedditAppToken | null = null;
+
+function dropCachedAppToken(): void {
+  cachedAppToken = null;
+}
+
+// Test seam: resets the in-memory app token between unit tests so token
+// reuse never leaks across cases. Production code never calls this.
+export function resetRedditAppTokenForTests(): void {
+  dropCachedAppToken();
+}
+
+// Application-only OAuth for confidential "script"-type apps, per the
+// official Reddit OAuth2 documentation: POST form-urlencoded
+// grant_type=client_credentials with HTTP Basic auth (client_id as user,
+// client_secret as password). No user context, no redirect URI, read-only.
+async function acquireAppToken(clientId: string, clientSecret: string): Promise<string> {
+  const now = Date.now();
+  if (cachedAppToken && cachedAppToken.expiresAt - 60000 > now) {
+    return cachedAppToken.token;
+  }
+  const basic = Buffer.from(`${clientId}:${clientSecret}`).toString('base64');
+  let response: Response;
+  try {
+    response = await fetch(REDDIT_TOKEN_URL, {
+      method: 'POST',
+      headers: {
+        Authorization: `Basic ${basic}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': REDDIT_UA,
+      },
+      body: 'grant_type=client_credentials',
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+  } catch (error) {
+    throw new Error(
+      `Reddit token endpoint unreachable: ${error instanceof Error ? error.message : 'network error'}`
+    );
+  }
+  if (response.status === 401 || response.status === 403) {
+    throw new Error('Reddit app credentials rejected - verify REDDIT_CLIENT_ID/REDDIT_CLIENT_SECRET');
+  }
+  if (!response.ok) {
+    throw new Error(`Reddit token endpoint responded ${response.status}`);
+  }
+  let payload: unknown;
+  try {
+    payload = await response.json();
+  } catch {
+    throw new Error('Reddit token endpoint returned a malformed response');
+  }
+  const accessToken =
+    typeof payload === 'object' && payload !== null
+      ? (payload as Record<string, unknown>).access_token
+      : undefined;
+  if (typeof accessToken !== 'string' || !accessToken) {
+    throw new Error('Reddit token endpoint returned no access token');
+  }
+  const expiresIn =
+    typeof (payload as Record<string, unknown>).expires_in === 'number'
+      ? ((payload as Record<string, unknown>).expires_in as number)
+      : 3600;
+  cachedAppToken = { token: accessToken, expiresAt: now + expiresIn * 1000 };
+  return accessToken;
+}
 
 async function fetchJson(url: string, options: RequestInit = {}): Promise<any> {
   const controller = new AbortController();
@@ -84,59 +160,112 @@ export class RedditConnector extends BaseResearchConnector {
 
     // Improved: use old.reddit.com which is more permissive, add retry with backoff
     const REDDIT_API_ALT = 'https://old.reddit.com';
-    
-    async function fetchWithRetry(url: string, retries = 3): Promise<any> {
+
+    // Marker for transient failures (rate limits, network errors) that may
+    // succeed on retry. Every other failure is definitive: the provider
+    // refused this client (403/404), the payload is not JSON (HTML
+    // interstitial pages are never parseable posts), or the request is
+    // malformed. Definitive failures throw immediately with the exact
+    // provider status instead of burning the backoff budget.
+    class TransientRedditError extends Error {}
+
+    async function fetchOnce(url: string, bearer?: string): Promise<any> {
+      const headers: Record<string, string> = {
+        'User-Agent': REDDIT_UA,
+        'Accept': 'application/json',
+      };
+      if (bearer) headers.Authorization = `Bearer ${bearer}`;
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        headers,
+      });
+      if (response.status === 429) {
+        throw new TransientRedditError('RATE_LIMITED');
+      }
+      if (!response.ok) {
+        throw new Error(
+          response.status === 403
+            ? `Reddit API responded ${response.status} (forbidden) - subreddit may be private, quarantined, or blocking`
+            : `Reddit API responded ${response.status}`
+        );
+      }
+      const contentType = response.headers.get('content-type') ?? '';
+      if (!contentType.includes('json')) {
+        throw new Error(
+          `Reddit API returned unexpected content-type "${contentType || 'unknown'}" - not parseable posts`
+        );
+      }
+      return await response.json();
+    }
+
+    function isTransient(error: unknown): boolean {
+      if (error instanceof TransientRedditError) return true;
+      if (error instanceof TypeError) return true; // network failure in fetch
+      return error instanceof Error && (error.name === 'AbortError' || error.name === 'TimeoutError');
+    }
+
+    async function fetchWithRetry(
+      url: string,
+      retries = 3,
+      bearer?: string,
+      onUnauthorized?: () => Promise<string>,
+    ): Promise<any> {
+      const isFallbackHost = !url.includes('www.reddit.com');
       for (let attempt = 0; attempt <= retries; attempt++) {
         try {
-          const response = await fetch(url, {
-            signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-            headers: {
-              'User-Agent': 'GrowthOperator/1.0 (+https://growth-operator.dev/bot)',
-              'Accept': 'application/json',
-            },
-          });
-          
-          if (response.status === 429) {
-            // Rate limited - wait and retry
-            const retryAfter = response.headers.get('retry-after');
-            const waitMs = retryAfter ? parseInt(retryAfter) * 1000 : Math.min(2000 * Math.pow(2, attempt), 10000);
-            if (attempt < retries) {
-              await new Promise(r => setTimeout(r, waitMs));
-              continue;
-            }
-            throw new Error('RATE_LIMITED');
-          }
-          
-          if (response.status === 403) {
-            // Try alternative domain
-            if (url.includes('www.reddit.com') && attempt === 0) {
-              const altUrl = url.replace('www.reddit.com', 'old.reddit.com');
-              await new Promise(r => setTimeout(r, 1000));
-              return fetchWithRetry(altUrl, retries);
-            }
-            if (attempt < retries) {
-              await new Promise(r => setTimeout(r, 2000 * Math.pow(2, attempt)));
-              continue;
-            }
-            throw new Error(`Reddit API responded 403 (forbidden) - subreddit may be private, quarantined, or blocking`);
-          }
-          
-          if (!response.ok) {
-            throw new Error(`Reddit API responded ${response.status}`);
-          }
-          
-          return await response.json();
+          return await fetchOnce(url, bearer);
         } catch (error) {
-          if (attempt === retries) throw error;
-          await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+          // Single re-auth: a 401 under app credentials means the cached
+          // token died early. Drop it, acquire once, retry once — then stop.
+          if (
+            bearer &&
+            onUnauthorized &&
+            attempt === 0 &&
+            error instanceof Error &&
+            error.message.includes('responded 401')
+          ) {
+            const fresh = await onUnauthorized();
+            return fetchOnce(url, fresh);
+          }
+          // Single fallback attempt for a www 403 only: a 404 or any other
+          // definitive status will fail identically on the old host.
+          if (
+            !isFallbackHost &&
+            attempt === 0 &&
+            error instanceof Error &&
+            error.message.includes('responded 403')
+          ) {
+            await new Promise(r => setTimeout(r, 1000));
+            return fetchOnce(url.replace('www.reddit.com', 'old.reddit.com'));
+          }
+          if (!isTransient(error) || attempt === retries) throw error;
+          const waitMs = Math.min(2000 * Math.pow(2, attempt), 10000);
+          await new Promise(r => setTimeout(r, waitMs));
         }
       }
       throw new Error('Max retries exceeded');
     }
 
     const fetchOne = async (subreddit: string): Promise<any[]> => {
-      const url = `${REDDIT_API}/r/${subreddit}/${sortBy}.json?t=${timeFilter}&limit=25`;
-      const data = await fetchWithRetry(url);
+      // App-only OAuth when the server holds script-app credentials:
+      // same listing shape via oauth.reddit.com with a bearer token.
+      // Otherwise the honest public fail-fast path below.
+      const appId = (credentials.clientId || '').trim();
+      const appSecret = (credentials.clientSecret || '').trim();
+      const useAppAuth = Boolean(appId && appSecret);
+      const host = useAppAuth ? REDDIT_OAUTH_API : REDDIT_API;
+      const url = `${host}/r/${subreddit}/${sortBy}.json?t=${timeFilter}&limit=25&raw_json=1`;
+      const data = useAppAuth
+        ? await fetchWithRetry(
+            url,
+            3,
+            await acquireAppToken(appId, appSecret),
+            async () => {
+              dropCachedAppToken();
+              return acquireAppToken(appId, appSecret);
+            },
+          )
+        : await fetchWithRetry(url);
       const posts = data?.data?.children || [];
       const out: any[] = [];
       for (const post of posts) {
